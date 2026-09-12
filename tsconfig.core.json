@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "dist-core",
+    "rootDir": "."
+  },
+  "include": ["src/domain/**/*.ts", "src/core/**/*.ts", "src/fixtures/**/*.ts"],
+  "exclude": ["node_modules"]
+}
