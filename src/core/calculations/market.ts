@@ -29,3 +29,5 @@ export function classifyLiquidity(
   if (spreadPct > config.spreadWarnPercent || bidSize < config.minVisibleBidSize || askSize < config.minVisibleAskSize) return "THIN";
   return "NORMAL";
 }
+
+

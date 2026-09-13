@@ -2,6 +2,8 @@
 
 import React from "react";
 
+import { BRANDING } from "@/config/branding";
+
 interface WorkspaceHeaderProps {
   useFixture: boolean;
   onToggleFixture: (value: boolean) => void;
@@ -32,7 +34,7 @@ export function WorkspaceHeader({
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base font-bold text-zinc-900 [text-wrap:balance]">
-                  Bitget AI trading desk
+                  {BRANDING.PRODUCT_NAME}
                 </h1>
                 <span className="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-700 border border-zinc-200">
                   Risk workbench
@@ -90,3 +92,5 @@ export function WorkspaceHeader({
     </div>
   );
 }
+
+

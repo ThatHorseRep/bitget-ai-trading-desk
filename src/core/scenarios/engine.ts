@@ -153,3 +153,5 @@ export function runStressScenarios(trade: NormalizedTrade, state: MarketState, c
 
   return [market, contagion, micro, combined];
 }
+
+

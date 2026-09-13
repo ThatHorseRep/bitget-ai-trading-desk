@@ -1,6 +1,6 @@
-# PROMPT BOOK: Bitget AI Trading Desk
+# PROMPT BOOK: Bitget AI RedTeam Desk
 
-This document is the operational manual for building the Bitget AI Trading Desk. It defines the exact prompts to feed into fresh AntiGravity conversations to execute the remaining build phases.
+This document is the operational manual for building the Bitget AI RedTeam Desk. It defines the exact prompts to feed into fresh AntiGravity conversations to execute the remaining build phases.
 
 **CRITICAL INSTRUCTION FOR AI OPERATORS:** Do not rely on hidden conversation history. Read the relevant Markdown specs (B01-B06) and inspect the codebase before writing code. You must execute the **Audit Prompt** before ending your conversation and committing the code.
 
@@ -17,7 +17,7 @@ Verify that the deployed environment can actually hit `api.bitget.com` and the Y
 
 ### START PROMPT
 ```text
-You are the Technical Product Lead for the Bitget AI Trading Desk.
+You are the Technical Product Lead for the Bitget AI RedTeam Desk.
 We are executing Phase P01: Infrastructure & Data Verification.
 
 TASK:
@@ -60,7 +60,7 @@ Replace the static mocks in the `src/core/thesis/` directory with real, structur
 
 ### START PROMPT
 ```text
-You are the AI Product Architect for the Bitget AI Trading Desk.
+You are the AI Product Architect for the Bitget AI RedTeam Desk.
 We are executing Phase P02: AI Layer Implementation.
 
 TASK:
@@ -202,3 +202,5 @@ Is the codebase clean and ready for judges?
 If yes, commit the changes with message: "docs: finalize hackathon submission artifacts".
 This marks the completion of the project.
 ```
+
+

@@ -11,3 +11,5 @@ export const SCENARIO_CONFIG: ScenarioConfig = {
   minVisibleBidSize: 5,
   minVisibleAskSize: 5
 };
+
+

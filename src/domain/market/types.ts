@@ -32,3 +32,5 @@ export interface MarketState {
   dataQuality: DataQualityStatus;
   sources: SourceRef[];
 }
+
+

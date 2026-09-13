@@ -1501,3 +1501,5 @@ And the defining market insight is:
 > **Tokenized equities make the market continuous, but the information and liquidity regime is not continuous.**
 
 That mismatch is where the product has a reason to exist.
+
+

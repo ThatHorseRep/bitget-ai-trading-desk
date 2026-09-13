@@ -123,3 +123,5 @@ export function determineUsMarketSession(
 export function isReferenceMarketOpen(status: SessionStatus): boolean {
   return status === "REGULAR";
 }
+
+

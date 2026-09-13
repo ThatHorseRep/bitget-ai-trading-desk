@@ -4,7 +4,7 @@
 This document specifies the strategy and requirements for the Bitget AI Base Camp Hackathon S2 final submission and live demonstration. It ensures the product's unique value proposition (decision support for 24/7 tokenized equities) is clearly visible to judges regardless of when they review the project.
 
 ## 2. The Demo Wedge: Off-Hours Trading
-The core differentiator of the Bitget AI Trading Desk is handling structural risk during periods when the reference equity market (NYSE/Nasdaq) is closed but the Bitget token (rNVDA) remains tradable.
+The core differentiator of the Bitget AI RedTeam Desk is handling structural risk during periods when the reference equity market (NYSE/Nasdaq) is closed but the Bitget token (rNVDA) remains tradable.
 
 ### 2.1 The Timing Problem
 If a hackathon judge reviews the project at 2:00 PM EST on a Wednesday, the reference market is open, liquidity is likely normal, and basis is tight. The most interesting stress scenarios (off-hours basis un-anchoring) won't trigger naturally.
@@ -50,3 +50,5 @@ Before the final build is tagged:
 - **Live Connectivity:** Can the backend successfully hit `api.bitget.com` without CORS/DNS issues in production (e.g., on Vercel)?
 - **Graceful Degradation:** If the Yahoo Finance reference price fails, does the app still work using token-only data? (Yes, the UI must handle `referencePrice: null` gracefully).
 - **Static Checks:** `npm run build` must pass with zero TypeScript errors.
+
+

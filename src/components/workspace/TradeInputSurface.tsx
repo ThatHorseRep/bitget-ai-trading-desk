@@ -128,7 +128,7 @@ export function TradeInputSurface({
         </div>
       </form>
 
-      {/* Mandatory Tagline Reveal Section (B11) */}
+      {/* Tagline Reveal Section */}
       <div className="rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-xs">
         <div className="max-w-[680px] space-y-2">
           <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
@@ -147,3 +147,5 @@ export function TradeInputSurface({
     </div>
   );
 }
+
+

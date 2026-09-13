@@ -145,3 +145,5 @@ export class MarketStateService {
     return candidateState;
   }
 }
+
+

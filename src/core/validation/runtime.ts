@@ -38,3 +38,5 @@ export function validateMarketState(state: MarketState): ValidationResult {
   if (state.btcPrice !== null && state.btcPrice <= 0) errors.push("btcPrice must be positive when provided");
   return { valid: errors.length === 0, errors };
 }
+
+

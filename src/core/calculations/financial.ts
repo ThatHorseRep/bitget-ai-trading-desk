@@ -51,3 +51,5 @@ export function calculatePnlPct(pnlUsd: number, positionSizeUsd: number): number
   assertPositive(positionSizeUsd, "positionSizeUsd");
   return roundFinancial((pnlUsd / positionSizeUsd) * 100);
 }
+
+

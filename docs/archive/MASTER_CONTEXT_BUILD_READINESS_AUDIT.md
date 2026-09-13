@@ -1,5 +1,5 @@
 # MASTER CONTEXT & BUILD READINESS AUDIT
-### Bitget AI Trading Desk — RedTeam Risk Workbench
+### Bitget AI RedTeam Desk — Bitget AI RedTeam Desk
 **Track:** AI Trading Desk (Sub-Theme: Decision Stress Testing) · **Hackathon:** Bitget AI Base Camp Hackathon S2
 **Audit date:** 2026-09-12 · **Submission deadline:** 2026-09-21 (UTC+8) — **≈9 days remaining**
 **Repository:** https://github.com/ThatHorseRep/bitget-ai-trading-desk
@@ -71,7 +71,7 @@ This is a handoff document for a fresh AI coding/product conversation. It assume
 | Deterministic-calculation / AI-interpretation separation | **LOCKED** | This is the single most consistently repeated principle across all 6 documents |
 | No database / no persistence for MVP | **LOCKED** | Explicit in B04 §18, Technical_Definition §17, Technical_Integration §20 |
 | Portfolio context is optional, not required | **LOCKED** | Consistent everywhere |
-| "RedTeam" naming | **NEEDS DECISION** | research-reconciliation-2 explicitly flags this as one of only 3 unresolved decisions ("RedTeam Challenge" vs. "Challenge This Trade"). The repo's own README still uses "RedTeam Risk Workbench" as the primary product name — this should be resolved before writing submission copy, since the GitBook target-user field and thesis field will use whichever name is chosen |
+| "RedTeam" naming | **NEEDS DECISION** | research-reconciliation-2 explicitly flags this as one of only 3 unresolved decisions ("RedTeam Challenge" vs. "Challenge This Trade"). The repo's own README still uses "Bitget AI RedTeam Desk" as the primary product name — this should be resolved before writing submission copy, since the GitBook target-user field and thesis field will use whichever name is chosen |
 | Historical analogues | **RESOLVED / OBSOLETE tension** | B01 lists it as "Future/Conditional"; B02 lists it as "SUPPORTING"; research-reconciliation-2 flags this exact inconsistency and resolves it: not core MVP, include only with a clearly defensible matching method. Treat as **settled: cut from MVP**, mention only as a stated non-goal in the submission form (helps address the sub-theme's "retrieve historical distribution" language honestly) |
 | Synthetic hedging | **LOCKED (cut)** | Explicitly removed from MVP core in B01, B02, and research-reconciliation-2 with matching rationale each time. No contradiction |
 | Reference market data source (Yahoo Finance / Stooq fallback) | **NEEDS DECISION → now effectively LOCKED by Technical_Integration_Reconnaissance** | B-docs leave this abstract ("reference price provider"); the Technical Integration doc commits to Yahoo primary / Stooq fallback. This is the correct level of specificity and should not be revisited absent a concrete failure |
@@ -174,7 +174,7 @@ This is a handoff document for a fresh AI coding/product conversation. It assume
 5. **Evidence quality from a no-key news search** (GDELT or otherwise) may surface irrelevant or thin results for a niche thesis, weakening the Challenge stage's credibility live.
 6. **LLM structured-output reliability** — malformed JSON from the model mid-demo, without validation/retry, could break the pipeline visibly in front of judges.
 7. **Off-hours demo timing** — the strongest demo requires the reference market to actually be closed. If the live judged session happens to fall during U.S. market hours, the "wedge" is less visually obvious. A clearly-labeled fixture toggle is a reasonable safety net but must not be presented as live data.
-8. **"RedTeam" branding indecision** could leak into submission copy inconsistently (README still says "RedTeam Risk Workbench," while the newer docs prefer a plain "Challenge" framing) — small but visible polish risk to judges.
+8. **"RedTeam" branding indecision** could leak into submission copy inconsistently (README still says "Bitget AI RedTeam Desk," while the newer docs prefer a plain "Challenge" framing) — small but visible polish risk to judges.
 
 ### P2 — Can be deferred
 9. Historical analogues, richer correlation/factor analysis, paper trading, decision history, portfolio/account integration, Bitget Agentic account/OAuth, Best Spread Award X-campaign optimization.
@@ -275,3 +275,5 @@ See Part 8 in full. Top three: (1) unverified live Bitget API connectivity from 
 
 ## NEXT SINGLE ACTION
 Run the standalone Bitget + NVDA-reference connectivity verification described in Part 11, today, before writing any other code. Everything else in the project is contingent on its result.
+
+

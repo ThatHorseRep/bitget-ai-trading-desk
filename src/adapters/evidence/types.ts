@@ -9,3 +9,5 @@ export interface EvidenceQuery {
 export interface EvidenceProvider {
   retrieveEvidence(query: EvidenceQuery): Promise<EvidenceItem[]>;
 }
+
+

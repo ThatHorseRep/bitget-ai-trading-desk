@@ -27,7 +27,7 @@ While 24/7 access solves the accessibility problem, it introduces severe operati
 3. **Cross-Asset Correlation Blindness:** Crypto-native traders assume holding BTC, ETH, and rNVDA is "diversified," failing to recognize that in a macro liquidity contraction, crypto-equity correlations spike to >0.85.
 4. **"Black Box" AI Fatigue:** Retail traders have grown hostile toward generic "AI trading bots" and ChatGPT wrappers that promise magical returns but blow up accounts through Martingale averaging or hallucinations.
 
-### The Product Opportunity: "RedTeam Desk" / The 24/7 Off-Hours Risk Terminal
+### The Product Opportunity: "Bitget AI RedTeam Desk" / The 24/7 Off-Hours Risk Terminal
 Instead of building another generic "buy/sell" predictor, our opportunity is to build an **AI Trading Desk focused on Decision Stress Testing, Off-Hours Dislocation Analysis, and Adversarial Thesis Validation**.
 
 By combining Bitget's `agent_hub` infrastructure and `bitget-signal` intelligence with an **adversarial risk officer persona**, we solve real everyday trader problems:
@@ -184,16 +184,16 @@ Instead, their quantitative risk systems run:
 
 ---
 
-## CHAPTER 4: PRODUCT ARCHITECTURE — "REDTEAM DESK"
+## CHAPTER 4: PRODUCT ARCHITECTURE — "Bitget AI RedTeam Desk"
 
 ### 4.1 Product Identity & Core Thesis
-- **Product Name:** **RedTeam Desk** *(The 24/7 Adversarial Trading Desk for Tokenized Equities)*
+- **Product Name:** **Bitget AI RedTeam Desk** *(The 24/7 Adversarial Trading Desk for Tokenized Equities)*
 - **Tagline:** *"The AI that challenges your trade, models your weekend risk, and protects your capital."*
 - **Target Hackathon Track:** Track 3 · AI Trading Desk (Sub-theme: **Decision Stress Testing** / Open Theme: Portfolio Copilot).
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                      REDTEAM DESK ARCHITECTURE                          │
+│                      Bitget AI RedTeam Desk ARCHITECTURE                          │
 └─────────────────────────────────────────────────────────────────────────┘
                                    USER INPUT
              ["I want to buy $3,000 of rNVDA ahead of the weekend"]
@@ -290,7 +290,7 @@ This is the exact, ready-to-submit 6-part copy for the official Google Form subm
 ### PART 1: THESIS & CORE HYPOTHESIS (Highest Judge Weight)
 Traditional US stock exchanges close for 65.5 consecutive hours every weekend (Friday 4 PM to Monday 9:30 AM EST), yet global macroeconomic shocks, geopolitical events, and crypto markets operate 24/7. Tokenized US equities (rTokens) on Bitget have created a revolutionary 24/7 trading paradigm, but retail traders are currently getting liquidated due to three critical market failures: (1) Off-hours liquidity traps and spread blowouts, (2) Correlation blindness between crypto assets and tech rTokens, and (3) Cognitive confirmation bias with zero systematic stress testing.
 
-Our core hypothesis is that retail traders do not need another generic "AI that predicts buy/sell signals." They need an institutional-grade, adversarial AI Trading Desk—RedTeam Desk—that acts as a ruthless Chief Risk Officer. RedTeam Desk stress-tests user theses before execution, models the 65.5-hour Weekend Overhang, calculates the Implied Monday Opening Gap, and prescribes exact cross-asset crypto hedges (e.g. BTC/ETH beta-neutralizing hedges) when traditional equity markets are locked shut.
+Our core hypothesis is that retail traders do not need another generic "AI that predicts buy/sell signals." They need an institutional-grade, adversarial AI Trading Desk—Bitget AI RedTeam Desk—that acts as a ruthless Chief Risk Officer. Bitget AI RedTeam Desk stress-tests user theses before execution, models the 65.5-hour Weekend Overhang, calculates the Implied Monday Opening Gap, and prescribes exact cross-asset crypto hedges (e.g. BTC/ETH beta-neutralizing hedges) when traditional equity markets are locked shut.
 
 ### PART 2: TARGET USER & PRODUCT VALUE
 - Specific User Segment: Crypto-native active traders and cross-market swing traders with portfolio sizes between $3,000 and $50,000 who trade tokenized US stocks (rTokens) alongside major cryptocurrencies (BTC, ETH, SOL) on Bitget.
@@ -301,7 +301,7 @@ Our core hypothesis is that retail traders do not need another generic "AI that 
 
 ### PART 3: VALIDATION DATA & KEY METRICS
 - Validation Framework:
-  - Metric 1: Downside Risk Reduction. In historical scenario backtests (e.g., Yen carry shock August 2024, weekend geopolitical escalations), portfolios utilizing RedTeam Desk's synthetic weekend crypto hedges reduced maximum drawdown by 38.4% compared to unhedged rToken holders.
+  - Metric 1: Downside Risk Reduction. In historical scenario backtests (e.g., Yen carry shock August 2024, weekend geopolitical escalations), portfolios utilizing Bitget AI RedTeam Desk's synthetic weekend crypto hedges reduced maximum drawdown by 38.4% compared to unhedged rToken holders.
   - Metric 2: Thesis Invalidation Adherence. User testing simulations demonstrated an 82% reduction in "bagholding" losing positions through the clear, pre-trade display of numerical invalidation triggers.
   - Metric 3: Target Adoption. Initial launch targeting 150 active Bitget rToken traders within 30 days post-hackathon, measuring task completion rate (>85%) and hedge simulation frequency.
 
@@ -342,28 +342,28 @@ Judges remember **stories and scenarios**, not abstract feature lists. Here is t
 
 2. THE ADVERSARIAL RED TEAM (0:25 - 0:55):
    • The screen doesn't just say "Order Placed."
-   • REDTEAM DESK flashes an alert: ⚠️ "ADVERSARIAL STRESS TEST TRIGGERED."
+   • Bitget AI RedTeam Desk flashes an alert: ⚠️ "ADVERSARIAL STRESS TEST TRIGGERED."
    • The AI presents the Steelman Bear Case:
      - Shows that BTC has already dropped 2.8% in response, indicating broad institutional risk-off.
      - Detects that rNVDA weekend orderbook spread has widened from 0.05% to 1.8% (buying now incurs instant slippage).
      - Warns of Correlation Exposure: Portfolio is already 80% concentrated in high-beta tech/crypto. Adding $1,000 rNVDA pushes portfolio beta to 1.74!
 
 3. THE 65.5h WEEKEND GAP PREDICTOR (0:55 - 1:25):
-   • RedTeam Desk displays the Implied Monday Opening Gap:
+   • Bitget AI RedTeam Desk displays the Implied Monday Opening Gap:
      - Traditional Friday Close: $122.50
      - Weekend rToken Price: $118.20
      - Implied Monday Open Range: $116.50 – $118.00 (78% confidence).
    • Verdict: "Buying spot rNVDA on Saturday night exposes you to further illiquid weekend decay."
 
 4. THE ACTIONABLE ALTERNATIVE & HEDGE (1:25 - 1:55):
-   • Instead of letting the user blow up, RedTeam Desk offers an institutional solution:
+   • Instead of letting the user blow up, Bitget AI RedTeam Desk offers an institutional solution:
      - "Recommended Action: REJECT $1,000 Buy."
      - "Action 2: Protect existing $1,500 rNVDA position with a Weekend Delta Hedge."
      - Suggests: Short 0.024 BTC on Bitget Futures (zero spread penalty, deep liquidity) to neutralize downside until Monday 9:30 AM EST.
    • User clicks "Stage Paper Hedge" -> Order is seamlessly logged in Bitget Paper Trading environment via Agent SDK!
 
 5. CONCLUSION (1:55 - 2:00):
-   • "RedTeam Desk: Where Wall Street's closed hours become your greatest edge."
+   • "Bitget AI RedTeam Desk: Where Wall Street's closed hours become your greatest edge."
 ```
 
 ---
@@ -390,3 +390,5 @@ Judges remember **stories and scenarios**, not abstract feature lists. Here is t
 
 ---
 *End of Market Research & Product Strategy Dossier.*
+
+

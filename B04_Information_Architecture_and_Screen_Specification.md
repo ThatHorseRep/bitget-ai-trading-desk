@@ -886,3 +886,5 @@ The verdict must emerge from the actual runtime evidence and calculations. The i
 ## 24. INFORMATION ARCHITECTURE NORTH STAR
 
 > **One trade, one workspace, one continuous decision journey: start with the action, expose only what matters, and end with a decision artifact the trader can understand and own.**
+
+

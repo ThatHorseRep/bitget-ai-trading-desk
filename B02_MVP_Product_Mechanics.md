@@ -949,3 +949,5 @@ The MVP should feel like one action, not a collection of tools:
 > **It gives you a transparent decision and tells you what would change it.**
 
 That is the complete MVP job.
+
+

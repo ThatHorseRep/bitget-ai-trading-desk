@@ -36,9 +36,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
+import { BRANDING } from "@/config/branding";
+
 export async function GET() {
   return NextResponse.json({
-    service: "Bitget AI Trading Desk — RedTeam Risk Workbench",
+    service: BRANDING.PRODUCT_NAME,
     status: "HEALTHY",
     version: "0.1.0",
     supportedAssets: ["rNVDA", "BTC"],
@@ -49,3 +51,5 @@ export async function GET() {
     defaultScenario: "I'm thinking about buying $2,000 of rNVDA before Monday because AI infrastructure demand still looks strong. Holding existing BTC exposure."
   });
 }
+
+

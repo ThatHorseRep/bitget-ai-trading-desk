@@ -12,8 +12,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import { BRANDING } from "@/config/branding";
+
 export const metadata: Metadata = {
-  title: "Bitget AI Trading Desk — RedTeam Risk Workbench",
+  title: BRANDING.PRODUCT_NAME,
   description: "Deterministic trade stress testing, basis decoupling analysis, and thesis vs position deconstruction."
 };
 
@@ -24,3 +26,5 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </html>
   );
 }
+
+

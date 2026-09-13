@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  reactStrictMode: true
+  // Explicitly set Turbopack workspace root to avoid inference errors
+  turbopack: {
+    root: __dirname,
+  },
+  reactStrictMode: true,
 };
 
 export default nextConfig;
+
+

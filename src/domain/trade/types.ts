@@ -32,3 +32,5 @@ export interface NormalizedTrade {
   userAssumptions: string[];
   relevantExposure: ExistingExposure[];
 }
+
+

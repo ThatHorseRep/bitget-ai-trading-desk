@@ -219,3 +219,5 @@ This directly satisfies the AI Trading Desk track's required deliverable: *"a co
 - BrokersDB, *Koyfin Review 2026*
 - Techpoint Africa / Helm Terminal / AI Prompt Finance, *Perplexity Finance reviews*
 - Bitget AI, *Base Camp Hackathon S2 Official Handbook* (bitget-ai.gitbook.io/bitgetai_hackathons2)
+
+

@@ -1,21 +1,18 @@
-import OpenAI from "openai";
+import { getSeekAiClient, type SeekAiRequest } from "./seekAiClient";
+import { getNarrative } from "./narrativeCache";
 import { z } from "zod";
-import { zodResponseFormat } from "openai/helpers/zod";
 import type { EvidenceItem } from "../../domain/decision/types";
 import type { MarketState } from "../../domain/market/types";
 import type { StressScenario } from "../../domain/scenarios/types";
 import type { Thesis, ThesisPositionAssessment, ThesisQuality, Challenge } from "../../domain/thesis/types";
+import { classifyPositionQuality } from "../decision/classifyPosition";
 import type { NormalizedTrade } from "../../domain/trade/types";
 
-const openai = new OpenAI({
-  apiKey: process.env.LLM_API_KEY || process.env.OPENAI_API_KEY,
-  baseURL: process.env.LLM_API_BASE_URL || undefined,
-});
-const modelName = process.env.LLM_MODEL || "gpt-4o";
+const modelName = process.env.SEEKAI_MODEL || "deepseek-v4-flash";
 
 const AssessmentSchema = z.object({
   thesisQuality: z.enum(["STRONGER", "MIXED", "WEAKER", "INSUFFICIENT"]),
-  positionQuality: z.enum(["STRONGER", "MIXED", "WEAKER", "INSUFFICIENT"]),
+  // positionQuality is now computed deterministically; LLM only narrates.
   keyMismatch: z.string().nullable(),
   explanation: z.string()
 });
@@ -28,10 +25,11 @@ export async function assessThesisVsPosition(
   challenge: Challenge,
   evidence: EvidenceItem[]
 ): Promise<ThesisPositionAssessment> {
+  const deterministicResult = classifyPositionQuality(scenarios, marketState);
   const systemPrompt = `You are the final decision-support synthesizer.
 You must evaluate two things independently:
 1. Thesis Quality (STRONGER, MIXED, WEAKER, INSUFFICIENT): Based on the evidence and counter-thesis.
-2. Position Quality (STRONGER, MIXED, WEAKER, INSUFFICIENT): Based purely on deterministic stress scenario losses, liquidity, and off-hours basis risk.
+2. Position Quality (STRONGER, MIXED, WEAKER, INSUFFICIENT): Determined deterministically as ${deterministicResult.positionQuality} based on stress scenario losses, liquidity, and basis risk.
 
 Rules:
 1. A strong thesis does NOT mean a strong position. If the token is illiquid or basis is severely disconnected, Position Quality must be WEAKER even if the thesis is STRONGER.
@@ -57,29 +55,36 @@ Evidence:
 ${JSON.stringify(evidence, null, 2)}
   `;
 
-  let response;
-  try {
-    response = await openai.chat.completions.parse({
-      model: modelName,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ],
-      response_format: zodResponseFormat(AssessmentSchema, "assessment")
-    });
-  } catch (error) {
-    throw new Error(`Failed to assess thesis vs position: ${error}`);
-  }
+let result;
+try {
+  const client = getSeekAiClient();
+  const payload: SeekAiRequest = {
+    model: modelName,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt }
+    ]
+  };
+  const resp = await client.chat(payload);
+  result = AssessmentSchema.parse(JSON.parse(resp.content));
+} catch (error) {
+  // Fallback to static narrative cache
+  const fallbackExplanation = getNarrative(deterministicResult.positionQuality);
+  result = {
+    thesisQuality: deterministicResult.positionQuality as any,
+    keyMismatch: null,
+    explanation: fallbackExplanation
+  };
+}
 
-  const result = response.choices[0].message.parsed;
-  if (!result) {
-    throw new Error("Parsed result is null.");
-  }
+
 
   return {
     thesisQuality: result.thesisQuality as ThesisQuality,
-    positionQuality: result.positionQuality as ThesisQuality,
+    positionQuality: deterministicResult.positionQuality as ThesisQuality,
     keyMismatch: result.keyMismatch,
     explanation: result.explanation
   };
 }
+
+

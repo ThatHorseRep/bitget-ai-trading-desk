@@ -12,3 +12,5 @@ export interface ReferencePriceQuote {
 export interface ReferencePriceProvider {
   getReferencePrice(symbol: string): Promise<ReferencePriceQuote>;
 }
+
+

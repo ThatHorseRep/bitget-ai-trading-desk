@@ -1,9 +1,9 @@
-# Bitget AI Trading Desk — RedTeam Risk Workbench
+# Bitget AI RedTeam Desk
 
 Implementation workspace for the **Bitget AI Base Camp Hackathon S2**.
 
 ## About the Project
-Bitget AI Trading Desk (RedTeam Risk Workbench) is a pre-trade decision-support product designed specifically for the unique structural risks of tokenized U.S. equities on Bitget. It acts as an adversarial "Red Team" against a user's proposed trade, isolating fundamental market rationale from off-hours execution risk and stressing the position mathematically before capital is deployed.
+Bitget AI RedTeam Desk is a pre-trade decision-support product designed specifically for the unique structural risks of tokenized U.S. equities on Bitget. It acts as an adversarial "Red Team" against a user's proposed trade, isolating fundamental market rationale from off-hours execution risk and stressing the position mathematically before capital is deployed.
 
 For full details on the project, the target user, the core job, and the role of the LLM, please see the [SUBMISSION.md](./SUBMISSION.md) file.
 
@@ -42,3 +42,5 @@ npm run test
 
 ## Architecture & Specifications
 The official product specs and architecture documents (B01-B06) are located in the root directory. Early research drafts and planning notes have been archived in the `docs/archive/` folder.
+
+

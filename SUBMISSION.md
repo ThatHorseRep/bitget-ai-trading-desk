@@ -1,8 +1,8 @@
-# Bitget AI Trading Desk — RedTeam Risk Workbench
+# Bitget AI RedTeam Desk
 **Bitget AI Base Camp Hackathon S2 Submission**
 
 ## 1. Project Description
-Bitget AI Trading Desk (RedTeam Risk Workbench) is a pre-trade decision-support product designed specifically for the unique structural risks of tokenized U.S. equities on Bitget. When traditional U.S. reference markets (NYSE/Nasdaq) close, Bitget's tokenized equities (e.g., rNVDA, rCOIN) continue to trade 24/7. This creates off-hours basis un-anchoring, crypto-contagion risks, and liquidity shifts that most retail traders fail to price in. 
+Bitget AI RedTeam Desk is a pre-trade decision-support product designed specifically for the unique structural risks of tokenized U.S. equities on Bitget. When traditional U.S. reference markets (NYSE/Nasdaq) close, Bitget's tokenized equities (e.g., rNVDA, rCOIN) continue to trade 24/7. This creates off-hours basis un-anchoring, crypto-contagion risks, and liquidity shifts that most retail traders fail to price in. 
 
 Instead of generating generic market summaries, the AI Trading Desk acts as an adversarial "Red Team" against the user's proposed trade. It isolates fundamental market rationale from off-hours execution risk, stresses the position mathematically, and forces the trader to confront the consequences of their decision *before* capital is deployed.
 
@@ -32,8 +32,10 @@ The product is hired to improve the quality of the decision immediately before a
 **Tweet:**
 Trading tokenized equities on the weekend? 🛑 Don't execute until you've Red-Teamed your thesis.
 
-Built the Bitget AI Trading Desk for the #BitgetHackathon to stress-test 24/7 token trades against off-hours basis risk and crypto contagion.
+Built the Bitget AI RedTeam Desk for the #BitgetHackathon to stress-test 24/7 token trades against off-hours basis risk and crypto contagion.
 
 Thesis ≠ Position. 
 
 @Bitget_AI
+
+

@@ -1,7 +1,7 @@
 # B05: AI Behavior and Prompts
 
 ## 1. Purpose and Scope
-This document defines the precise responsibilities of the Large Language Model (LLM) within the Bitget AI Trading Desk. It establishes the boundaries between deterministic calculations and AI reasoning, defines the prompt architecture for the core AI modules, and specifies the required structured output schemas.
+This document defines the precise responsibilities of the Large Language Model (LLM) within the Bitget AI RedTeam Desk. It establishes the boundaries between deterministic calculations and AI reasoning, defines the prompt architecture for the core AI modules, and specifies the required structured output schemas.
 
 This document assumes the use of an OpenAI-compatible API endpoint returning strict JSON (e.g., via Zod validation).
 
@@ -105,3 +105,5 @@ Rules:
 - **JSON Parse Failure:** If the LLM returns invalid JSON, the system will attempt 1 retry with a stronger format instruction. If it fails again, the pipeline aborts to the `ERROR` state.
 - **Missing Evidence:** If the evidence provider returns nothing, the Challenger module must explicitly state: "No recent external evidence was found to support or contradict the thesis." It must not hallucinate news.
 - **Ambiguous Trade:** If the Extractor module cannot determine the asset or direction, it must populate `unresolvedAmbiguities` and trigger the `CLARIFICATION` UI state rather than guessing.
+
+

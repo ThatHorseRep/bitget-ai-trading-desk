@@ -29,3 +29,5 @@ export interface WorkspaceState {
   isDrawerOpen: boolean;
   selectedProvenance: ProvenanceRecord | null;
 }
+
+

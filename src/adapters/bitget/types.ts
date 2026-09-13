@@ -46,3 +46,5 @@ export interface BitgetRealityCalendar {
   timeZone: string;
   specificConfig: BitgetRealityCalendarConfig[];
 }
+
+

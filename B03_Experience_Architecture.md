@@ -2,7 +2,7 @@
 
 ## 1. EXPERIENCE PRINCIPLE
 
-Bitget AI Trading Desk should feel like a **focused decision desk**: the user brings a specific trade idea, the product organizes the decision around it, and the experience progressively reveals the evidence, challenge, stress and conclusion that matter.
+Bitget AI RedTeam Desk should feel like a **focused decision desk**: the user brings a specific trade idea, the product organizes the decision around it, and the experience progressively reveals the evidence, challenge, stress and conclusion that matter.
 
 The experience is not a chatbot because conversation is not the primary product output. It is not a spreadsheet because the user should not have to manually assemble calculations. It is not a research terminal because the product should retrieve only information that materially affects the proposed decision. It is not a dashboard because the user's attention is centered on one decision at a time.
 
@@ -1015,3 +1015,5 @@ The experience should not create separate states for every intermediate calculat
 - Multi-agent activity visualizations.
 - Decorative AI "thinking" experiences.
 - Any interaction that requires users to understand internal product terminology before beginning.
+
+

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the smallest real technical system capable of delivering the Bitget AI Trading Desk MVP vertical slice defined in B01–B04.
+This document defines the smallest real technical system capable of delivering the Bitget AI RedTeam Desk MVP vertical slice defined in B01–B04.
 
 It is not a production architecture, enterprise architecture, or implementation ticket set. It deliberately avoids unnecessary services, agents, persistence, infrastructure, and market-data breadth.
 
@@ -1341,3 +1341,5 @@ Do not build breadth before that path works.
 # 23. Technical North Star
 
 > **The smallest trustworthy system is the one that can take a real Bitget trade idea, reconstruct only the state needed to understand it, challenge the trader's reasoning, deterministically show how the position can fail, and return a traceable Decision Artifact without pretending to predict the market or trade autonomously.**
+
+

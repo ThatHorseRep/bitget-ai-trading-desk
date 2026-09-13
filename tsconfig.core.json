@@ -12,3 +12,5 @@
   "include": ["src/domain/**/*.ts", "src/core/**/*.ts", "src/fixtures/**/*.ts", "src/adapters/**/*.ts", "src/services/**/*.ts"],
   "exclude": ["node_modules"]
 }
+
+

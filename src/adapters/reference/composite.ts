@@ -22,3 +22,5 @@ export class CompositeReferenceProvider implements ReferencePriceProvider {
     throw new Error(`All reference price providers failed for ${symbol}: ${errors.join("; ")}`);
   }
 }
+
+

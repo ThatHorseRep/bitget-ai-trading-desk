@@ -22,3 +22,5 @@ export function assessMarketDataQuality(state: MarketState, now = new Date(), st
   if (issues.length > 0) return { status: "DEGRADED", issues };
   return { status: "COMPLETE", issues: [] };
 }
+
+

@@ -587,3 +587,5 @@ export function DecisionArtifactView({
     </div>
   );
 }
+
+
