@@ -2,7 +2,7 @@
 
 ## 1. Product Identity
 
-Bitget AI Trading Desk is a **pre-trade decision-support product for crypto-native Bitget traders**, initially focused on tokenized U.S. equities and the unusual risks created when those assets remain tradable while their underlying U.S. markets are closed. The product takes a specific proposed trade, reconstructs the relevant market state, extracts and examines the trader's thesis, deliberately challenges it, stress-tests the proposed position, considers relevant portfolio exposure, and produces a structured decision artifact that helps the trader decide whether to proceed, wait, reduce, or reject the trade. It is not a generic AI trading assistant, research chatbot, trading terminal, or portfolio manager.
+Bitget AI RedTeam Desk is a **pre-trade decision-support product for crypto-native Bitget traders**, initially focused on tokenized U.S. equities and the unusual risks created when those assets remain tradable while their underlying U.S. markets are closed. The product takes a specific proposed trade, reconstructs the relevant market state, extracts and examines the trader's thesis, deliberately challenges it, stress‑tests the proposed position, considers relevant portfolio exposure, and produces a structured decision artifact that helps the trader decide whether to proceed, wait, reduce, or reject the trade. It is not a generic AI trading assistant, research chatbot, trading terminal, or portfolio manager.
 
 ## 2. Product Thesis
 
@@ -573,3 +573,4 @@ The MVP is successful when all of the following are true for a supported trade s
 ## 14. Product North Star
 
 > **Before a Bitget trader commits to a proposed trade, the product must turn that trade into a transparent, adversarial, scenario-tested decision the trader can understand and own.**
+# dummy change for PR
