@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "npm run test:core",
-    "test:core": "npm run build:core && node --test tests/*.test.cjs",
+    "test:core": "npm run build:core && node --env-file=.env.local --test tests/*.test.cjs",
     "build:core": "tsc -p tsconfig.core.json"
   },
   "dependencies": {
