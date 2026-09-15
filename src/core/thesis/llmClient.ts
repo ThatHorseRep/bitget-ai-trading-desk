@@ -46,11 +46,17 @@ export function getSeekAiClient() {
         return {
           content: JSON.stringify({
             normalizedThesis: "Mock normalized thesis",
-            assumptions: [],
-            dependencies: [],
+            assumptions: [{ text: "Mock assumption", origin: "USER_STATED" }],
+            dependencies: [{ text: "Mock dependency", origin: "USER_STATED" }],
             supportingEvidenceRefs: [],
-            invalidationConditions: [],
-            unresolvedAmbiguities: []
+            invalidationConditions: [{ text: "Mock invalidation", origin: "AI_INFERRED" }],
+            unresolvedAmbiguities: [],
+            counterThesis: "Mock counter thesis",
+            vulnerableAssumptions: ["Mock vulnerable assumption"],
+            contradictoryEvidenceRefs: [],
+            explanation: "Mock explanation",
+            thesisQuality: "STRONGER",
+            keyMismatch: null
           })
         };
       }

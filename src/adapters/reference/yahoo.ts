@@ -19,11 +19,22 @@ interface YahooChartResponse {
   };
 }
 
+const TRUSTED_YAHOO_ORIGINS = new Set([
+  "https://query1.finance.yahoo.com",
+  "https://query2.finance.yahoo.com"
+]);
+
 export class YahooReferenceProvider implements ReferencePriceProvider {
   private baseUrl: string;
 
   constructor(baseUrl = "https://query1.finance.yahoo.com") {
-    this.baseUrl = baseUrl.replace(/\/$/, "");
+    const cleanUrl = baseUrl.replace(/\/$/, "");
+    if (!TRUSTED_YAHOO_ORIGINS.has(cleanUrl)) {
+      console.warn(`Untrusted Yahoo base URL: ${cleanUrl}. Falling back to default.`);
+      this.baseUrl = "https://query1.finance.yahoo.com";
+    } else {
+      this.baseUrl = cleanUrl;
+    }
   }
 
   async getReferencePrice(symbol: string): Promise<ReferencePriceQuote> {
@@ -59,5 +70,6 @@ export class YahooReferenceProvider implements ReferencePriceProvider {
     };
   }
 }
+
 
 

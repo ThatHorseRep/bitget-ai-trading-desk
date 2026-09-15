@@ -48,16 +48,30 @@ export const CURATED_NVDA_EVIDENCE: EvidenceItem[] = [
   }
 ];
 
+const TRUSTED_ORIGINS = new Set([
+  "https://query1.finance.yahoo.com",
+  "https://query2.finance.yahoo.com"
+]);
+
 export class CompositeEvidenceProvider implements EvidenceProvider {
   private baseUrl: string;
 
   constructor(baseUrl = "https://query1.finance.yahoo.com") {
-    this.baseUrl = baseUrl.replace(/\/$/, "");
+    const cleanUrl = baseUrl.replace(/\/$/, "");
+    if (!TRUSTED_ORIGINS.has(cleanUrl)) {
+      console.warn(`Untrusted base URL: ${cleanUrl}. Falling back to default.`);
+      this.baseUrl = "https://query1.finance.yahoo.com";
+    } else {
+      this.baseUrl = cleanUrl;
+    }
   }
 
   async retrieveEvidence(query: EvidenceQuery): Promise<EvidenceItem[]> {
     const symbol = query.asset.replace(/^r/i, "").replace(/USDT$/i, "");
-    const maxRecords = query.maxRecords ?? 5;
+    
+    // Bound the number of external records requested
+    const requestedRecords = query.maxRecords ?? 5;
+    const maxRecords = Math.min(Math.max(requestedRecords, 1), 10);
     const nowIso = new Date().toISOString();
 
     try {
@@ -98,5 +112,6 @@ export class CompositeEvidenceProvider implements EvidenceProvider {
     }));
   }
 }
+
 
 

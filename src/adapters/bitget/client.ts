@@ -1,7 +1,12 @@
 import { httpGetJson } from "../network/http";
 import type { BitgetResponse, BitgetRealityCalendar, NormalizedBitgetTicker, RawBitgetTickerItem } from "./types";
 
-const DEFAULT_BITGET_BASE_URL = process.env.BITGET_API_BASE_URL || "https://api.bitget.com";
+const TRUSTED_BITGET_ORIGINS = new Set([
+  "https://api.bitget.com"
+]);
+
+const envUrl = (process.env.BITGET_API_BASE_URL || "https://api.bitget.com").replace(/\/$/, "");
+const DEFAULT_BITGET_BASE_URL = TRUSTED_BITGET_ORIGINS.has(envUrl) ? envUrl : "https://api.bitget.com";
 
 export function parseBitgetTicker(item: RawBitgetTickerItem, sourceName = "Bitget Public Market API"): NormalizedBitgetTicker {
   const lastPrice = parseFloat(item.lastPrice);
@@ -37,7 +42,13 @@ export class BitgetClient {
   private baseUrl: string;
 
   constructor(baseUrl: string = DEFAULT_BITGET_BASE_URL) {
-    this.baseUrl = baseUrl.replace(/\/$/, "");
+    const cleanUrl = baseUrl.replace(/\/$/, "");
+    if (!TRUSTED_BITGET_ORIGINS.has(cleanUrl)) {
+      console.warn(`Untrusted Bitget base URL: ${cleanUrl}. Falling back to default.`);
+      this.baseUrl = "https://api.bitget.com";
+    } else {
+      this.baseUrl = cleanUrl;
+    }
   }
 
   async getSpotTicker(symbol: string): Promise<NormalizedBitgetTicker> {
@@ -64,5 +75,3 @@ export class BitgetClient {
     }
   }
 }
-
-

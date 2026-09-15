@@ -17,7 +17,8 @@ test("CompositeEvidenceProvider retrieves evidence with valid fields and provena
 });
 
 test("CompositeEvidenceProvider falls back gracefully on network error", async () => {
-  const provider = new CompositeEvidenceProvider("https://invalid-non-existent-domain-12345.org");
+  const provider = new CompositeEvidenceProvider();
+  provider.baseUrl = "https://invalid-non-existent-domain-12345.org";
   const items = await provider.retrieveEvidence({ asset: "rNVDA", maxRecords: 2 });
 
   assert.equal(items.length, 2);
