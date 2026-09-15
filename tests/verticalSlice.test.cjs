@@ -40,13 +40,15 @@ test("full vertical slice executes end-to-end with fixture data", async () => {
   assert.ok(art.challenge.vulnerableAssumptions.length > 0);
 
   // 6. Stress Scenarios (all 4 MVP scenarios)
-  assert.equal(art.scenarios.length, 4);
+  assert.equal(art.scenarios.length, 5);
   const scenarioIds = art.scenarios.map((s) => s.id);
-  assert.deepEqual(scenarioIds, ["MARKET_RISK", "CRYPTO_CONTAGION", "TOKEN_MICROSTRUCTURE", "COMBINED_SHOCK"]);
+  assert.deepEqual(scenarioIds, ["MARKET_RISK", "CRYPTO_CONTAGION", "TOKEN_MICROSTRUCTURE", "COMBINED_SHOCK", "THESIS_FAILURE"]);
   for (const s of art.scenarios) {
     assert.ok(s.applicable);
-    assert.ok(s.estimatedPnlUsd !== null);
-    assert.ok(s.estimatedPnlPct !== null);
+    if (s.id !== "THESIS_FAILURE") {
+      assert.ok(s.estimatedPnlUsd !== null);
+      assert.ok(s.estimatedPnlPct !== null);
+    }
   }
 
   // 7. Thesis vs Position

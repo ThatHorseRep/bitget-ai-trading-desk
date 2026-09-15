@@ -13,7 +13,7 @@ test("DecisionDeskService workflow returns DECISION_READY for complete reference
   assert.equal(result.artifact.trade.asset, "rNVDA");
   assert.equal(result.artifact.trade.direction, "LONG");
   assert.equal(result.artifact.trade.positionSizeUsd, 2000);
-  assert.equal(result.artifact.scenarios.length, 4);
+  assert.equal(result.artifact.scenarios.length, 5);
   assert.ok(["PROCEED", "WAIT", "REDUCE", "REJECT"].includes(result.artifact.decision.verdict));
   assert.ok(result.artifact.provenance.length >= 8);
 });

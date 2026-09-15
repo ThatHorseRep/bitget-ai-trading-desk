@@ -6,9 +6,9 @@ const { buildRnvdaDemoTrade, rnvdaDemoMarketState } = require("../dist-core/src/
 
 const trade = buildRnvdaDemoTrade();
 
-test("all four MVP scenarios are produced", () => {
+test("all MVP scenarios are produced including thesis failure", () => {
   const results = runStressScenarios(trade, rnvdaDemoMarketState, SCENARIO_CONFIG);
-  assert.deepEqual(results.map((s) => s.id), ["MARKET_RISK", "CRYPTO_CONTAGION", "TOKEN_MICROSTRUCTURE", "COMBINED_SHOCK"]);
+  assert.deepEqual(results.map((s) => s.id), ["MARKET_RISK", "CRYPTO_CONTAGION", "TOKEN_MICROSTRUCTURE", "COMBINED_SHOCK", "THESIS_FAILURE"]);
   assert.ok(results.every((s) => s.applicable));
 });
 
@@ -39,4 +39,61 @@ test("combined scenario composes explicit shocks and is adverse", () => {
   assert.equal(combined.basisImpact, -3);
   assert.equal(combined.liquidityImpact, -50);
   assert.ok(combined.estimatedPnlUsd < 0, "Combined stress must produce an adverse loss");
+});
+
+test("invariant: adverse long shock cannot improve long P&L", () => {
+  const longTrade = { ...trade, direction: "LONG" };
+  const results = runStressScenarios(longTrade, rnvdaDemoMarketState, SCENARIO_CONFIG);
+  
+  results.forEach(scenario => {
+    if (scenario.applicable && scenario.estimatedPnlUsd !== null) {
+      assert.ok(scenario.estimatedPnlUsd < 0, `${scenario.id} should not improve long P&L`);
+    }
+  });
+});
+
+test("invariant: adverse short shock cannot improve short P&L", () => {
+  const shortTrade = { ...trade, direction: "SHORT" };
+  const results = runStressScenarios(shortTrade, rnvdaDemoMarketState, SCENARIO_CONFIG);
+  
+  results.forEach(scenario => {
+    if (scenario.applicable && scenario.estimatedPnlUsd !== null) {
+      assert.ok(scenario.estimatedPnlUsd < 0, `${scenario.id} should not improve short P&L`);
+    }
+  });
+});
+
+test("invariant: scenario price must remain positive", () => {
+  // Use a config that would result in a negative price
+  const extremeConfig = {
+    ...SCENARIO_CONFIG,
+    marketShockPct: -150, // 150% drop
+    cryptoContagionTokenShockPct: -120, // 120% drop
+    basisWideningPctPoints: -150
+  };
+  const results = runStressScenarios(trade, rnvdaDemoMarketState, extremeConfig);
+  
+  results.forEach(scenario => {
+    if (scenario.applicable) {
+      if (scenario.shockedTokenPrice !== null) {
+        assert.ok(scenario.shockedTokenPrice > 0, `${scenario.id} token price must be positive`);
+      }
+      if (scenario.shockedReferencePrice !== null) {
+        assert.ok(scenario.shockedReferencePrice > 0, `${scenario.id} reference price must be positive`);
+      }
+    }
+  });
+});
+
+test("invariant: zero/missing required inputs cannot produce a plausible-looking result", () => {
+  const zeroState = { ...rnvdaDemoMarketState, instrumentPrice: 0, referencePrice: null, btcPrice: null };
+  const results = runStressScenarios(trade, zeroState, SCENARIO_CONFIG);
+  
+  results.forEach(scenario => {
+    if (scenario.id !== "THESIS_FAILURE") {
+      assert.equal(scenario.applicable, false, `${scenario.id} should not be applicable with missing inputs`);
+      assert.equal(scenario.estimatedPnlUsd, null, `${scenario.id} should not compute PnL`);
+      assert.equal(scenario.shockedTokenPrice, null, `${scenario.id} should not compute token price`);
+    }
+  });
 });

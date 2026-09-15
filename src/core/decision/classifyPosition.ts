@@ -60,8 +60,8 @@ export function classifyPositionQuality(
   }
 
   // Basis impact downgrade if any scenario exceeds threshold
-  const maxBasisImpact = Math.max(...scenarios.map((s) => s.basisImpact ?? 0));
-  if (Math.abs(maxBasisImpact) >= POSITION_QUALITY_CONFIG.basisImpactThreshold) {
+  const maxBasisImpact = Math.max(...scenarios.map((s) => Math.abs(s.basisImpact ?? 0)));
+  if (maxBasisImpact >= POSITION_QUALITY_CONFIG.basisImpactThreshold) {
     quality = "WEAKER";
   }
 
