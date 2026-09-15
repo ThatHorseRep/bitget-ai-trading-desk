@@ -98,6 +98,13 @@ export function NormalizedReviewCard({
                   &ldquo;{normalizedTrade.thesis}&rdquo;
                 </p>
               </div>
+
+              {normalizedTrade.entryPriceSource === "USER_PROVIDED" && (
+                <div className="flex justify-between items-center py-1 border-b border-zinc-200">
+                  <span className="text-xs text-zinc-500">Specified entry price:</span>
+                  <span className="font-mono text-xs font-semibold text-zinc-900">${normalizedTrade.entryPrice.toFixed(2)}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -128,10 +135,19 @@ export function NormalizedReviewCard({
                 <span className="font-semibold text-zinc-800">{normalizedTrade.referenceAsset || "N/A"}</span>
               </div>
 
-              <div className="flex justify-between items-center py-1 border-b border-zinc-200">
-                <span className="text-xs text-zinc-500">Working entry price:</span>
-                <span className="font-mono text-xs font-semibold text-zinc-800">${normalizedTrade.entryPrice.toFixed(2)}</span>
-              </div>
+              {normalizedTrade.entryPriceSource === "SYSTEM_DERIVED" && (
+                <div className="flex justify-between items-center py-1 border-b border-zinc-200">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-zinc-500">Working entry price:</span>
+                    {normalizedTrade.entryBasisTimestamp && (
+                      <span className="text-[10px] text-zinc-400">
+                        Observed: {new Date(normalizedTrade.entryBasisTimestamp).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-mono text-xs font-semibold text-zinc-800">${normalizedTrade.entryPrice.toFixed(2)}</span>
+                </div>
+              )}
 
               <div className="flex justify-between items-center py-1 border-b border-zinc-200">
                 <span className="text-xs text-zinc-500">Implied token quantity:</span>

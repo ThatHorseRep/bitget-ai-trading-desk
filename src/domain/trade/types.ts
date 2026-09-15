@@ -26,6 +26,8 @@ export interface NormalizedTrade {
   positionSizeUsd: number;
   entryPrice: number;
   quantity: number;
+  entryPriceSource: "USER_PROVIDED" | "SYSTEM_DERIVED";
+  entryBasisTimestamp?: string;
   referenceAsset?: string;
   timeHorizon?: string;
   thesis: string;

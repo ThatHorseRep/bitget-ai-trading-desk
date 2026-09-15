@@ -11,6 +11,7 @@ import { evaluateDecision } from "../core/decision/policy";
 import { MarketStateService } from "./marketStateService";
 import { CompositeEvidenceProvider } from "../adapters/evidence/provider";
 import type { EvidenceProvider } from "../adapters/evidence/types";
+import { validateNormalizedTrade } from "../core/validation/runtime";
 
 export interface DecisionDeskOptions {
   useFixture?: boolean;
@@ -48,7 +49,7 @@ export class DecisionDeskService {
     // 1. Natural language parsing and trade normalization
     const parsedResult = typeof input === "string"
       ? parseNaturalLanguageTrade(input)
-      : parseNaturalLanguageTrade(`${input.direction} $${input.positionSizeUsd} of ${input.asset} because ${input.thesis}`);
+      : parseNaturalLanguageTrade(`${input.direction} $${input.positionSizeUsd} of ${input.asset} ${input.entryPrice ? `at ${input.entryPrice}` : ''} because ${input.thesis}`);
 
     if (parsedResult.requiresClarification || !parsedResult.normalizedTrade) {
       return {
@@ -83,8 +84,21 @@ export class DecisionDeskService {
     }
 
     // Update trade quantity & entry price with live market observation if initial was default
-    trade.entryPrice = marketState.instrumentPrice;
-    trade.quantity = parseFloat((trade.positionSizeUsd / trade.entryPrice).toFixed(8));
+    if (trade.entryPriceSource === "SYSTEM_DERIVED") {
+      trade.entryPrice = marketState.instrumentPrice;
+      trade.entryBasisTimestamp = marketState.observedAt;
+      trade.quantity = parseFloat((trade.positionSizeUsd / trade.entryPrice).toFixed(8));
+    }
+
+    const tradeValidation = validateNormalizedTrade(trade);
+    if (!tradeValidation.valid) {
+      return {
+        step: "ERROR",
+        parsedResult,
+        artifact: null,
+        limitations: [`Trade validation failed: ${tradeValidation.errors.join(", ")}`]
+      };
+    }
 
     // 3. Evidence Retrieval
     const evidence: EvidenceItem[] = await this.evidenceProvider.retrieveEvidence({

@@ -14,7 +14,8 @@ export interface ParsedTradeResult {
 
 export function parseNaturalLanguageTrade(
   input: string,
-  workingPrice = 219.22
+  workingPrice = 219.22,
+  workingPriceTimestamp: string = new Date().toISOString()
 ): ParsedTradeResult {
   const text = input.trim();
   const userProvided: string[] = [];
@@ -33,12 +34,12 @@ export function parseNaturalLanguageTrade(
 
   // 2. Asset extraction
   let asset: string | null = null;
+  let assetClarificationRequired = false;
   if (/\b(rnvda|rnvdausdt)\b/i.test(text)) {
     asset = "rNVDA";
     userProvided.push("asset");
   } else if (/\bnvda\b/i.test(text)) {
-    asset = "rNVDA";
-    inferred.push("asset (mapped NVDA to Bitget rNVDA token)");
+    assetClarificationRequired = true;
   } else if (/\bbtc\b/i.test(text) && !/\b(rnvda|nvda)\b/i.test(text)) {
     asset = "BTC";
     userProvided.push("asset");
@@ -46,15 +47,28 @@ export function parseNaturalLanguageTrade(
 
   // 3. Position size extraction ($2,000 or 2000 usd or $2k)
   let positionSizeUsd: number | null = null;
-  const sizeMatch = text.match(/\$\s*([\d,]+(?:\.\d+)?)\s*(k|m)?/i) ||
-    text.match(/([\d,]+(?:\.\d+)?)\s*(?:usd|dollars|usdt)\b/i);
+  
+  const textToNum: Record<string, number> = {
+    one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10
+  };
+  const grandMatch = text.match(/(one|two|three|four|five|six|seven|eight|nine|ten)\s+grand\b/i);
 
-  if (sizeMatch) {
-    const rawNum = parseFloat(sizeMatch[1].replace(/,/g, ""));
-    const multiplier = sizeMatch[2]?.toLowerCase() === "k" ? 1000 : (sizeMatch[2]?.toLowerCase() === "m" ? 1000000 : 1);
-    if (Number.isFinite(rawNum) && rawNum > 0) {
-      positionSizeUsd = rawNum * multiplier;
-      userProvided.push("positionSizeUsd");
+  const sizeMatch = text.match(/(-?)\s*\$\s*([\d,]+(?:\.\d+)?)\s*(k|m)?/i) ||
+    text.match(/(-?)\s*([\d,]+(?:\.\d+)?)\s*(?:usd|dollars|usdt)\b/i);
+
+  if (grandMatch) {
+    positionSizeUsd = textToNum[grandMatch[1].toLowerCase()] * 1000;
+    userProvided.push("positionSizeUsd");
+  } else if (sizeMatch) {
+    const isNegative = sizeMatch[1] === "-";
+    const rawNum = parseFloat(sizeMatch[2].replace(/,/g, ""));
+    const multiplierStr = sizeMatch[3] || "";
+    const multiplier = multiplierStr.toLowerCase() === "k" ? 1000 : (multiplierStr.toLowerCase() === "m" ? 1000000 : 1);
+    if (Number.isFinite(rawNum)) {
+      positionSizeUsd = (isNegative ? -rawNum : rawNum) * multiplier;
+      if (positionSizeUsd > 0) {
+        userProvided.push("positionSizeUsd");
+      }
     }
   }
 
@@ -68,6 +82,19 @@ export function parseNaturalLanguageTrade(
     // If no explicit 'because' but trader wrote a paragraph
     thesis = text;
     inferred.push("thesis");
+  }
+
+  // 4.5. Price extraction
+  let explicitPrice: number | null = null;
+  let priceClarificationRequired = false;
+  const priceMatch = text.match(/(?:at|@)\s*\$?(-?[\d,]+(?:\.\d+)?)/i);
+  if (priceMatch) {
+     explicitPrice = parseFloat(priceMatch[1].replace(/,/g, ""));
+     if (explicitPrice <= 0 || isNaN(explicitPrice)) {
+        priceClarificationRequired = true;
+     } else {
+        userProvided.push("entryPrice");
+     }
   }
 
   // 5. Time horizon extraction
@@ -107,18 +134,24 @@ export function parseNaturalLanguageTrade(
   let clarificationField: string | null = null;
   let clarificationQuestion: string | null = null;
 
-  if (!asset) {
+  if (assetClarificationRequired || !asset) {
     requiresClarification = true;
     clarificationField = "asset";
-    clarificationQuestion = "Which asset are you planning to trade? (The MVP supports rNVDA tokenized NVIDIA).";
+    clarificationQuestion = assetClarificationRequired 
+      ? "Did you mean rNVDA (the tokenized NVIDIA asset available on Bitget)?" 
+      : "Which asset are you planning to trade? (The MVP supports rNVDA tokenized NVIDIA).";
   } else if (!direction) {
     requiresClarification = true;
     clarificationField = "direction";
     clarificationQuestion = "Are you planning to buy (LONG) or sell (SHORT) this position?";
-  } else if (!positionSizeUsd || positionSizeUsd <= 0) {
+  } else if (priceClarificationRequired) {
+    requiresClarification = true;
+    clarificationField = "entryPrice";
+    clarificationQuestion = "The specified entry price is invalid. Please provide a positive number.";
+  } else if (positionSizeUsd === null || positionSizeUsd <= 0) {
     requiresClarification = true;
     clarificationField = "positionSizeUsd";
-    clarificationQuestion = "What position size (in USD) are you proposing to allocate?";
+    clarificationQuestion = "What position size (in USD) are you proposing to allocate? Please provide a valid positive number.";
   } else if (!thesis || thesis.length < 5) {
     requiresClarification = true;
     clarificationField = "thesis";
@@ -138,12 +171,15 @@ export function parseNaturalLanguageTrade(
   if (!requiresClarification && asset && direction && positionSizeUsd && positionSizeUsd > 0) {
     const canonicalSymbol = asset === "rNVDA" ? "rNVDAUSDT" : `${asset}USDT`;
     const referenceAsset = asset === "rNVDA" ? "NVDA" : undefined;
-    const entryPrice = workingPrice > 0 ? workingPrice : 120;
+    const entryPrice = explicitPrice !== null ? explicitPrice : (workingPrice > 0 ? workingPrice : 120);
     const quantity = calculatePositionQuantity(positionSizeUsd, entryPrice);
 
     derived.push("canonicalSymbol");
     derived.push("referenceAsset");
-    derived.push("entryPrice (from market observation)");
+    
+    if (explicitPrice === null) {
+       derived.push("entryPrice (system-derived from market observation)");
+    }
     derived.push("quantity (calculated from position size and entry price)");
 
     normalizedTrade = {
@@ -154,6 +190,8 @@ export function parseNaturalLanguageTrade(
       positionSizeUsd,
       entryPrice,
       quantity,
+      entryPriceSource: explicitPrice !== null ? "USER_PROVIDED" : "SYSTEM_DERIVED",
+      entryBasisTimestamp: explicitPrice === null ? workingPriceTimestamp : undefined,
       referenceAsset,
       timeHorizon,
       thesis,

@@ -24,7 +24,9 @@ export function buildRnvdaDemoTrade(): NormalizedTrade {
     referenceAsset: "NVDA",
     thesis: rnvdaTradeIdea.thesis,
     userAssumptions: [],
-    relevantExposure: []
+    relevantExposure: [],
+    entryPriceSource: "SYSTEM_DERIVED",
+    entryBasisTimestamp: "2024-10-25T14:30:00Z"
   };
 }
 
