@@ -91,12 +91,17 @@ export class MarketStateService {
     const sessionStatus = determineUsMarketSession(now, closures);
 
     // 5. Fetch Reference stock price (Yahoo / fallback)
+    const activeReferenceProvider = options.referenceProvider ?? this.referenceProvider;
     let referencePrice: number | null = null;
+    let referencePreviousClose: number | null = null;
     let referenceObservedAt: string | null = null;
+    let referenceSourceName: string | null = null;
     try {
-      const refQuote = await this.referenceProvider.getReferencePrice(mapping.referenceSymbol);
+      const refQuote = await activeReferenceProvider.getReferencePrice(mapping.referenceSymbol);
       referencePrice = refQuote.price;
+      referencePreviousClose = refQuote.previousClose ?? null;
       referenceObservedAt = refQuote.observedAt;
+      referenceSourceName = refQuote.source;
       sources.push({
         id: "reference-quote",
         name: refQuote.source,
@@ -135,8 +140,11 @@ export class MarketStateService {
       askSize: rTokenTicker.askSize,
       spread,
       spreadPct,
+      referenceSymbol: mapping.referenceSymbol,
       referencePrice,
+      referencePreviousClose,
       referenceObservedAt,
+      referenceSourceName,
       basis,
       basisPct,
       btcPrice,

@@ -57,9 +57,12 @@ export class YahooReferenceProvider implements ReferencePriceProvider {
 
     const previousClose = result.meta.chartPreviousClose ?? result.meta.previousClose;
     const timeSec = result.meta.regularMarketTime;
-    const observedAt = timeSec && Number.isFinite(timeSec)
-      ? new Date(timeSec * 1000).toISOString()
-      : new Date().toISOString();
+    
+    if (!timeSec || !Number.isFinite(timeSec)) {
+      throw new Error(`Missing regularMarketTime for ${symbol} from Yahoo Finance`);
+    }
+
+    const observedAt = new Date(timeSec * 1000).toISOString();
 
     return {
       symbol,

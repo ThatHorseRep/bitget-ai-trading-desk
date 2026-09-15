@@ -20,8 +20,11 @@ export interface MarketState {
   askSize: number | null;
   spread: number | null;
   spreadPct: number | null;
+  referenceSymbol: string | null;
   referencePrice: number | null;
+  referencePreviousClose: number | null;
   referenceObservedAt: string | null;
+  referenceSourceName: string | null;
   basis: number | null;
   basisPct: number | null;
   btcPrice: number | null;

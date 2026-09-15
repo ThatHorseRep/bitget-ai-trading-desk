@@ -72,6 +72,15 @@ export function isStandardUsHoliday(year: number, month: number, day: number): b
   return false;
 }
 
+/**
+ * Determines the US market session status.
+ * 
+ * PROVENANCE/LIMITATIONS:
+ * This implementation uses a lightweight calendar approximation for the hackathon.
+ * It checks a fixed list of standard US holidays (New Year, July 4, Juneteenth, Christmas)
+ * but does NOT represent a complete exchange calendar. It does not account for early 
+ * closures, dynamic holidays (e.g., Thanksgiving, MLK Day, Good Friday), or unexpected trading halts.
+ */
 export function determineUsMarketSession(
   date: Date = new Date(),
   holidayClosures: HolidayClosureRange[] = []
@@ -101,11 +110,6 @@ export function determineUsMarketSession(
 
   // Saturday or Sunday is always WEEKEND
   if (dayOfWeek === 0 || dayOfWeek === 6) {
-    return "WEEKEND";
-  }
-
-  // Friday after 16:00 ET transitions into WEEKEND closure
-  if (dayOfWeek === 5 && hour >= 16) {
     return "WEEKEND";
   }
 
