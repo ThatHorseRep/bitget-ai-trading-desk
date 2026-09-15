@@ -23,6 +23,28 @@ export interface BitgetResponse<T> {
   data: T;
 }
 
+export interface RawBitgetInstrumentItem {
+  symbol: string;
+  category: string;
+  baseCoin: string;
+  quoteCoin: string;
+  isRwa?: string;
+  isReality?: string;
+  symbolType?: string;
+  status?: string;
+}
+
+export interface NormalizedBitgetInstrument {
+  symbol: string;
+  category: string;
+  baseCoin: string;
+  quoteCoin: string;
+  isRwa: boolean;
+  isReality: boolean;
+  status: string;
+  isActive: boolean;
+}
+
 export interface NormalizedBitgetTicker {
   symbol: string;
   lastPrice: number;
@@ -34,6 +56,7 @@ export interface NormalizedBitgetTicker {
   price24hPcnt: number | null;
   observedAt: string;
   source: string;
+  requestTime?: number;
 }
 
 export interface BitgetRealityCalendarConfig {

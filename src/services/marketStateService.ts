@@ -49,8 +49,18 @@ export class MarketStateService {
     const now = options.now ?? new Date();
     const sources: SourceRef[] = [];
 
-    // 1. Fetch Bitget rToken ticker
-    const rTokenTicker = await this.bitgetClient.getSpotTicker(mapping.bitgetSymbol);
+    // 1. Fetch Bitget rToken instrument & ticker
+    const [rTokenInstrument, rTokenTicker] = await Promise.all([
+      this.bitgetClient.getSpotInstrument(mapping.bitgetSymbol),
+      this.bitgetClient.getSpotTicker(mapping.bitgetSymbol)
+    ]);
+
+    if (!rTokenInstrument.isReality) {
+      throw new Error(`Instrument ${mapping.bitgetSymbol} is not identified as a Reality token by Bitget.`);
+    }
+
+    const tokenMarketStatus = rTokenInstrument.isActive ? "ACTIVE" : "INACTIVE";
+
     sources.push({
       id: "bitget-rtoken",
       name: "Bitget Spot Ticker (rToken)",
@@ -132,7 +142,7 @@ export class MarketStateService {
       btcPrice,
       btcObservedAt,
       sessionStatus,
-      tokenMarketStatus: "ACTIVE",
+      tokenMarketStatus,
       liquidityClass,
       dataQuality: "COMPLETE",
       sources

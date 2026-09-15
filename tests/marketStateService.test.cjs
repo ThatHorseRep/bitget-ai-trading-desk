@@ -21,6 +21,18 @@ test("MarketStateService throws on unsupported asset", async () => {
 
 test("MarketStateService synthesizes live state with mock providers correctly", async () => {
   const mockBitgetClient = {
+    getSpotInstrument: async (symbol) => {
+      return {
+        symbol,
+        category: "SPOT",
+        baseCoin: "rNVDA",
+        quoteCoin: "USDT",
+        isRwa: false,
+        isReality: true,
+        status: "online",
+        isActive: true
+      };
+    },
     getSpotTicker: async (symbol) => {
       if (symbol === "rNVDAUSDT") {
         return {
@@ -82,6 +94,15 @@ test("MarketStateService synthesizes live state with mock providers correctly", 
 
 test("MarketStateService degrades cleanly when reference price fails", async () => {
   const mockBitgetClient = {
+    getSpotInstrument: async (symbol) => ({
+      symbol,
+      category: "SPOT",
+      baseCoin: "rNVDA",
+      quoteCoin: "USDT",
+      isReality: true,
+      status: "online",
+      isActive: true
+    }),
     getSpotTicker: async () => ({
       symbol: "rNVDAUSDT",
       lastPrice: 220,

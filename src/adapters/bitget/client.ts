@@ -1,12 +1,14 @@
 import { httpGetJson } from "../network/http";
-import type { BitgetResponse, BitgetRealityCalendar, NormalizedBitgetTicker, RawBitgetTickerItem } from "./types";
+import type { BitgetResponse, BitgetRealityCalendar, NormalizedBitgetTicker, RawBitgetTickerItem, RawBitgetInstrumentItem, NormalizedBitgetInstrument } from "./types";
 
 const TRUSTED_BITGET_ORIGINS = new Set([
-  "https://api.bitget.com"
+  "https://api.bitget.com",
+  ...(process.env.NODE_ENV === "test" ? ["http://127.0.0.1"] : [])
 ]);
 
 const envUrl = (process.env.BITGET_API_BASE_URL || "https://api.bitget.com").replace(/\/$/, "");
-const DEFAULT_BITGET_BASE_URL = TRUSTED_BITGET_ORIGINS.has(envUrl) ? envUrl : "https://api.bitget.com";
+const isTrusted = TRUSTED_BITGET_ORIGINS.has(envUrl) || (process.env.NODE_ENV === "test" && envUrl.startsWith("http://127.0.0.1:"));
+const DEFAULT_BITGET_BASE_URL = isTrusted ? envUrl : "https://api.bitget.com";
 
 export function parseBitgetTicker(item: RawBitgetTickerItem, sourceName = "Bitget Public Market API"): NormalizedBitgetTicker {
   const lastPrice = parseFloat(item.lastPrice);
@@ -22,7 +24,10 @@ export function parseBitgetTicker(item: RawBitgetTickerItem, sourceName = "Bitge
   const price24hPcnt = item.price24hPcnt && item.price24hPcnt !== "" ? parseFloat(item.price24hPcnt) : null;
 
   const tsMs = parseInt(item.ts, 10);
-  const observedAt = Number.isFinite(tsMs) && tsMs > 0 ? new Date(tsMs).toISOString() : new Date().toISOString();
+  if (!Number.isFinite(tsMs) || tsMs <= 0) {
+    throw new Error(`Invalid or missing observation timestamp from Bitget for ${item.symbol}: ${item.ts}`);
+  }
+  const observedAt = new Date(tsMs).toISOString();
 
   return {
     symbol: item.symbol,
@@ -38,12 +43,31 @@ export function parseBitgetTicker(item: RawBitgetTickerItem, sourceName = "Bitge
   };
 }
 
+export function parseBitgetInstrument(item: RawBitgetInstrumentItem): NormalizedBitgetInstrument {
+  const isRwa = item.isRwa === "yes" || item.isRwa === "true";
+  const isReality = item.isReality === "yes" || item.isReality === "true";
+  const status = item.status || "unknown";
+  const isActive = status === "online" || status === "normal" || status === "1";
+
+  return {
+    symbol: item.symbol,
+    category: item.category,
+    baseCoin: item.baseCoin,
+    quoteCoin: item.quoteCoin,
+    isRwa,
+    isReality,
+    status,
+    isActive
+  };
+}
+
 export class BitgetClient {
   private baseUrl: string;
 
   constructor(baseUrl: string = DEFAULT_BITGET_BASE_URL) {
     const cleanUrl = baseUrl.replace(/\/$/, "");
-    if (!TRUSTED_BITGET_ORIGINS.has(cleanUrl)) {
+    const isUrlTrusted = TRUSTED_BITGET_ORIGINS.has(cleanUrl) || (process.env.NODE_ENV === "test" && cleanUrl.startsWith("http://127.0.0.1:"));
+    if (!isUrlTrusted) {
       console.warn(`Untrusted Bitget base URL: ${cleanUrl}. Falling back to default.`);
       this.baseUrl = "https://api.bitget.com";
     } else {
@@ -56,10 +80,23 @@ export class BitgetClient {
     const res = await httpGetJson<BitgetResponse<RawBitgetTickerItem[]>>(url);
 
     if (res.code !== "00000" || !Array.isArray(res.data) || res.data.length === 0) {
-      throw new Error(`Bitget ticker request for ${symbol} failed: ${res.msg || `code ${res.code}`}`);
+      throw new Error(`Bitget ticker request for ${symbol} failed: [${res.code}] ${res.msg}`);
     }
 
-    return parseBitgetTicker(res.data[0]);
+    const ticker = parseBitgetTicker(res.data[0]);
+    ticker.requestTime = res.requestTime;
+    return ticker;
+  }
+
+  async getSpotInstrument(symbol: string): Promise<NormalizedBitgetInstrument> {
+    const url = `${this.baseUrl}/api/v3/market/instruments?category=SPOT&symbol=${encodeURIComponent(symbol)}`;
+    const res = await httpGetJson<BitgetResponse<RawBitgetInstrumentItem[]>>(url);
+
+    if (res.code !== "00000" || !Array.isArray(res.data) || res.data.length === 0) {
+      throw new Error(`Bitget instrument request for ${symbol} failed: [${res.code}] ${res.msg}`);
+    }
+
+    return parseBitgetInstrument(res.data[0]);
   }
 
   async getRealityCalendar(): Promise<BitgetRealityCalendar | null> {

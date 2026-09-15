@@ -8,9 +8,13 @@ async function verifyConnectivity() {
   const yahoo = new YahooReferenceProvider();
 
   try {
-    console.log("1. Fetching rNVDAUSDT from Bitget...");
+    console.log("1. Fetching rNVDAUSDT instrument from Bitget...");
+    const instrument = await bitget.getSpotInstrument("rNVDAUSDT");
+    console.log("Instrument:", instrument, "\n");
+
+    console.log("2. Fetching rNVDAUSDT ticker from Bitget...");
     const rNVDATicker = await bitget.getSpotTicker("rNVDAUSDT");
-    console.log("rNVDAUSDT:", rNVDATicker, "\n");
+    console.log("rNVDAUSDT ticker:", rNVDATicker, "\n");
   } catch (error) {
     console.error("Failed to fetch rNVDAUSDT:", error);
   }
