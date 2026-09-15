@@ -58,7 +58,10 @@ export interface ProvenanceRecord {
   retrievedAt?: string;
   inputs?: string[];
   generatedBy?: string;
+  evidenceState?: EvidenceState;
 }
+
+export type EvidenceState = "LIVE_RETRIEVED" | "CURATED_DEMO_FIXTURE" | "UNAVAILABLE";
 
 export interface EvidenceItem {
   id: string;
@@ -68,6 +71,7 @@ export interface EvidenceItem {
   publishedAt?: string;
   retrievedAt?: string;
   summary: string;
+  state: EvidenceState;
   provenanceType: "OBSERVED_FACT";
 }
 

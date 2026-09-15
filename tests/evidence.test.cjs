@@ -22,6 +22,9 @@ test("CompositeEvidenceProvider falls back gracefully on network error", async (
   const items = await provider.retrieveEvidence({ asset: "rNVDA", maxRecords: 2 });
 
   assert.equal(items.length, 2);
-  assert.equal(items[0].id, CURATED_NVDA_EVIDENCE[0].id);
-  assert.equal(items[0].provenanceType, "OBSERVED_FACT");
+  assert.equal(items[0].id, "live-unavailable");
+  assert.equal(items[0].state, "UNAVAILABLE");
+  assert.equal(items[1].id, CURATED_NVDA_EVIDENCE[0].id);
+  assert.equal(items[1].state, "CURATED_DEMO_FIXTURE");
+  assert.equal(items[1].provenanceType, "OBSERVED_FACT");
 });

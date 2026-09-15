@@ -119,11 +119,24 @@ export function ProvenanceDrawer({
                 }`}
               >
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border ${config.bg} ${config.text} ${config.border}`}
-                  >
-                    {config.label}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border ${config.bg} ${config.text} ${config.border}`}
+                    >
+                      {config.label}
+                    </span>
+                    {rec.evidenceState && (
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase border ${
+                        rec.evidenceState === "LIVE_RETRIEVED"
+                          ? "bg-blue-100 text-blue-800 border-blue-200"
+                          : rec.evidenceState === "UNAVAILABLE"
+                          ? "bg-rose-100 text-rose-800 border-rose-200"
+                          : "bg-purple-100 text-purple-800 border-purple-200"
+                      }`}>
+                        {rec.evidenceState.replace(/_/g, " ")}
+                      </span>
+                    )}
+                  </div>
                   <span className="font-mono text-xs text-zinc-400">
                     {rec.id}
                   </span>

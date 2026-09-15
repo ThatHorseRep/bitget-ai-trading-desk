@@ -24,6 +24,7 @@ export const CURATED_NVDA_EVIDENCE: EvidenceItem[] = [
     publishedAt: "2026-09-10T14:30:00.000Z",
     retrievedAt: "2026-09-12T20:00:00.000Z",
     summary: "Major cloud providers (Microsoft, Alphabet, Meta) reiterated planned capital expenditure increases for AI data center infrastructure through 2026.",
+    state: "CURATED_DEMO_FIXTURE",
     provenanceType: "OBSERVED_FACT"
   },
   {
@@ -34,6 +35,7 @@ export const CURATED_NVDA_EVIDENCE: EvidenceItem[] = [
     publishedAt: "2026-09-09T08:00:00.000Z",
     retrievedAt: "2026-09-12T20:00:00.000Z",
     summary: "Advanced packaging availability at TSMC continues to cap maximum quarterly hardware shipment volumes despite strong booking interest.",
+    state: "CURATED_DEMO_FIXTURE",
     provenanceType: "OBSERVED_FACT"
   },
   {
@@ -44,6 +46,7 @@ export const CURATED_NVDA_EVIDENCE: EvidenceItem[] = [
     publishedAt: "2026-09-11T18:00:00.000Z",
     retrievedAt: "2026-09-12T20:00:00.000Z",
     summary: "High enterprise multiples leave semiconductor leaders vulnerable to asymmetric downside on any guidance deceleration or client capex hesitation.",
+    state: "CURATED_DEMO_FIXTURE",
     provenanceType: "OBSERVED_FACT"
   }
 ];
@@ -74,6 +77,8 @@ export class CompositeEvidenceProvider implements EvidenceProvider {
     const maxRecords = Math.min(Math.max(requestedRecords, 1), 10);
     const nowIso = new Date().toISOString();
 
+    let liveRetrievalFailed = false;
+
     try {
       const url = `${this.baseUrl}/v1/finance/search?q=${encodeURIComponent(symbol)}&newsCount=${maxRecords}`;
       const res = await httpGetJson<YahooSearchResponse>(url, {
@@ -96,20 +101,51 @@ export class CompositeEvidenceProvider implements EvidenceProvider {
             url: item.link,
             publishedAt,
             retrievedAt: nowIso,
-            summary: item.title,
+            summary: `[Title Only] ${item.title}`,
+            state: "LIVE_RETRIEVED",
             provenanceType: "OBSERVED_FACT"
           };
         });
+      } else {
+        liveRetrievalFailed = true;
       }
     } catch {
-      // Fall through to curated evidence fallback
+      liveRetrievalFailed = true;
     }
 
-    // Curated fallback with fresh retrieval timestamps
-    return CURATED_NVDA_EVIDENCE.slice(0, maxRecords).map((item) => ({
-      ...item,
-      retrievedAt: nowIso
-    }));
+    const fallbackEvidence = symbol.toUpperCase().includes("NVDA") 
+      ? CURATED_NVDA_EVIDENCE.slice(0, maxRecords)
+      : [];
+    
+    if (liveRetrievalFailed) {
+      if (fallbackEvidence.length === 0) {
+        return [
+          {
+            id: "live-unavailable",
+            title: "Live Evidence Retrieval Failed",
+            source: "System",
+            summary: "Could not fetch live evidence. No curated demo fixture available for this asset.",
+            state: "UNAVAILABLE",
+            retrievedAt: nowIso,
+            provenanceType: "OBSERVED_FACT"
+          }
+        ];
+      }
+      return [
+        {
+          id: "live-unavailable",
+          title: "Live Evidence Retrieval Failed",
+          source: "System",
+          summary: "Could not fetch live evidence. Falling back to curated demo fixture.",
+          state: "UNAVAILABLE",
+          retrievedAt: nowIso,
+          provenanceType: "OBSERVED_FACT"
+        },
+        ...fallbackEvidence.slice(0, Math.max(0, maxRecords - 1))
+      ];
+    }
+
+    return fallbackEvidence;
   }
 }
 
