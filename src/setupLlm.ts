@@ -1,4 +1,4 @@
-// src/setupSeekAi.ts
+// src/setupLlm.ts
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
@@ -16,15 +16,15 @@ function prompt(question: string): Promise<string> {
 }
 
 async function main() {
-  console.log('--- SeekAI credentials setup ---');
-  const endpoint = await prompt('Enter SeekAI endpoint (e.g., https://seekai.cc/v1/chat/completions): ');
-  const apiKey = await prompt('Enter your SeekAI API key (sk-...): ');
-  const model = await prompt('Optional model name (press Enter to use default "deepseek-v4-flash"): ');
+  console.log('--- OpenAI-compatible LLM credentials setup ---');
+  const endpoint = await prompt('Enter LLM endpoint (e.g., https://api.openai.com/v1/chat/completions): ');
+  const apiKey = await prompt('Enter your LLM API key: ');
+  const model = await prompt('Optional model name: ');
 
   const lines = [];
-  if (endpoint) lines.push(`SEEKAI_ENDPOINT=${endpoint}`);
-  if (apiKey) lines.push(`SEEKAI_API_KEY=${apiKey}`);
-  if (model) lines.push(`SEEKAI_MODEL=${model}`);
+  if (endpoint) lines.push(`LLM_API_BASE_URL=${endpoint}`);
+  if (apiKey) lines.push(`LLM_API_KEY=${apiKey}`);
+  if (model) lines.push(`LLM_MODEL=${model}`);
 
   const content = lines.join('\n') + '\n';
   fs.writeFileSync(envFile, content, { encoding: 'utf8' });
@@ -35,5 +35,3 @@ main().catch(err => {
   console.error('Error during setup:', err);
   process.exit(1);
 });
-
-

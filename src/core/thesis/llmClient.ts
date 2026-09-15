@@ -37,8 +37,8 @@ export function getSeekAiClient() {
     };
   }
 
-  const endpoint = process.env.SEEKAI_ENDPOINT;
-  const apiKey = process.env.SEEKAI_API_KEY;
+  const endpoint = process.env.LLM_API_BASE_URL;
+  const apiKey = process.env.LLM_API_KEY;
   if (!endpoint || !apiKey) {
     // Return a mock client similar to test mode when credentials are missing
     return {

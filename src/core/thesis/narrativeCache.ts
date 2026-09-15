@@ -1,5 +1,5 @@
 // Narrative cache providing deterministic fallback explanations based on position quality.
-// This file is used when the SeekAI request fails.
+// This file is used when the LLM request fails.
 
 export function getNarrative(positionQuality: string): string {
   switch (positionQuality) {

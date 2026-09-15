@@ -1,4 +1,4 @@
-import { getSeekAiClient, type SeekAiRequest } from "./seekAiClient";
+import { getSeekAiClient, type SeekAiRequest } from "./llmClient";
 import { z } from "zod";
 import type { EvidenceItem } from "../../domain/decision/types";
 import type { MarketState } from "../../domain/market/types";
@@ -56,7 +56,7 @@ ${JSON.stringify(evidence, null, 2)}
   }
 
 const payload: SeekAiRequest = {
-  model: process.env.SEEKAI_MODEL || "deepseek-v4-flash",
+  model: process.env.LLM_MODEL || "deepseek-v4-flash",
   messages: [
     { role: "system", content: systemPrompt },
     { role: "user", content: userPrompt }

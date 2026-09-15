@@ -1,4 +1,4 @@
-import { getSeekAiClient, type SeekAiRequest } from "./seekAiClient";
+import { getSeekAiClient, type SeekAiRequest } from "./llmClient";
 import { getNarrative } from "./narrativeCache";
 import { z } from "zod";
 import type { EvidenceItem } from "../../domain/decision/types";
@@ -8,7 +8,7 @@ import type { Thesis, ThesisPositionAssessment, ThesisQuality, Challenge } from 
 import { classifyPositionQuality } from "../decision/classifyPosition";
 import type { NormalizedTrade } from "../../domain/trade/types";
 
-const modelName = process.env.SEEKAI_MODEL || "deepseek-v4-flash";
+const modelName = process.env.LLM_MODEL || "deepseek-v4-flash";
 
 const AssessmentSchema = z.object({
   thesisQuality: z.enum(["STRONGER", "MIXED", "WEAKER", "INSUFFICIENT"]),

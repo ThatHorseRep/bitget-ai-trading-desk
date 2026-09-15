@@ -10,22 +10,25 @@
     "lint": "eslint .",
     "test": "npm run test:core",
     "test:core": "npm run build:core && node --env-file=.env.local --test tests/*.test.cjs",
-    "build:core": "tsc -p tsconfig.core.json"
+    "build:core": "tsc -p tsconfig.core.json",
+    "verify-clean": "npm ci && npm run typecheck && npm run lint && npm run test && npm run build"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "dependencies": {
-    "@playwright/test": "^1.63.0",
-    "dotenv": "^17.4.2",
     "next": "16.1.0",
-    "openai": "^7.15.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "zod": "^4.6.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "4.1.17",
     "@types/node": "^22.20.2",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
+    "dotenv": "^17.4.2",
     "eslint": "9.17.0",
     "eslint-config-next": "16.1.0",
     "postcss": "8.4.49",
