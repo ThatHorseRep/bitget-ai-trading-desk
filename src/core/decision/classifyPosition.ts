@@ -1,7 +1,7 @@
 import type { StressScenario } from "../../domain/scenarios/types";
 import type { MarketState, LiquidityClass, SessionStatus } from "../../domain/market/types";
 import type { NormalizedTrade } from "../../domain/trade/types";
-import type { PositionQualityAssessment } from "../../domain/thesis/types";
+import type { PositionQualityAssessment, ExecutionRiskMetric } from "../../domain/thesis/types";
 
 export const MVP_POLICY_ASSUMPTIONS = {
   // Loss thresholds expressed as negative percentages (worst-case loss)
@@ -91,18 +91,37 @@ export function classifyPositionQuality(
     reasons.push(`Position downgraded due to off-hours/weekend trading session status (${marketState.sessionStatus}).`);
   }
 
-  // Position size relative to visible liquidity
+  // Position size relative to visible liquidity (Execution Risk Metric)
   const relevantSizeTokens = trade.direction === "LONG" ? marketState.askSize : marketState.bidSize;
-  if (relevantSizeTokens !== null && marketState.instrumentPrice > 0) {
-    const visibleLiquidityUsd = relevantSizeTokens * marketState.instrumentPrice;
-    if (visibleLiquidityUsd > 0) {
-      const ratio = trade.positionSizeUsd / visibleLiquidityUsd;
-      if (ratio > MVP_POLICY_ASSUMPTIONS.positionToVisibleLiquidityRatioThreshold) {
-        quality = "WEAKER";
-        reasons.push(`Position size exceeds ${MVP_POLICY_ASSUMPTIONS.positionToVisibleLiquidityRatioThreshold * 100}% of visible top-of-book liquidity (Ratio: ${ratio.toFixed(2)}).`);
-        keyDrivers.push(`liquidityRatio=${ratio.toFixed(2)}`);
-      }
-    } else {
+  const sideLabel = trade.direction === "LONG" ? "ask-side" : "bid-side";
+  
+  let executionRisk: ExecutionRiskMetric | undefined;
+
+  if (relevantSizeTokens == null || marketState.instrumentPrice == null || marketState.instrumentPrice <= 0) {
+    executionRisk = {
+      metricName: "notional / visibleNotional",
+      positionNotionalUsd: trade.positionSizeUsd,
+      visibleNotionalUsd: "UNKNOWN",
+      ratio: "UNKNOWN",
+      explanation: `Top-of-book ${sideLabel} sizes are missing. Cannot compute total market liquidity from top-of-book alone. Note: Reality deep order-book access may require whitelist access per Bitget's current documentation.`
+    };
+  } else {
+    const visibleNotionalUsd = relevantSizeTokens * marketState.instrumentPrice;
+    const ratio = visibleNotionalUsd > 0 ? trade.positionSizeUsd / visibleNotionalUsd : Infinity;
+    
+    executionRisk = {
+      metricName: "notional / visibleNotional",
+      positionNotionalUsd: trade.positionSizeUsd,
+      visibleNotionalUsd,
+      ratio,
+      explanation: `Calculated using ${sideLabel} top-of-book visible liquidity for an immediate ${trade.direction === "LONG" ? "buy" : "sell"} approximation. This does not represent full order-book depth. Note: Reality deep order-book access may require whitelist access per Bitget's current documentation.`
+    };
+
+    if (ratio > MVP_POLICY_ASSUMPTIONS.positionToVisibleLiquidityRatioThreshold) {
+      quality = "WEAKER";
+      reasons.push(`Position size exceeds ${MVP_POLICY_ASSUMPTIONS.positionToVisibleLiquidityRatioThreshold * 100}% of visible top-of-book liquidity (Ratio: ${ratio.toFixed(2)}).`);
+      keyDrivers.push(`liquidityRatio=${ratio.toFixed(2)}`);
+    } else if (ratio === Infinity) {
       quality = "WEAKER";
       reasons.push(`Position downgraded to WEAKER because there is ZERO visible top-of-book liquidity.`);
       keyDrivers.push(`liquidityRatio=Infinity`);
@@ -119,5 +138,5 @@ export function classifyPositionQuality(
     keyDrivers.push(`basisImpact=${maxBasisImpact}`);
   }
 
-  return { quality: quality as any, reasons, keyDrivers };
+  return { quality: quality as any, reasons, keyDrivers, executionRisk };
 }
