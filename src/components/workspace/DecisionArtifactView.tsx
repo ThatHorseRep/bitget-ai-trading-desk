@@ -287,119 +287,133 @@ export function DecisionArtifactView({
       {/* 4 and 5: Side by Side Thesis Deconstruction and Adversarial Challenge */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 4. Thesis Deconstruction */}
-        <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xs space-y-4 relative">
-          <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900 text-white text-xs font-bold">
-              4
+        {thesis ? (
+          <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xs space-y-4 relative">
+            <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900 text-white text-xs font-bold">
+                4
+              </div>
+              <h3 className="text-base font-bold text-zinc-900 [text-wrap:balance] flex-1">
+                Thesis deconstruction
+              </h3>
+              {thesis.modelInfo && (
+                <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded" title="AI Model Identity">
+                  {thesis.modelInfo.provider}/{thesis.modelInfo.model}
+                </span>
+              )}
             </div>
-            <h3 className="text-base font-bold text-zinc-900 [text-wrap:balance] flex-1">
-              Thesis deconstruction
-            </h3>
-            {thesis.modelInfo && (
-              <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded" title="AI Model Identity">
-                {thesis.modelInfo.provider}/{thesis.modelInfo.model}
-              </span>
-            )}
-          </div>
 
-          <div>
-            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Normalized thesis</span>
-            <p className="mt-1 text-xs sm:text-sm font-medium text-zinc-900 bg-zinc-50 p-3.5 rounded-xl border border-zinc-200 [text-wrap:pretty] break-words">
-              &ldquo;{thesis.normalizedThesis}&rdquo;
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Extracted assumptions</span>
-            <div className="space-y-2">
-              {thesis.assumptions.map((ass, i) => (
-                <div key={i} className="flex items-start justify-between gap-2 text-xs bg-zinc-50 p-3 rounded-lg border border-zinc-200">
-                  <span className="text-zinc-800 font-medium [text-wrap:pretty]">{ass.text}</span>
-                  <span className={`shrink-0 text-xs font-bold px-2 py-0.5 rounded-md ${
-                    ass.origin === "USER_STATED" ? "bg-zinc-200 text-zinc-800" : "bg-purple-100 text-purple-800"
-                  }`}>
-                    {ass.origin}
-                  </span>
-                </div>
-              ))}
+            <div>
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Normalized thesis</span>
+              <p className="mt-1 text-xs sm:text-sm font-medium text-zinc-900 bg-zinc-50 p-3.5 rounded-xl border border-zinc-200 [text-wrap:pretty] break-words">
+                &ldquo;{thesis.normalizedThesis}&rdquo;
+              </p>
             </div>
-          </div>
 
-          {thesis.supportingEvidenceRefs.length > 0 && (
-            <div className="space-y-2 pt-1">
-              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Provenance links</span>
-              <div className="flex flex-wrap gap-2">
-                {thesis.supportingEvidenceRefs.map(ref => (
-                  <span key={ref} className="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-                    [PROV: {ref}]
-                  </span>
+            <div className="space-y-3">
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Extracted assumptions</span>
+              <div className="space-y-2">
+                {thesis.assumptions.map((ass, i) => (
+                  <div key={i} className="flex items-start justify-between gap-2 text-xs bg-zinc-50 p-3 rounded-lg border border-zinc-200">
+                    <span className="text-zinc-800 font-medium [text-wrap:pretty]">{ass.text}</span>
+                    <span className={`shrink-0 text-xs font-bold px-2 py-0.5 rounded-md ${
+                      ass.origin === "USER_STATED" ? "bg-zinc-200 text-zinc-800" : "bg-purple-100 text-purple-800"
+                    }`}>
+                      {ass.origin}
+                    </span>
+                  </div>
                 ))}
               </div>
             </div>
-          )}
 
-          <div className="space-y-2 pt-1">
-            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Key dependencies</span>
-            <ul className="list-disc list-inside text-xs text-zinc-700 space-y-1">
-              {thesis.dependencies.map((dep, i) => (
-                <li key={i} className="[text-wrap:pretty]">{dep.text}</li>
-              ))}
-            </ul>
-          </div>
-        </section>
+            {thesis.supportingEvidenceRefs.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Provenance links</span>
+                <div className="flex flex-wrap gap-2">
+                  {thesis.supportingEvidenceRefs.map(ref => (
+                    <span key={ref} className="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                      [PROV: {ref}]
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2 pt-1">
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Key dependencies</span>
+              <ul className="list-disc list-inside text-xs text-zinc-700 space-y-1">
+                {thesis.dependencies.map((dep, i) => (
+                  <li key={i} className="[text-wrap:pretty]">{dep.text}</li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        ) : (
+          <section className="rounded-2xl border border-zinc-200 bg-zinc-50 p-6 shadow-xs flex flex-col items-center justify-center text-center space-y-2">
+            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Thesis Deconstruction</span>
+            <span className="text-sm font-medium text-zinc-500">Unavailable due to system degradation.</span>
+          </section>
+        )}
 
         {/* 5. Adversarial Challenge */}
-        <section className="rounded-2xl border border-rose-200 bg-white p-6 shadow-xs space-y-4 relative">
-          <div className="flex items-center gap-2 border-b border-rose-100 pb-3">
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-700 text-white text-xs font-bold">
-              5
+        {challenge ? (
+          <section className="rounded-2xl border border-rose-200 bg-white p-6 shadow-xs space-y-4 relative">
+            <div className="flex items-center gap-2 border-b border-rose-100 pb-3">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-700 text-white text-xs font-bold">
+                5
+              </div>
+              <h3 className="text-base font-bold text-rose-950 [text-wrap:balance] flex-1">
+                Adversarial counter challenge
+              </h3>
+              {challenge.modelInfo && (
+                <span className="text-[10px] font-mono text-rose-600 bg-rose-50 px-2 py-0.5 rounded" title="AI Model Identity">
+                  {challenge.modelInfo.provider}/{challenge.modelInfo.model}
+                </span>
+              )}
             </div>
-            <h3 className="text-base font-bold text-rose-950 [text-wrap:balance] flex-1">
-              Adversarial counter challenge
-            </h3>
-            {challenge.modelInfo && (
-              <span className="text-[10px] font-mono text-rose-600 bg-rose-50 px-2 py-0.5 rounded" title="AI Model Identity">
-                {challenge.modelInfo.provider}/{challenge.modelInfo.model}
-              </span>
-            )}
-          </div>
 
-          <div>
-            <span className="text-xs font-semibold text-rose-800 uppercase tracking-wider">Strongest counter thesis</span>
-            <p className="mt-1 text-xs sm:text-sm font-medium text-rose-950 bg-rose-50 p-3.5 rounded-xl border border-rose-200 [text-wrap:pretty] break-words">
-              {challenge.counterThesis}
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            <span className="text-xs font-semibold text-rose-800 uppercase tracking-wider">Vulnerable assumptions attacked</span>
-            <div className="space-y-2">
-              {challenge.vulnerableAssumptions.map((item, i) => (
-                <div key={i} className="flex items-start gap-2 text-xs bg-rose-50/60 p-3 rounded-lg border border-rose-200 text-rose-900 font-medium">
-                  <span className="text-rose-500 font-bold shrink-0">✕</span>
-                  <span className="[text-wrap:pretty]">{item}</span>
-                </div>
-              ))}
+            <div>
+              <span className="text-xs font-semibold text-rose-800 uppercase tracking-wider">Strongest counter thesis</span>
+              <p className="mt-1 text-xs sm:text-sm font-medium text-rose-950 bg-rose-50 p-3.5 rounded-xl border border-rose-200 [text-wrap:pretty] break-words">
+                {challenge.counterThesis}
+              </p>
             </div>
-          </div>
 
-          {challenge.contradictoryEvidenceRefs.length > 0 && (
-            <div className="space-y-2 pt-1">
-              <span className="text-xs font-semibold text-rose-800 uppercase tracking-wider">Contradictory evidence refs</span>
-              <div className="flex flex-wrap gap-2">
-                {challenge.contradictoryEvidenceRefs.map(ref => (
-                  <span key={ref} className="text-[10px] font-mono text-rose-700 bg-rose-100 border border-rose-200 px-1.5 py-0.5 rounded">
-                    [PROV: {ref}]
-                  </span>
+            <div className="space-y-3">
+              <span className="text-xs font-semibold text-rose-800 uppercase tracking-wider">Vulnerable assumptions attacked</span>
+              <div className="space-y-2">
+                {challenge.vulnerableAssumptions.map((item, i) => (
+                  <div key={i} className="flex items-start gap-2 text-xs bg-rose-50/60 p-3 rounded-lg border border-rose-200 text-rose-900 font-medium">
+                    <span className="text-rose-500 font-bold shrink-0">✕</span>
+                    <span className="[text-wrap:pretty]">{item}</span>
+                  </div>
                 ))}
               </div>
             </div>
-          )}
 
-          <p className="text-xs text-rose-900 pt-1 leading-relaxed [text-wrap:pretty]">
-            {challenge.explanation}
-          </p>
-        </section>
+            {challenge.contradictoryEvidenceRefs.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <span className="text-xs font-semibold text-rose-800 uppercase tracking-wider">Contradictory evidence refs</span>
+                <div className="flex flex-wrap gap-2">
+                  {challenge.contradictoryEvidenceRefs.map(ref => (
+                    <span key={ref} className="text-[10px] font-mono text-rose-700 bg-rose-100 border border-rose-200 px-1.5 py-0.5 rounded">
+                      [PROV: {ref}]
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <p className="text-xs text-rose-900 pt-1 leading-relaxed [text-wrap:pretty]">
+              {challenge.explanation}
+            </p>
+          </section>
+        ) : (
+          <section className="rounded-2xl border border-rose-200 bg-rose-50 p-6 shadow-xs flex flex-col items-center justify-center text-center space-y-2">
+            <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">Adversarial Challenge</span>
+            <span className="text-sm font-medium text-rose-500">Unavailable due to system degradation.</span>
+          </section>
+        )}
       </div>
 
       {/* 6. Stress Scenarios */}
@@ -487,117 +501,124 @@ export function DecisionArtifactView({
       </section>
 
       {/* 7. Thesis vs Position Split Card (THE CORE PRODUCT THESIS!) */}
-      <section className="rounded-2xl border border-indigo-300 bg-white p-6 sm:p-8 shadow-xs space-y-5 relative">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-700 text-white text-xs font-bold">
-              7
-            </div>
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">
-                Core product thesis
-              </span>
-              <h3 className="text-lg font-bold text-zinc-900 [text-wrap:balance]">
-                Thesis quality versus position quality deconstruction
-              </h3>
-            </div>
-          </div>
-          {thesisPosition.modelInfo && (
-            <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded" title="AI Model Identity">
-              {thesisPosition.modelInfo.provider}/{thesisPosition.modelInfo.model}
-            </span>
-          )}
-        </div>
-
-        {/* Dual Qualitative Scores */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative">
-          {/* Subtle connecting line in the middle for desktop */}
-          <div className="hidden sm:block absolute left-1/2 top-0 bottom-0 w-px bg-indigo-100 -translate-x-1/2" />
-
-          {/* Thesis Quality Panel */}
-          <div className={`rounded-xl border-2 p-5 space-y-3 shadow-xs relative bg-white ${
-            thesisPosition.thesisQuality === "STRONGER"
-              ? "border-emerald-200"
-              : "border-amber-200"
-          }`}>
-            <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-zinc-100 text-zinc-700">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
-                </div>
-                <span className="text-sm font-bold text-zinc-800 uppercase tracking-wider">
-                  Thesis Quality
+      {thesisPosition ? (
+        <section className="rounded-2xl border border-indigo-300 bg-white p-6 sm:p-8 shadow-xs space-y-5 relative">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-700 text-white text-xs font-bold">
+                7
+              </div>
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">
+                  Core product thesis
                 </span>
+                <h3 className="text-lg font-bold text-zinc-900 [text-wrap:balance]">
+                  Thesis quality versus position quality deconstruction
+                </h3>
               </div>
-              <span className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
-                thesisPosition.thesisQuality === "STRONGER"
-                  ? "bg-emerald-100 text-emerald-800"
-                  : "bg-amber-100 text-amber-800"
-              }`}>
-                {thesisPosition.thesisQuality}
-              </span>
             </div>
-          </div>
-
-          {/* Position Quality Panel */}
-          <div className={`rounded-xl border-2 p-5 space-y-3 shadow-xs relative bg-white ${
-            thesisPosition.positionQuality.quality === "WEAKER"
-              ? "border-rose-200"
-              : "border-emerald-200"
-          }`}>
-            <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-zinc-100 text-zinc-700">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-                <span className="text-sm font-bold text-zinc-800 uppercase tracking-wider">
-                  Position Quality
-                </span>
-              </div>
-              <span className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
-                thesisPosition.positionQuality.quality === "WEAKER"
-                  ? "bg-rose-100 text-rose-800"
-                  : "bg-emerald-100 text-emerald-800"
-              }`}>
-                {thesisPosition.positionQuality.quality}
+            {thesisPosition.modelInfo && (
+              <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded" title="AI Model Identity">
+                {thesisPosition.modelInfo.provider}/{thesisPosition.modelInfo.model}
               </span>
-            </div>
-            {thesisPosition.positionQuality.reasons && thesisPosition.positionQuality.reasons.length > 0 && (
-              <div className="mt-2 text-xs text-zinc-600 bg-zinc-50 p-2 rounded border border-zinc-200">
-                <div className="font-semibold text-zinc-800 mb-1 uppercase tracking-wide">Deterministic Drivers</div>
-                <ul className="list-disc pl-4 space-y-1">
-                  {thesisPosition.positionQuality.reasons.map((reason, idx) => (
-                    <li key={idx}>{reason}</li>
-                  ))}
-                </ul>
-              </div>
             )}
           </div>
-        </div>
 
-        {/* Prominent Key Mismatch Banner */}
-        {thesisPosition.keyMismatch && (
-          <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 space-y-1.5">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900 uppercase tracking-wider">
-              <svg className="w-4 h-4 text-indigo-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Key mismatch identified
+          {/* Dual Qualitative Scores */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative">
+            {/* Subtle connecting line in the middle for desktop */}
+            <div className="hidden sm:block absolute left-1/2 top-0 bottom-0 w-px bg-indigo-100 -translate-x-1/2" />
+
+            {/* Thesis Quality Panel */}
+            <div className={`rounded-xl border-2 p-5 space-y-3 shadow-xs relative bg-white ${
+              thesisPosition.thesisQuality === "STRONGER"
+                ? "border-emerald-200"
+                : "border-amber-200"
+            }`}>
+              <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-zinc-100 text-zinc-700">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-bold text-zinc-800 uppercase tracking-wider">
+                    Thesis Quality
+                  </span>
+                </div>
+                <span className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
+                  thesisPosition.thesisQuality === "STRONGER"
+                    ? "bg-emerald-100 text-emerald-800"
+                    : "bg-amber-100 text-amber-800"
+                }`}>
+                  {thesisPosition.thesisQuality}
+                </span>
+              </div>
             </div>
-            <p className="text-xs sm:text-sm font-semibold text-indigo-950 leading-relaxed [text-wrap:pretty]">
-              {thesisPosition.keyMismatch}
-            </p>
-          </div>
-        )}
 
-        <p className="text-xs text-zinc-600 leading-relaxed [text-wrap:pretty]">
-          {thesisPosition.explanation}
-        </p>
-      </section>
+            {/* Position Quality Panel */}
+            <div className={`rounded-xl border-2 p-5 space-y-3 shadow-xs relative bg-white ${
+              thesisPosition.positionQuality.quality === "WEAKER"
+                ? "border-rose-200"
+                : "border-emerald-200"
+            }`}>
+              <div className="flex items-center justify-between border-b border-zinc-100 pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-zinc-100 text-zinc-700">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-bold text-zinc-800 uppercase tracking-wider">
+                    Position Quality
+                  </span>
+                </div>
+                <span className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
+                  thesisPosition.positionQuality.quality === "WEAKER"
+                    ? "bg-rose-100 text-rose-800"
+                    : "bg-emerald-100 text-emerald-800"
+                }`}>
+                  {thesisPosition.positionQuality.quality}
+                </span>
+              </div>
+              {thesisPosition.positionQuality.reasons && thesisPosition.positionQuality.reasons.length > 0 && (
+                <div className="mt-2 text-xs text-zinc-600 bg-zinc-50 p-2 rounded border border-zinc-200">
+                  <div className="font-semibold text-zinc-800 mb-1 uppercase tracking-wide">Deterministic Drivers</div>
+                  <ul className="list-disc pl-4 space-y-1">
+                    {thesisPosition.positionQuality.reasons.map((reason, idx) => (
+                      <li key={idx}>{reason}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Prominent Key Mismatch Banner */}
+          {thesisPosition.keyMismatch && (
+            <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900 uppercase tracking-wider">
+                <svg className="w-4 h-4 text-indigo-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Key mismatch identified
+              </div>
+              <p className="text-xs sm:text-sm font-semibold text-indigo-950 leading-relaxed [text-wrap:pretty]">
+                {thesisPosition.keyMismatch}
+              </p>
+            </div>
+          )}
+
+          <p className="text-xs text-zinc-600 leading-relaxed [text-wrap:pretty]">
+            {thesisPosition.explanation}
+          </p>
+        </section>
+      ) : (
+        <section className="rounded-2xl border border-indigo-200 bg-indigo-50 p-6 shadow-xs flex flex-col items-center justify-center text-center space-y-2">
+          <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Qualitative Synthesis</span>
+          <span className="text-sm font-medium text-indigo-500">Unavailable due to system degradation. Proceeding on deterministic bounds only.</span>
+        </section>
+      )}
 
       {/* 8. Change Conditions */}
       <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xs space-y-4">

@@ -47,7 +47,7 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     };
   }
 
-  if (inputs.thesisQuality === "WEAKER" && inputs.positionAssessment.positionQuality.quality === "WEAKER") {
+  if (inputs.thesisQuality === "WEAKER" && inputs.positionQuality.quality === "WEAKER") {
     return {
       verdict: "REJECT",
       reasons: [
@@ -59,7 +59,7 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
           code: "SEVERE_POSITION_RISK",
           message: "The proposed position structure is vulnerable to adverse liquidity and microstructure shocks."
         },
-        ...inputs.positionAssessment.positionQuality.reasons.map(r => ({
+        ...inputs.positionQuality.reasons.map((r: string) => ({
           code: "SEVERE_POSITION_RISK" as const,
           message: r
         }))
@@ -83,7 +83,7 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
 
   // Off-hours / weekend position stress check
   const isWeekendOrOffHours = inputs.marketState.sessionStatus === "WEEKEND" || inputs.marketState.sessionStatus === "OFF_HOURS";
-  if (isWeekendOrOffHours && inputs.positionAssessment.positionQuality.quality === "WEAKER") {
+  if (isWeekendOrOffHours && inputs.positionQuality.quality === "WEAKER") {
     const reasons = [
       {
         code: "OFF_HOURS_WAIT" as const,
@@ -91,14 +91,14 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
       }
     ];
 
-    if (inputs.positionAssessment.keyMismatch) {
+    if (inputs.positionAssessment?.keyMismatch) {
       reasons.push({
         code: "OFF_HOURS_WAIT" as const,
         message: inputs.positionAssessment.keyMismatch
       });
     }
 
-    reasons.push(...inputs.positionAssessment.positionQuality.reasons.map(r => ({
+    reasons.push(...inputs.positionQuality.reasons.map((r: string) => ({
       code: "OFF_HOURS_WAIT" as const,
       message: r
     })));
@@ -115,16 +115,16 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     };
   }
 
-  if (inputs.positionAssessment.positionQuality.quality === "WEAKER") {
+  if (inputs.positionQuality.quality === "WEAKER") {
     const reasons = [];
-    if (inputs.positionAssessment.keyMismatch) {
+    if (inputs.positionAssessment?.keyMismatch) {
       reasons.push({
         code: "REDUCE_POSITION_SIZE" as const,
         message: inputs.positionAssessment.keyMismatch
       });
     }
     
-    reasons.push(...inputs.positionAssessment.positionQuality.reasons.map(r => ({
+    reasons.push(...inputs.positionQuality.reasons.map((r: string) => ({
       code: "REDUCE_POSITION_SIZE" as const,
       message: r
     })));
@@ -152,6 +152,11 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     proceedReasons.push({
       code: "THESIS_CONTRADICTED" as const,
       message: "Warning: The underlying thesis is contradicted by evidence (quality: WEAKER), but the position structure risk remains acceptable."
+    });
+  } else if (inputs.thesisQuality === null) {
+    proceedReasons.push({
+      code: "MATERIAL_UNCERTAINTY" as const,
+      message: "Thesis assessment unavailable due to system degradation. Deterministic bounds still acceptable."
     });
   }
 

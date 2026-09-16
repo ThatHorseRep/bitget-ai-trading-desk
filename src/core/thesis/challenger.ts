@@ -96,8 +96,7 @@ ${evidenceText}
       break;
     } catch (err) {
       if (attempt === maxAttempts) {
-        console.error("Challenger failed completely, returning partial workflow neutral challenge.");
-        break; // Drop out and use partial workflow fallback
+        throw new Error(`Failed to generate challenge after ${maxAttempts} attempts. Error: ${(err as Error).message}`);
       }
       console.warn("Challenger JSON parse failed, retrying with stronger format instructions...");
       payload.messages.push({
@@ -107,16 +106,9 @@ ${evidenceText}
     }
   }
 
-  // Fallback / partial workflow
+
   if (!parsed) {
-    return {
-      counterThesis: "No strong counter-evidence could be generated due to system timeout or error.",
-      vulnerableAssumptions: [],
-      contradictoryEvidenceRefs: [],
-      noMeaningfulCounterThesis: true,
-      explanation: "Challenger system experienced an error. Defaulting to neutral.",
-      modelInfo: resp ? resp.provenance : { model: "fallback", provider: "fallback" }
-    };
+    throw new Error("Failed to parse challenger response");
   }
 
   // Filter evidence refs against actual given evidence

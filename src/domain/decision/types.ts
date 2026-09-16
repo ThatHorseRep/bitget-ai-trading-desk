@@ -23,9 +23,10 @@ export interface DecisionReason {
 
 export interface DecisionInputs {
   marketState: MarketState;
-  thesis: import("../thesis/types").Thesis;
-  thesisQuality: ThesisQuality;
-  positionAssessment: ThesisPositionAssessment;
+  thesis: import("../thesis/types").Thesis | null;
+  thesisQuality: ThesisQuality | null;
+  positionQuality: import("../thesis/types").PositionQualityAssessment;
+  positionAssessment: import("../thesis/types").ThesisPositionAssessment | null;
   scenarios: StressScenario[];
   dataQuality: DataQualityStatus;
   criticalBlockers?: string[];
@@ -52,10 +53,10 @@ export interface DecisionArtifact {
   trade: NormalizedTrade;
   decision: Decision;
   marketState: MarketState;
-  thesis: import("../thesis/types").Thesis;
-  challenge: import("../thesis/types").Challenge;
+  thesis: import("../thesis/types").Thesis | null;
+  challenge: import("../thesis/types").Challenge | null;
   scenarios: StressScenario[];
-  thesisPosition: ThesisPositionAssessment;
+  thesisPosition: import("../thesis/types").ThesisPositionAssessment | null;
   changeConditions: string[];
   evidence: EvidenceItem[];
   provenance: ProvenanceRecord[];

@@ -107,45 +107,11 @@ export class CompositeEvidenceProvider implements EvidenceProvider {
           };
         });
       } else {
-        liveRetrievalFailed = true;
+        throw new Error("News API returned empty or invalid results.");
       }
-    } catch {
-      liveRetrievalFailed = true;
+    } catch (err) {
+      throw new Error(`Live evidence retrieval failed: ${(err as Error).message}`);
     }
-
-    const fallbackEvidence = symbol.toUpperCase().includes("NVDA") 
-      ? CURATED_NVDA_EVIDENCE.slice(0, maxRecords)
-      : [];
-    
-    if (liveRetrievalFailed) {
-      if (fallbackEvidence.length === 0) {
-        return [
-          {
-            id: "live-unavailable",
-            title: "Live Evidence Retrieval Failed",
-            source: "System",
-            summary: "Could not fetch live evidence. No curated demo fixture available for this asset.",
-            state: "UNAVAILABLE",
-            retrievedAt: nowIso,
-            provenanceType: "OBSERVED_FACT"
-          }
-        ];
-      }
-      return [
-        {
-          id: "live-unavailable",
-          title: "Live Evidence Retrieval Failed",
-          source: "System",
-          summary: "Could not fetch live evidence. Falling back to curated demo fixture.",
-          state: "UNAVAILABLE",
-          retrievedAt: nowIso,
-          provenanceType: "OBSERVED_FACT"
-        },
-        ...fallbackEvidence.slice(0, Math.max(0, maxRecords - 1))
-      ];
-    }
-
-    return fallbackEvidence;
   }
 }
 

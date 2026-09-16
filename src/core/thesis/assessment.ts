@@ -93,8 +93,7 @@ ${evidenceText}
       break;
     } catch (error) {
       if (attempt === maxAttempts) {
-        console.error("Assessment failed completely, using fallback narrative.", error);
-        break;
+        throw new Error(`Failed to assess thesis after ${maxAttempts} attempts. Error: ${(error as Error).message}`);
       }
       console.warn("Assessment JSON parse failed, retrying with stronger format instructions...");
       basePayload.messages.push({
@@ -104,23 +103,15 @@ ${evidenceText}
     }
   }
 
-  if (parsed) {
-    result = parsed;
-  } else {
-    // Fallback to static narrative cache
-    const fallbackExplanation = getNarrative(deterministicResult.quality);
-    result = {
-      thesisQuality: "INSUFFICIENT" as ThesisQuality,
-      keyMismatch: null,
-      explanation: fallbackExplanation
-    };
+  if (!parsed) {
+    throw new Error("Failed to parse assessment response");
   }
 
   return {
-    thesisQuality: result.thesisQuality as ThesisQuality,
+    thesisQuality: parsed.thesisQuality as ThesisQuality,
     positionQuality: deterministicResult,
-    keyMismatch: result.keyMismatch,
-    explanation: result.explanation,
-    modelInfo: resp ? resp.provenance : { model: "fallback", provider: "fallback" }
+    keyMismatch: parsed.keyMismatch,
+    explanation: parsed.explanation,
+    modelInfo: resp!.provenance
   };
 }

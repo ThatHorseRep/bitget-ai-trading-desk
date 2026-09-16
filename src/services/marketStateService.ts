@@ -97,10 +97,12 @@ export class MarketStateService {
 
     // 3. Fetch Bitget Reality calendar for special closures
     const calendar = await this.bitgetClient.getRealityCalendar();
-    const closures = calendar?.specificConfig ?? [];
-
+    
     // 4. Determine deterministic session status
-    const sessionStatus = determineUsMarketSession(now, closures);
+    let sessionStatus = determineUsMarketSession(now, calendar?.specificConfig ?? []);
+    if (calendar === null) {
+      sessionStatus = "UNKNOWN"; // Do not silently pretend no closures if fetch failed
+    }
 
     // 5. Fetch Reference stock price (Yahoo / fallback)
     const activeReferenceProvider = options.referenceProvider ?? this.referenceProvider;

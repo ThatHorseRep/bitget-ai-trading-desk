@@ -12,7 +12,7 @@ export const MVP_POLICY_ASSUMPTIONS = {
   liquidityDowngrade: {
     THIN: 1,   // downgrade one level for thin liquidity
     NORMAL: 0,
-    UNKNOWN: 0
+    UNKNOWN: 1 // treat missing liquidity data as THIN to prevent bypassing risk bounds
   },
   // Absolute basis impact (percentage points) that forces WEAKER classification
   basisDislocationThreshold: 1.0,
@@ -105,6 +105,9 @@ export function classifyPositionQuality(
       ratio: "UNKNOWN",
       explanation: `Top-of-book ${sideLabel} sizes are missing. Cannot compute total market liquidity from top-of-book alone. Note: Reality deep order-book access may require whitelist access per Bitget's current documentation.`
     };
+    quality = "WEAKER";
+    reasons.push(`Position downgraded to WEAKER because visible top-of-book liquidity is unknown, preventing position size validation.`);
+    keyDrivers.push(`liquidityRatio=UNKNOWN`);
   } else {
     const visibleNotionalUsd = relevantSizeTokens * marketState.instrumentPrice;
     const ratio = visibleNotionalUsd > 0 ? trade.positionSizeUsd / visibleNotionalUsd : Infinity;
