@@ -27,10 +27,19 @@ export interface Challenge {
   modelInfo?: { model: string; provider: string };
 }
 
+export interface ExecutionRiskMetric {
+  metricName: string;
+  positionNotionalUsd: number;
+  visibleNotionalUsd: number | "UNKNOWN";
+  ratio: number | "UNKNOWN";
+  explanation: string;
+}
+
 export interface PositionQualityAssessment {
   quality: ThesisQuality;
   reasons: string[];
   keyDrivers: string[];
+  executionRisk?: ExecutionRiskMetric;
 }
 
 export interface ThesisPositionAssessment {
