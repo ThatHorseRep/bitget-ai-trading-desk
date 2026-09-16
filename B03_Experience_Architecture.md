@@ -116,7 +116,7 @@ The internal analysis stages are represented within the analysis experience and 
 
 **What the user does:** Primarily observes. The user may inspect or correct a material issue if the experience surfaces one.
 
-**What the system does:** Reconstructs market state, extracts the thesis, finds relevant contradictions, stress-tests the position, checks available portfolio context, and synthesizes the decision.
+**What the system does:** Reconstructs market state, extracts the thesis, finds relevant contradictions, stress-tests the position, and synthesizes the decision.
 
 **What can go wrong:** Required data is missing, stale, conflicting, or impossible to calculate reliably.
 
@@ -207,7 +207,6 @@ Examples of acceptable clarification:
 
 Examples of unacceptable clarification:
 
-> requesting a complete portfolio when relevant exposure is sufficient;
 
 > requesting an exact stop-loss when the MVP does not use one;
 
@@ -453,7 +452,6 @@ The four core scenarios are presented consistently.
 
 **Position impact:** Deterministic estimated gain/loss.
 
-**Portfolio impact:** Estimated portfolio effect where relevant portfolio context exists.
 
 **Interpretation:** Explains direct price sensitivity and whether the proposed position is disproportionately exposed to the scenario.
 
@@ -469,7 +467,6 @@ The four core scenarios are presented consistently.
 
 **Position impact:** Deterministic consequence under the stated contagion assumption; no invented beta.
 
-**Portfolio impact:** Included where relevant portfolio exposure exists.
 
 **Interpretation:** Explains whether the trade has meaningful crypto-market dependence beyond its nominal underlying thesis.
 
@@ -485,7 +482,6 @@ The four core scenarios are presented consistently.
 
 **Position impact:** Deterministic calculation where spread, basis, depth, or equivalent liquidity inputs support it.
 
-**Portfolio impact:** Included where the portfolio calculation can incorporate the effect reliably.
 
 **Interpretation:** Shows how the trade can suffer even when the underlying equity thesis remains broadly correct.
 
@@ -497,11 +493,10 @@ The four core scenarios are presented consistently.
 
 **Assumption:** Multiple adverse conditions occur together, such as underlying weakness, broader crypto deterioration, and worse token liquidity.
 
-**Consequence:** Combined deterministic position/portfolio impact.
+**Consequence:** Combined deterministic position impact.
 
 **Position impact:** Result of applying the explicit component shocks together.
 
-**Portfolio impact:** Included where portfolio inputs are available.
 
 **Interpretation:** Identifies the dominant contributing risk and shows whether the position becomes materially weaker when vulnerabilities align.
 
@@ -554,7 +549,7 @@ or
 
 > **Position: Reasonable under current conditions**
 
-The explanation should identify the main drivers: size, liquidity, basis, portfolio exposure, or scenario sensitivity.
+The explanation should identify the main drivers: size, liquidity, basis, or scenario sensitivity.
 
 ### Relationship explanation
 
@@ -751,9 +746,9 @@ Errors should be handled as **decision-state changes**, not merely technical err
 
 **Continue when:** Price-based scenarios remain useful, with execution/liquidity conclusions clearly bounded.
 
-### Missing portfolio context
+### Missing portfolio context (Future)
 
-**Experience:** Continue the position-level analysis and explicitly state that portfolio impact is not assessed.
+**Experience:** Portfolio impact is deferred to a future phase.
 
 **Continue when:** Position-level analysis is sufficient to produce a qualified result.
 
@@ -803,7 +798,6 @@ The product is one experience that adapts across form factors. It is not two sep
 
 - denser side-by-side comparison of thesis, challenge, scenarios and evidence;
 - easier inspection of source and calculation detail;
-- simultaneous viewing of portfolio context and position impact;
 - larger information surfaces where they improve analysis comprehension.
 
 ### Decision Artifact adaptation
@@ -993,7 +987,6 @@ The experience should not create separate states for every intermediate calculat
 ### SUPPORTING
 
 - Optional thesis-failure scenario.
-- Lightweight portfolio-context entry when relevant exposure is not already available.
 - Expanded calculation detail.
 - Richer desktop side-by-side evidence inspection.
 - Limited interaction for correcting or refining analysis inputs after normalization.

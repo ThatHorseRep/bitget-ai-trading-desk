@@ -49,7 +49,7 @@ export function AnalysisProgressView({
                 </span>
               </div>
               <p className="text-xs text-zinc-500 mt-0.5 [text-wrap:pretty]">
-                The desk is currently reconstructing market state, finding relevant contradictions, stress-testing the position, checking available portfolio context, and synthesizing the decision.
+                The desk is currently reconstructing market state, finding relevant contradictions, stress-testing the position, and synthesizing the decision.
               </p>
             </div>
           </div>

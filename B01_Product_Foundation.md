@@ -2,11 +2,11 @@
 
 ## 1. Product Identity
 
-Bitget AI RedTeam Desk is a **pre-trade decision-support product for crypto-native Bitget traders**, initially focused on tokenized U.S. equities and the unusual risks created when those assets remain tradable while their underlying U.S. markets are closed. The product takes a specific proposed trade, reconstructs the relevant market state, extracts and examines the trader's thesis, deliberately challenges it, stress-tests the proposed position, considers relevant portfolio exposure, and produces a structured decision artifact that helps the trader decide whether to proceed, wait, reduce, or reject the trade. It is not a generic AI trading assistant, research chatbot, trading terminal, or portfolio manager.
+Bitget AI RedTeam Desk is a **pre-trade decision-support product for crypto-native Bitget traders**, initially focused on tokenized U.S. equities and the unusual risks created when those assets remain tradable while their underlying U.S. markets are closed. The product takes a specific proposed trade, reconstructs the relevant market state, extracts and examines the trader's thesis, deliberately challenges it, stress-tests the proposed position, and produces a structured decision artifact that helps the trader decide whether to proceed, wait, reduce, or reject the trade. It is not a generic AI trading assistant, research chatbot, trading terminal, or portfolio manager.
 
 ## 2. Product Thesis
 
-Crypto-native Bitget traders can make poor trade decisions even when their underlying market thesis is reasonable because **market state, token microstructure, evidence, and portfolio exposure are often evaluated separately rather than as one decision**. This is especially relevant for tokenized U.S. equities, where 24/7 token trading can continue while the underlying market is closed. Bitget AI RedTeam Desk addresses this by reconstructing the proposed trade as a decision, challenging its assumptions, stress-testing the actual position, and making the consequences and uncertainty explicit before the trader acts.
+Crypto-native Bitget traders can make poor trade decisions even when their underlying market thesis is reasonable because **market state, token microstructure, and evidence are often evaluated separately rather than as one decision**. This is especially relevant for tokenized U.S. equities, where 24/7 token trading can continue while the underlying market is closed. Bitget AI RedTeam Desk addresses this by reconstructing the proposed trade as a decision, challenging its assumptions, stress-testing the actual position, and making the consequences and uncertainty explicit before the trader acts.
 
 ## 3. Primary User
 
@@ -41,7 +41,6 @@ A trader can form a reasonable thesis and still make a poor trade because the de
 - the assumptions behind the thesis;
 - the conditions that could invalidate it;
 - the size and structure of the proposed position;
-- the trader's existing related exposure.
 
 Existing tools can provide many of these pieces individually. The problem is not simply a lack of information or an excess of information. The problem is that the trader still has to **manually turn those pieces into one coherent pre-trade decision**.
 
@@ -94,7 +93,7 @@ The product should reason about explicit possible conditions rather than pretend
 
 The product evaluates the **proposed trade**, not merely the underlying asset.
 
-**In practice:** position size, existing exposure, liquidity, basis, and scenario loss matter alongside the thesis about the asset itself.
+**In practice:** position size, liquidity, basis, and scenario loss matter alongside the thesis about the asset itself.
 
 ### 7.5 Deterministic numbers
 
@@ -139,8 +138,6 @@ The canonical workflow is:
 **CHALLENGE THESIS**  
 ↓  
 **STRESS POSITION**  
-↓  
-**CHECK PORTFOLIO IMPACT**  
 ↓  
 **DECIDE**  
 ↓  
@@ -208,9 +205,9 @@ Evidence is not a separate standalone stage. Relevant evidence is gathered and u
 
 **What the user does:** Assesses whether the proposed trade remains acceptable under those conditions.
 
-### Stage 6 — Check Portfolio Impact
+### Stage 6 — Check Portfolio Impact (FUTURE)
 
-**Purpose:** Determine whether the proposed trade changes the user's existing risk in a material way.
+**Purpose:** (Deferred to future) Determine whether the proposed trade changes the user's existing risk in a material way.
 
 **Input:** Position stress results plus relevant existing holdings/exposure.
 
@@ -224,7 +221,7 @@ Evidence is not a separate standalone stage. Relevant evidence is gathered and u
 
 **Purpose:** Turn the analysis into a clear decision-support conclusion.
 
-**Input:** Market state, thesis, challenge, stress results, and portfolio impact.
+**Input:** Market state, thesis, challenge, and stress results.
 
 **Output:** **Proceed / Wait / Reduce / Reject** plus the principal reason.
 
@@ -333,7 +330,6 @@ The canonical output is a **Decision Artifact**. It is a structured record of th
 **Required information:**
 - scenario assumption;
 - estimated position impact;
-- estimated portfolio impact where portfolio context exists;
 - principal risk exposed.
 
 **MVP scenarios:**
@@ -359,7 +355,7 @@ A fifth **Thesis Failure** scenario may be used where the trader's key catalyst 
 
 **Required information:**
 - **Thesis quality:** whether the underlying idea is reasonably supported;
-- **Position quality:** whether the specific size and structure of the trade are sensible given the state, exposure, liquidity, basis, and stress results.
+- **Position quality:** whether the specific size and structure of the trade are sensible given the state, liquidity, basis, and stress results.
 
 **Optional information:**
 - principal factor driving the difference between the two judgments.
@@ -416,7 +412,6 @@ The MVP is responsible for:
 - thesis extraction and assumption identification;
 - adversarial thesis challenge;
 - deterministic position stress testing;
-- basic portfolio context and relevant portfolio impact;
 - explicit Thesis vs Position assessment;
 - structured Decision Artifact;
 - uncertainty, invalidation, and change conditions;
@@ -445,6 +440,7 @@ These capabilities may be considered later, but they are not part of the MVP pro
 - constrained historical analogues where the matching methodology is defensible;
 - richer correlation and factor analysis;
 - additional market-state signals;
+- basic portfolio context and relevant portfolio impact;
 - paper-trading handoff;
 - decision history and review;
 - additional Bitget AI research capabilities;
@@ -456,7 +452,7 @@ These capabilities may be considered later, but they are not part of the MVP pro
 
 **Autonomous execution:** Not in scope. The user remains responsible for the actual trading action.
 
-**Portfolio management:** Limited to decision-relevant portfolio context and impact analysis. The MVP does not attempt to manage or optimize the portfolio.
+**Portfolio management:** Deferred to future versions. The MVP does not attempt to manage or optimize the portfolio.
 
 **Synthetic hedging:** Removed from MVP core. Future versions may explore hedge candidates as optional scenario analysis only after methodology and trust are sufficiently validated.
 
@@ -544,13 +540,13 @@ ChatGPT can reason. TradingView can visualize markets. Bitget already provides A
 
 The product's distinctive unit is the **pre-trade decision**:
 
-> **proposed trade → reconstructed state → explicit thesis → adversarial challenge → position stress → portfolio impact → structured decision artifact**
+> **proposed trade → reconstructed state → explicit thesis → adversarial challenge → position stress → structured decision artifact**
 
 The important difference is that the system does not merely answer a market question or summarize information. It reconstructs the user's intended action and asks whether **that specific trade**, at **that specific size**, under **that current market state**, survives its own assumptions and relevant stress conditions.
 
 The strongest defensible asset is therefore the **decision model and workflow**. AI, market data, Bitget integration, retrieval, and stress calculations are enabling components rather than the differentiation themselves.
 
-This differentiation is strongest in the tokenized-equity wedge because 24/7 token trading and closed underlying markets make market state, basis, liquidity, cross-asset conditions, and portfolio exposure unusually important to the decision.
+This differentiation is strongest in the tokenized-equity wedge because 24/7 token trading and closed underlying markets make market state, basis, liquidity, and cross-asset conditions unusually important to the decision.
 
 ## 13. Success Criteria
 
@@ -562,7 +558,6 @@ The MVP is successful when all of the following are true for a supported trade s
 4. The system presents a credible counter-thesis rather than only reinforcing the user's view.
 5. The system stress-tests the proposed position using explicit, deterministic scenario assumptions.
 6. The system distinguishes **Thesis quality** from **Position quality**.
-7. The system considers relevant portfolio impact when portfolio context is available.
 8. The system produces a structured Decision Artifact rather than only a conversational response.
 9. The user can understand where important conclusions came from.
 10. Facts, calculations, assumptions, and AI interpretations are clearly distinguishable.

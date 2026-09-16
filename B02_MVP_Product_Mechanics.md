@@ -25,7 +25,6 @@ The user may also provide:
 
 - **Entry price** — if different from the current market price or if the user has a specific planned entry.
 - **Time horizon** — for example, intraday, several days, or several weeks.
-- **Relevant existing exposure** — assets or positions that materially overlap with the proposed trade.
 - **User-stated assumptions** — conditions the trader already believes must hold for the thesis to work.
 
 Optional information should improve the analysis, not determine whether the user can begin.
@@ -70,7 +69,6 @@ The user's natural-language proposal is converted into a canonical **Normalized 
 | Proposed entry | No | User-specified entry; otherwise current observed market price may be used as the working reference and explicitly labeled. |
 | Time horizon | No | User's intended holding period when supplied. |
 | Thesis | Yes | The user's stated reason for making the trade. |
-| Relevant existing exposure | No | Existing holdings/exposure supplied or retrieved when available and permitted. |
 | User-stated assumptions | No | Conditions the user explicitly says must be true. |
 
 ### Normalization rules
@@ -297,7 +295,7 @@ The MVP stress test applies explicit assumptions to the proposed position and ca
 
 Every scenario contains:
 
-**Assumption → Inputs → Deterministic calculation → Position impact → Portfolio impact where available → Interpretation**
+**Assumption → Inputs → Deterministic calculation → Position impact → → Interpretation**
 
 ### Scenario 1 — Market Risk
 
@@ -307,7 +305,7 @@ Every scenario contains:
 
 **Calculation:** Recalculate position value/P&L under the assumed price move.
 
-**Output:** Estimated position gain/loss and, where portfolio context exists, estimated portfolio impact.
+**Output:** Estimated position gain/loss .
 
 **Interpretation:** Shows how vulnerable the proposed position is to direct market movement.
 
@@ -347,7 +345,7 @@ Every scenario contains:
 
 **Required inputs:** Inputs required by the applicable component scenarios.
 
-**Calculation:** Apply the explicitly defined shocks together and calculate the resulting deterministic position/portfolio consequence.
+**Calculation:** Apply the explicitly defined shocks together and calculate the resulting deterministic position consequence.
 
 **Output:** Combined estimated impact and the dominant contributing risk.
 
@@ -460,9 +458,9 @@ These are decision patterns, not hard-coded verdict rules. No single thesis or p
 
 ---
 
-## 8. PORTFOLIO CONTEXT
+## 8. PORTFOLIO CONTEXT (FUTURE)
 
-Portfolio context is **important but not required to begin the MVP analysis**.
+Portfolio context is **deferred to a future release**.
 
 The product is not a portfolio manager. It only needs enough context to answer:
 
@@ -528,7 +526,6 @@ The synthesis uses:
 - thesis quality;
 - challenge findings;
 - stress scenarios;
-- portfolio impact where available;
 - unresolved uncertainty;
 - data quality/freshness.
 
@@ -539,7 +536,6 @@ The system should reason in this order:
 1. **Is the thesis sufficiently supported to remain actionable?**
 2. **Does the current market state create a material problem for the thesis or position?**
 3. **Does the proposed position survive the relevant stress scenarios?**
-4. **Does existing exposure materially change the quality of the position?**
 5. **Are there unresolved unknowns large enough to prevent a reliable conclusion?**
 
 The product may synthesize these factors into a verdict, but it must explain which factors were decisive.
@@ -656,7 +652,7 @@ The Decision Artifact is the canonical product output. It should be readable qui
 
 ### 11.5 Stress Scenarios
 
-**User sees:** A compact set of 4 core scenarios, each showing assumption, estimated position impact, portfolio impact where available, and principal risk.
+**User sees:** A compact set of 4 core scenarios, each showing assumption, estimated position impact and principal risk.
 
 **Calculated:** All quantitative scenario consequences.
 
@@ -764,11 +760,11 @@ without reading a long AI essay.
 
 **Behavior:** Treat liquidity as a position-level risk. Do not present a price-only stress result as though execution were guaranteed. If the proposed position cannot be meaningfully stressed because liquidity inputs are insufficient, say so.
 
-### 12.8 Missing portfolio context
+### 12.8 Missing portfolio context (Future)
 
 **Condition:** Relevant holdings are unavailable.
 
-**Behavior:** Perform position-level analysis and explicitly mark portfolio impact as unassessed. Do not infer an empty portfolio.
+**Behavior:** Portfolio context is deferred to a future phase.
 
 ### 12.9 Unsupported asset
 
@@ -891,7 +887,6 @@ The reference scenario is therefore a test of the product's reasoning workflow, 
 - Thesis extraction and assumption identification.
 - Evidence-grounded adversarial challenge.
 - Four deterministic stress scenarios.
-- Basic relevant portfolio context.
 - Separate Thesis Quality and Position Quality judgments.
 - Decision synthesis into Proceed / Wait / Reduce / Reject.
 - Trade-specific change conditions.
@@ -919,6 +914,7 @@ The reference scenario is therefore a test of the product's reasoning workflow, 
 - Unsupported probability scores.
 - Core synthetic hedge recommendations.
 - Full portfolio management.
+- Basic relevant portfolio context (Deferred).
 - Full portfolio optimization.
 - Full institutional VaR/Expected Shortfall stack.
 - General-purpose market research mode.

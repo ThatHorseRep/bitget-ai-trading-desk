@@ -137,7 +137,7 @@ One dominant natural-language input area should be the primary interaction. The 
 The system checks whether the minimum required information can be identified.
 
 ### What must NOT happen
-The user should not be forced to provide technical indicators, stop-loss values, full portfolio information, or internal product terminology before starting.
+The user should not be forced to provide technical indicators, stop-loss values, or internal product terminology before starting.
 
 ### Mobile behavior
 The input area, example, and submission action must fit naturally into a compact first interaction.
@@ -387,7 +387,7 @@ The larger surface can show more stable interim findings, but it remains the sam
 ### 6. Stress Scenarios
 **Headline information:** four core scenarios and their position consequences.
 
-**Supporting information:** explicit assumption, position impact, portfolio impact where available, interpretation.
+**Supporting information:** explicit assumption, position impact, interpretation.
 
 **Expandable:** calculation inputs and component assumptions.
 
@@ -642,7 +642,6 @@ Desktop uses additional width to improve comparison and inspection, not to add u
 
 - side-by-side Thesis and Challenge inspection;
 - scenario comparison;
-- position versus portfolio impact;
 - evidence alongside the claim it supports;
 - calculation detail alongside the resulting metric.
 
@@ -670,7 +669,7 @@ Not every failure gets its own screen.
 | Conflicting sources | Provenance detail + conflict notice |
 | Unavailable reference price | Qualified token-only analysis where useful; reference-dependent sections marked unavailable |
 | Illiquid token | Elevated position-risk warning; no implied execution certainty |
-| Missing portfolio context | Continue position analysis; state portfolio impact is unassessed |
+| Missing portfolio context | Deferred |
 | Unsupported asset | Blocked error state |
 | No meaningful counter-thesis | Explicitly state none was found; do not manufacture one |
 | Scenario not reliably calculable | Scenario marked unavailable or qualitative-only |
