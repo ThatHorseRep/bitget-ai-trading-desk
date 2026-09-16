@@ -88,14 +88,14 @@ export function DecisionArtifactView({
             <button
               type="button"
               onClick={handleCopyJson}
-              className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 border border-zinc-200 shadow-xs active:scale-[0.98] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+              className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 border border-zinc-200 shadow-xs active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
             >
               {copied ? "Copied JSON!" : "Export artifact JSON"}
             </button>
             <button
               type="button"
               onClick={onOpenProvenance}
-              className="inline-flex items-center gap-1 rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-zinc-800 shadow-xs active:scale-[0.98] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+              className="inline-flex items-center gap-1 rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-zinc-800 shadow-xs active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
             >
               Audit provenance
             </button>
@@ -209,7 +209,7 @@ export function DecisionArtifactView({
             <div className="text-base font-bold text-zinc-900 font-mono mt-0.5">
               ${marketState.instrumentPrice.toFixed(2)}
             </div>
-            <div className="text-xs text-zinc-400 font-mono">{trade.canonicalSymbol || trade.asset}</div>
+            <div className="text-xs text-zinc-500 font-mono">{trade.canonicalSymbol || trade.asset}</div>
           </div>
 
           {/* Reference Price */}
@@ -218,7 +218,7 @@ export function DecisionArtifactView({
             <div className="text-base font-bold text-zinc-900 font-mono mt-0.5">
               ${marketState.referencePrice ? marketState.referencePrice.toFixed(2) : "N/A"}
             </div>
-            <div className="text-xs text-zinc-400 font-mono">{trade.referenceAsset || "Underlying"}</div>
+            <div className="text-xs text-zinc-500 font-mono">{trade.referenceAsset || "Underlying"}</div>
           </div>
 
           {/* Basis */}
@@ -259,7 +259,7 @@ export function DecisionArtifactView({
                 {marketState.sessionStatus}
               </span>
             </div>
-            <div className="text-xs text-zinc-400 mt-0.5">United States market clock</div>
+            <div className="text-xs text-zinc-500 mt-0.5">United States market clock</div>
           </div>
 
           {/* Liquidity Class */}
@@ -274,7 +274,7 @@ export function DecisionArtifactView({
                 {marketState.liquidityClass}
               </span>
             </div>
-            <div className="text-xs text-zinc-400 mt-0.5">Orderbook class</div>
+            <div className="text-xs text-zinc-500 mt-0.5">Orderbook class</div>
           </div>
         </div>
       </section>
@@ -294,7 +294,7 @@ export function DecisionArtifactView({
 
           <div>
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Normalized thesis</span>
-            <p className="mt-1 text-xs sm:text-sm font-medium text-zinc-900 bg-zinc-50 p-3.5 rounded-xl border border-zinc-200 [text-wrap:pretty]">
+            <p className="mt-1 text-xs sm:text-sm font-medium text-zinc-900 bg-zinc-50 p-3.5 rounded-xl border border-zinc-200 [text-wrap:pretty] break-words">
               &ldquo;{thesis.normalizedThesis}&rdquo;
             </p>
           </div>
@@ -338,7 +338,7 @@ export function DecisionArtifactView({
 
           <div>
             <span className="text-xs font-semibold text-rose-800 uppercase tracking-wider">Strongest counter thesis</span>
-            <p className="mt-1 text-xs sm:text-sm font-medium text-rose-950 bg-rose-50 p-3.5 rounded-xl border border-rose-200 [text-wrap:pretty]">
+            <p className="mt-1 text-xs sm:text-sm font-medium text-rose-950 bg-rose-50 p-3.5 rounded-xl border border-rose-200 [text-wrap:pretty] break-words">
               {challenge.counterThesis}
             </p>
           </div>
@@ -583,7 +583,7 @@ export function DecisionArtifactView({
         <button
           type="button"
           onClick={onNewTrade}
-          className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-zinc-800 active:scale-[0.98] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+          className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-zinc-800 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -594,7 +594,7 @@ export function DecisionArtifactView({
         <button
           type="button"
           onClick={onOpenProvenance}
-          className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 active:scale-[0.98] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+          className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
         >
           <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

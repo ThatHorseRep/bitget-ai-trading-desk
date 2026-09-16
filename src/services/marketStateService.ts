@@ -40,9 +40,22 @@ export class MarketStateService {
       };
     }
 
-    const mapping = SUPPORTED_ASSET_MAPPINGS[asset] || SUPPORTED_ASSET_MAPPINGS[asset.toUpperCase()];
+    let mapping = SUPPORTED_ASSET_MAPPINGS[asset] || SUPPORTED_ASSET_MAPPINGS[asset.toUpperCase()];
+    
+    // Dynamic mapping for other rTokens (e.g. rAAPL, rTSLA)
+    if (!mapping && asset.toLowerCase().startsWith('r')) {
+       let refSymbol = asset.substring(1).toUpperCase();
+       if (refSymbol.endsWith('USDT')) {
+          refSymbol = refSymbol.substring(0, refSymbol.length - 4);
+       }
+       mapping = { 
+         bitgetSymbol: `r${refSymbol}USDT`, 
+         referenceSymbol: refSymbol 
+       };
+    }
+
     if (!mapping) {
-      throw new Error(`Asset ${asset} is not currently supported in MVP (only rNVDA is supported)`);
+      throw new Error(`Asset ${asset} is not supported. Must be an rToken.`);
     }
 
     const now = options.now ?? new Date();

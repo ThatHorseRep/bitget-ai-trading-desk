@@ -52,19 +52,19 @@ export function WorkspaceHeader({
               <button
                 type="button"
                 onClick={() => onToggleFixture(false)}
-                className={`rounded-md px-3 py-1.5 active:scale-[0.98] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden ${
+                className={`rounded-md px-3 py-1.5 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden ${
                   !useFixture
                     ? "bg-white text-zinc-900 shadow-xs font-semibold"
                     : "text-zinc-500 hover:text-zinc-900"
                 }`}
               >
-                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1.5 align-middle animate-pulse" />
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1.5 align-middle motion-safe:animate-pulse" />
                 Live Bitget and reference
               </button>
               <button
                 type="button"
                 onClick={() => onToggleFixture(true)}
-                className={`rounded-md px-3 py-1.5 active:scale-[0.98] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden ${
+                className={`rounded-md px-3 py-1.5 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden ${
                   useFixture
                     ? "bg-white text-zinc-900 shadow-xs font-semibold"
                     : "text-zinc-500 hover:text-zinc-900"
@@ -78,7 +78,7 @@ export function WorkspaceHeader({
               <button
                 type="button"
                 onClick={onNewTrade}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 active:scale-[0.98] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-xs focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-xs focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
               >
                 <svg className="w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

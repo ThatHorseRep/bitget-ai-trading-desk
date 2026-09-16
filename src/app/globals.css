@@ -13,3 +13,10 @@ body {
 code, kbd, samp, pre {
   font-family: var(--font-geist-mono), ui-monospace, monospace;
 }
+
+@media (pointer: coarse) {
+  button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
