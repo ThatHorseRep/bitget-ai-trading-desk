@@ -209,7 +209,7 @@ export function DecisionArtifactView({
             <div className="text-base font-bold text-zinc-900 font-mono mt-0.5">
               ${marketState.instrumentPrice.toFixed(2)}
             </div>
-            <div className="text-xs text-zinc-400 font-mono">rNVDA/USDT</div>
+            <div className="text-xs text-zinc-400 font-mono">{trade.canonicalSymbol || trade.asset}</div>
           </div>
 
           {/* Reference Price */}
@@ -218,7 +218,7 @@ export function DecisionArtifactView({
             <div className="text-base font-bold text-zinc-900 font-mono mt-0.5">
               ${marketState.referencePrice ? marketState.referencePrice.toFixed(2) : "N/A"}
             </div>
-            <div className="text-xs text-zinc-400 font-mono">NVDA (Nasdaq)</div>
+            <div className="text-xs text-zinc-400 font-mono">{trade.referenceAsset || "Underlying"}</div>
           </div>
 
           {/* Basis */}
@@ -369,14 +369,14 @@ export function DecisionArtifactView({
               6
             </div>
             <h3 className="text-base font-bold text-zinc-900 [text-wrap:balance]">
-              Four deterministic stress scenarios
+              Deterministic stress scenarios
             </h3>
           </div>
           <span className="text-xs text-zinc-500">Zero speculative heuristics • Pure deterministic arithmetic</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {scenarios.map((sc) => {
+          {scenarios.filter(s => s.id !== "THESIS_FAILURE").map((sc) => {
             const isSevere = sc.estimatedPnlPct !== null && sc.estimatedPnlPct <= -10;
             return (
               <div
@@ -431,9 +431,11 @@ export function DecisionArtifactView({
                   </div>
                 </div>
 
-                <div className="bg-white p-2.5 rounded-lg border border-zinc-200 text-xs text-zinc-600 font-mono [text-wrap:pretty]">
-                  {sc.assumptions[0]}
-                </div>
+                {sc.assumptions && sc.assumptions.length > 0 && (
+                  <div className="bg-white p-2.5 rounded-lg border border-zinc-200 text-xs text-zinc-600 font-mono [text-wrap:pretty]">
+                    {sc.assumptions[0]}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -486,9 +488,6 @@ export function DecisionArtifactView({
                 {thesisPosition.thesisQuality}
               </span>
             </div>
-            <p className="text-sm text-zinc-700 leading-relaxed font-medium [text-wrap:pretty]">
-              Fundamental enterprise demand rationale has empirical tailwinds, corroborated by news and earnings filings.
-            </p>
           </div>
 
           {/* Position Quality Panel */}
@@ -526,9 +525,6 @@ export function DecisionArtifactView({
                 </ul>
               </div>
             )}
-            <p className="text-sm text-zinc-700 leading-relaxed font-medium [text-wrap:pretty]">
-              Execution vehicle, timing, and microstructure are compromised due to weekend illiquidity and off hours gap vulnerability.
-            </p>
           </div>
         </div>
 
