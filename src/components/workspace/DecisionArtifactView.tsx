@@ -173,9 +173,14 @@ export function DecisionArtifactView({
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-zinc-200 text-xs font-bold text-zinc-800">
                 {idx + 1}
               </span>
-              <p className="text-xs sm:text-sm font-medium text-zinc-800 leading-snug [text-wrap:pretty]">
-                {reason}
-              </p>
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-mono bg-zinc-200/50 px-1.5 py-0.5 rounded w-fit">
+                  {reason.code}
+                </span>
+                <p className="text-xs sm:text-sm font-medium text-zinc-800 leading-snug [text-wrap:pretty]">
+                  {reason.message}
+                </p>
+              </div>
             </div>
           ))}
         </div>

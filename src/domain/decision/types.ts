@@ -5,6 +5,21 @@ import type { MarketState } from "../market/types";
 import type { NormalizedTrade } from "../trade/types";
 
 export type DecisionVerdict = "PROCEED" | "WAIT" | "REDUCE" | "REJECT";
+export type DecisionReasonCode = 
+  | "FATAL_INVALID_TRADE"
+  | "CRITICAL_DATA_BLOCKER"
+  | "INSUFFICIENT_THESIS"
+  | "THESIS_CONTRADICTED"
+  | "SEVERE_POSITION_RISK"
+  | "OFF_HOURS_WAIT"
+  | "REDUCE_POSITION_SIZE"
+  | "MATERIAL_UNCERTAINTY"
+  | "PROCEED_OK";
+
+export interface DecisionReason {
+  code: DecisionReasonCode;
+  message: string;
+}
 
 export interface DecisionInputs {
   marketState: MarketState;
@@ -18,7 +33,7 @@ export interface DecisionInputs {
 
 export interface Decision {
   verdict: DecisionVerdict;
-  reasons: string[];
+  reasons: DecisionReason[];
   blockers: string[];
   changeConditions: string[];
 }

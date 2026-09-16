@@ -12,16 +12,34 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
   if (blockers.length > 0) {
     return {
       verdict: config.invalidTradeVerdict,
-      reasons: blockers.map((b) => `Critical trade blocker: ${b}`),
+      reasons: blockers.map((b) => ({
+        code: "FATAL_INVALID_TRADE",
+        message: `Critical trade blocker: ${b}`
+      })),
       blockers,
       changeConditions: ["Resolve the critical blockers before resubmitting the trade idea."]
+    };
+  }
+
+  if (inputs.dataQuality === "INVALID") {
+    return {
+      verdict: config.criticalDataVerdict,
+      reasons: [{
+        code: "CRITICAL_DATA_BLOCKER",
+        message: "Required market data is missing or invalid."
+      }],
+      blockers: [],
+      changeConditions: ["Obtain valid current market observations before acting."]
     };
   }
 
   if (inputs.thesisQuality === "INSUFFICIENT") {
     return {
       verdict: "REJECT",
-      reasons: ["The trader thesis lacks causal reasoning or actionable substance to justify capital allocation."],
+      reasons: [{
+        code: "INSUFFICIENT_THESIS",
+        message: "The trader thesis lacks causal reasoning or actionable substance to justify capital allocation."
+      }],
       blockers: ["Insufficient thesis"],
       changeConditions: ["Articulate a specific, falsifiable thesis or catalyst."]
     };
@@ -31,28 +49,31 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     return {
       verdict: "REJECT",
       reasons: [
-        "The underlying thesis is contradicted by available market evidence.",
-        "The proposed position structure is vulnerable to adverse liquidity and microstructure shocks.",
-        ...inputs.positionAssessment.positionQuality.reasons
+        {
+          code: "THESIS_CONTRADICTED",
+          message: "The underlying thesis is contradicted by available market evidence."
+        },
+        {
+          code: "SEVERE_POSITION_RISK",
+          message: "The proposed position structure is vulnerable to adverse liquidity and microstructure shocks."
+        },
+        ...inputs.positionAssessment.positionQuality.reasons.map(r => ({
+          code: "SEVERE_POSITION_RISK" as const,
+          message: r
+        }))
       ],
       blockers: [],
       changeConditions: ["Re-evaluate the trade only if fresh evidence invalidates the counter-thesis."]
     };
   }
 
-  if (inputs.dataQuality === "INVALID") {
-    return {
-      verdict: config.criticalDataVerdict,
-      reasons: ["Required market data is missing or invalid."],
-      blockers: [],
-      changeConditions: ["Obtain valid current market observations before acting."]
-    };
-  }
-
-  if (inputs.materialUncertainty || inputs.dataQuality === "DEGRADED") {
+  if (inputs.materialUncertainty) {
     return {
       verdict: config.materialUncertaintyVerdict,
-      reasons: ["Material uncertainty remains in the available decision inputs."],
+      reasons: [{
+        code: "CRITICAL_DATA_BLOCKER",
+        message: "Material uncertainty remains in the available decision inputs."
+      }],
       blockers: [],
       changeConditions: ["Resolve or refresh the material uncertainty before acting."]
     };
@@ -61,14 +82,28 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
   // Off-hours / weekend position stress check
   const isWeekendOrOffHours = inputs.marketState.sessionStatus === "WEEKEND" || inputs.marketState.sessionStatus === "OFF_HOURS";
   if (isWeekendOrOffHours && inputs.positionAssessment.positionQuality.quality === "WEAKER") {
+    const reasons = [
+      {
+        code: "OFF_HOURS_WAIT" as const,
+        message: `Underlying reference equity market is currently in ${inputs.marketState.sessionStatus} state with no continuous price discovery.`
+      }
+    ];
+
+    if (inputs.positionAssessment.keyMismatch) {
+      reasons.push({
+        code: "OFF_HOURS_WAIT" as const,
+        message: inputs.positionAssessment.keyMismatch
+      });
+    }
+
+    reasons.push(...inputs.positionAssessment.positionQuality.reasons.map(r => ({
+      code: "OFF_HOURS_WAIT" as const,
+      message: r
+    })));
+
     return {
       verdict: "WAIT",
-      reasons: [
-        `Underlying reference equity market is currently in ${inputs.marketState.sessionStatus} state with no continuous price discovery.`,
-        "Thin top-of-book liquidity and unanchored off-hours basis create asymmetric downside risk before Monday's open.",
-        inputs.positionAssessment.keyMismatch ?? "Thesis quality does not rescue off-hours position fragility.",
-        ...inputs.positionAssessment.positionQuality.reasons
-      ],
+      reasons,
       blockers: [],
       changeConditions: [
         "Wait for Monday 09:30 ET reference market open to confirm underlying price response to weekend events.",
@@ -78,13 +113,22 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
   }
 
   if (inputs.positionAssessment.positionQuality.quality === "WEAKER") {
+    const reasons = [];
+    if (inputs.positionAssessment.keyMismatch) {
+      reasons.push({
+        code: "REDUCE_POSITION_SIZE" as const,
+        message: inputs.positionAssessment.keyMismatch
+      });
+    }
+    
+    reasons.push(...inputs.positionAssessment.positionQuality.reasons.map(r => ({
+      code: "REDUCE_POSITION_SIZE" as const,
+      message: r
+    })));
+
     return {
       verdict: "REDUCE",
-      reasons: [
-        "The proposed position size creates disproportionate exposure relative to observable liquidity and scenario drawdowns.",
-        inputs.positionAssessment.keyMismatch ?? "Position size/exposure exceeds optimal structural bounds.",
-        ...inputs.positionAssessment.positionQuality.reasons
-      ],
+      reasons,
       blockers: [],
       changeConditions: [
         "Reduce proposed position size by 50% to mitigate scenario drawdown severity.",
@@ -93,13 +137,37 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     };
   }
 
+  const proceedReasons = [];
+
+  if (inputs.thesisQuality === "STRONGER" || inputs.thesisQuality === "MIXED") {
+    proceedReasons.push({
+      code: "PROCEED_OK" as const,
+      message: `The underlying thesis is supported by current available evidence (quality: ${inputs.thesisQuality}).`
+    });
+  }
+
+  proceedReasons.push({
+    code: "PROCEED_OK" as const,
+    message: "The proposed position structure survives deterministic stress scenarios within acceptable bounds."
+  });
+
+  if (blockers.length === 0 && !inputs.materialUncertainty) {
+    proceedReasons.push({
+      code: "PROCEED_OK" as const,
+      message: "No configured hard blocker prevents the decision from proceeding to human judgment."
+    });
+  }
+
+  if (inputs.dataQuality === "DEGRADED") {
+    proceedReasons.push({
+      code: "PROCEED_OK" as const,
+      message: "Operating on degraded but defensible partial data."
+    });
+  }
+
   return {
     verdict: "PROCEED",
-    reasons: [
-      "The underlying thesis is supported by current available evidence.",
-      "The proposed position structure survives deterministic stress scenarios within acceptable bounds.",
-      "No configured hard blocker prevents the decision from proceeding to human judgment."
-    ],
+    reasons: proceedReasons,
     blockers: [],
     changeConditions: [
       "Monitor for major negative guidance revisions or capex announcements from cloud hyperscalers.",
