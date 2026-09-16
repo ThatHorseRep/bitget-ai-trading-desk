@@ -102,6 +102,10 @@ export function classifyPositionQuality(
         reasons.push(`Position size exceeds ${MVP_POLICY_ASSUMPTIONS.positionToVisibleLiquidityRatioThreshold * 100}% of visible top-of-book liquidity (Ratio: ${ratio.toFixed(2)}).`);
         keyDrivers.push(`liquidityRatio=${ratio.toFixed(2)}`);
       }
+    } else {
+      quality = "WEAKER";
+      reasons.push(`Position downgraded to WEAKER because there is ZERO visible top-of-book liquidity.`);
+      keyDrivers.push(`liquidityRatio=Infinity`);
     }
   }
 

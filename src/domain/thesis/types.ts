@@ -15,6 +15,7 @@ export interface Thesis {
   supportingEvidenceRefs: string[];
   invalidationConditions: ThesisItem[];
   unresolvedAmbiguities: string[];
+  modelInfo?: { model: string; provider: string };
 }
 
 export interface Challenge {
@@ -23,6 +24,7 @@ export interface Challenge {
   contradictoryEvidenceRefs: string[];
   noMeaningfulCounterThesis: boolean;
   explanation: string;
+  modelInfo?: { model: string; provider: string };
 }
 
 export interface PositionQualityAssessment {
@@ -36,4 +38,5 @@ export interface ThesisPositionAssessment {
   positionQuality: PositionQualityAssessment;
   keyMismatch: string | null;
   explanation: string;
+  modelInfo?: { model: string; provider: string };
 }

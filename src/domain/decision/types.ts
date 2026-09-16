@@ -23,6 +23,7 @@ export interface DecisionReason {
 
 export interface DecisionInputs {
   marketState: MarketState;
+  thesis: import("../thesis/types").Thesis;
   thesisQuality: ThesisQuality;
   positionAssessment: ThesisPositionAssessment;
   scenarios: StressScenario[];
@@ -74,6 +75,7 @@ export interface ProvenanceRecord {
   inputs?: string[];
   generatedBy?: string;
   evidenceState?: EvidenceState;
+  modelIdentity?: string;
 }
 
 export type EvidenceState = "LIVE_RETRIEVED" | "CURATED_DEMO_FIXTURE" | "UNAVAILABLE";

@@ -9,6 +9,8 @@ export const DECISION_POLICY_CONFIG: DecisionPolicyConfig = {
 
 export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyConfig = DECISION_POLICY_CONFIG): Decision {
   const blockers = inputs.criticalBlockers ?? [];
+  const thesisConditions = inputs.thesis?.invalidationConditions?.map(ic => ic.text) || [];
+
   if (blockers.length > 0) {
     return {
       verdict: config.invalidTradeVerdict,
@@ -63,7 +65,7 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
         }))
       ],
       blockers: [],
-      changeConditions: ["Re-evaluate the trade only if fresh evidence invalidates the counter-thesis."]
+      changeConditions: ["Re-evaluate the trade only if fresh evidence invalidates the counter-thesis.", ...thesisConditions]
     };
   }
 
@@ -75,7 +77,7 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
         message: "Material uncertainty remains in the available decision inputs."
       }],
       blockers: [],
-      changeConditions: ["Resolve or refresh the material uncertainty before acting."]
+      changeConditions: ["Resolve or refresh the material uncertainty before acting.", ...thesisConditions]
     };
   }
 
@@ -107,7 +109,8 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
       blockers: [],
       changeConditions: [
         "Wait for Monday 09:30 ET reference market open to confirm underlying price response to weekend events.",
-        "Ensure token/reference basis divergence does not widen prior to trade execution."
+        "Ensure token/reference basis divergence does not widen prior to trade execution.",
+        ...thesisConditions
       ]
     };
   }
@@ -132,7 +135,8 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
       blockers: [],
       changeConditions: [
         "Reduce proposed position size by 50% to mitigate scenario drawdown severity.",
-        "Verify liquidity depth before executing to prevent excessive execution slippage."
+        "Verify liquidity depth before executing to prevent excessive execution slippage.",
+        ...thesisConditions
       ]
     };
   }
@@ -143,6 +147,11 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     proceedReasons.push({
       code: "PROCEED_OK" as const,
       message: `The underlying thesis is supported by current available evidence (quality: ${inputs.thesisQuality}).`
+    });
+  } else if (inputs.thesisQuality === "WEAKER") {
+    proceedReasons.push({
+      code: "THESIS_CONTRADICTED" as const,
+      message: "Warning: The underlying thesis is contradicted by evidence (quality: WEAKER), but the position structure risk remains acceptable."
     });
   }
 
@@ -169,10 +178,9 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     verdict: "PROCEED",
     reasons: proceedReasons,
     blockers: [],
-    changeConditions: [
-      "Monitor for major negative guidance revisions or capex announcements from cloud hyperscalers.",
-      "Track BTC benchmark stability for potential crypto contagion spillover."
-    ]
+    changeConditions: thesisConditions.length > 0 
+      ? thesisConditions
+      : ["Monitor underlying assumptions for structural invalidation."]
   };
 }
 
