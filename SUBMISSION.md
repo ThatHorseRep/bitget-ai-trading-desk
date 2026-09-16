@@ -40,3 +40,12 @@ Thesis ≠ Position.
 @Bitget_AI
 
 
+
+## 7. Implementation Map (MVP Capabilities)
+- **Natural language parsing & thesis deconstruction**: src/core/ai/extractor.ts
+- **Adversarial reasoning (Counter-thesis/Challenge)**: src/core/ai/challenger.ts
+- **Mathematical position stressing (Scenarios & P&L)**: src/core/scenarios/engine.ts
+- **Thesis vs. Position synthesis**: src/core/ai/assessment.ts
+- **Decision Artifact generation & Policy**: src/core/decision/policy.ts
+- **Demo Mode (Off-Hours Trading simulation)**: src/components/workspace/RedTeamWorkspace.tsx & API routes.
+- **Portfolio Management/Impact**: (Deferred to post-MVP future release).

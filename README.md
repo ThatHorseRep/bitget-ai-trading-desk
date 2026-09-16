@@ -40,6 +40,15 @@ npm run test
 ```
 *(Note: If you encounter rate limit errors, wait 60 seconds and try again, or test manually via the UI).*
 
+## Implementation Map (Capabilities)
+- **Natural Language Trade Parsing & Thesis Extraction:** Implemented in src/core/ai/extractor.ts.
+- **Adversarial Challenge (Red Teaming):** Implemented in src/core/ai/challenger.ts.
+- **Deterministic Scenario Stress Testing (P&L, basis, liquidity):** Implemented in src/core/scenarios/engine.ts.
+- **Thesis vs Position Assessment:** Implemented in src/core/ai/assessment.ts.
+- **Deterministic Decision Policy:** Implemented in src/core/decision/policy.ts.
+- **Transparent Demo Mode (Off-Hours Wedge):** Triggered via UI in src/components/workspace/RedTeamWorkspace.tsx and processed in src/app/api/stress-test/route.ts.
+- **Portfolio Context/Impact:** Marked as FUTURE/DEFERRED in documentation (not implemented in MVP).
+
 ## Architecture & Specifications
 The official product specs and architecture documents (B01-B06) are located in the root directory. Early research drafts and planning notes have been archived in the `docs/archive/` folder.
 
