@@ -7,7 +7,8 @@ Bitget AI RedTeam Desk is a pre-trade decision-support product designed specific
 Instead of generating generic market summaries, the AI Trading Desk acts as an adversarial "Red Team" against the user's proposed trade. It isolates fundamental market rationale from off-hours execution risk, stresses the position mathematically, and forces the trader to confront the consequences of their decision *before* capital is deployed.
 
 ## 2. Track Fit
-**Track:** Trading / Risk Management
+**Track:** AI Trading Desk (Track 3)
+**Sub-theme:** Decision Stress Testing
 This project aligns perfectly with building advanced AI-driven solutions for trading. By leveraging LLMs for adversarial reasoning (Red Teaming) and coupling them with deterministic stress testing, this application directly enhances a trader's risk assessment and decision-making for Bitget's distinct tokenized asset offerings.
 
 ## 3. Target User
