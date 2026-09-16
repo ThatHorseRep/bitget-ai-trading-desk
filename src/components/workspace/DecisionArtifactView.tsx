@@ -173,10 +173,15 @@ export function DecisionArtifactView({
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-zinc-200 text-xs font-bold text-zinc-800">
                 {idx + 1}
               </span>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-mono bg-zinc-200/50 px-1.5 py-0.5 rounded w-fit">
-                  {reason.code}
-                </span>
+              <div className="flex flex-col gap-1 w-full">
+                <div className="flex justify-between items-center w-full">
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-mono bg-zinc-200/50 px-1.5 py-0.5 rounded w-fit">
+                    {reason.code}
+                  </span>
+                  <span className="text-[10px] text-zinc-400 font-mono" title="Trace to deterministic policy / qualitative logic">
+                    [PROV: RULE-EVAL]
+                  </span>
+                </div>
                 <p className="text-xs sm:text-sm font-medium text-zinc-800 leading-snug [text-wrap:pretty]">
                   {reason.message}
                 </p>
@@ -282,14 +287,19 @@ export function DecisionArtifactView({
       {/* 4 and 5: Side by Side Thesis Deconstruction and Adversarial Challenge */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 4. Thesis Deconstruction */}
-        <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xs space-y-4">
+        <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xs space-y-4 relative">
           <div className="flex items-center gap-2 border-b border-zinc-100 pb-3">
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900 text-white text-xs font-bold">
               4
             </div>
-            <h3 className="text-base font-bold text-zinc-900 [text-wrap:balance]">
+            <h3 className="text-base font-bold text-zinc-900 [text-wrap:balance] flex-1">
               Thesis deconstruction
             </h3>
+            {thesis.modelInfo && (
+              <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded" title="AI Model Identity">
+                {thesis.modelInfo.provider}/{thesis.modelInfo.model}
+              </span>
+            )}
           </div>
 
           <div>
@@ -315,6 +325,19 @@ export function DecisionArtifactView({
             </div>
           </div>
 
+          {thesis.supportingEvidenceRefs.length > 0 && (
+            <div className="space-y-2 pt-1">
+              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Provenance links</span>
+              <div className="flex flex-wrap gap-2">
+                {thesis.supportingEvidenceRefs.map(ref => (
+                  <span key={ref} className="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                    [PROV: {ref}]
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2 pt-1">
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Key dependencies</span>
             <ul className="list-disc list-inside text-xs text-zinc-700 space-y-1">
@@ -326,14 +349,19 @@ export function DecisionArtifactView({
         </section>
 
         {/* 5. Adversarial Challenge */}
-        <section className="rounded-2xl border border-rose-200 bg-white p-6 shadow-xs space-y-4">
+        <section className="rounded-2xl border border-rose-200 bg-white p-6 shadow-xs space-y-4 relative">
           <div className="flex items-center gap-2 border-b border-rose-100 pb-3">
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-700 text-white text-xs font-bold">
               5
             </div>
-            <h3 className="text-base font-bold text-rose-950 [text-wrap:balance]">
+            <h3 className="text-base font-bold text-rose-950 [text-wrap:balance] flex-1">
               Adversarial counter challenge
             </h3>
+            {challenge.modelInfo && (
+              <span className="text-[10px] font-mono text-rose-600 bg-rose-50 px-2 py-0.5 rounded" title="AI Model Identity">
+                {challenge.modelInfo.provider}/{challenge.modelInfo.model}
+              </span>
+            )}
           </div>
 
           <div>
@@ -354,6 +382,19 @@ export function DecisionArtifactView({
               ))}
             </div>
           </div>
+
+          {challenge.contradictoryEvidenceRefs.length > 0 && (
+            <div className="space-y-2 pt-1">
+              <span className="text-xs font-semibold text-rose-800 uppercase tracking-wider">Contradictory evidence refs</span>
+              <div className="flex flex-wrap gap-2">
+                {challenge.contradictoryEvidenceRefs.map(ref => (
+                  <span key={ref} className="text-[10px] font-mono text-rose-700 bg-rose-100 border border-rose-200 px-1.5 py-0.5 rounded">
+                    [PROV: {ref}]
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           <p className="text-xs text-rose-900 pt-1 leading-relaxed [text-wrap:pretty]">
             {challenge.explanation}
@@ -432,8 +473,11 @@ export function DecisionArtifactView({
                 </div>
 
                 {sc.assumptions && sc.assumptions.length > 0 && (
-                  <div className="bg-white p-2.5 rounded-lg border border-zinc-200 text-xs text-zinc-600 font-mono [text-wrap:pretty]">
-                    {sc.assumptions[0]}
+                  <div className="bg-white p-2.5 rounded-lg border border-zinc-200 text-xs text-zinc-600 font-mono [text-wrap:pretty] space-y-1">
+                    <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Assumptions:</div>
+                    {sc.assumptions.map((a, i) => (
+                      <div key={i}>- {a}</div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -443,19 +487,26 @@ export function DecisionArtifactView({
       </section>
 
       {/* 7. Thesis vs Position Split Card (THE CORE PRODUCT THESIS!) */}
-      <section className="rounded-2xl border border-indigo-300 bg-white p-6 sm:p-8 shadow-xs space-y-5">
-        <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-700 text-white text-xs font-bold">
-            7
+      <section className="rounded-2xl border border-indigo-300 bg-white p-6 sm:p-8 shadow-xs space-y-5 relative">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-700 text-white text-xs font-bold">
+              7
+            </div>
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">
+                Core product thesis
+              </span>
+              <h3 className="text-lg font-bold text-zinc-900 [text-wrap:balance]">
+                Thesis quality versus position quality deconstruction
+              </h3>
+            </div>
           </div>
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">
-              Core product thesis
+          {thesisPosition.modelInfo && (
+            <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded" title="AI Model Identity">
+              {thesisPosition.modelInfo.provider}/{thesisPosition.modelInfo.model}
             </span>
-            <h3 className="text-lg font-bold text-zinc-900 [text-wrap:balance]">
-              Thesis quality versus position quality deconstruction
-            </h3>
-          </div>
+          )}
         </div>
 
         {/* Dual Qualitative Scores */}

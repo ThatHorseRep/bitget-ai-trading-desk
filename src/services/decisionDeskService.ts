@@ -187,7 +187,7 @@ export class DecisionDeskService {
         id: "prov-calc-scenarios",
         type: "CALCULATED_METRIC" as const,
         source: "Deterministic Stress Engine",
-        inputs: [`positionSizeUsd: ${trade.positionSizeUsd}`, `shocks: config`],
+        inputs: [`positionSizeUsd: ${trade.positionSizeUsd}`, `shocks: ${scenarios.map(s => `${s.id} (${s.estimatedPnlPct}%)`).join(", ")}`],
         generatedBy: "Scenario Engine"
       },
       ...scenarios.map((sc) => ({
@@ -220,9 +220,14 @@ export class DecisionDeskService {
       }
     ];
 
+    const materialUncertainty = thesis.unresolvedAmbiguities.length > 0;
+    if (materialUncertainty) {
+      limitations.push(`Material Uncertainty: ${thesis.unresolvedAmbiguities.join("; ")}`);
+    }
+
     const artifact: DecisionArtifact = {
       artifactId: `art-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      generatedAt: options.useFixture ? marketState.observedAt : now.toISOString(),
+      generatedAt: now.toISOString(),
       trade,
       decision,
       marketState,
