@@ -107,8 +107,8 @@ test("Adversarial LLM Tests", async (t) => {
     });
 
     const result = await service.runWorkflow("buy $1000 of rNVDA because of AI", { useFixture: false });
-    assert.equal(result.step, "ERROR");
-    assert.ok(result.limitations[0].includes("Failed to extract thesis"));
+    assert.equal(result.step, "DECISION_READY");
+    assert.ok(result.limitations.some(l => l.includes("Failed to extract thesis")));
     // Extractor tries 2 times (initial + 1 retry)
     assert.equal(fetchCount, 2);
   });
@@ -127,8 +127,8 @@ test("Adversarial LLM Tests", async (t) => {
     });
 
     const result = await service.runWorkflow("buy $1000 of rNVDA because of AI", { useFixture: false });
-    assert.equal(result.step, "ERROR");
-    assert.ok(result.limitations[0].includes("Failed to extract thesis"));
+    assert.equal(result.step, "DECISION_READY");
+    assert.ok(result.limitations.some(l => l.includes("Failed to extract thesis")));
     assert.equal(fetchCount, 2);
   });
 
@@ -188,8 +188,8 @@ test("Adversarial LLM Tests", async (t) => {
     });
 
     const result = await service.runWorkflow("buy $1000 of rNVDA because of AI", { useFixture: false });
-    assert.equal(result.step, "ERROR");
-    assert.ok(result.limitations[0].includes("LLM request failed (429)"));
+    assert.equal(result.step, "DECISION_READY");
+    assert.ok(result.limitations.some(l => l.includes("LLM request failed (429)")));
     assert.equal(fetchCount, 4); // 2 extractor attempts * 2 llmClient attempts
   });
 
@@ -201,8 +201,8 @@ test("Adversarial LLM Tests", async (t) => {
     });
 
     const result = await service.runWorkflow("buy $1000 of rNVDA because of AI", { useFixture: false });
-    assert.equal(result.step, "ERROR");
-    assert.ok(result.limitations[0].includes("LLM request failed (500)"));
+    assert.equal(result.step, "DECISION_READY");
+    assert.ok(result.limitations.some(l => l.includes("LLM request failed (500)")));
     assert.equal(fetchCount, 4);
   });
 
@@ -216,8 +216,8 @@ test("Adversarial LLM Tests", async (t) => {
     });
 
     const result = await service.runWorkflow("buy $1000 of rNVDA because of AI", { useFixture: false });
-    assert.equal(result.step, "ERROR");
-    assert.ok(result.limitations[0].includes("timeout"));
+    assert.equal(result.step, "DECISION_READY");
+    assert.ok(result.limitations.some(l => l.includes("timeout")));
     assert.equal(fetchCount, 4);
   });
 

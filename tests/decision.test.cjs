@@ -17,6 +17,11 @@ const assessment = {
 const base = {
   marketState: rnvdaDemoMarketState,
   thesisQuality: assessment.thesisQuality,
+  positionQuality: {
+    quality: "STRONGER",
+    reasons: [],
+    executionRisk: { ratio: 0.01, explanation: "" }
+  },
   positionAssessment: assessment,
   scenarios: [],
   dataQuality: "COMPLETE"
@@ -56,6 +61,7 @@ test("decision reduce on severe position risk", () => {
   const result = evaluateDecision({
     ...base,
     marketState: { ...base.marketState, sessionStatus: "REGULAR" },
+    positionQuality: { quality: "WEAKER", reasons: ["Too big for liquidity"], executionRisk: { ratio: 0.8, explanation: "" } },
     positionAssessment: { ...assessment, positionQuality: { quality: "WEAKER", reasons: ["Too big for liquidity"], keyDrivers: [] } }
   });
   assert.equal(result.verdict, "REDUCE");
@@ -76,6 +82,7 @@ test("decision rejects on contradicted thesis and weak position", () => {
   const result = evaluateDecision({
     ...base,
     thesisQuality: "WEAKER",
+    positionQuality: { quality: "WEAKER", reasons: [], executionRisk: { ratio: 0.1, explanation: "" } },
     positionAssessment: { ...assessment, positionQuality: { ...assessment.positionQuality, quality: "WEAKER" } }
   });
   assert.equal(result.verdict, "REJECT");
@@ -86,6 +93,7 @@ test("decision waits on off-hours market with weak position", () => {
   const result = evaluateDecision({
     ...base,
     marketState: { ...base.marketState, sessionStatus: "WEEKEND" },
+    positionQuality: { quality: "WEAKER", reasons: [], executionRisk: { ratio: 0.1, explanation: "" } },
     positionAssessment: { ...assessment, positionQuality: { ...assessment.positionQuality, quality: "WEAKER" } }
   });
   assert.equal(result.verdict, "WAIT");
@@ -126,6 +134,7 @@ test("precedence: contradicted thesis overrides material uncertainty", () => {
   const result = evaluateDecision({
     ...base,
     thesisQuality: "WEAKER",
+    positionQuality: { quality: "WEAKER", reasons: [], executionRisk: { ratio: 0.1, explanation: "" } },
     positionAssessment: { ...assessment, positionQuality: { ...assessment.positionQuality, quality: "WEAKER" } },
     materialUncertainty: true
   });

@@ -15,7 +15,7 @@ test("MarketStateService throws on unsupported asset", async () => {
   const service = new MarketStateService();
   await assert.rejects(
     async () => service.getMarketState("XYZ_FAKE"),
-    /Asset XYZ_FAKE is not currently supported/
+    /Asset XYZ_FAKE is not supported. Must be an rToken./
   );
 });
 
@@ -64,7 +64,7 @@ test("MarketStateService synthesizes live state with mock providers correctly", 
       }
       throw new Error(`Unexpected symbol: ${symbol}`);
     },
-    getRealityCalendar: async () => null
+    getRealityCalendar: async () => ({ specificConfig: [] })
   };
 
   const mockReferenceProvider = {

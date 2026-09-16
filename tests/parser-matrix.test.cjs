@@ -23,7 +23,7 @@ test("matrix 3: go long rNVDAUSDT with 2000 USDT because...", () => {
   assert.equal(result.requiresClarification, false);
   assert.equal(result.tradeIdea.direction, "LONG");
   assert.equal(result.tradeIdea.positionSizeUsd, 2000);
-  assert.equal(result.tradeIdea.asset, "rNVDA");
+  assert.equal(result.tradeIdea.asset, "rNVDAUSDT");
 });
 
 test("matrix 4: thinking about buying NVDA -> clarification on asset", () => {

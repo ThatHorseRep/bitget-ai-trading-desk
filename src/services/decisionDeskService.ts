@@ -169,6 +169,16 @@ export class DecisionDeskService {
       }
     }
 
+    // SAFE FALLBACK: If LLM fails to provide thesisPosition, default to INSUFFICIENT to ensure deterministic rejection/wait
+    if (!thesisPosition) {
+      thesisPosition = {
+        thesisQuality: "INSUFFICIENT",
+        positionQuality: { quality: "INSUFFICIENT", reasons: ["Assessor LLM failed or skipped"], keyDrivers: [] },
+        keyMismatch: "Assessment unavailable due to system failure",
+        explanation: "Fallback assessment generated because the reasoning layer failed to respond."
+      };
+    }
+
     // 8. Deterministic Decision Policy
     const decision = evaluateDecision({
       marketState,

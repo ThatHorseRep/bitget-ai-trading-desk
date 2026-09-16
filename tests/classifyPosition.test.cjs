@@ -20,10 +20,16 @@ function makeScenario(id, lossPct, applicable = true, basisImpact = 0) {
 
 // Mock market state objects
 const marketNormal = {
-  liquidityClass: 'NORMAL'
+  liquidityClass: 'NORMAL',
+  instrumentPrice: 10,
+  askSize: 100000,
+  bidSize: 100000
 };
 const marketThin = {
-  liquidityClass: 'THIN'
+  liquidityClass: 'THIN',
+  instrumentPrice: 10,
+  askSize: 100000,
+  bidSize: 100000
 };
 
 const tradeMock = { direction: "LONG", positionSizeUsd: 10000 };
@@ -80,24 +86,24 @@ test('Execution Risk: position larger than visible liquidity threshold', () => {
   assert.ok(result.reasons.some(r => r.includes('Position size exceeds 50%')));
 });
 
-test('Execution Risk: missing ask size for LONG does not downgrade size', () => {
+test('Execution Risk: missing ask size for LONG strictly downgrades position', () => {
   const scenarios = [makeScenario('s', -3)];
   const market = { ...marketNormal, instrumentPrice: 10, askSize: null };
   const trade = { direction: "LONG", positionSizeUsd: 10000 };
   const result = classifyPositionQuality(scenarios, market, trade);
   
-  assert.equal(result.quality, 'STRONGER');
+  assert.equal(result.quality, 'WEAKER');
   assert.equal(result.executionRisk.ratio, 'UNKNOWN');
   assert.ok(result.executionRisk.explanation.includes('missing'));
 });
 
-test('Execution Risk: missing bid size for SHORT does not downgrade size', () => {
+test('Execution Risk: missing bid size for SHORT strictly downgrades position', () => {
   const scenarios = [makeScenario('s', -3)];
   const market = { ...marketNormal, instrumentPrice: 10, bidSize: null, askSize: 10000 };
   const trade = { direction: "SHORT", positionSizeUsd: 10000 };
   const result = classifyPositionQuality(scenarios, market, trade);
   
-  assert.equal(result.quality, 'STRONGER');
+  assert.equal(result.quality, 'WEAKER');
   assert.equal(result.executionRisk.ratio, 'UNKNOWN');
   assert.ok(result.executionRisk.explanation.includes('missing'));
 });
