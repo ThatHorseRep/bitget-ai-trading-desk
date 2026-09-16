@@ -143,7 +143,7 @@ export function DecisionArtifactView({
           </div>
         )}
 
-        {artifact.evidence.some(e => e.state === "UNAVAILABLE") && (
+        {artifact.evidence.some(e => e.state === "UNAVAILABLE" || e.state === "CURATED_DEMO_FIXTURE") && (
           <div className="rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs text-rose-900 flex items-start gap-2 [text-wrap:pretty]">
             <span className="font-bold shrink-0 text-rose-700">WARNING:</span>
             <span>Live evidence is UNAVAILABLE. Operating on explicitly labeled CURATED DEMO FIXTURE data.</span>

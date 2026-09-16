@@ -36,8 +36,7 @@ export class MarketStateService {
   async getMarketState(asset: string, options: MarketStateOptions = {}): Promise<MarketState> {
     if (options.useFixture) {
       return {
-        ...rnvdaDemoMarketState,
-        observedAt: (options.now ?? new Date()).toISOString()
+        ...rnvdaDemoMarketState
       };
     }
 

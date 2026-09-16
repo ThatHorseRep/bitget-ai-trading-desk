@@ -34,6 +34,8 @@ export interface MarketState {
   liquidityClass: LiquidityClass;
   dataQuality: DataQualityStatus;
   sources: SourceRef[];
+  scenarioId?: string;
+  isSynthetic?: boolean;
 }
 
 

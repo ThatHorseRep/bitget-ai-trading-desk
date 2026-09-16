@@ -26,7 +26,7 @@ export function buildRnvdaDemoTrade(): NormalizedTrade {
     userAssumptions: [],
     relevantExposure: [],
     entryPriceSource: "SYSTEM_DERIVED",
-    entryBasisTimestamp: "2024-10-25T14:30:00Z"
+    entryBasisTimestamp: "2026-01-01T18:00:00.000Z"
   };
 }
 
@@ -54,7 +54,64 @@ export const rnvdaDemoMarketState: MarketState = {
   dataQuality: "COMPLETE",
   sources: [
     { id: "fixture-bitget", name: "DEMO FIXTURE — NOT LIVE DATA", observedAt: "2026-01-01T18:00:00.000Z" }
-  ]
+  ],
+  scenarioId: "RNVDA_WEEKEND_REFERENCE_SCENARIO_V1",
+  isSynthetic: true
 };
 
+import type { Thesis, Challenge, ThesisPositionAssessment } from "../domain/thesis/types";
 
+export const rnvdaDemoThesis: Thesis = {
+  traderStatement: "A current NVIDIA/AI-demand thesis supports upside in the underlying.",
+  normalizedThesis: "NVIDIA's underlying demand and AI growth will continue to drive the asset's value higher.",
+  assumptions: [
+    { text: "AI demand remains strong", origin: "USER_STATED" },
+    { text: "NVIDIA retains market leadership", origin: "AI_INFERRED" }
+  ],
+  dependencies: [
+    { text: "Semiconductor supply chain stability", origin: "AI_INFERRED" }
+  ],
+  supportingEvidenceRefs: [],
+  invalidationConditions: [
+    { text: "Major drop in corporate AI capital expenditure", origin: "AI_INFERRED" }
+  ],
+  unresolvedAmbiguities: [],
+  modelInfo: { model: "FIXTURE_LLM", provider: "DEMO" }
+};
+
+export const rnvdaDemoChallenge: Challenge = {
+  counterThesis: "Market has fully priced in AI growth expectations, creating high sensitivity to any demand hiccups.",
+  vulnerableAssumptions: ["AI demand remains strong"],
+  contradictoryEvidenceRefs: [],
+  noMeaningfulCounterThesis: false,
+  explanation: "Macro conditions could tighten tech spending.",
+  modelInfo: { model: "FIXTURE_LLM", provider: "DEMO" }
+};
+
+export const rnvdaDemoThesisPosition: ThesisPositionAssessment = {
+  thesisQuality: "MIXED",
+  positionQuality: {
+    quality: "WEAKER",
+    reasons: ["Trading rNVDA on weekend has high basis risk"],
+    keyDrivers: ["Weekend liquidity"]
+  },
+  keyMismatch: "Weekend basis risk offsets fundamental NVDA thesis.",
+  explanation: "While the underlying thesis is strong, executing it over the weekend using a tokenized asset carries structural risks.",
+  modelInfo: { model: "FIXTURE_LLM", provider: "DEMO" }
+};
+
+import type { EvidenceItem } from "../domain/decision/types";
+
+export const rnvdaDemoEvidence: EvidenceItem[] = [
+  {
+    id: "demo-ev-1",
+    title: "NVIDIA Corporate Capital Expenditure Surge",
+    source: "Fixture Source",
+    url: "https://fixture.example.com/demo-ev-1",
+    publishedAt: "2026-01-01T10:00:00.000Z",
+    retrievedAt: "2026-01-01T18:00:00.000Z",
+    summary: "Recent supply chain data suggests NVIDIA's upcoming corporate capital expenditure remains robust.",
+    state: "CURATED_DEMO_FIXTURE",
+    provenanceType: "OBSERVED_FACT"
+  }
+];

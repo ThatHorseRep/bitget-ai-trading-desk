@@ -22,7 +22,7 @@ export function WorkspaceHeader({
       {/* DEMO MODE BANNER for off-hours simulation */}
       {useFixture && (
         <div className="bg-amber-500 px-4 py-1.5 text-center text-xs font-bold uppercase tracking-wider text-amber-950 shadow-xs">
-          DEMO MODE: Off-hours Simulation Active. Synthetic basis and liquidity risks applied.
+          DEMO MODE: Simulating Weekend Off-Hours Session
         </div>
       )}
       <header className="border-b border-zinc-200 bg-white">
