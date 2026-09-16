@@ -35,14 +35,17 @@ export function parseNaturalLanguageTrade(
   // 2. Asset extraction
   let asset: string | null = null;
   let assetClarificationRequired = false;
-  if (/\b(rnvda|rnvdausdt)\b/i.test(text)) {
-    asset = "rNVDA";
+  
+  const genericRTokenMatch = text.match(/\b(r[A-Z]{2,10})(?:USDT)?\b/i);
+  
+  if (genericRTokenMatch) {
+    // e.g. rNVDA, rAAPL, rTSLA
+    asset = genericRTokenMatch[1].toUpperCase();
+    if (asset === "RNVDA") asset = "rNVDA"; // keep preferred casing
+    else asset = "r" + asset.substring(1);
     userProvided.push("asset");
   } else if (/\bnvda\b/i.test(text)) {
     assetClarificationRequired = true;
-  } else if (/\bbtc\b/i.test(text) && !/\b(rnvda|nvda)\b/i.test(text)) {
-    asset = "BTC";
-    userProvided.push("asset");
   }
 
   // 3. Position size extraction ($2,000 or 2000 usd or $2k)
@@ -110,23 +113,39 @@ export function parseNaturalLanguageTrade(
     userProvided.push("timeHorizon");
   }
 
-  // 6. Existing exposure extraction (e.g. "already have BTC exposure" or "have $10,000 in BTC")
+  // 6. Existing exposure extraction (e.g. "already have BTC exposure" or "have $10,000 in ETH")
   const relevantExposure: ExistingExposure[] = [];
-  if (/\b(?:already have|holding|have|hold|exposure to)\s+(?:a\s+)?(?:([\d,]+(?:\.\d+)?)\s*(?:usd|dollars|usdt|\$)?\s+of\s+)?btc\b/i.test(text) || /\bbtc exposure\b/i.test(text)) {
-    const btcAmountMatch = text.match(/\$?([\d,]+(?:\.\d+)?)\s*(k)?\s*(?:of\s+)?btc/i);
+  
+  const exposureMatch = text.match(/\b(?:already have|holding|have|hold|exposure to)\s+(?:a\s+)?(?:\$?([\d,]+(?:\.\d+)?)\s*(k|m)?\s*(?:usd|dollars|usdt)?\s*(?:of|in)\s+)?([A-Za-z]{2,8})\b/i) || text.match(/\b([A-Za-z]{2,8})\s+exposure\b/i);
+
+  if (exposureMatch) {
     let val = 5000; // default estimated exposure if not specified
-    if (btcAmountMatch) {
-      const parsed = parseFloat(btcAmountMatch[1].replace(/,/g, ""));
-      if (Number.isFinite(parsed) && parsed > 0) {
-        val = parsed * (btcAmountMatch[2]?.toLowerCase() === "k" ? 1000 : 1);
-      }
+    let expAsset = "BTC"; // default fallback
+
+    if (exposureMatch[3]) { 
+       const amountMatch = exposureMatch[1];
+       const multMatch = exposureMatch[2];
+       expAsset = exposureMatch[3].toUpperCase();
+       
+       if (amountMatch) {
+         const parsed = parseFloat(amountMatch.replace(/,/g, ""));
+         if (Number.isFinite(parsed) && parsed > 0) {
+           val = parsed * (multMatch?.toLowerCase() === "m" ? 1000000 : (multMatch?.toLowerCase() === "k" ? 1000 : 1));
+         }
+       }
+    } else if (exposureMatch[1]) {
+       expAsset = exposureMatch[1].toUpperCase();
     }
-    relevantExposure.push({
-      asset: "BTC",
-      direction: "LONG",
-      valueUsd: val
-    });
-    userProvided.push("relevantExposure");
+
+    const commonWords = ["A", "THE", "SOME", "THIS", "THAT", "LONG", "SHORT", "POSITION", "TRADE", "MONEY", "CASH", "USD", "USDT"];
+    if (!commonWords.includes(expAsset) && expAsset !== asset?.toUpperCase()) {
+      relevantExposure.push({
+        asset: expAsset,
+        direction: "LONG",
+        valueUsd: val
+      });
+      userProvided.push("relevantExposure");
+    }
   }
 
   // Check required fields and determine if clarification is required
@@ -139,7 +158,7 @@ export function parseNaturalLanguageTrade(
     clarificationField = "asset";
     clarificationQuestion = assetClarificationRequired 
       ? "Did you mean rNVDA (the tokenized NVIDIA asset available on Bitget)?" 
-      : "Which asset are you planning to trade? (The MVP supports rNVDA tokenized NVIDIA).";
+      : "Which asset are you planning to trade? (e.g., rNVDA, rAAPL, rTSLA).";
   } else if (!direction) {
     requiresClarification = true;
     clarificationField = "direction";
@@ -170,7 +189,7 @@ export function parseNaturalLanguageTrade(
   let normalizedTrade: NormalizedTrade | null = null;
   if (!requiresClarification && asset && direction && positionSizeUsd && positionSizeUsd > 0) {
     const canonicalSymbol = asset === "rNVDA" ? "rNVDAUSDT" : `${asset}USDT`;
-    const referenceAsset = asset === "rNVDA" ? "NVDA" : undefined;
+    const referenceAsset = asset.startsWith("r") && asset.length > 1 ? asset.substring(1).toUpperCase() : undefined;
     const entryPrice = explicitPrice !== null ? explicitPrice : (workingPrice > 0 ? workingPrice : 120);
     const quantity = calculatePositionQuantity(positionSizeUsd, entryPrice);
 

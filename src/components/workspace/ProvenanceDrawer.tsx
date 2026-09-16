@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { DecisionArtifact, ProvenanceRecord, ProvenanceType } from "../../domain/decision/types";
 
 interface ProvenanceDrawerProps {
@@ -48,6 +48,16 @@ export function ProvenanceDrawer({
 }: ProvenanceDrawerProps) {
   const [activeTab, setActiveTab] = useState<ProvenanceType | "ALL">("ALL");
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const records = artifact.provenance.filter(
@@ -55,7 +65,7 @@ export function ProvenanceDrawer({
   );
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 flex justify-end">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 flex justify-end" role="dialog" aria-modal="true" aria-label="Provenance details">
       <div className="w-full max-w-xl bg-white shadow-2xl h-full flex flex-col border-l border-zinc-200">
         {/* Header */}
         <div className="border-b border-zinc-200 px-6 py-4 flex items-center justify-between bg-zinc-50">
@@ -75,7 +85,8 @@ export function ProvenanceDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-200 active:scale-[0.98] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+            aria-label="Close provenance drawer"
+            className="rounded-lg p-2 text-zinc-500 hover:text-zinc-800 hover:bg-zinc-200 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -91,7 +102,7 @@ export function ProvenanceDrawer({
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
-                className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap active:scale-[0.98] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden ${
+                className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden ${
                   activeTab === tab
                     ? "bg-zinc-900 text-white font-semibold"
                     : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
@@ -112,7 +123,7 @@ export function ProvenanceDrawer({
             return (
               <div
                 key={rec.id}
-                className={`rounded-xl border p-4 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                className={`rounded-xl border p-4 motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
                   isHighlight
                     ? "ring-2 ring-zinc-900 border-zinc-900 bg-zinc-50"
                     : "border-zinc-200 bg-white hover:border-zinc-300"
@@ -137,12 +148,12 @@ export function ProvenanceDrawer({
                       </span>
                     )}
                   </div>
-                  <span className="font-mono text-xs text-zinc-400">
+                  <span className="font-mono text-xs text-zinc-500">
                     {rec.id}
                   </span>
                 </div>
 
-                <h4 className="text-sm font-semibold text-zinc-900 [text-wrap:balance]">
+                <h4 className="text-sm font-semibold text-zinc-900 [text-wrap:balance] break-words">
                   {rec.source || rec.generatedBy || "System observation"}
                 </h4>
 
@@ -193,7 +204,7 @@ export function ProvenanceDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 font-medium text-zinc-700 hover:bg-zinc-100 active:scale-[0.98] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+            className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 font-medium text-zinc-700 hover:bg-zinc-100 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
           >
             Close drawer
           </button>

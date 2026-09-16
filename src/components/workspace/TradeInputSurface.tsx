@@ -68,7 +68,7 @@ export function TradeInputSurface({
           <label htmlFor="trade-input" className="block text-sm font-semibold text-zinc-900">
             Proposed trade and rationale
           </label>
-          <span className="text-xs text-zinc-400">Natural language parsed deterministically</span>
+          <span className="text-xs text-zinc-500">Natural language parsed deterministically</span>
         </div>
 
         <div>
@@ -78,7 +78,7 @@ export function TradeInputSurface({
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Describe what you plan to buy or sell and why..."
-            className="w-full rounded-xl border border-zinc-300 p-4 text-sm sm:text-base text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-900 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] resize-y [text-wrap:pretty]"
+            className="w-full rounded-xl border border-zinc-300 p-4 text-base text-zinc-900 placeholder:text-zinc-500 focus-visible:border-zinc-900 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] resize-y [text-wrap:pretty]"
             disabled={isLoading}
           />
         </div>
@@ -92,7 +92,7 @@ export function TradeInputSurface({
                 key={i}
                 type="button"
                 onClick={() => setPrompt(ex.text)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 active:scale-[0.98] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] text-left focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] text-left focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
               >
                 <span className="font-semibold text-zinc-900">{ex.badge}:</span>
                 <span className="truncate max-w-[200px] sm:max-w-xs">{ex.label}</span>
@@ -106,11 +106,11 @@ export function TradeInputSurface({
           <button
             type="submit"
             disabled={!prompt.trim() || isLoading}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-base font-semibold text-white shadow-xs hover:bg-zinc-800 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-base font-semibold text-white shadow-xs hover:bg-zinc-800 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
           >
             {isLoading ? (
               <>
-                <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                <svg className="motion-safe:animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>

@@ -42,9 +42,9 @@ export function ClarificationModal({
             <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
               Clarification needed
             </span>
-            <h3 className="text-lg font-bold text-zinc-900 mt-0.5 [text-wrap:balance]">
+            <h2 className="text-lg font-bold text-zinc-900 mt-0.5 [text-wrap:balance]">
               {question}
-            </h3>
+            </h2>
             <p className="text-xs text-zinc-600 mt-1 [text-wrap:pretty]">
               Field required for deterministic calculations: <span className="font-semibold text-zinc-800">{fieldName}</span>
             </p>
@@ -91,7 +91,7 @@ export function ClarificationModal({
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               placeholder={fieldName.toLowerCase().includes("size") ? "For example, $2,000" : "For example, long"}
-              className="w-full rounded-xl border border-zinc-300 px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-900 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              className="w-full rounded-xl border border-zinc-300 px-4 py-2.5 text-base text-zinc-900 placeholder:text-zinc-400 focus-visible:border-zinc-900 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
             />
           </div>
 
@@ -106,7 +106,7 @@ export function ClarificationModal({
             <button
               type="submit"
               disabled={!answer.trim()}
-              className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+              className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
             >
               Continue stress test
             </button>
