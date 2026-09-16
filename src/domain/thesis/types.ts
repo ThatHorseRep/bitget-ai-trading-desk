@@ -25,11 +25,15 @@ export interface Challenge {
   explanation: string;
 }
 
+export interface PositionQualityAssessment {
+  quality: ThesisQuality;
+  reasons: string[];
+  keyDrivers: string[];
+}
+
 export interface ThesisPositionAssessment {
   thesisQuality: ThesisQuality;
-  positionQuality: ThesisQuality;
+  positionQuality: PositionQualityAssessment;
   keyMismatch: string | null;
   explanation: string;
 }
-
-

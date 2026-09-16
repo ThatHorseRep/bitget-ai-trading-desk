@@ -488,7 +488,7 @@ export function DecisionArtifactView({
 
           {/* Position Quality Panel */}
           <div className={`rounded-xl border-2 p-5 space-y-3 shadow-xs relative bg-white ${
-            thesisPosition.positionQuality === "WEAKER"
+            thesisPosition.positionQuality.quality === "WEAKER"
               ? "border-rose-200"
               : "border-emerald-200"
           }`}>
@@ -504,13 +504,23 @@ export function DecisionArtifactView({
                 </span>
               </div>
               <span className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
-                thesisPosition.positionQuality === "WEAKER"
+                thesisPosition.positionQuality.quality === "WEAKER"
                   ? "bg-rose-100 text-rose-800"
                   : "bg-emerald-100 text-emerald-800"
               }`}>
-                {thesisPosition.positionQuality}
+                {thesisPosition.positionQuality.quality}
               </span>
             </div>
+            {thesisPosition.positionQuality.reasons && thesisPosition.positionQuality.reasons.length > 0 && (
+              <div className="mt-2 text-xs text-zinc-600 bg-zinc-50 p-2 rounded border border-zinc-200">
+                <div className="font-semibold text-zinc-800 mb-1 uppercase tracking-wide">Deterministic Drivers</div>
+                <ul className="list-disc pl-4 space-y-1">
+                  {thesisPosition.positionQuality.reasons.map((reason, idx) => (
+                    <li key={idx}>{reason}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <p className="text-sm text-zinc-700 leading-relaxed font-medium [text-wrap:pretty]">
               Execution vehicle, timing, and microstructure are compromised due to weekend illiquidity and off hours gap vulnerability.
             </p>

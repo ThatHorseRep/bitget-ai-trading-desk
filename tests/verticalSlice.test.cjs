@@ -52,8 +52,8 @@ test("full vertical slice executes end-to-end with fixture data", async () => {
   }
 
   // 7. Thesis vs Position
-  assert.ok(["STRONGER", "MIXED", "WEAKER"].includes(art.thesisPosition.thesisQuality));
-  assert.ok(["STRONGER", "MIXED", "WEAKER"].includes(art.thesisPosition.positionQuality));
+  assert.ok(["STRONGER", "MIXED", "WEAKER", "INSUFFICIENT"].includes(art.thesisPosition.thesisQuality));
+  assert.ok(["STRONGER", "MIXED", "WEAKER", "INSUFFICIENT"].includes(art.thesisPosition.positionQuality.quality));
   assert.ok(art.thesisPosition.explanation);
 
   // 8. Change Conditions

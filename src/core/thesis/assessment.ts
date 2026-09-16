@@ -25,15 +25,19 @@ export async function assessThesisVsPosition(
   challenge: Challenge,
   evidence: EvidenceItem[]
 ): Promise<ThesisPositionAssessment> {
-  const deterministicResult = classifyPositionQuality(scenarios, marketState);
+  const deterministicResult = classifyPositionQuality(scenarios, marketState, trade);
   const systemPrompt = `You are the final decision-support synthesizer.
 You must evaluate two things independently:
 1. Thesis Quality (STRONGER, MIXED, WEAKER, INSUFFICIENT): Based on the evidence and counter-thesis.
-2. Position Quality (STRONGER, MIXED, WEAKER, INSUFFICIENT): Determined deterministically as ${deterministicResult.positionQuality} based on stress scenario losses, liquidity, and basis risk.
+2. Position Quality (STRONGER, MIXED, WEAKER, INSUFFICIENT): Determined deterministically as ${deterministicResult.quality} based on stress scenario losses, liquidity, and basis risk.
+
+Deterministic Position Quality Reasons (DO NOT change these, just explain if asked):
+${deterministicResult.reasons.join('\n')}
 
 Rules:
 1. A strong thesis does NOT mean a strong position. If the token is illiquid or basis is severely disconnected, Position Quality must be WEAKER even if the thesis is STRONGER.
-2. Provide a concise explanation of any mismatch between thesis and position.`;
+2. Provide a concise explanation of any mismatch between thesis and position.
+3. Your final output must adhere strictly to the JSON schema.`;
 
   const userPrompt = `
 Trade Details:
@@ -55,36 +59,32 @@ Evidence:
 ${JSON.stringify(evidence, null, 2)}
   `;
 
-let result;
-try {
-  const client = getSeekAiClient();
-  const payload: SeekAiRequest = {
-    model: modelName,
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt }
-    ]
-  };
-  const resp = await client.chat(payload);
-  result = AssessmentSchema.parse(JSON.parse(resp.content));
-} catch (error) {
-  // Fallback to static narrative cache
-  const fallbackExplanation = getNarrative(deterministicResult.positionQuality);
-  result = {
-    thesisQuality: deterministicResult.positionQuality as any,
-    keyMismatch: null,
-    explanation: fallbackExplanation
-  };
-}
-
-
+  let result;
+  try {
+    const client = getSeekAiClient();
+    const payload: SeekAiRequest = {
+      model: modelName,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ]
+    };
+    const resp = await client.chat(payload);
+    result = AssessmentSchema.parse(JSON.parse(resp.content));
+  } catch (error) {
+    // Fallback to static narrative cache
+    const fallbackExplanation = getNarrative(deterministicResult.quality);
+    result = {
+      thesisQuality: deterministicResult.quality as ThesisQuality,
+      keyMismatch: null,
+      explanation: fallbackExplanation
+    };
+  }
 
   return {
     thesisQuality: result.thesisQuality as ThesisQuality,
-    positionQuality: deterministicResult.positionQuality as ThesisQuality,
+    positionQuality: deterministicResult,
     keyMismatch: result.keyMismatch,
     explanation: result.explanation
   };
 }
-
-

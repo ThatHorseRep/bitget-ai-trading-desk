@@ -27,12 +27,13 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     };
   }
 
-  if (inputs.thesisQuality === "WEAKER" && inputs.positionAssessment.positionQuality === "WEAKER") {
+  if (inputs.thesisQuality === "WEAKER" && inputs.positionAssessment.positionQuality.quality === "WEAKER") {
     return {
       verdict: "REJECT",
       reasons: [
         "The underlying thesis is contradicted by available market evidence.",
-        "The proposed position structure is vulnerable to adverse liquidity and microstructure shocks."
+        "The proposed position structure is vulnerable to adverse liquidity and microstructure shocks.",
+        ...inputs.positionAssessment.positionQuality.reasons
       ],
       blockers: [],
       changeConditions: ["Re-evaluate the trade only if fresh evidence invalidates the counter-thesis."]
@@ -59,13 +60,14 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
 
   // Off-hours / weekend position stress check
   const isWeekendOrOffHours = inputs.marketState.sessionStatus === "WEEKEND" || inputs.marketState.sessionStatus === "OFF_HOURS";
-  if (isWeekendOrOffHours && inputs.positionAssessment.positionQuality === "WEAKER") {
+  if (isWeekendOrOffHours && inputs.positionAssessment.positionQuality.quality === "WEAKER") {
     return {
       verdict: "WAIT",
       reasons: [
         `Underlying reference equity market is currently in ${inputs.marketState.sessionStatus} state with no continuous price discovery.`,
         "Thin top-of-book liquidity and unanchored off-hours basis create asymmetric downside risk before Monday's open.",
-        inputs.positionAssessment.keyMismatch ?? "Thesis quality does not rescue off-hours position fragility."
+        inputs.positionAssessment.keyMismatch ?? "Thesis quality does not rescue off-hours position fragility.",
+        ...inputs.positionAssessment.positionQuality.reasons
       ],
       blockers: [],
       changeConditions: [
@@ -75,12 +77,13 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     };
   }
 
-  if (inputs.positionAssessment.positionQuality === "WEAKER") {
+  if (inputs.positionAssessment.positionQuality.quality === "WEAKER") {
     return {
       verdict: "REDUCE",
       reasons: [
         "The proposed position size creates disproportionate exposure relative to observable liquidity and scenario drawdowns.",
-        inputs.positionAssessment.keyMismatch ?? "Position size/exposure exceeds optimal structural bounds."
+        inputs.positionAssessment.keyMismatch ?? "Position size/exposure exceeds optimal structural bounds.",
+        ...inputs.positionAssessment.positionQuality.reasons
       ],
       blockers: [],
       changeConditions: [
