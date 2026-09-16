@@ -8,7 +8,7 @@ export const rnvdaTradeIdea: TradeIdea = {
   asset: "rNVDA",
   direction: "LONG",
   positionSizeUsd: 2000,
-  thesis: "A current NVIDIA/AI-demand thesis supports upside in the underlying."
+  thesis: "I'm thinking about buying $2,000 of rNVDA because AI infrastructure demand still looks strong. BTC has been weakening all weekend. Stress-test it."
 };
 
 export function buildRnvdaDemoTrade(): NormalizedTrade {
@@ -62,8 +62,8 @@ export const rnvdaDemoMarketState: MarketState = {
 import type { Thesis, Challenge, ThesisPositionAssessment } from "../domain/thesis/types";
 
 export const rnvdaDemoThesis: Thesis = {
-  traderStatement: "A current NVIDIA/AI-demand thesis supports upside in the underlying.",
-  normalizedThesis: "NVIDIA's underlying demand and AI growth will continue to drive the asset's value higher.",
+  traderStatement: "I'm thinking about buying $2,000 of rNVDA because AI infrastructure demand still looks strong. BTC has been weakening all weekend. Stress-test it.",
+  normalizedThesis: "NVIDIA's underlying demand and AI growth will continue to drive the asset's value higher, disregarding immediate crypto market weakness.",
   assumptions: [
     { text: "AI demand remains strong", origin: "USER_STATED" },
     { text: "NVIDIA retains market leadership", origin: "AI_INFERRED" }
@@ -80,23 +80,23 @@ export const rnvdaDemoThesis: Thesis = {
 };
 
 export const rnvdaDemoChallenge: Challenge = {
-  counterThesis: "Market has fully priced in AI growth expectations, creating high sensitivity to any demand hiccups.",
-  vulnerableAssumptions: ["AI demand remains strong"],
+  counterThesis: "You are paying a ~3% premium on a weekend when BTC is weakening. You have 65.5 hours of un-anchored basis risk before Monday's open.",
+  vulnerableAssumptions: ["AI demand remains strong", "BTC weakness will not spill over to tokenized equities"],
   contradictoryEvidenceRefs: [],
   noMeaningfulCounterThesis: false,
-  explanation: "Macro conditions could tighten tech spending.",
+  explanation: "The fundamental thesis on AI infrastructure demand might hold, but paying a token premium during off-hours with negative crypto sentiment exposes you to significant basis risk.",
   modelInfo: { model: "FIXTURE_LLM", provider: "DEMO" }
 };
 
 export const rnvdaDemoThesisPosition: ThesisPositionAssessment = {
-  thesisQuality: "MIXED",
+  thesisQuality: "STRONGER",
   positionQuality: {
     quality: "WEAKER",
-    reasons: ["Trading rNVDA on weekend has high basis risk"],
-    keyDrivers: ["Weekend liquidity"]
+    reasons: ["Trading rNVDA on weekend has high basis risk (+2.56%)"],
+    keyDrivers: ["Weekend liquidity", "Basis premium"]
   },
   keyMismatch: "Weekend basis risk offsets fundamental NVDA thesis.",
-  explanation: "While the underlying thesis is strong, executing it over the weekend using a tokenized asset carries structural risks.",
+  explanation: "While the underlying thesis is strong, executing it over the weekend using a tokenized asset carries structural risks due to basis dislocation and crypto market contagion.",
   modelInfo: { model: "FIXTURE_LLM", provider: "DEMO" }
 };
 
