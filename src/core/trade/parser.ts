@@ -116,7 +116,7 @@ export function parseNaturalLanguageTrade(
   // 6. Existing exposure extraction (e.g. "already have BTC exposure" or "have $10,000 in ETH")
   const relevantExposure: ExistingExposure[] = [];
   
-  const exposureMatch = text.match(/\b(?:already have|holding|have|hold|exposure to)\s+(?:a\s+)?(?:\$?([\d,]+(?:\.\d+)?)\s*(k|m)?\s*(?:usd|dollars|usdt)?\s*(?:of|in)\s+)?([A-Za-z]{2,8})\b/i) || text.match(/\b([A-Za-z]{2,8})\s+exposure\b/i);
+  const exposureMatch = text.match(/\b(?:already have|holding|have|hold|exposure to)\s+(?:a\s+)?(?:\$?([\d,]+(?:\.\d+)?)\s*(k|m)?\s*(?:usd|dollars|usdt)?\s*(?:of|in)?\s+)?([A-Za-z]{2,8})\b/i) || text.match(/\b([A-Za-z]{2,8})\s+exposure\b/i);
 
   if (exposureMatch) {
     let val = 5000; // default estimated exposure if not specified
