@@ -31,13 +31,30 @@ export default function WorkspacePage() {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Step S02 -> S03 or S04
-  const handleInitialSubmit = (rawInput: string) => {
+  const handleInitialSubmit = async (rawInput: string) => {
     setPrompt(rawInput);
     setIsSubmitting(true);
     setErrorMessage(null);
 
     try {
       const parsed = parseNaturalLanguageTrade(rawInput);
+      
+      if (parsed.normalizedTrade && parsed.normalizedTrade.entryPriceSource === "SYSTEM_DERIVED" && parsed.normalizedTrade.entryPrice === 0) {
+         try {
+            const res = await fetch(`/api/market-price?asset=${parsed.normalizedTrade.asset}`);
+            if (res.ok) {
+               const data = await res.json();
+               if (data.price > 0) {
+                  parsed.normalizedTrade.entryPrice = data.price;
+                  parsed.normalizedTrade.entryBasisTimestamp = data.timestamp;
+                  parsed.normalizedTrade.quantity = parseFloat((parsed.normalizedTrade.positionSizeUsd / data.price).toFixed(8));
+               }
+            }
+         } catch (e) {
+            console.error("Failed to pre-fetch live price", e);
+         }
+      }
+
       setParsedResult(parsed);
 
       if (parsed.requiresClarification || !parsed.normalizedTrade) {
@@ -59,6 +76,9 @@ export default function WorkspacePage() {
     handleInitialSubmit(supplementalText);
   };
 
+  const [stages, setStages] = useState<AnalysisStage[]>([]);
+  const [activeStageIndex, setActiveStageIndex] = useState(-1);
+
   // Step S04 Confirmed -> Run S05 Analysis and Fetch Artifact
   const handleConfirmRunStressTest = async () => {
     if (!prompt || isAnalyzing) return;
@@ -66,6 +86,8 @@ export default function WorkspacePage() {
     setStep("ANALYZING");
     setIsAnalyzing(true);
     setErrorMessage(null);
+    setStages([]);
+    setActiveStageIndex(-1);
 
     abortControllerRef.current = new AbortController();
 
@@ -77,29 +99,66 @@ export default function WorkspacePage() {
         signal: abortControllerRef.current.signal
       });
 
-      let data: DecisionWorkflowResult | null = null;
-      try {
-        data = await response.json();
-      } catch (err: any) {
-        if (err.name === "AbortError") throw err;
-        throw new Error(`HTTP ${response.status}: Analysis failed and response was not valid JSON.`);
+      if (!response.ok && !response.body) {
+         throw new Error(`HTTP ${response.status}: Analysis failed.`);
       }
 
-      if (!response.ok || !data || data.step === "ERROR" || !data.artifact) {
-        setErrorMessage(data?.limitations?.[0] || `HTTP ${response.status}: Analysis failed.`);
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("Failed to start response stream");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let finalData: DecisionWorkflowResult | null = null;
+      let finalStatus = 200;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\\n");
+        buffer = lines.pop() || "";
+        
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const parsed = JSON.parse(line);
+            if (parsed.type === "progress") {
+              setStages(prev => {
+                 const exists = prev.find(s => s.id === parsed.stageId);
+                 if (exists) return prev;
+                 return [...prev, {
+                    id: parsed.stageId,
+                    label: parsed.message,
+                    description: parsed.message,
+                    status: "active"
+                 }];
+              });
+              setActiveStageIndex(prev => prev + 1);
+            } else if (parsed.type === "result" || parsed.type === "error") {
+              finalData = parsed.data;
+              finalStatus = parsed.status || 200;
+            }
+          } catch (e) {
+             console.error("Failed to parse stream line:", line);
+          }
+        }
+      }
+
+      if (!finalData || finalData.step === "ERROR" || !finalData.artifact) {
+        setErrorMessage(finalData?.limitations?.[0] || `HTTP ${finalStatus}: Analysis failed.`);
         setStep("ERROR");
         setIsAnalyzing(false);
         return;
       }
 
-      setArtifact(data.artifact);
+      setArtifact(finalData.artifact);
       setStep("DECISION_READY");
     } catch (err: any) {
       if (err.name === "AbortError") {
         return;
       }
       setErrorMessage(err instanceof Error ? err.message : "Network error during stress test.");
-
       setStep("ERROR");
     } finally {
       setIsAnalyzing(false);
@@ -162,7 +221,7 @@ export default function WorkspacePage() {
 
         {/* S05: Analysis Progress State */}
         {step === "ANALYZING" && (
-          <AnalysisProgressView />
+          <AnalysisProgressView stages={stages} activeStageIndex={activeStageIndex} />
         )}
 
         {/* S06: Decision Artifact Ready State */}

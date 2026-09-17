@@ -27,7 +27,6 @@ export function AnalysisProgressView({
           </p>
         </div>
 
-        {/* Bounded Operation Progress */}
         <div className="space-y-4">
           <div className="flex items-start gap-3.5 p-3 rounded-xl bg-indigo-50 border border-indigo-200 motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
             <div className="mt-0.5">
@@ -44,13 +43,27 @@ export function AnalysisProgressView({
                 <h3 className="text-sm font-semibold [text-wrap:balance] text-indigo-950">
                   Analyzing Trade
                 </h3>
-                <span className="text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-md motion-safe:animate-pulse">
-                  Processing
-                </span>
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-1.5 bg-indigo-200/50 rounded-full overflow-hidden hidden sm:block">
+                    <div 
+                       className="h-full bg-indigo-600 transition-all duration-500 ease-out"
+                       style={{ width: `${Math.min(100, Math.round((Math.max(0, activeStageIndex ?? 0) / 8) * 100))}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-semibold text-indigo-700 bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-md motion-safe:animate-pulse">
+                    Processing {Math.min(100, Math.round((Math.max(0, activeStageIndex ?? 0) / 8) * 100))}%
+                  </span>
+                </div>
               </div>
               <p className="text-xs text-zinc-500 mt-0.5 [text-wrap:pretty]">
                 The desk is currently reconstructing market state, finding relevant contradictions, stress-testing the position, and synthesizing the decision.
               </p>
+              
+              {stages && stages.length > 0 && activeStageIndex !== undefined && stages[activeStageIndex] && (
+                <p className="text-xs font-medium text-indigo-700 mt-2.5 bg-indigo-100/50 inline-block px-2 py-1 rounded-md">
+                  Current Action: {stages[activeStageIndex].label}
+                </p>
+              )}
             </div>
           </div>
         </div>

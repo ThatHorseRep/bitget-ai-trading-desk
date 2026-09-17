@@ -14,7 +14,7 @@ export interface ParsedTradeResult {
 
 export function parseNaturalLanguageTrade(
   input: string,
-  workingPrice = 219.22,
+  workingPrice = 0,
   workingPriceTimestamp: string = new Date().toISOString()
 ): ParsedTradeResult {
   const text = input.trim();
@@ -190,8 +190,8 @@ export function parseNaturalLanguageTrade(
   if (!requiresClarification && asset && direction && positionSizeUsd && positionSizeUsd > 0) {
     const canonicalSymbol = asset === "rNVDA" ? "rNVDAUSDT" : `${asset}USDT`;
     const referenceAsset = asset.startsWith("r") && asset.length > 1 ? asset.substring(1).toUpperCase() : undefined;
-    const entryPrice = explicitPrice !== null ? explicitPrice : (workingPrice > 0 ? workingPrice : 120);
-    const quantity = calculatePositionQuantity(positionSizeUsd, entryPrice);
+    const entryPrice = explicitPrice !== null ? explicitPrice : (workingPrice > 0 ? workingPrice : 0);
+    const quantity = entryPrice > 0 ? calculatePositionQuantity(positionSizeUsd, entryPrice) : 0;
 
     derived.push("canonicalSymbol");
     derived.push("referenceAsset");

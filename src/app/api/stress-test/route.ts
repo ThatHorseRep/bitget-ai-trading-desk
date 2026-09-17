@@ -86,21 +86,56 @@ export async function POST(request: NextRequest) {
 
     const { input, useFixture } = parseResult.data;
     const deskService = new DecisionDeskService();
-    const result = await deskService.runWorkflow(input, { useFixture, signal: request.signal });
+    
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          const result = await deskService.runWorkflow(input, { 
+            useFixture, 
+            signal: request.signal,
+            onProgress: (stageId, message) => {
+              try {
+                if (!request.signal.aborted) {
+                  controller.enqueue(encoder.encode(JSON.stringify({ type: "progress", stageId, message }) + "\\n"));
+                }
+              } catch (e) {
+                // Ignore enqueue errors if the client abruptly disconnected and the controller is closed
+              }
+            }
+          });
+          
+          let status = 200;
+          if (result.step === "CLARIFICATION") status = 422;
+          else if (result.step === "ERROR") status = 502;
+          
+          controller.enqueue(encoder.encode(JSON.stringify({ type: "result", status, data: result }) + "\\n"));
+          controller.close();
+        } catch (error) {
+          console.error("Internal service error during stream:", error);
+          controller.enqueue(encoder.encode(JSON.stringify({ 
+            type: "error", 
+            status: 500,
+            data: {
+              step: "ERROR",
+              parsedResult: null,
+              artifact: null,
+              limitations: ["An internal error occurred while processing your request."],
+            }
+          }) + "\\n"));
+          controller.close();
+        }
+      }
+    });
 
-    if (result.step === "CLARIFICATION") {
-      return NextResponse.json(result, { status: 422 });
-    }
-
-    if (result.step === "ERROR") {
-      // Assuming ERROR at this stage corresponds to an upstream failure in market state or evidence retrieval.
-      return NextResponse.json(result, { status: 502 });
-    }
-
-    return NextResponse.json(result, { status: 200 });
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'application/x-ndjson',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      }
+    });
   } catch (error) {
-    // 6. Do not leak secrets, raw stack traces, API keys, or unnecessary provider internals to the client.
-    // 7. Ensure error messages are useful to the user but safe to expose.
     console.error("Internal service error:", error);
     return NextResponse.json(
       {

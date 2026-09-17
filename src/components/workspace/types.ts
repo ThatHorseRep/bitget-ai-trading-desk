@@ -10,7 +10,7 @@ export type WorkspaceStep =
   | "ERROR";
 
 export interface AnalysisStage {
-  id: number;
+  id: string;
   label: string;
   description: string;
   detail?: string;

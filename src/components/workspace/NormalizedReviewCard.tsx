@@ -142,19 +142,27 @@ export function NormalizedReviewCard({
                 <div className="flex justify-between items-center py-1 border-b border-zinc-200">
                   <div className="flex flex-col">
                     <span className="text-xs text-zinc-500">Working entry price:</span>
-                    {normalizedTrade.entryBasisTimestamp && (
+                    {normalizedTrade.entryBasisTimestamp && normalizedTrade.entryPrice > 0 && (
                       <span className="text-[10px] text-zinc-400">
                         Observed: {new Date(normalizedTrade.entryBasisTimestamp).toLocaleString()}
                       </span>
                     )}
                   </div>
-                  <span className="font-mono text-xs font-semibold text-zinc-800">${normalizedTrade.entryPrice.toFixed(2)}</span>
+                  {normalizedTrade.entryPrice > 0 ? (
+                    <span className="font-mono text-xs font-semibold text-zinc-800">${normalizedTrade.entryPrice.toFixed(2)}</span>
+                  ) : (
+                    <span className="text-xs font-medium italic text-zinc-400">Pending live fetch...</span>
+                  )}
                 </div>
               )}
 
               <div className="flex justify-between items-center py-1 border-b border-zinc-200">
                 <span className="text-xs text-zinc-500">Implied token quantity:</span>
-                <span className="font-mono text-xs font-semibold text-zinc-800">{normalizedTrade.quantity.toFixed(4)} {normalizedTrade.asset}</span>
+                {normalizedTrade.quantity > 0 ? (
+                  <span className="font-mono text-xs font-semibold text-zinc-800">{normalizedTrade.quantity.toFixed(4)} {normalizedTrade.asset}</span>
+                ) : (
+                  <span className="text-xs font-medium italic text-zinc-400">Calculated at execution</span>
+                )}
               </div>
 
               {parsedResult.inferredFields.length > 0 && (

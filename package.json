@@ -17,9 +17,10 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
-    "next": "16.1.0",
+    "next": "^16.3.5",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "sharp": "^0.35.4",
     "zod": "^4.6.3"
   },
   "devDependencies": {
@@ -31,12 +32,10 @@
     "dotenv": "^17.4.2",
     "eslint": "9.17.0",
     "eslint-config-next": "16.1.0",
-    "postcss": "8.4.49",
+    "postcss": "^8.4.49",
     "tailwindcss": "4.1.17",
     "ts-node": "^10.9.2",
     "typescript": "5.8.3"
   },
   "description": "Adversarial pre‑trade risk workbench for tokenized equities"
 }
-
-
