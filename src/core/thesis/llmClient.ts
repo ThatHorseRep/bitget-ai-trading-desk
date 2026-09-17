@@ -104,7 +104,7 @@ class LLMProvider {
       };
     } catch (err) {
       clearTimeout(timeout);
-      if (!isRetry && (err as Error).name !== "AbortError") {
+      if (!isRetry) {
         console.warn("LLM Request failed, retrying once in 2 seconds...");
         await new Promise(r => setTimeout(r, 2000));
         return this.chat(request, true);

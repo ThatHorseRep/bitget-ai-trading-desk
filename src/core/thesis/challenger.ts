@@ -95,8 +95,11 @@ ${evidenceText}
       parsed = ChallengerSchema.parse(JSON.parse(resp.content));
       break;
     } catch (err) {
-      if ((err as Error).name === "AbortError" || attempt === maxAttempts) {
-        throw new Error(`Failed to generate challenge after ${attempt} attempts. Error: ${(err as Error).message}`);
+      if (!resp) {
+        throw new Error(`LLM API or network failure: ${err instanceof Error ? err.message : String(err)}`);
+      }
+      if (attempt === maxAttempts) {
+        throw new Error(`Failed to generate challenge after ${attempt} attempts. Error: ${err instanceof Error ? err.message : String(err)}`);
       }
       console.warn("Challenger JSON parse failed, retrying...");
       if (resp && resp.content) {

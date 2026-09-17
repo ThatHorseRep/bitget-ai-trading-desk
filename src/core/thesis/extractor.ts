@@ -87,7 +87,10 @@ ${evidenceText}
       parsed = ExtractionSchema.parse(JSON.parse(resp.content));
       break; // Success, exit retry loop
     } catch (err) {
-      if ((err as Error).name === "AbortError" || attempt === maxAttempts) {
+      if (!resp) {
+        throw new Error(`LLM API or network failure: ${err instanceof Error ? err.message : String(err)}`);
+      }
+      if (attempt === maxAttempts) {
         throw new Error(`Failed to extract thesis after ${attempt} attempts. Error: ${err instanceof Error ? err.message : String(err)}`);
       }
       console.warn("Extractor JSON parse failed, retrying with stronger format instructions...");

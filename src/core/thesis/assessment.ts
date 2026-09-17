@@ -92,8 +92,11 @@ ${evidenceText}
       parsed = AssessmentSchema.parse(JSON.parse(resp.content));
       break;
     } catch (error) {
-      if ((error as Error).name === "AbortError" || attempt === maxAttempts) {
-        throw new Error(`Failed to assess thesis after ${attempt} attempts. Error: ${(error as Error).message}`);
+      if (!resp) {
+        throw new Error(`LLM API or network failure: ${error instanceof Error ? error.message : String(error)}`);
+      }
+      if (attempt === maxAttempts) {
+        throw new Error(`Failed to assess thesis after ${attempt} attempts. Error: ${error instanceof Error ? error.message : String(error)}`);
       }
       console.warn("Assessment JSON parse failed, retrying...");
       if (resp && resp.content) {

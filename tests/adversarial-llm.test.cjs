@@ -176,7 +176,7 @@ test("Adversarial LLM Tests", async (t) => {
     const result = await service.runWorkflow("buy $1000 of rNVDA because of AI", { useFixture: false });
     assert.equal(result.step, "DECISION_READY");
     assert.ok(result.limitations.some(l => l.includes("LLM request failed (429)")));
-    assert.equal(fetchCount, 4); // 2 extractor attempts * 2 llmClient attempts
+    assert.equal(fetchCount, 2);
   });
 
   await t.test("Provider 5xx Server Error", async () => {
@@ -189,7 +189,7 @@ test("Adversarial LLM Tests", async (t) => {
     const result = await service.runWorkflow("buy $1000 of rNVDA because of AI", { useFixture: false });
     assert.equal(result.step, "DECISION_READY");
     assert.ok(result.limitations.some(l => l.includes("LLM request failed (500)")));
-    assert.equal(fetchCount, 4);
+    assert.equal(fetchCount, 2);
   });
 
   await t.test("Provider Timeout", async () => {
@@ -204,7 +204,7 @@ test("Adversarial LLM Tests", async (t) => {
     const result = await service.runWorkflow("buy $1000 of rNVDA because of AI", { useFixture: false });
     assert.equal(result.step, "DECISION_READY");
     assert.ok(result.limitations.some(l => l.includes("timeout")));
-    assert.equal(fetchCount, 4);
+    assert.equal(fetchCount, 2);
   });
 
   await t.test("Prompt Injection in User Text", async () => {
