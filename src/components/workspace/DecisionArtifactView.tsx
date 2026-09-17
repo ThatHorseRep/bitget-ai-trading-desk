@@ -436,9 +436,9 @@ export function DecisionArtifactView({
             return (
               <div
                 key={sc.id}
-                className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 space-y-3 flex flex-col justify-between"
+                className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 flex flex-col h-full"
               >
-                <div>
+                <div className="flex-1 mb-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-zinc-500 font-mono">
                       {sc.id}
@@ -447,10 +447,10 @@ export function DecisionArtifactView({
                       STRESS
                     </span>
                   </div>
-                  <h4 className="text-sm font-bold text-zinc-900 mt-1 [text-wrap:balance]">
+                  <h4 className="text-sm font-bold text-zinc-900 mt-2 [text-wrap:balance]">
                     {sc.name}
                   </h4>
-                  <p className="text-xs text-zinc-500 mt-1 [text-wrap:pretty]">
+                  <p className="text-xs text-zinc-500 mt-1.5 [text-wrap:pretty]">
                     {sc.description}
                   </p>
                 </div>
@@ -487,7 +487,7 @@ export function DecisionArtifactView({
                 </div>
 
                 {sc.assumptions && sc.assumptions.length > 0 && (
-                  <div className="bg-white p-2.5 rounded-lg border border-zinc-200 text-xs text-zinc-600 font-mono [text-wrap:pretty] space-y-1">
+                  <div className="mt-3 bg-white p-2.5 rounded-lg border border-zinc-200 text-xs text-zinc-600 font-mono [text-wrap:pretty] space-y-1">
                     <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">Assumptions:</div>
                     {sc.assumptions.map((a, i) => (
                       <div key={i}>- {a}</div>

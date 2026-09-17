@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
             onProgress: (stageId, message) => {
               try {
                 if (!request.signal.aborted) {
-                  controller.enqueue(encoder.encode(JSON.stringify({ type: "progress", stageId, message }) + "\\n"));
+                  controller.enqueue(encoder.encode(JSON.stringify({ type: "progress", stageId, message }) + "\n"));
                 }
               } catch (e) {
                 // Ignore enqueue errors if the client abruptly disconnected and the controller is closed
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
           if (result.step === "CLARIFICATION") status = 422;
           else if (result.step === "ERROR") status = 502;
           
-          controller.enqueue(encoder.encode(JSON.stringify({ type: "result", status, data: result }) + "\\n"));
+          controller.enqueue(encoder.encode(JSON.stringify({ type: "result", status, data: result }) + "\n"));
           controller.close();
         } catch (error) {
           console.error("Internal service error during stream:", error);
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
               artifact: null,
               limitations: ["An internal error occurred while processing your request."],
             }
-          }) + "\\n"));
+          }) + "\n"));
           controller.close();
         }
       }
