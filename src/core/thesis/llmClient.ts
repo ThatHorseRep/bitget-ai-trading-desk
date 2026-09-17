@@ -46,7 +46,7 @@ class LLMProvider {
     }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 90000); // 90s timeout
+    const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout to prevent Vercel 60s limit
 
     try {
       const response = await fetch(endpoint, {
