@@ -1,3 +1,5 @@
+export const maxDuration = 60;
+
 import { NextResponse, type NextRequest } from "next/server";
 import { DecisionDeskService } from "../../../services/decisionDeskService";
 import { z } from "zod";

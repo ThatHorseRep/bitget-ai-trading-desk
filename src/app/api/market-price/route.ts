@@ -1,3 +1,5 @@
+export const maxDuration = 60;
+
 import { NextResponse, type NextRequest } from "next/server";
 import { MarketStateService } from "../../../services/marketStateService";
 import { z } from "zod";
