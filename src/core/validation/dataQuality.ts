@@ -16,9 +16,14 @@ export function assessMarketDataQuality(state: MarketState, now = new Date(), st
   if (!Number.isFinite(state.instrumentPrice) || state.instrumentPrice <= 0) issues.push("missing or invalid instrument price");
   if (state.bid === null || state.ask === null) issues.push("bid/ask unavailable");
   if (state.referencePrice === null) issues.push("reference price unavailable");
+  else if (state.referenceObservedAt) {
+    const refObservedMs = Date.parse(state.referenceObservedAt);
+    if (!Number.isFinite(refObservedMs)) issues.push("invalid reference observedAt timestamp");
+    else if (now.getTime() - refObservedMs > 4 * 24 * 60 * 60 * 1000) issues.push("reference observation is severely stale");
+  }
   if (state.btcPrice === null) issues.push("BTC price unavailable");
 
-  if (issues.some((issue) => issue === "missing or invalid instrument price" || issue === "invalid observedAt timestamp")) return { status: "INVALID", issues };
+  if (issues.some((issue) => issue === "missing or invalid instrument price" || issue === "invalid observedAt timestamp" || issue === "instrument observation is stale" || issue === "reference observation is severely stale")) return { status: "INVALID", issues };
   if (issues.length > 0) return { status: "DEGRADED", issues };
   return { status: "COMPLETE", issues: [] };
 }

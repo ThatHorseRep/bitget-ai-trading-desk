@@ -15,6 +15,13 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
+  // Occasional cleanup of expired entries
+  if (rateLimitMap.size > 1000) {
+    for (const [key, val] of rateLimitMap.entries()) {
+      if (now > val.resetTime) rateLimitMap.delete(key);
+    }
+  }
+
   const record = rateLimitMap.get(ip);
   if (record) {
     if (now > record.resetTime) {
@@ -79,7 +86,7 @@ export async function POST(request: NextRequest) {
 
     const { input, useFixture } = parseResult.data;
     const deskService = new DecisionDeskService();
-    const result = await deskService.runWorkflow(input, { useFixture });
+    const result = await deskService.runWorkflow(input, { useFixture, signal: request.signal });
 
     if (result.step === "CLARIFICATION") {
       return NextResponse.json(result, { status: 422 });

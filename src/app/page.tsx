@@ -77,14 +77,16 @@ export default function WorkspacePage() {
         signal: abortControllerRef.current.signal
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: Analysis failed.`);
+      let data: DecisionWorkflowResult | null = null;
+      try {
+        data = await response.json();
+      } catch (err: any) {
+        if (err.name === "AbortError") throw err;
+        throw new Error(`HTTP ${response.status}: Analysis failed and response was not valid JSON.`);
       }
 
-      const data: DecisionWorkflowResult = await response.json();
-
-      if (data.step === "ERROR" || !data.artifact) {
-        setErrorMessage(data.limitations?.[0] || "Stress test analysis failed.");
+      if (!response.ok || !data || data.step === "ERROR" || !data.artifact) {
+        setErrorMessage(data?.limitations?.[0] || `HTTP ${response.status}: Analysis failed.`);
         setStep("ERROR");
         setIsAnalyzing(false);
         return;

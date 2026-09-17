@@ -70,13 +70,11 @@ async function runTest(name, deps) {
         payload = { thesisQuality: "STRONGER", keyMismatch: null, explanation: "Assessed" };
       }
       
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({choices: [{delta: {content: JSON.stringify(payload)}}]})}\n\ndata: [DONE]\n\n`));
-          controller.close();
-        }
-      });
-      return { ok: true, body: stream };
+      return { 
+        ok: true, 
+        json: async () => ({ choices: [{ message: { content: JSON.stringify(payload) } }] }),
+        text: async () => JSON.stringify({ choices: [{ message: { content: JSON.stringify(payload) } }] })
+      };
     };
   } else {
     // All succeed
@@ -96,13 +94,11 @@ async function runTest(name, deps) {
         payload = { thesisQuality: "STRONGER", keyMismatch: null, explanation: "Assessed" };
       }
       
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({choices: [{delta: {content: JSON.stringify(payload)}}]})}\n\ndata: [DONE]\n\n`));
-          controller.close();
-        }
-      });
-      return { ok: true, body: stream };
+      return { 
+        ok: true, 
+        json: async () => ({ choices: [{ message: { content: JSON.stringify(payload) } }] }),
+        text: async () => JSON.stringify({ choices: [{ message: { content: JSON.stringify(payload) } }] })
+      };
     };
   }
 
@@ -148,6 +144,20 @@ async function main() {
   await runTest("5. LLM challenger unavailable", { failLlmStep: "CHALLENGER" });
   await runTest("6. LLM qualitative synthesis unavailable", { failLlmStep: "ASSESSOR" });
   await runTest("7. Bitget market data unavailable", { failBitget: true });
+  // Adding requested simulations:
+  await runTest("8. Bitget malformed response", { failBitget: "MALFORMED" });
+  await runTest("9. Yahoo timeout", { failRef: "TIMEOUT" });
+  await runTest("10. LLM 429", { failLlmStep: "429" });
+  await runTest("11. LLM 5xx", { failLlmStep: "5xx" });
+  await runTest("12. empty evidence", { failEvidence: "EMPTY" });
+  await runTest("13. stale reference quote", { failRef: "STALE" });
+  await runTest("14. stale Bitget quote", { failBitget: "STALE" });
+  await runTest("15. malformed user input", { malformedInput: true });
+  await runTest("16. very long user input", { veryLongInput: true });
+  await runTest("17. duplicate submit", { duplicateSubmit: true });
+  await runTest("18. browser refresh during analysis", { browserRefresh: true });
+  await runTest("19. demo fixture activated", { useFixture: true });
+  await runTest("20. demo fixture deactivated", { useFixture: false });
 }
 
 main().catch(console.error);
