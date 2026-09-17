@@ -13,6 +13,8 @@ import { classifyPositionQuality } from "../core/decision/classifyPosition";
 import { MarketStateService } from "./marketStateService";
 import { CompositeEvidenceProvider } from "../adapters/evidence/provider";
 import type { EvidenceProvider } from "../adapters/evidence/types";
+import { ResearchProviderRegistry } from "../adapters/research/registry";
+import { LegacyEvidenceProviderAdapter } from "../adapters/research/legacyAdapter";
 import { validateNormalizedTrade } from "../core/validation/runtime";
 import { rnvdaDemoThesis, rnvdaDemoChallenge, rnvdaDemoThesisPosition, rnvdaDemoEvidence } from "../fixtures/rnvda-demo";
 
@@ -20,6 +22,7 @@ export interface DecisionDeskOptions {
   useFixture?: boolean;
   marketStateService?: MarketStateService;
   evidenceProvider?: EvidenceProvider;
+  researchRegistry?: ResearchProviderRegistry;
   now?: Date;
   signal?: AbortSignal;
   onProgress?: (stageId: string, message: string) => void;
@@ -35,13 +38,21 @@ export interface DecisionWorkflowResult {
 export class DecisionDeskService {
   private marketStateService: MarketStateService;
   private evidenceProvider: EvidenceProvider;
+  private researchRegistry: ResearchProviderRegistry;
 
   constructor(
     marketStateService: MarketStateService = new MarketStateService(),
-    evidenceProvider: EvidenceProvider = new CompositeEvidenceProvider()
+    evidenceProvider: EvidenceProvider = new CompositeEvidenceProvider(),
+    researchRegistry?: ResearchProviderRegistry
   ) {
     this.marketStateService = marketStateService;
     this.evidenceProvider = evidenceProvider;
+    if (researchRegistry) {
+      this.researchRegistry = researchRegistry;
+    } else {
+      this.researchRegistry = new ResearchProviderRegistry();
+      this.researchRegistry.register(new LegacyEvidenceProviderAdapter(this.evidenceProvider));
+    }
   }
 
   async runWorkflow(
@@ -115,11 +126,21 @@ export class DecisionDeskService {
       evidence = rnvdaDemoEvidence;
     } else {
       try {
-        evidence = await this.evidenceProvider.retrieveEvidence({
-          asset: trade.asset,
-          topic: trade.thesis,
-          maxRecords: 5
-        });
+        const registryToUse = options.researchRegistry ?? this.researchRegistry;
+        const observations = await registryToUse.gatherObservations(trade.asset, trade.thesis);
+        
+        evidence = observations.map(obs => ({
+          id: obs.id,
+          providerId: obs.providerId,
+          source: obs.source,
+          title: obs.title,
+          summary: obs.summary,
+          retrievedAt: obs.observedTimestamp,
+          url: obs.url,
+          state: obs.providerStatus === "UNAVAILABLE" ? "UNAVAILABLE" 
+               : (obs.providerId === "legacy-evidence-provider" ? "LIVE_RETRIEVED" : "RESEARCH_PROVIDER"),
+          provenanceType: "OBSERVED_FACT"
+        }));
       } catch (err) {
         limitations.push(`Evidence retrieval failed: ${(err as Error).message}. Operating without external evidence.`);
       }

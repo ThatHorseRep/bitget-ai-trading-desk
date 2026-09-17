@@ -79,7 +79,7 @@ export interface ProvenanceRecord {
   modelIdentity?: string;
 }
 
-export type EvidenceState = "LIVE_RETRIEVED" | "CURATED_DEMO_FIXTURE" | "UNAVAILABLE";
+export type EvidenceState = "LIVE_RETRIEVED" | "CURATED_DEMO_FIXTURE" | "UNAVAILABLE" | "RESEARCH_PROVIDER";
 
 export interface EvidenceItem {
   id: string;
@@ -91,6 +91,7 @@ export interface EvidenceItem {
   summary: string;
   state: EvidenceState;
   provenanceType: "OBSERVED_FACT";
+  providerId?: string;
 }
 
 
