@@ -46,7 +46,7 @@ class LLMProvider {
     }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+    const timeout = setTimeout(() => controller.abort(), 90000); // 90s timeout
 
     try {
       const response = await fetch(endpoint, {
@@ -55,7 +55,7 @@ class LLMProvider {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`
         },
-        body: JSON.stringify({ ...request, model, stream: true, response_format: { type: "json_object" } }),
+        body: JSON.stringify({ ...request, model, stream: false, response_format: { type: "json_object" } }),
         signal: controller.signal
       });
       clearTimeout(timeout);
@@ -65,31 +65,16 @@ class LLMProvider {
         throw new Error(`LLM request failed (${response.status}): ${text}`);
       }
       
-      if (!response.body) throw new Error("No response body");
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder("utf-8");
       let content = "";
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ""; // keep the last incomplete line
-        for (let line of lines) {
-          line = line.trim();
-          if (line.startsWith('data: ') && line !== 'data: [DONE]') {
-            try {
-              const data = JSON.parse(line.slice(6));
-              if (data.choices && data.choices[0] && data.choices[0].delta && typeof data.choices[0].delta.content === 'string') {
-                content += data.choices[0].delta.content;
-              }
-            } catch (e) {
-              // ignore parse error on incomplete chunk
-            }
-          }
+      try {
+        const jsonBody = await response.json();
+        if (jsonBody.choices && jsonBody.choices[0] && jsonBody.choices[0].message) {
+          content = jsonBody.choices[0].message.content || "";
+        } else {
+          content = JSON.stringify(jsonBody);
         }
+      } catch (err) {
+        throw new Error("Failed to parse non-stream JSON response: " + (err as Error).message);
       }
       
       // Transparently extract JSON if it's wrapped in markdown
@@ -119,7 +104,8 @@ class LLMProvider {
     } catch (err) {
       clearTimeout(timeout);
       if (!isRetry) {
-        console.warn("LLM Request failed, retrying once...");
+        console.warn("LLM Request failed, retrying once in 2 seconds...");
+        await new Promise(r => setTimeout(r, 2000));
         return this.chat(request, true);
       }
       console.error("LLM CLIENT ERROR (Retry failed):", err);

@@ -3,6 +3,7 @@ import type { NormalizedTrade } from "../../domain/trade/types";
 import type { StressScenario, ScenarioConfig } from "../../domain/scenarios/types";
 import { calculatePnlPct, calculateScenarioPnl, roundFinancial } from "../calculations/financial";
 import { classifyLiquidity } from "../calculations/market";
+import { ASSET_RISK_PROFILES } from "./config";
 
 const percentMultiplier = (pct: number) => 1 + pct / 100;
 const boundedPrice = (price: number) => Math.max(0.00000001, price);
@@ -32,6 +33,31 @@ function baseScenario(
 
 export function runStressScenarios(trade: NormalizedTrade, state: MarketState, config: ScenarioConfig): StressScenario[] {
   const hasValidTradePosition = trade.quantity > 0 && trade.entryPrice > 0 && trade.positionSizeUsd > 0;
+  const profile = ASSET_RISK_PROFILES[trade.asset] || ASSET_RISK_PROFILES["DEFAULT"];
+  
+  let daysHeld = 0;
+  if (trade.timeHorizon) {
+    const th = trade.timeHorizon.toLowerCase();
+    if (th.includes("weekend") || th.includes("monday")) daysHeld = 3;
+    else if (th.includes("month")) daysHeld = 30;
+    else if (th.includes("week")) daysHeld = 7;
+    else if (th.includes("intraday") || th.includes("day trade")) daysHeld = 0;
+    else daysHeld = 1;
+  }
+  const carryCostUsd = trade.direction === "SHORT" ? (trade.positionSizeUsd * profile.dailyBorrowPct * daysHeld / 100) : 0;
+  
+  const getPnl = (price: number) => {
+    let pnl = calculateScenarioPnl(trade.direction, trade.quantity, trade.entryPrice, price);
+    if (carryCostUsd > 0) pnl -= carryCostUsd;
+    return roundFinancial(pnl);
+  };
+  
+  const addCarryLimitation = (limitations: string[]) => {
+    if (carryCostUsd > 0) {
+      limitations.push(`Includes estimated carry cost of $${carryCostUsd.toFixed(2)} over ${daysHeld} days (${profile.dailyBorrowPct}% daily borrow rate).`);
+    }
+  };
+
   
   // 1. MARKET_RISK
   const adverseMarketShockPct = trade.direction === "LONG" ? -Math.abs(config.marketShockPct) : Math.abs(config.marketShockPct);
@@ -51,22 +77,24 @@ export function runStressScenarios(trade: NormalizedTrade, state: MarketState, c
   } else {
     market.shockedTokenPrice = roundFinancial(boundedPrice(state.instrumentPrice * percentMultiplier(adverseMarketShockPct)));
     market.shockedReferencePrice = state.referencePrice === null ? null : roundFinancial(boundedPrice(state.referencePrice * percentMultiplier(adverseMarketShockPct)));
-    market.estimatedPnlUsd = calculateScenarioPnl(trade.direction, trade.quantity, trade.entryPrice, market.shockedTokenPrice);
+    market.estimatedPnlUsd = getPnl(market.shockedTokenPrice);
     market.estimatedPnlPct = calculatePnlPct(market.estimatedPnlUsd, trade.positionSizeUsd);
+    addCarryLimitation(market.limitations);
   }
 
   const isTokenizedEquity = trade.instrumentType === "TOKENIZED_EQUITY";
 
   // 2. CRYPTO_CONTAGION
-  const adverseContagionShockPct = trade.direction === "LONG" ? -Math.abs(config.cryptoContagionTokenShockPct) : Math.abs(config.cryptoContagionTokenShockPct);
+  const contagionTokenShockBase = Math.abs(config.btcShockPct) * profile.betaToBtc;
+  const adverseContagionShockPct = trade.direction === "LONG" ? -contagionTokenShockBase : contagionTokenShockBase;
   const contagion = baseScenario(
     "CRYPTO_CONTAGION",
     "Crypto contagion",
     "BTC falls sharply while the token remains tradable.",
     [
       `Assume BTC falls ${config.btcShockPct}%.`,
-      `Assume the token experiences a direct ${Math.abs(config.cryptoContagionTokenShockPct)}% adverse shock (applied as ${adverseContagionShockPct}%).`,
-      "No beta is inferred."
+      `Token beta to BTC is ${profile.betaToBtc}.`,
+      `Assume the token experiences a direct ${contagionTokenShockBase.toFixed(2)}% adverse shock (applied as ${adverseContagionShockPct.toFixed(2)}%).`
     ]
   );
   if (trade.instrumentType === "UNSUPPORTED") {
@@ -83,8 +111,9 @@ export function runStressScenarios(trade: NormalizedTrade, state: MarketState, c
     contagion.limitations.push("Trade position size, quantity, or entry price is invalid.");
   } else {
     contagion.shockedTokenPrice = roundFinancial(boundedPrice(state.instrumentPrice * percentMultiplier(adverseContagionShockPct)));
-    contagion.estimatedPnlUsd = calculateScenarioPnl(trade.direction, trade.quantity, trade.entryPrice, contagion.shockedTokenPrice);
+    contagion.estimatedPnlUsd = getPnl(contagion.shockedTokenPrice);
     contagion.estimatedPnlPct = calculatePnlPct(contagion.estimatedPnlUsd, trade.positionSizeUsd);
+    addCarryLimitation(contagion.limitations);
   }
 
   // 3. TOKEN_MICROSTRUCTURE
@@ -116,9 +145,10 @@ export function runStressScenarios(trade: NormalizedTrade, state: MarketState, c
     micro.basisImpact = roundFinancial(basisShift);
     micro.shockedReferencePrice = state.referencePrice;
     micro.shockedTokenPrice = roundFinancial(boundedPrice(state.referencePrice * percentMultiplier(stressedBasisPct)));
-    micro.estimatedPnlUsd = calculateScenarioPnl(trade.direction, trade.quantity, trade.entryPrice, micro.shockedTokenPrice);
+    micro.estimatedPnlUsd = getPnl(micro.shockedTokenPrice);
     micro.estimatedPnlPct = calculatePnlPct(micro.estimatedPnlUsd, trade.positionSizeUsd);
     micro.liquidityImpact = -Math.abs(config.liquidityReductionPct);
+    addCarryLimitation(micro.limitations);
     
     if (state.bidSize !== null && state.askSize !== null && state.bidSize >= 0 && state.askSize >= 0) {
       const stressedLiquidity = classifyLiquidity(
@@ -198,8 +228,9 @@ export function runStressScenarios(trade: NormalizedTrade, state: MarketState, c
       combined.limitations.push("Top-of-book sizes are unavailable; stressed liquidity class cannot be determined.");
     }
 
-    combined.estimatedPnlUsd = calculateScenarioPnl(trade.direction, trade.quantity, trade.entryPrice, stressedToken);
+    combined.estimatedPnlUsd = getPnl(stressedToken);
     combined.estimatedPnlPct = calculatePnlPct(combined.estimatedPnlUsd, trade.positionSizeUsd);
+    addCarryLimitation(combined.limitations);
   }
 
   // 5. THESIS_FAILURE

@@ -2,6 +2,7 @@ import type { StressScenario } from "../../domain/scenarios/types";
 import type { MarketState, LiquidityClass, SessionStatus } from "../../domain/market/types";
 import type { NormalizedTrade } from "../../domain/trade/types";
 import type { PositionQualityAssessment, ExecutionRiskMetric } from "../../domain/thesis/types";
+import { ASSET_RISK_PROFILES } from "../scenarios/config";
 
 export const MVP_POLICY_ASSUMPTIONS = {
   // Loss thresholds expressed as negative percentages (worst-case loss)
@@ -18,6 +19,8 @@ export const MVP_POLICY_ASSUMPTIONS = {
   basisDislocationThreshold: 1.0,
   // If position size exceeds this percentage of visible top-of-book size, downgrade to WEAKER
   positionToVisibleLiquidityRatioThreshold: 0.5,
+  // Multiplier to estimate deep book liquidity from top-of-book
+  estimatedDepthMultiplier: 10,
   // Off-hours / weekend force downgrade steps
   offHoursDowngradeSteps: 1
 } as const;
@@ -61,16 +64,20 @@ export function classifyPositionQuality(
   );
   const worstLossPct = worstScenario.estimatedPnlPct!;
 
+  const profile = ASSET_RISK_PROFILES[trade.asset] || ASSET_RISK_PROFILES["DEFAULT"];
+  const strongerThreshold = MVP_POLICY_ASSUMPTIONS.lossThresholds.stronger * profile.volScalar;
+  const mixedThreshold = MVP_POLICY_ASSUMPTIONS.lossThresholds.mixed * profile.volScalar;
+
   let quality: "STRONGER" | "MIXED" | "WEAKER" | "INSUFFICIENT";
-  if (worstLossPct >= MVP_POLICY_ASSUMPTIONS.lossThresholds.stronger) {
+  if (worstLossPct >= strongerThreshold) {
     quality = "STRONGER";
-    reasons.push(`Worst-case scenario loss (${worstLossPct.toFixed(2)}%) is within the STRONGER threshold (>= ${MVP_POLICY_ASSUMPTIONS.lossThresholds.stronger}%).`);
-  } else if (worstLossPct >= MVP_POLICY_ASSUMPTIONS.lossThresholds.mixed) {
+    reasons.push(`Worst-case scenario loss (${worstLossPct.toFixed(2)}%) is within the STRONGER threshold (>= ${strongerThreshold.toFixed(2)}%).`);
+  } else if (worstLossPct >= mixedThreshold) {
     quality = "MIXED";
-    reasons.push(`Worst-case scenario loss (${worstLossPct.toFixed(2)}%) falls into the MIXED threshold (between ${MVP_POLICY_ASSUMPTIONS.lossThresholds.stronger}% and ${MVP_POLICY_ASSUMPTIONS.lossThresholds.mixed}%).`);
+    reasons.push(`Worst-case scenario loss (${worstLossPct.toFixed(2)}%) falls into the MIXED threshold (between ${strongerThreshold.toFixed(2)}% and ${mixedThreshold.toFixed(2)}%).`);
   } else {
     quality = "WEAKER";
-    reasons.push(`Worst-case scenario loss (${worstLossPct.toFixed(2)}%) exceeds the WEAKER threshold (< ${MVP_POLICY_ASSUMPTIONS.lossThresholds.mixed}%).`);
+    reasons.push(`Worst-case scenario loss (${worstLossPct.toFixed(2)}%) exceeds the WEAKER threshold (< ${mixedThreshold.toFixed(2)}%).`);
   }
   keyDrivers.push(`worstScenario=${worstScenario.id}`);
   keyDrivers.push(`worstLossPct=${worstLossPct.toFixed(2)}`);
@@ -109,7 +116,7 @@ export function classifyPositionQuality(
     reasons.push(`Position downgraded to WEAKER because visible top-of-book liquidity is unknown, preventing position size validation.`);
     keyDrivers.push(`liquidityRatio=UNKNOWN`);
   } else {
-    const visibleNotionalUsd = relevantSizeTokens * marketState.instrumentPrice;
+    const visibleNotionalUsd = relevantSizeTokens * MVP_POLICY_ASSUMPTIONS.estimatedDepthMultiplier * marketState.instrumentPrice;
     const ratio = visibleNotionalUsd > 0 ? trade.positionSizeUsd / visibleNotionalUsd : Infinity;
     
     executionRisk = {
@@ -117,7 +124,7 @@ export function classifyPositionQuality(
       positionNotionalUsd: trade.positionSizeUsd,
       visibleNotionalUsd,
       ratio,
-      explanation: `Calculated using ${sideLabel} top-of-book visible liquidity for an immediate ${trade.direction === "LONG" ? "buy" : "sell"} approximation. This does not represent full order-book depth. Note: Reality deep order-book access may require whitelist access per Bitget's current documentation.`
+      explanation: `Calculated using ${sideLabel} top-of-book visible liquidity scaled by an estimated depth multiplier of ${MVP_POLICY_ASSUMPTIONS.estimatedDepthMultiplier}x for an immediate ${trade.direction === "LONG" ? "buy" : "sell"} approximation. This does not represent full order-book depth. Note: Reality deep order-book access may require whitelist access per Bitget's current documentation.`
     };
 
     if (ratio > MVP_POLICY_ASSUMPTIONS.positionToVisibleLiquidityRatioThreshold) {

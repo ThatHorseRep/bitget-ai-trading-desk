@@ -91,7 +91,10 @@ ${evidenceText}
         throw new Error(`Failed to extract thesis after ${maxAttempts} attempts. Error: ${err instanceof Error ? err.message : String(err)}`);
       }
       console.warn("Extractor JSON parse failed, retrying with stronger format instructions...");
-      // Enhance prompt for retry
+      // Enhance prompt for retry by maintaining alternating roles
+      if (resp && resp.content) {
+        basePayload.messages.push({ role: "assistant", content: resp.content });
+      }
       basePayload.messages.push({
         role: "user",
         content: "Your previous response was not valid JSON matching the schema. Please try again and return ONLY valid JSON."

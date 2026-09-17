@@ -99,6 +99,9 @@ ${evidenceText}
         throw new Error(`Failed to generate challenge after ${maxAttempts} attempts. Error: ${(err as Error).message}`);
       }
       console.warn("Challenger JSON parse failed, retrying with stronger format instructions...");
+      if (resp && resp.content) {
+        payload.messages.push({ role: "assistant", content: resp.content });
+      }
       payload.messages.push({
         role: "user",
         content: "Your previous response was not valid JSON matching the schema. Please try again and return ONLY valid JSON."

@@ -96,6 +96,9 @@ ${evidenceText}
         throw new Error(`Failed to assess thesis after ${maxAttempts} attempts. Error: ${(error as Error).message}`);
       }
       console.warn("Assessment JSON parse failed, retrying with stronger format instructions...");
+      if (resp && resp.content) {
+        basePayload.messages.push({ role: "assistant", content: resp.content });
+      }
       basePayload.messages.push({
         role: "user",
         content: "Your previous response was not valid JSON matching the schema. Please try again and return ONLY valid JSON."

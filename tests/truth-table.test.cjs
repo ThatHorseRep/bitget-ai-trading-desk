@@ -1,23 +1,39 @@
 const assert = require("node:assert/strict");
 const { test } = require("node:test");
 const { runStressScenarios } = require("../dist-core/src/core/scenarios/engine.js");
-const { SCENARIO_CONFIG } = require("../dist-core/src/core/scenarios/config.js");
+const { SCENARIO_CONFIG, ASSET_RISK_PROFILES } = require("../dist-core/src/core/scenarios/config.js");
 const { buildRnvdaDemoTrade, rnvdaDemoMarketState } = require("../dist-core/src/fixtures/rnvda-demo.js");
 const fs = require("fs");
 
 const roundFinancial = (value) => Math.round((value + Number.EPSILON) * 1e8) / 1e8;
 const percentMultiplier = (pct) => 1 + pct / 100;
 const boundedPrice = (price) => Math.max(0.00000001, price);
-const calculateScenarioPnl = (direction, quantity, entryPrice, scenarioPrice) => {
-  const pnl = direction === "LONG"
-    ? quantity * (scenarioPrice - entryPrice)
-    : quantity * (entryPrice - scenarioPrice);
-  return roundFinancial(pnl);
-};
-const calculatePnlPct = (pnlUsd, positionSizeUsd) => roundFinancial((pnlUsd / positionSizeUsd) * 100);
 
 const longTrade = buildRnvdaDemoTrade();
 const shortTrade = { ...longTrade, direction: "SHORT" };
+
+const getCarryCost = (trade) => {
+  const profile = ASSET_RISK_PROFILES[trade.asset] || ASSET_RISK_PROFILES["DEFAULT"];
+  let daysHeld = 0;
+  if (trade.timeHorizon) {
+    const th = trade.timeHorizon.toLowerCase();
+    if (th.includes("weekend") || th.includes("monday")) daysHeld = 3;
+    else if (th.includes("month")) daysHeld = 30;
+    else if (th.includes("week")) daysHeld = 7;
+    else if (th.includes("intraday") || th.includes("day trade")) daysHeld = 0;
+    else daysHeld = 1;
+  }
+  return trade.direction === "SHORT" ? (trade.positionSizeUsd * profile.dailyBorrowPct * daysHeld / 100) : 0;
+}
+
+const calculateScenarioPnl = (direction, quantity, entryPrice, scenarioPrice, carryCost) => {
+  let pnl = direction === "LONG"
+    ? quantity * (scenarioPrice - entryPrice)
+    : quantity * (entryPrice - scenarioPrice);
+  if (carryCost > 0) pnl -= carryCost;
+  return roundFinancial(pnl);
+};
+const calculatePnlPct = (pnlUsd, positionSizeUsd) => roundFinancial((pnlUsd / positionSizeUsd) * 100);
 
 const longResults = runStressScenarios(longTrade, rnvdaDemoMarketState, SCENARIO_CONFIG);
 const shortResults = runStressScenarios(shortTrade, rnvdaDemoMarketState, SCENARIO_CONFIG);
@@ -46,8 +62,10 @@ test("Truth Table Verification", () => {
       let expectedBasisShift = null;
       let expectedLiquidityImpact = null;
 
+      const profile = ASSET_RISK_PROFILES[trade.asset] || ASSET_RISK_PROFILES["DEFAULT"];
+      const contagionBase = Math.abs(SCENARIO_CONFIG.btcShockPct) * profile.betaToBtc;
       const adverseMarketPct = direction === "LONG" ? -Math.abs(SCENARIO_CONFIG.marketShockPct) : Math.abs(SCENARIO_CONFIG.marketShockPct);
-      const adverseContagionPct = direction === "LONG" ? -Math.abs(SCENARIO_CONFIG.cryptoContagionTokenShockPct) : Math.abs(SCENARIO_CONFIG.cryptoContagionTokenShockPct);
+      const adverseContagionPct = direction === "LONG" ? -contagionBase : contagionBase;
       const basisShift = direction === "LONG" ? -Math.abs(SCENARIO_CONFIG.basisWideningPctPoints) : Math.abs(SCENARIO_CONFIG.basisWideningPctPoints);
 
       if (result.id === "MARKET_RISK") {
@@ -72,7 +90,8 @@ test("Truth Table Verification", () => {
       }
 
       if (result.applicable && result.id !== "THESIS_FAILURE") {
-        const expectedPnlUsd = calculateScenarioPnl(direction, trade.quantity, trade.entryPrice, expectedTokenPrice);
+        const carryCost = getCarryCost(trade);
+        const expectedPnlUsd = calculateScenarioPnl(direction, trade.quantity, trade.entryPrice, expectedTokenPrice, carryCost);
         const expectedPnlPct = calculatePnlPct(expectedPnlUsd, trade.positionSizeUsd);
 
         assert.equal(result.shockedTokenPrice, expectedTokenPrice, `Failed token price for ${direction} ${result.id}`);

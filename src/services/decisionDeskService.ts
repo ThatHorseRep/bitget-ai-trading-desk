@@ -1,4 +1,5 @@
 import type { DecisionArtifact, EvidenceItem, ProvenanceRecord } from "../domain/decision/types";
+import { rnvdaDemoMarketState } from "../fixtures/rnvda-demo";
 import type { MarketState } from "../domain/market/types";
 import type { NormalizedTrade, TradeIdea } from "../domain/trade/types";
 import { SCENARIO_CONFIG } from "../core/scenarios/config";
@@ -46,7 +47,9 @@ export class DecisionDeskService {
     options: DecisionDeskOptions = {}
   ): Promise<DecisionWorkflowResult> {
     const rawText = typeof input === "string" ? input : input.thesis;
-    const now = options.now ?? new Date();
+    const now = options.useFixture && !options.now 
+      ? new Date(rnvdaDemoMarketState.observedAt) 
+      : (options.now ?? new Date());
 
     // 1. Natural language parsing and trade normalization
     const parsedResult = typeof input === "string"

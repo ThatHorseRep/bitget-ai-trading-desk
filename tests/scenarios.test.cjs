@@ -18,10 +18,10 @@ test("market shock is deterministic", () => {
   assert.equal(market.estimatedPnlPct, -5);
 });
 
-test("crypto contagion never invents beta", () => {
+test("crypto contagion scales by beta", () => {
   const [, crypto] = runStressScenarios(trade, rnvdaDemoMarketState, SCENARIO_CONFIG);
-  assert.equal(crypto.shockedTokenPrice, 115.2);
-  assert.ok(crypto.assumptions.some((a) => a.includes("No beta is inferred")));
+  assert.equal(crypto.shockedTokenPrice, 118.08);
+  assert.ok(crypto.assumptions.some((a) => a.includes("beta to BTC is")));
 });
 
 test("microstructure widening uses reference price and explicit basis assumption with adverse directional shift", () => {
