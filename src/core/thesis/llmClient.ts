@@ -46,7 +46,7 @@ class LLMProvider {
     }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout to prevent Vercel 60s limit
+    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout to prevent Vercel 60s limit
 
     try {
       const response = await fetch(endpoint, {
@@ -103,12 +103,12 @@ class LLMProvider {
       };
     } catch (err) {
       clearTimeout(timeout);
-      if (!isRetry) {
+      if (!isRetry && (err as Error).name !== "AbortError") {
         console.warn("LLM Request failed, retrying once in 2 seconds...");
         await new Promise(r => setTimeout(r, 2000));
         return this.chat(request, true);
       }
-      console.error("LLM CLIENT ERROR (Retry failed):", err);
+      console.error("LLM CLIENT ERROR (Retry failed or aborted):", err);
       throw err; // Caller must handle the failure
     }
   }
