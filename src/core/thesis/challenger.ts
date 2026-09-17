@@ -95,10 +95,10 @@ ${evidenceText}
       parsed = ChallengerSchema.parse(JSON.parse(resp.content));
       break;
     } catch (err) {
-      if (attempt === maxAttempts) {
-        throw new Error(`Failed to generate challenge after ${maxAttempts} attempts. Error: ${(err as Error).message}`);
+      if ((err as Error).name === "AbortError" || attempt === maxAttempts) {
+        throw new Error(`Failed to generate challenge after ${attempt} attempts. Error: ${(err as Error).message}`);
       }
-      console.warn("Challenger JSON parse failed, retrying with stronger format instructions...");
+      console.warn("Challenger JSON parse failed, retrying...");
       if (resp && resp.content) {
         payload.messages.push({ role: "assistant", content: resp.content });
       }

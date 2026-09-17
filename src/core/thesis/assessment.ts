@@ -92,10 +92,10 @@ ${evidenceText}
       parsed = AssessmentSchema.parse(JSON.parse(resp.content));
       break;
     } catch (error) {
-      if (attempt === maxAttempts) {
-        throw new Error(`Failed to assess thesis after ${maxAttempts} attempts. Error: ${(error as Error).message}`);
+      if ((error as Error).name === "AbortError" || attempt === maxAttempts) {
+        throw new Error(`Failed to assess thesis after ${attempt} attempts. Error: ${(error as Error).message}`);
       }
-      console.warn("Assessment JSON parse failed, retrying with stronger format instructions...");
+      console.warn("Assessment JSON parse failed, retrying...");
       if (resp && resp.content) {
         basePayload.messages.push({ role: "assistant", content: resp.content });
       }
