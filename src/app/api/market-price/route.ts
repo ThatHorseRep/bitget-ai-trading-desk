@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { MarketStateService } from "../../../../services/marketStateService";
+import { MarketStateService } from "../../../services/marketStateService";
 import { z } from "zod";
 
 const requestSchema = z.object({

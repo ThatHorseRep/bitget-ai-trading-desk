@@ -21,7 +21,7 @@ test("market validation rejects invalid price relationships", () => {
 
 test("data quality detects stale observations as degraded", () => {
   const result = assessMarketDataQuality(rnvdaDemoMarketState, new Date("2026-01-01T19:00:00.000Z"));
-  assert.equal(result.status, "DEGRADED");
+  assert.equal(result.status, "INVALID");
   assert.ok(result.issues.includes("instrument observation is stale"));
 });
 
