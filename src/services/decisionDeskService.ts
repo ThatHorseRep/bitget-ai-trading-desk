@@ -16,6 +16,7 @@ import type { EvidenceProvider } from "../adapters/evidence/types";
 import { ResearchProviderRegistry } from "../adapters/research/registry";
 import { BitgetUsEquityMcpProvider } from "../adapters/research/bitgetUsEquityMcpProvider";
 import { LegacyEvidenceProviderAdapter } from "../adapters/research/legacyAdapter";
+import { BitgetSignalAgentBridge } from "../adapters/research/bitgetSignalAgentBridge";
 import { validateNormalizedTrade } from "../core/validation/runtime";
 import { rnvdaDemoThesis, rnvdaDemoChallenge, rnvdaDemoThesisPosition, rnvdaDemoEvidence } from "../fixtures/rnvda-demo";
 
@@ -54,6 +55,7 @@ export class DecisionDeskService {
       this.researchRegistry = new ResearchProviderRegistry();
       this.researchRegistry.register(new LegacyEvidenceProviderAdapter(this.evidenceProvider));
       this.researchRegistry.register(new BitgetUsEquityMcpProvider());
+      this.researchRegistry.register(new BitgetSignalAgentBridge());
     }
   }
 
