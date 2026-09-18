@@ -45,10 +45,15 @@ test("Adversarial LLM Tests", async (t) => {
   );
 
   // Helper to mock the LLM response at the fetch level
-  function mockFetch(handler) {
+  const originalFetch = global.fetch;
+    function mockFetch(handler) {
+
     mock.method(global, 'fetch', async (url, options) => {
-      return handler(url, options);
-    });
+        if (url.toString().includes('/chat/completions')) {
+          return handler(url, options);
+        }
+        return originalFetch(url, options);
+      });
   }
 
   t.afterEach(() => {

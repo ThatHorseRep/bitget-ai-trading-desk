@@ -14,6 +14,7 @@ import { MarketStateService } from "./marketStateService";
 import { CompositeEvidenceProvider } from "../adapters/evidence/provider";
 import type { EvidenceProvider } from "../adapters/evidence/types";
 import { ResearchProviderRegistry } from "../adapters/research/registry";
+import { BitgetUsEquityMcpProvider } from "../adapters/research/bitgetUsEquityMcpProvider";
 import { LegacyEvidenceProviderAdapter } from "../adapters/research/legacyAdapter";
 import { validateNormalizedTrade } from "../core/validation/runtime";
 import { rnvdaDemoThesis, rnvdaDemoChallenge, rnvdaDemoThesisPosition, rnvdaDemoEvidence } from "../fixtures/rnvda-demo";
@@ -52,6 +53,7 @@ export class DecisionDeskService {
     } else {
       this.researchRegistry = new ResearchProviderRegistry();
       this.researchRegistry.register(new LegacyEvidenceProviderAdapter(this.evidenceProvider));
+      this.researchRegistry.register(new BitgetUsEquityMcpProvider());
     }
   }
 
