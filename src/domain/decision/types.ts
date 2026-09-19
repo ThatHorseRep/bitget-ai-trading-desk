@@ -81,6 +81,18 @@ export interface ProvenanceRecord {
 
 export type EvidenceState = "LIVE_RETRIEVED" | "CURATED_DEMO_FIXTURE" | "UNAVAILABLE" | "RESEARCH_PROVIDER";
 
+/**
+ * Conflict state assigned to an EvidenceItem after source arbitration.
+ * - UNRESOLVED_CONFLICT: numeric values from multiple sources disagree beyond tolerance;
+ *   the arbitrator does NOT pick one — a conflict limitation is attached instead.
+ * - DUPLICATE: same source+id already observed; deduplicated (kept once).
+ * - STALE: observation timestamp is older than the staleness threshold.
+ * - UNAVAILABLE: the observation was produced by a provider that returned
+ *   "UNAVAILABLE" status or failed entirely.
+ * - OK: no conflict detected; sources agree or only a single source reported.
+ */
+export type ConflictState = "OK" | "UNRESOLVED_CONFLICT" | "DUPLICATE" | "STALE" | "UNAVAILABLE";
+
 export interface EvidenceItem {
   id: string;
   title: string;
@@ -92,6 +104,20 @@ export interface EvidenceItem {
   state: EvidenceState;
   provenanceType: "OBSERVED_FACT";
   providerId?: string;
+  /**
+   * Arbitration result. Present when the EvidenceArbitrator has processed
+   * this item. Allows downstream consumers (e.g. DecisionArtifact) to
+   * surface conflict limitations without losing the original observation.
+   */
+  conflictState?: ConflictState;
+  /**
+   * When conflictState is UNRESOLVED_CONFLICT, lists every source that
+   * contributed a differing value so the conflict is fully traceable.
+   * Preserved verbatim — no reconciliation is attempted.
+   */
+  conflictingSources?: string[];
+  /** When the observation carried a numeric value, the normalized value. */
+  observedValue?: number;
+  /** Unit of observedValue (e.g. USD, percent). */
+  observedUnit?: string;
 }
-
-

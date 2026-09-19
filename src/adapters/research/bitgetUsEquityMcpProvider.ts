@@ -1,19 +1,98 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { z } from "zod";
 import type {
   NormalizedResearchObservation,
   ResearchProvider,
   ResearchProviderStatus,
 } from "./types.js";
-import {
-  QuoteResponseSchema,
-  CompanyProfileSchema,
-  FinancialStatementSchema,
-  EarningsCalendarSchema,
-  AnalystEstimateSchema,
-  NewsItemSchema,
-  type ToolCategory,
-} from "./usEquitySchemas.js";
+
+// ===========================================================================
+// Zod schemas for the six documented bitget-mcp-server tool categories
+// (inlined to avoid Turbopack module-resolution issues on Windows)
+// ===========================================================================
+
+// 1. Quotes & History
+const QuoteResponseSchema = z
+  .object({
+    symbol: z.string(),
+    price: z.number().optional(),
+    open: z.number().optional(),
+    high: z.number().optional(),
+    low: z.number().optional(),
+    close: z.number().optional(),
+    volume: z.number().optional(),
+    timestamp: z.string().optional(),
+  })
+  .passthrough();
+
+// 2. Fundamentals
+const CompanyProfileSchema = z
+  .object({
+    symbol: z.string(),
+    companyName: z.string().optional(),
+    sector: z.string().optional(),
+    industry: z.string().optional(),
+    marketCap: z.number().optional(),
+    description: z.string().optional(),
+  })
+  .passthrough();
+
+const FinancialStatementSchema = z
+  .object({
+    symbol: z.string(),
+    period: z.string().optional(),
+    revenue: z.number().optional(),
+    netIncome: z.number().optional(),
+    eps: z.number().optional(),
+  })
+  .passthrough();
+
+const EarningsCalendarSchema = z
+  .object({
+    symbol: z.string(),
+    date: z.string().optional(),
+    epsEstimate: z.number().optional(),
+    epsActual: z.number().optional(),
+  })
+  .passthrough();
+
+// 3. Institutional & Analyst
+const AnalystEstimateSchema = z
+  .object({
+    symbol: z.string(),
+    targetPrice: z.number().optional(),
+    consensusRating: z.string().optional(),
+    forwardPE: z.number().optional(),
+    forwardEPS: z.number().optional(),
+  })
+  .passthrough();
+
+// 4. News & Sentiment
+const NewsItemSchema = z
+  .object({
+    title: z.string(),
+    summary: z.string().optional(),
+    url: z.string().optional(),
+    publishedAt: z.string().optional(),
+    sentiment: z.string().optional(),
+  })
+  .passthrough();
+
+// ===========================================================================
+// Types
+// ===========================================================================
+
+const TOOL_CATEGORIES = [
+  "quotes",
+  "fundamentals",
+  "corporate_actions",
+  "institutional_analyst",
+  "etf",
+  "news_sentiment",
+] as const;
+
+type ToolCategory = (typeof TOOL_CATEGORIES)[number];
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -215,10 +294,11 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
         if (!parsed.success) return this.genericObs(tool, asset, payload, now);
         const q = parsed.data;
         return [
-          makeObs(
-            tool.name, asset, `Quote: ${asset}`,
-            `Price ${q.price ?? "N/A"} | Vol ${q.volume ?? "N/A"}`, now,
-          ),
+         makeObs(
+           tool.name, asset, `Quote: ${asset}`,
+           `Price ${q.price ?? "N/A"} | Vol ${q.volume ?? "N/A"}`,
+            now, undefined, q.price, "USD",
+         ),
         ];
       }
       case "fundamentals": {
@@ -261,7 +341,8 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
           return [
             makeObs(
               tool.name, asset, `Analyst: ${asset}`,
-              `Target ${a.targetPrice ?? "N/A"} | Rating ${a.consensusRating ?? "N/A"}`, now,
+              `Target ${a.targetPrice ?? "N/A"} | Rating ${a.consensusRating ?? "N/A"}`,
+              now, undefined, a.targetPrice, "USD",
             ),
           ];
         }
@@ -408,8 +489,14 @@ export function extractPayload(raw: unknown): unknown {
 
 /** Build a NormalizedResearchObservation with the provider ID baked in. */
 function makeObs(
-  toolName: string, asset: string, title: string,
-  summary: string, timestamp: string, url?: string,
+  toolName: string,
+  asset: string,
+  title: string,
+  summary: string,
+  timestamp: string,
+  url?: string,
+  value?: number,
+  unit?: string,
 ): NormalizedResearchObservation {
   return {
     id: `use-${asset}-${toolName}-${Date.now()}`,
@@ -420,6 +507,8 @@ function makeObs(
     observedTimestamp: timestamp,
     providerStatus: "AVAILABLE",
     url,
+    value,
+    unit,
   };
 }
 
