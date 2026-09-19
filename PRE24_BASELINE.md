@@ -227,3 +227,63 @@ Absent (confirmed no runtime code): live portfolio context (§3), paper-trading 
 ### 7.4 Portfolio-context status
 
 Unchanged from §3: **deferred / not implemented**. Type-level `ExistingExposure` and parser-level user-declared exposure only; no concentration, overlap, correlation, or portfolio-impact calculation anywhere in `src/`.
+
+---
+
+## 8. PRE24-01 Implementation Record (2026-09-20)
+
+**Scope delivered:** smallest clean abstraction for optional external research providers + composition mechanism. No external providers implemented.
+
+### 8.1 What already existed (reused, not rebuilt)
+
+The PRE24-02/03/04 work had already established the abstraction this task asks for; PRE24-01 formalized it rather than duplicating it:
+
+- **Normalized observation schema** — `NormalizedResearchObservation` (`src/adapters/research/types.ts`) carries exactly the required fields: `providerId`, `source`, `title`/`summary`, `observedTimestamp`, `providerStatus` (`AVAILABLE | DEGRADED | UNAVAILABLE`), optional `url`, plus optional numeric `value`/`unit` for cross-source arbitration.
+- **Provider contract** — the `ResearchProvider` interface (`getStatus()` + `getObservations(asset, topic?)`).
+- **Domain boundary** — `src/domain/` imports nothing from `src/adapters/` (now enforced by a test); raw MCP responses never reach the core domain.
+- **Evidence normalization** — `EvidenceArbitrator` maps observations to `EvidenceItem`s (provenanceType `OBSERVED_FACT`, `RESEARCH_PROVIDER` state for research providers, conflicts/dedup/staleness handled deterministically).
+
+### 8.2 What PRE24-01 added
+
+1. **`src/adapters/research/defaultRegistry.ts`** — the explicit composition root (`createDefaultResearchRegistry`) with four documented slots: legacy evidence provider, Bitget US Equity MCP, Bitget Signal bridge, and a **reserved Chainbase AgentKey slot** (type-level seam only — no stub implementation, nothing fake registered). Supports full override via `providers: []` for tests and granular seams (endpoint, bridge path, evidence provider).
+2. **`DecisionDeskService`** constructor now delegates to the factory — provider assembly is no longer buried in the service; behavior is identical.
+3. **Registry hardening** — `gatherObservations` normalizes non-array provider returns (`null`, single object, undefined) to `[]`; a misbehaving provider can no longer break the gather loop.
+4. **Strengthened `tests/researchProviders.test.cjs`** (now hermetic via `TEST_MODE=mock_llm` + injected deterministic `MarketStateService` — no live LLM/network): proves (a) an empty registry still completes the full workflow; (b) throwing providers are isolated from the core, both at the registry and through `runWorkflow`; (c) non-array provider returns cannot crash the workflow; (d) the workflow behaves exactly as before when providers are disabled/absent (same verdict surface, same scenario engine, same market-state path; fixture golden path unchanged); (e) observation→evidence provenance preservation (id, providerId, source, url, timestamp, `OBSERVED_FACT`, value/unit); (f) the four composition-root slots incl. the Chainbase seam; (g) the domain-does-not-import-adapters boundary.
+
+### 8.3 Verification after PRE24-01
+
+| Gate | Result |
+|---|---|
+| `npm run build:core` | PASS (exit 0) |
+| `npm run typecheck` | PASS (exit 0) |
+| `npm run lint` | PASS (exit 0) |
+| `npm run test` | **PASS — 161 tests: 160 pass, 0 fail, 1 skip** (live gate) |
+
+### 8.4 Untouched-surface guarantee
+
+`git diff --name-only` after PRE24-01 contains only: `registry.ts`, `defaultRegistry.ts` (new), `decisionDeskService.ts`, `researchProviders.test.cjs` (+ the parallel effort's pre-existing `arbitrator.ts` fix). **No changes** to scenario math (`core/scenarios/*`), decision policy (`core/decision/*`), thesis schemas (`domain/thesis/*`), UI (`components/`, `app/`), or the `DecisionArtifact` shape.
+
+Note: the earlier §1.1 single test failure was fixed by the parallel PRE24-04 effort (arbitrator now emits limitations for malformed observations); the suite was already 157/157-green before PRE24-01 work began.
+
+---
+
+## 9. PRE24-01 Audit Record (2026-09-20) — PASS
+
+Independent audit of the PRE24-01 diff, all gates re-run with exit codes captured:
+
+| Audit check | Result |
+|---|---|
+| Core workflow behaves the same | **PASS** — fixture golden path and disabled-provider path produce identical verdict/scenario/market-state surfaces (proven by tests, not asserted) |
+| No deterministic calculation modified | **PASS** — diff touches no file under `core/scenarios`, `core/calculations`, `core/decision`, `core/thesis`, `core/trade`, `core/market`, `core/validation`, `domain/`, `components/`, `app/`, `fixtures/` |
+| Provider failures representable without crashing | **PASS** — throwing providers isolated at registry and through `runWorkflow`; non-array returns normalized to `[]` |
+| Optional providers independently enabled/disabled | **PASS** — runtime-proven: mixed registry (1 UNAVAILABLE + 1 AVAILABLE) gathers only the enabled provider's observations |
+| Tests | **PASS** — 161 tests, 160 pass, 0 fail, 1 skip (exit 0) |
+| Build | **PASS** — `next build` exit 0 |
+| Typecheck | **PASS** — exit 0 (lint also exit 0) |
+| Architecture drift scan | **PASS** — no new adapter imports into core/domain; no `DecisionArtifact` shape change; only surgical changes: composition-root delegation, defensive array normalization, arbitration completion fix (parallel PRE24-04) |
+
+**Verdict: PRE24-01 PASS.**
+
+### 9.1 Contributor condition for merge
+
+At audit time the GitHub repo (`ThatHorseRep/bitget-ai-trading-desk`) has exactly **one collaborator (`ThatHorseRep`, admin)** and **zero pending invitations**; all commit authors/committers across all branches are the owner's two identities (`ThatHorseRep` / `Stallion`). There are no other contributors to remove — the removal condition is satisfied vacuously. Commits for this merge are authored solely as the owner (no co-author trailers, per owner request).

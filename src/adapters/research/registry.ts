@@ -18,7 +18,11 @@ export class ResearchProviderRegistry {
         if (status === "UNAVAILABLE") {
           return [];
         }
-        return await provider.getObservations(asset, topic);
+        const observations = await provider.getObservations(asset, topic);
+        // Defensive: a misbehaving provider must never break the gather loop.
+        // Normalize any non-array return (null, undefined, single object) to []
+        // so the core always receives a well-formed observation list.
+        return Array.isArray(observations) ? observations : [];
       } catch (err) {
         // Provider failure does not crash the core
         console.warn(`[ResearchProviderRegistry] Provider ${provider.providerId} failed:`, err);
