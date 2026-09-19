@@ -1,4 +1,5 @@
 import type { DecisionArtifact, EvidenceItem, ProvenanceRecord } from "../domain/decision/types";
+import { EvidenceArbitrator } from "../adapters/evidence/arbitrator";
 import { rnvdaDemoMarketState } from "../fixtures/rnvda-demo";
 import type { MarketState } from "../domain/market/types";
 import type { NormalizedTrade, TradeIdea } from "../domain/trade/types";
@@ -133,18 +134,15 @@ export class DecisionDeskService {
         const registryToUse = options.researchRegistry ?? this.researchRegistry;
         const observations = await registryToUse.gatherObservations(trade.asset, trade.thesis);
         
-        evidence = observations.map(obs => ({
-          id: obs.id,
-          providerId: obs.providerId,
-          source: obs.source,
-          title: obs.title,
-          summary: obs.summary,
-          retrievedAt: obs.observedTimestamp,
-          url: obs.url,
-          state: obs.providerStatus === "UNAVAILABLE" ? "UNAVAILABLE" 
-               : (obs.providerId === "legacy-evidence-provider" ? "LIVE_RETRIEVED" : "RESEARCH_PROVIDER"),
-          provenanceType: "OBSERVED_FACT"
-        }));
+        // PRE24-04: Source arbitration at the Evidence layer.
+        // The arbitrator preserves all material source identities, timestamps,
+        // and observed values; detects conflicts; and never silently picks
+        // a convenient number. It returns limitations for any conflict,
+        // staleness, or unavailability it detects.
+        const arbitrator = new EvidenceArbitrator();
+        const arbitration = arbitrator.arbitrate(observations, { now });
+        evidence = arbitration.evidence;
+        limitations.push(...arbitration.limitations);
       } catch (err) {
         limitations.push(`Evidence retrieval failed: ${(err as Error).message}. Operating without external evidence.`);
       }
