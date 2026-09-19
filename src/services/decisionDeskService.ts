@@ -15,9 +15,7 @@ import { MarketStateService } from "./marketStateService";
 import { CompositeEvidenceProvider } from "../adapters/evidence/provider";
 import type { EvidenceProvider } from "../adapters/evidence/types";
 import { ResearchProviderRegistry } from "../adapters/research/registry";
-import { BitgetUsEquityMcpProvider } from "../adapters/research/bitgetUsEquityMcpProvider";
-import { LegacyEvidenceProviderAdapter } from "../adapters/research/legacyAdapter";
-import { BitgetSignalAgentBridge } from "../adapters/research/bitgetSignalAgentBridge";
+import { createDefaultResearchRegistry } from "../adapters/research/defaultRegistry";
 import { validateNormalizedTrade } from "../core/validation/runtime";
 import { rnvdaDemoThesis, rnvdaDemoChallenge, rnvdaDemoThesisPosition, rnvdaDemoEvidence } from "../fixtures/rnvda-demo";
 
@@ -53,10 +51,12 @@ export class DecisionDeskService {
     if (researchRegistry) {
       this.researchRegistry = researchRegistry;
     } else {
-      this.researchRegistry = new ResearchProviderRegistry();
-      this.researchRegistry.register(new LegacyEvidenceProviderAdapter(this.evidenceProvider));
-      this.researchRegistry.register(new BitgetUsEquityMcpProvider());
-      this.researchRegistry.register(new BitgetSignalAgentBridge());
+      // PRE24-01: composition root for optional external research providers.
+      // Slots: legacy evidence adapter, Bitget US Equity MCP, Bitget Signal
+      // bridge, and a reserved Chainbase AgentKey slot (not implemented yet).
+      this.researchRegistry = createDefaultResearchRegistry({
+        evidenceProvider: this.evidenceProvider,
+      });
     }
   }
 

@@ -281,13 +281,17 @@ export class EvidenceArbitrator {
        valid.push(obs);
      }
 
+    const malformedLimitations = malformed.map((m) =>
+      `Observation '${m.title}' from ${m.source} was flagged unavailable (malformed numeric value).`,
+    );
+
     // If there's only one valid observation, no conflict possible
     if (valid.length === 1) {
       const item = this.toEvidenceItem(valid[0], "OK", now, staleThresholdMs);
       const lim = this.maybeLimitation(item.conflictState, valid[0]);
       return {
         items: [...malformed, item],
-        limitations: lim ? [lim] : [],
+        limitations: lim ? [...malformedLimitations, lim] : malformedLimitations,
       };
     }
 
@@ -327,7 +331,7 @@ export class EvidenceArbitrator {
 
         return {
           items: [...malformed, ...items],
-          limitations: [limitation],
+          limitations: [...malformedLimitations, limitation],
         };
       }
 
@@ -344,7 +348,7 @@ export class EvidenceArbitrator {
 
       return {
         items: [...malformed, ...items],
-        limitations: groupLimitations,
+        limitations: [...malformedLimitations, ...groupLimitations],
       };
   }
 
