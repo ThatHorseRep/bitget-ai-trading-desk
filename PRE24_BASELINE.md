@@ -331,6 +331,51 @@ Diff limited to: the provider file, the two verification scripts, the provider t
 
 **Verdict: PRE24-02 PASS.** Provider is real (documented transport, validated payloads, normalized contract) and correctly labelled (`bitget-us-equity-mcp`).
 
+---
+
+## 12. PRE24-03 Bitget Signal Provider (2026-09-20) — COMPLETE
+
+**Documentation verification (no guessed names/shapes):**
+- `@bitget-ai/bitget-signal@1.2.0` (npm): bundles five markdown Skills (AI-host prompt layer) + a registration of Bitget's **public market-data MCP server** — "the skills are the prompt, the MCP server is the tools"; no credentials.
+- `scripts/install.js` of the same package: `MCP_NAME="bitget-signal"`, `MCP_URL=https://datahub.noxiaohao.com/mcp`, transport **http**.
+- The five Skills (`macro-analyst`, `market-intel`, `news-briefing`, `sentiment-analyst`, `technical-analysis`) live in `skills/*/SKILL.md`; **exact tool names and `action=` arg shapes extracted from those files**: `rates_yields`, `macro_indicators`, `global_assets`, `cross_asset`, `cn_market`, `global_data` (macro); `crypto_market`, `defi_analytics`, `network_status` (intel); `sentiment_index`, `derivatives_sentiment` (sentiment); `news_feed`, `tradfi_news`, `social_trending` (news); technical-analysis = `crypto_market` OHLCV + host-side Python indicators.
+- **Outcome A + B combined as documented:** the programmatic MCP path feeds the Desk (`BitgetSignalProvider`); the five Skills remain the AI-host layer, preserved as the opt-in file bridge (`bitgetSignalAgentBridge`, select via `signalBridgePath`). No fake native integration is claimed.
+
+**Live verification (2026-09-20, `verify-signal-connectivity`):**
+- `getStatus()` → **AVAILABLE**; `listTools()` → **19 live tools, all 14 documented names present** (0 absent). Live-only extras include `technical_analysis`, `crypto_price`, `crypto_derivatives`, `backtest`, `dex_market`.
+- Every tool call aggregates upstream APIs and took **15–32 s**; the server's own upstreams were failing during the run (`{"error": ""}`, `{"alt_me_error": ""}`, `ConnectTimeout`, all-empty news items). With production bounds (8 s per call, parallel) the desk retrieves **0 observations and stays healthy** — documented, by-design degradation, not a crash.
+- Consequent design: parallel dispatch (slow tools must not serialize), ops-tunable `BITGET_SIGNAL_TOOL_TIMEOUT_MS`, upstream-error payloads detected (`isEmptyUpstreamPayload`) and skipped, never normalized into junk observations.
+
+**Implementation:** `BitgetSignalProvider` (providerId `bitget-signal`): runtime tool discovery with a discovery gate (documented tools absent from the live list are never called); per-capability relevance routing (`capabilitiesForTopic`, trigger stems from the SKILL.md frontmatter; unknown topics fall back to news+intel — never all five); Zod validation with passthrough envelopes and a bounded generic fallback; every observation tagged `source = bitget-signal/<capability>/<tool>` so provenance records which Signal capability produced it; 5 s connect / 8 s call timeouts; 300-char summaries, 5 items/call, 24 observations total. Composition root slot 3 now defaults to the live provider; tests register custom providers via `signalProvider`.
+
+**Gates:** typecheck 0 · lint 0 · **tests 172: 171 pass, 0 fail, 1 skip (live gate)** · build 0. New file `tests/bitgetSignalProvider.test.cjs`: **17 hermetic tests** against an in-process MCP fixture server (routing ×5, mapping, asset mapping, live-path routing/provenance/bounds, discovery gate, status, unreachable degradation, empty catalog, failing-tool isolation, malformed/lenient payloads, volume bound). `technical-analysis` deliberately surfaces raw bounded OHLCV context — indicator math stays in the AI-host Skill (pandas/numpy), not reimplemented.
+
+**Protected surfaces:** zero changes to `core/`, `domain/`, `components/`, `app/`, `fixtures/` (diff-verified). Deterministic math, policy, thesis schemas, UI, artifact shape untouched.
+
+---
+
+## 13. PRE24-03 Audit Record (2026-09-20) — PASS
+
+**Per-capability integration status (truthful, no false runtime claims):**
+
+| Capability | Runtime integrated | Agent-host integrated | Proof |
+|---|---|---|---|
+| macro-analyst | **YES** (live MCP path) | **YES** (Skill + bridge) | Runtime: `rates_yields`/`macro_indicators`/`global_assets` routed, documented args wire-asserted (fixture). Live: real calls answered (upstreams failing server-side). Agent-host: request routing + file-contract ingest proven |
+| market-intel | **YES** (live MCP path) | **YES** | Runtime: `crypto_market`/`defi_analytics` routed; live `crypto_market` call answered (`ConnectTimeout` payload, correctly skipped). Agent-host: bridge contract proven |
+| news-briefing | **YES** (live MCP path) | **YES** | Runtime: `news_feed` routed, bounded (≤5 items); live call answered (all-empty envelope, correctly skipped). Agent-host: bridge contract proven |
+| sentiment-analyst | **YES** (live MCP path) | **YES** | Runtime: `sentiment_index`/`derivatives_sentiment` routed; live calls answered (error envelopes, correctly skipped). Agent-host: bridge contract proven |
+| technical-analysis | **PARTIAL by design** (raw bounded OHLCV only) | **YES** (full indicator math in the AI-host Skill) | Runtime deliberately does NOT reimplement the Skill's pandas/numpy indicator math; surfaces raw context, labelled as such. No false claim of full runtime technical analysis |
+
+**Truthfulness:** zero Bitget Signal mentions in UI/app code; docs describe the live state honestly ("upstream-dependent", yield 0 under current server conditions). The web app is never claimed to run the Skills themselves.
+
+**Runtime proof (real call):** audit probes to `datahub.noxiaohao.com/mcp`: `macro_indicators` 21.0 s → `{"error":""}`; `network_status` 15.8 s → `{"url":…,"error":""}`; `social_trending` 30.4 s → `{"provider":"all_failed","items":[]}`; `derivatives_sentiment` 15.7 s → `{"error":""}` — all real protocol responses, all correctly skipped by the hardened upstream-failure detector (new test covers every live shape). Provenance through the real workflow proven with a Signal-slot stub: evidence `providerId=bitget-signal`, `source=bitget-signal/sentiment-analyst/sentiment_index`, `state=RESEARCH_PROVIDER`, `provenanceType=OBSERVED_FACT`, `conflictState=OK`, `observedValue=71 index`, matching provenance record in the artifact chain.
+
+**Agent-host proof:** official package contents verified (5 `SKILL.md` + `install.js` with the MCP registration); bridge driven as an AI host would: request file `{asset, thesis, requestedCapabilities}` generated by the workflow → observations written to the bridge file → workflow ingests them (`source=skill/macro-analyst`, `state=RESEARCH_PROVIDER`) → output file cleaned.
+
+**Checks:** no API secrets added (scan clean; the service requires none — verified) · deterministic math unchanged (zero diffs outside the adapter layer) · failures degrade safely (18 hermetic tests incl. unreachable/empty/failing-tool/upstream-error shapes) · existing core workflow runs (`DECISION_READY` with and without the Signal slot) · **gates: typecheck 0, lint 0, tests 172: 171 pass / 0 fail / 1 skip, build 0.**
+
+**Verdict: PRE24-03 PASS — documentation truthful.**
+
 ### 9.1 Contributor condition for merge
 
 At audit time the GitHub repo (`ThatHorseRep/bitget-ai-trading-desk`) has exactly **one collaborator (`ThatHorseRep`, admin)** and **zero pending invitations**; all commit authors/committers across all branches are the owner's two identities (`ThatHorseRep` / `Stallion`). There are no other contributors to remove — the removal condition is satisfied vacuously. Commits for this merge are authored solely as the owner (no co-author trailers, per owner request).
