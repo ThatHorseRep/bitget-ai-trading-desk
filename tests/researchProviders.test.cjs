@@ -90,10 +90,12 @@ test('PRE24-01: domain layer does not import adapters', () => {
 test('PRE24-01: composition root registers the four provider slots', () => {
   const registry = createDefaultResearchRegistry();
   const ids = registry.getRegisteredProviders();
+  // PRE24-03: slot 3 defaults to the documented live Signal MCP provider;
+  // the AI-host file bridge remains available via signalBridgePath.
   assert.deepEqual(ids, [
     'legacy-evidence-provider',
     'bitget-us-equity-mcp',
-    'bitget-signal-agent-bridge',
+    'bitget-signal',
   ]);
   // Chainbase AgentKey slot is reserved but optional — when a provider is
   // supplied for it, it is appended without any core change.

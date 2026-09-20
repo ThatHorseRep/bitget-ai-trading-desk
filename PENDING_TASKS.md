@@ -1,5 +1,23 @@
 # Pending Tasks: US Equity MCP Integration
 
+## Bitget Signal (PRE24-03) — implemented, live-proven, upstream-dependent
+
+- **Programmatic path (runtime):** `BitgetSignalProvider` speaks the documented
+  Streamable HTTP transport to `https://datahub.noxiaohao.com/mcp` (registered by
+  `@bitget-ai/bitget-signal@1.2.0`). Live-verified: `listTools()` returns 19 tools,
+  all 14 documented names present. The server's own upstream APIs were failing and
+  slow (15–32 s per call) at verification time, so observation yield was 0 under
+  production bounds — degradation is by design and the provider stays healthy.
+  Re-run `verify-signal-connectivity` (40 s diagnostic window) when upstreams may
+  have recovered to capture real samples.
+- **Agent-host path (Skills):** the five official Skills (`macro-analyst`,
+  `market-intel`, `news-briefing`, `sentiment-analyst`, `technical-analysis`) run
+  in AI hosts via the package installer; the file bridge (`signalBridgePath` in
+  the composition root) ingests their observations. Proven end-to-end in the
+  PRE24-03 audit.
+- **Not claimed:** the web app does not run the Skills themselves; indicator math
+  for `technical-analysis` stays in the AI-host Skill (pandas/numpy).
+
 ## Completed (PRE24-02, verified 2026-09-20)
 
 The provider is fully implemented against the documented interface:
