@@ -1,9 +1,9 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 async function verifyConnection() {
   console.log("Attempting to connect to Bitget US Equity MCP...");
-  const transport = new SSEClientTransport(new URL("https://agent.bitget.com/mcp"));
+  const transport = new StreamableHTTPClientTransport(new URL("https://agent.bitget.com/mcp"));
   const client = new Client({ name: "bitget-redteam-verifier", version: "1.0.0" }, { capabilities: {} });
 
   try {

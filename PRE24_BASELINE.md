@@ -284,6 +284,53 @@ Independent audit of the PRE24-01 diff, all gates re-run with exit codes capture
 
 **Verdict: PRE24-01 PASS.**
 
+---
+
+## 10. PRE24-02 Implementation Record (2026-09-20)
+
+**Scope:** `BitgetUsEquityMcpProvider` re-verified against the official S2 Developer Toolkit documentation and corrected; no other provider replaced; core untouched.
+
+### 10.1 Documented interface (verified, not guessed)
+
+Source: official S2 handbook (local `gitbook.md`, matching `bitget-ai.gitbook.io/bitgetai_hackathons2`), section *"Bitget MCP Server (US Stocks / ETF — Read-Only Data)"*:
+
+- **Transport: HTTP** — `https://agent.bitget.com/mcp` (`--transport http`). The provider previously used **SSE**, contradicting the handbook; corrected to `StreamableHTTPClientTransport`.
+- **Read-only US stock/ETF data service**; explicitly *not* the Agent Hub trading MCP and *not* `bitget-signal`; **no Bitget account or API key required** (none added).
+- **Six documented categories** (quotes & history, fundamentals, corporate actions, institutional & analyst, ETF, news & sentiment) — **no tool names or request shapes are published**, so runtime `listTools()` discovery + keyword classification (zero guessed names) remains the correct mechanism.
+
+### 10.2 What changed
+
+1. **Transport corrected** to documented Streamable HTTP (provider + `src/scripts/verify-connectivity.ts` + `scripts/verify-us-equity-mcp.mjs`).
+2. **Asset gating added** (`toReferenceSymbol`): only rToken-mapped US reference tickers (rNVDA/rNVDAUSDT → NVDA) are requested; plain crypto (BTC, BTCUSDT, SOL) never reaches this US-equity-only service. Requests carry the **reference symbol**, not the raw trade symbol.
+3. **Existing strengths retained:** runtime tool discovery, Zod validation per category with generic-observation fallback, 5 s connect / 8 s tool-call timeouts, 500-char summaries, 20 obs/category bound, provider id + source (`bitget-mcp-server/<tool>`) + timestamps on every observation.
+4. **Tests rewritten hermetically (15, all passing):** an in-process MCP fixture server speaking the documented Streamable HTTP transport proves end-to-end behavior — discovery, per-category normalization (quote value/unit USD, news array bounding, company/analyst fields), source identity + timestamps, reference-symbol requests (asserted from the wire), asset gating (zero network traffic for crypto), malformed-payload degradation, unreachable-endpoint degradation (provider + registry levels), and pure-helper contracts. No live network in the suite.
+5. **Real-connectivity verification script** (`src/scripts/verify-connectivity.ts`, 4-step diagnostic) — runs outside the test suite.
+
+### 10.3 Live verification result
+
+Run 2026-09-20: **DNS could not resolve `agent.bitget.com`** from the current network (`ENOTFOUND`). Control probes at the same moment: `api.bitget.com` also failed while `github.com`/`registry.npmjs.org` resolved — a local network/DNS issue, not a documented-endpoint failure (the same machine fetched live Bitget prices earlier the same day). The provider degraded exactly as specified: `UNAVAILABLE`, zero requests issued, workflow unaffected. **Production behavior requirement satisfied by construction:** unreachable MCP ⇒ provider returns `[]`/`UNAVAILABLE` ⇒ the legacy Yahoo evidence provider still feeds the workflow. Schemas stay `.passthrough()` until the script succeeds from a reachable environment (see PENDING_TASKS.md).
+
+### 10.4 Untouched-surface guarantee
+
+Diff limited to: the provider file, the two verification scripts, the provider test file, PENDING_TASKS.md, this report. **No changes** to the Bitget token client (`adapters/bitget/*`), Yahoo/composite reference providers, scenario math, decision policy, thesis schemas, UI, or artifact shape. The MCP remains optional in the default registry.
+
+---
+
+## 11. PRE24-02 Audit Record (2026-09-20) — PASS
+
+| Audit proof | Result |
+|---|---|
+| 1. Official US-equity MCP interface | **PASS** — documented Streamable HTTP transport to `agent.bitget.com/mcp` (S2 handbook); not the Agent Hub trading MCP, not `bitget-signal`; no credentials; no guessed tool names (runtime discovery only) |
+| 2. Real request OR documented environment limitation | **PASS (documented limitation)** — live script re-run: `ENOTFOUND agent.bitget.com`; same-moment controls `api.bitget.com` FAIL / `github.com` 200 → local DNS limitation, documented in §10.3 and PENDING_TASKS.md |
+| 3. Result normalized | **PASS** — fixture tests assert `NormalizedResearchObservation` fields (id/providerId/source/timestamp/status/url/value/unit) per category |
+| 4. Provenance records the provider correctly | **PASS** — runtime-proven end-to-end: evidence `providerId=bitget-us-equity-mcp`, `source=bitget-mcp-server/<tool>`, `state=RESEARCH_PROVIDER`, `provenanceType=OBSERVED_FACT`; artifact provenance chain carries the matching `OBSERVED_FACT` record with `evidenceState` |
+| 5. Existing behavior works with provider disabled | **PASS** — disabled/absent provider paths produce `DECISION_READY` (test-proven); live degradation exercised same-day |
+| 6. Failure and timeout handled | **PASS** — 5 s connect / 8 s tool-call bounded timeouts; unreachable → `[]`/`UNAVAILABLE`; malformed payload → generic observation; registry isolation |
+| 7. No secrets in git | **PASS** — `git grep` of tracked tree clean; `git log --all -S ghp_` empty |
+| 8. build / typecheck / test | **PASS** — 0 / 0 / 0 (155 tests: 154 pass, 0 fail, 1 skip) |
+
+**Verdict: PRE24-02 PASS.** Provider is real (documented transport, validated payloads, normalized contract) and correctly labelled (`bitget-us-equity-mcp`).
+
 ### 9.1 Contributor condition for merge
 
 At audit time the GitHub repo (`ThatHorseRep/bitget-ai-trading-desk`) has exactly **one collaborator (`ThatHorseRep`, admin)** and **zero pending invitations**; all commit authors/committers across all branches are the owner's two identities (`ThatHorseRep` / `Stallion`). There are no other contributors to remove — the removal condition is satisfied vacuously. Commits for this merge are authored solely as the owner (no co-author trailers, per owner request).

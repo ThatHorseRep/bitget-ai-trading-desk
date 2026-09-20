@@ -1,11 +1,18 @@
 # Pending Tasks: US Equity MCP Integration
 
-## Completed (PRE24-02)
+## Completed (PRE24-02, verified 2026-09-20)
 
-The provider shell is fully implemented with:
+The provider is fully implemented against the documented interface:
 
+- **Documented transport** — Streamable HTTP to `https://agent.bitget.com/mcp`
+  (S2 handbook, "Bitget MCP Server (US Stocks / ETF — Read-Only Data)"); the
+  earlier SSE transport was corrected. No credentials required (read-only
+  service, explicitly not the Agent Hub trading MCP and not `bitget-signal`).
+- **Asset gating** — only rToken-mapped US reference tickers (rNVDA → NVDA)
+  are requested; plain crypto assets never reach this service
+  (`toReferenceSymbol`, unit-tested).
 - **Automatic tool discovery** — `listTools()` result is classified into the six
-  GitBook categories (quotes, fundamentals, corporate_actions, institutional_analyst,
+  documented categories (quotes, fundamentals, corporate_actions, institutional_analyst,
   etf, news_sentiment) via keyword heuristics. No tool names are guessed.
 - **Category-based dispatch** — topic text is matched to relevant categories;
   default is quotes + fundamentals + news_sentiment.
@@ -35,6 +42,17 @@ The provider shell is fully implemented with:
    `{ symbol: asset }` to every tool call. If some tools use a different argument
    name (e.g. `ticker`, `code`), add a per-category argument mapper.
 
-4. **Wire into DecisionDeskService** — Register the provider in the service's
-   default registry so it participates in production workflows. Currently the
-   provider is only used when explicitly registered.
+4. ~~**Wire into DecisionDeskService**~~ — DONE: the provider is registered in
+   the default registry via `createDefaultResearchRegistry` (PRE24-01).
+
+## Live-endpoint verification (2026-09-20)
+
+`src/scripts/verify-connectivity.ts` (HTTP transport) was run against the live
+endpoint. Result: **DNS cannot resolve `agent.bitget.com` from the current
+network** (`ENOTFOUND`; control host `api.bitget.com` also failed at the same
+moment while github.com/npmjs.org resolved — a local network issue, not a
+documented-endpoint failure). The provider degraded exactly as designed
+(`UNAVAILABLE`, zero requests issued). Items 1–3 above remain open until the
+endpoint is reachable from some environment and real payloads/tool names can
+be inspected. Re-run the script from a deployment environment (e.g. Vercel)
+before tightening schemas.

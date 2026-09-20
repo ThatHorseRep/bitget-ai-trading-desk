@@ -1,5 +1,5 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { z } from "zod";
 import type {
   NormalizedResearchObservation,
@@ -104,6 +104,27 @@ const MAX_OBSERVATIONS_PER_CATEGORY = 20;
 const MAX_SUMMARY_LENGTH = 500;
 
 /**
+ * PRE24-02 — asset gating.
+ *
+ * The documented bitget-mcp-server is a US stock / ETF read-only data
+ * service. It is only asked about supported reference assets: our rToken
+ * trade symbols (e.g. rNVDA / rNVDAUSDT) are mapped to their US reference
+ * ticker (NVDA). Anything else (pure crypto pairs like BTC) is NOT a US
+ * equity question and must never reach this service.
+ */
+export function toReferenceSymbol(asset: string): string | null {
+  const upper = asset.trim().toUpperCase();
+  // Must be an rToken (rNVDA / rNVDAUSDT) — mirrors the market layer's
+  // supported-asset rule. Plain crypto tickers (BTC, BTCUSDT, SOL) are not
+  // US-equity questions and never reach this service.
+  if (!upper.startsWith("R")) return null;
+  let symbol = upper.slice(1);
+  if (symbol.endsWith("USDT")) symbol = symbol.slice(0, -4);
+  // A US listing ticker is 1–5 capital letters (NVDA, TSLA, AAPL, GOOG...).
+  return /^[A-Z]{1,5}$/.test(symbol) ? symbol : null;
+}
+
+/**
  * Heuristic keyword map: when a discovered MCP tool name contains one of
  * these substrings we file it under that category.  This avoids guessing
  * exact tool names while still enabling automatic dispatch once the
@@ -169,6 +190,12 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
     asset: string,
     topic?: string,
   ): Promise<NormalizedResearchObservation[]> {
+    // Gate: only US reference equities are decision-relevant for this
+    // service. Unsupported assets degrade to zero observations rather than
+    // issuing malformed requests against a US-equity-only tool catalog.
+    const referenceSymbol = toReferenceSymbol(asset);
+    if (!referenceSymbol) return [];
+
     const { client, transport } = await this.connect();
     if (!client) return [];
 
@@ -182,7 +209,7 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
       for (const cat of categories) {
         const catTools = tools.filter((t) => t.category === cat);
         for (const tool of catTools) {
-          const obs = await this.callToolSafe(client, tool, asset, cat);
+          const obs = await this.callToolSafe(client, tool, referenceSymbol, cat);
           results.push(...obs);
           if (results.length >= MAX_OBSERVATIONS_PER_CATEGORY * categories.length) break;
         }
@@ -203,12 +230,15 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
 
   private async connect(): Promise<{
     client: Client | null;
-    transport: SSEClientTransport | null;
+    transport: StreamableHTTPClientTransport | null;
   }> {
-    let transport: SSEClientTransport | null = null;
+    let transport: StreamableHTTPClientTransport | null = null;
     let client: Client | null = null;
     try {
-      transport = new SSEClientTransport(new URL(this.endpoint));
+      // Documented transport (S2 handbook, "How to connect"): HTTP via
+      // https://agent.bitget.com/mcp — Streamable HTTP, not SSE, and no
+      // credentials are required for this read-only data service.
+      transport = new StreamableHTTPClientTransport(new URL(this.endpoint));
       client = new Client(
         { name: "bitget-us-equity-client", version: "1.0.0" },
         { capabilities: {} },
@@ -416,7 +446,7 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
   // -----------------------------------------------------------------------
 
   private async safeClose(
-    client: Client | null, transport: SSEClientTransport | null,
+    client: Client | null, transport: StreamableHTTPClientTransport | null,
   ): Promise<void> {
     try { if (client) await client.close(); } catch { /* swallow */ }
     try { if (transport) await transport.close(); } catch { /* swallow */ }
