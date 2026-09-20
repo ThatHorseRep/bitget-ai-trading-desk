@@ -47,10 +47,11 @@ npm run test
 - **Thesis vs Position Assessment:** Implemented in src/core/ai/assessment.ts.
 - **Deterministic Decision Policy:** Implemented in src/core/decision/policy.ts.
 - **Transparent Demo Mode (Off-Hours Wedge):** Triggered via UI in src/components/workspace/RedTeamWorkspace.tsx and processed in src/app/api/stress-test/route.ts.
+- **Optional Ecosystem Integrations (enrichment, not dependencies):** The core decision is fully defensible with zero optional integrations enabled. Optional providers/handoffs — Bitget US Equity MCP, Bitget Signal, Chainbase AgentKey (external partner, not a Bitget product), Agent Hub read-only handoff, Agentic Account handoff, and a demo-only paper-trading harness — are documented in [B07_Optional_Bitget_Ecosystem_Integrations.md](./B07_Optional_Bitget_Ecosystem_Integrations.md), including their implemented vs external/agent-host status and safety boundaries. No autonomous trading exists in any configuration.
 - **Portfolio Context/Impact:** Marked as FUTURE/DEFERRED in documentation (not implemented in MVP).
 
 ## Architecture & Specifications
-The official product specs and architecture documents (B01-B06) are located in the root directory. Early research drafts and planning notes have been archived in the `docs/archive/` folder.
+The official product specs and architecture documents (B01-B07) are located in the root directory. Early research drafts and planning notes have been archived in the `docs/archive/` folder.
 
 
 

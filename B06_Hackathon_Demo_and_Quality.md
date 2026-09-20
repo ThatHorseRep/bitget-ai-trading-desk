@@ -51,4 +51,11 @@ Before the final build is tagged:
 - **Graceful Degradation:** If the Yahoo Finance reference price fails, does the app still work using token-only data? (Yes, the UI must handle `referencePrice: null` gracefully).
 - **Static Checks:** `npm run build` must pass with zero TypeScript errors.
 
+## 6. Optional Integrations: Demo Truthfulness Gates
+The optional ecosystem integrations (Bitget US Equity MCP, Bitget Signal, Chainbase AgentKey, Agent Hub read-only, Agentic Account, Paper Trading, Playbook/GetAgent — see `B07_Optional_Bitget_Ecosystem_Integrations.md`) may appear in demo materials only under these gates:
+- **Enrichment-only claim:** demonstrate (or state) that the core decision remains defensible with all optional integrations disabled; never present an integration as required for a verdict.
+- **No "implemented" for external setup:** anything whose live session is a developer-side/agent-host step (Agent Hub session, Agentic Account OAuth, GetAgent Studio setup, Chainbase AgentKey access) is presented as a documented handoff with external setup required — never as a shipped, working feature.
+- **Provenance visible:** any integration-sourced observation shown in the demo displays its source label and evidence state; conflicting sources are shown as unresolved conflicts, never silently reconciled.
+- **No autonomous-trading framing:** the demo never shows or implies the product placing orders. Paper-trading content is always labeled `DEMO / PAPER` and shown as a human-confirmed, external-session harness. Chainbase is always identified as an external partner, not a Bitget product. Track 3 does not require Playbook, and the demo makes no such claim.
+
 
