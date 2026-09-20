@@ -1,5 +1,7 @@
 import type { DecisionArtifact, EvidenceItem, ProvenanceRecord } from "../domain/decision/types";
 import { EvidenceArbitrator } from "../adapters/evidence/arbitrator";
+import type { AgentHubHandoffPayload } from "../adapters/agenthub/handoff";
+import { buildAgentHubHandoff } from "../adapters/agenthub/handoff";
 import { rnvdaDemoMarketState } from "../fixtures/rnvda-demo";
 import type { MarketState } from "../domain/market/types";
 import type { NormalizedTrade, TradeIdea } from "../domain/trade/types";
@@ -34,6 +36,12 @@ export interface DecisionWorkflowResult {
   parsedResult: ParsedTradeResult;
   artifact: DecisionArtifact | null;
   limitations: string[];
+  /**
+   * PRE24-06: read-only Agent Hub research handoff for the developer's own
+   * AI host. Present only on DECISION_READY. `executionAllowed` is typed
+   * literal false and can never authorize any account operation.
+   */
+  agentHubHandoff?: AgentHubHandoffPayload;
 }
 
 export class DecisionDeskService {
@@ -329,7 +337,11 @@ export class DecisionDeskService {
       step: "DECISION_READY",
       parsedResult,
       artifact,
-      limitations
+      limitations,
+      // PRE24-06: structured read-only Agent Hub handoff, built from the
+      // finished artifact. executionAllowed is typed literal false; the
+      // app is fully functional without Agent Hub ever being connected.
+      agentHubHandoff: buildAgentHubHandoff(artifact),
     };
   }
 }
