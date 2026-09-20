@@ -376,6 +376,46 @@ Diff limited to: the provider file, the two verification scripts, the provider t
 
 **Verdict: PRE24-03 PASS — documentation truthful.**
 
+---
+
+## 14. PRE24-04 Evidence-Layer Source Arbitration (2026-09-20) — COMPLETE
+
+The deterministic `EvidenceArbitrator` (wired into DecisionDeskService evidence assembly since the baseline lock) was extended to fully satisfy the PRE24-04 requirements. Requirement-by-requirement status:
+
+| Requirement | Status |
+|---|---|
+| Preserve all material source identities | ✅ (pre-existing) — every source retained; conflicting sources enumerated verbatim in `conflictingSources`; no reconciliation attempted |
+| Preserve timestamps | ✅ (pre-existing) — original `observedTimestamp` carried to `retrievedAt` unmodified; staleness flagged, never rewritten |
+| Distinguish observed facts from AI interpretations | ✅ **closed this task** — the doc comment claimed the distinction but the types could not express it (`EvidenceItem.provenanceType` hardcoded to `"OBSERVED_FACT"`). `NormalizedResearchObservation.provenanceType?` ("OBSERVED_FACT" \| "AI_INTERPRETATION") added; `EvidenceItem.provenanceType` widened to the existing domain `ProvenanceType` union (backward-compatible: all existing producers still emit `OBSERVED_FACT`; nothing reads the field discriminator today). The arbitrator now honors the observation's provenance and **never** feeds AI interpretations into numeric conflict detection |
+| Detect conflicting observations | ✅ (pre-existing) — pairwise relative-tolerance (0.5%) comparison within same-metric groups → `UNRESOLVED_CONFLICT` on every contributing item |
+| Never silently choose a convenient number | ✅ (pre-existing) — conflicts mark ALL items; no value is selected |
+| Never let an LLM invent a reconciliation | ✅ (pre-existing + tested) — zero LLM involvement; determinism test proves identical output for identical input |
+| Attach a conflict limitation when necessary | ✅ (pre-existing) — limitation strings for conflicts, staleness, unavailability, malformed values; flow into the artifact's limitations via the service |
+| Deterministic layer consumes only MarketStateService-approved market state | ✅ **proven by test** — poisoned 3-way conflicting evidence yields byte-identical `artifact.scenarios` to a no-evidence baseline |
+| No UI redesign / no scenario formula changes / no new metrics | ✅ diff-verified: zero changes to `core/`, `components/`, `app/`, `fixtures/` |
+
+**Tests (`tests/arbitrator.test.cjs`, now 9, all hermetic):** the six required cases existed (same value / different values / stale / unavailable / duplicate / malformed) and still pass unchanged; two new proofs added — (1) an AI interpretation carrying a wildly different value for the same metric must NOT manufacture a conflict with an observed fact, and (2) conflicting evidence values never leak into scenario math (baseline vs attacked artifact scenarios are deep-equal).
+
+**Gates:** typecheck 0 · lint 0 · **tests 175: 174 pass, 0 fail, 1 skip (live gate)** · build 0.
+
+---
+
+## 15. PRE24-04 Audit Record (2026-09-20) — PASS
+
+**Audit test case created:** `tests/arbitrationAudit.test.cjs` — two external providers in direct conflict (500 vs 12345.67 USD, same metric, same timestamp) run through the REAL workflow (`DecisionDeskService.runWorkflow`), plus a baseline no-evidence run and a hostile-LLM run. All hermetic.
+
+| Audit proof | Result |
+|---|---|
+| Both sources remain visible in provenance | **PASS** — provenance chain contains both records (`alpha/quote`, `beta/quote`), each `OBSERVED_FACT` with `retrievedAt` preserved; evidence timestamps unmodified |
+| System does not invent a third value | **PASS** — observedValues are exactly {500, 12345.67}; every item `UNRESOLVED_CONFLICT`; `conflictingSources` enumerate both sides; no averaged/reconciled number exists anywhere |
+| User receives a clear limitation | **PASS** — limitation names both sources AND both values and states no value was selected |
+| Deterministic calculations use only approved inputs | **PASS** — (1) scenarios deep-equal between no-evidence baseline and conflicting-evidence run; (2) independent `runStressScenarios` recomputation from the parsed trade + MarketStateService state reproduces the artifact's scenarios exactly; trade entry derivation is `SYSTEM_DERIVED` from the market state |
+| LLM cannot overwrite deterministic values | **PASS** — a hostile LLM (patched onto the real `sharedLlmClient` seam, returning schema-valid responses demanding `entryPrice=1`, `scenarios=[]`, and a "reconciled" 6422.835) changes nothing: scenarios deep-equal baseline, entry derivation remains `SYSTEM_DERIVED` at the market price, the "reconciled" value never enters evidence, and the hostile contribution appears only as `AI_INTERPRETATION` provenance with zero authority |
+
+**Gates:** typecheck 0 · lint 0 · **tests 178: 177 pass, 0 fail, 1 skip (live gate)** · build 0.
+
+**Verdict: PRE24-04 PASS.**
+
 ### 9.1 Contributor condition for merge
 
 At audit time the GitHub repo (`ThatHorseRep/bitget-ai-trading-desk`) has exactly **one collaborator (`ThatHorseRep`, admin)** and **zero pending invitations**; all commit authors/committers across all branches are the owner's two identities (`ThatHorseRep` / `Stallion`). There are no other contributors to remove — the removal condition is satisfied vacuously. Commits for this merge are authored solely as the owner (no co-author trailers, per owner request).

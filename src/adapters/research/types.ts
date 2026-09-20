@@ -10,6 +10,15 @@ export interface NormalizedResearchObservation {
   providerStatus: ResearchProviderStatus;
   url?: string;
   /**
+   * Whether this observation reports something directly observed (a price,
+   * an index reading, a published headline) or an interpretation produced
+   * by an AI step (e.g. an agent-host Skill verdict). Defaults to
+   * "OBSERVED_FACT" when omitted. Only OBSERVED_FACT values enter the
+   * EvidenceArbitrator's numeric conflict detection; AI interpretations
+   * are never cross-checked against facts and never reconcile them.
+   */
+  provenanceType?: "OBSERVED_FACT" | "AI_INTERPRETATION";
+  /**
    * Optional numeric value for observed facts that can be compared across
    * sources (e.g. price, volume, analyst target). When present, the
    * arbitrator can detect conflicts between providers reporting different

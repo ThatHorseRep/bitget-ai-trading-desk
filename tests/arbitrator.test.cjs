@@ -261,6 +261,44 @@ test("arbitrator: malformed external observation → UNAVAILABLE, source preserv
 });
 
 // ---------------------------------------------------------------------------
+// Extra (PRE24-04): AI interpretations never enter numeric conflict detection
+// ---------------------------------------------------------------------------
+
+test("arbitrator: AI interpretation with a value never conflicts with an observed fact", () => {
+  const arb = new EvidenceArbitrator();
+  const now = new Date("2026-01-01T00:05:00Z");
+  const obs = [
+    makeObs({
+      providerId: "bitget-us-equity-mcp",
+      source: "bitget-mcp-server/quote",
+      title: "Quote: NVDA",
+      value: 500,
+      unit: "USD",
+    }),
+    makeObs({
+      providerId: "bitget-signal-agent",
+      source: "skill/technical-analysis",
+      title: "Quote: NVDA",
+      // Same metric key, wildly different value — but it is an AI
+      // interpretation, so it must NOT create a conflict with the fact.
+      value: 320,
+      unit: "USD",
+      provenanceType: "AI_INTERPRETATION",
+    }),
+  ];
+
+  const { evidence, limitations } = arb.arbitrate(obs, { now });
+  const fact = evidence.find((e) => e.provenanceType === "OBSERVED_FACT");
+  const interp = evidence.find((e) => e.provenanceType === "AI_INTERPRETATION");
+
+  assert.ok(fact, "observed fact must be present");
+  assert.ok(interp, "AI interpretation must be present");
+  assert.equal(fact.conflictState, "OK", "fact must not be dragged into a conflict by an AI reading");
+  assert.equal(interp.conflictState, "OK", "AI interpretation passes through without conflict detection");
+  assert.ok(!limitations.some((l) => l.toLowerCase().includes("conflict")), "no conflict limitation may be manufactured from an AI interpretation");
+});
+
+// ---------------------------------------------------------------------------
 // Extra: no LLM reconciliation — the arbitrator must be deterministic
 // ---------------------------------------------------------------------------
 
@@ -276,5 +314,88 @@ test("arbitrator: produces identical output for identical input (determinism)", 
   assert.deepEqual(
     a.evidence.map((e) => e.conflictState),
     b.evidence.map((e) => e.conflictState)
+  );
+});
+
+// ---------------------------------------------------------------------------
+// Extra (PRE24-04): the deterministic calculation layer must consume ONLY
+// the normalized market state approved by the MarketStateService — never
+// evidence values, however many sources or conflicts exist.
+// ---------------------------------------------------------------------------
+
+test("arbitrator: conflicting evidence values never leak into scenario math", async () => {
+  process.env.TEST_MODE = "mock_llm";
+  const { DecisionDeskService } = require("../dist-core/src/services/decisionDeskService.js");
+  const { ResearchProviderRegistry } = require("../dist-core/src/adapters/research/registry.js");
+
+  // Poisoned market state: a distinctive price the scenario math WILL use.
+  // If any evidence value leaked into calculations, outputs would diverge.
+  const now = new Date("2026-01-01T00:05:00Z");
+  const poisonedMarketState = {
+    observedAt: now.toISOString(),
+    instrumentPrice: 777.25,
+    bid: 776.5,
+    ask: 778.0,
+    bidSize: 10,
+    askSize: 12,
+    spread: 1.5,
+    spreadPct: 0.19,
+    referenceSymbol: "NVDA",
+    referencePrice: 770,
+    referencePreviousClose: 765,
+    referenceObservedAt: now.toISOString(),
+    referenceSourceName: "Test Reference Source",
+    basis: 7.25,
+    basisPct: 0.941,
+    btcPrice: 85000,
+    btcObservedAt: now.toISOString(),
+    sessionStatus: "WEEKEND",
+    tokenMarketStatus: "ACTIVE",
+    liquidityClass: "NORMAL",
+    dataQuality: "COMPLETE",
+    sources: [{ id: "test-bitget", name: "Test Bitget Source", observedAt: now.toISOString() }],
+  };
+  const mockMarket = { async getMarketState() { return { ...poisonedMarketState }; } };
+
+  const TRADE = "LONG rNVDA at 200 for 2000 dollars, exit before Monday";
+
+  async function runWithObservations(observations) {
+    const registry = new ResearchProviderRegistry();
+    registry.register({
+      providerId: "stub-evil",
+      getStatus: async () => "AVAILABLE",
+      getObservations: async () => observations,
+    });
+    const desk = new DecisionDeskService(mockMarket, undefined, registry);
+    const result = await desk.runWorkflow(TRADE, { useFixture: false });
+    assert.equal(result.step, "DECISION_READY", `workflow must stay ready, got ${result.step}`);
+    return result;
+  }
+
+  // Baseline: no external evidence at all.
+  const baseline = await runWithObservations([]);
+
+  // Attacked: providers reporting wildly conflicting prices for the same
+  // metric — precisely what the arbitrator flags as UNRESOLVED_CONFLICT.
+  const attacked = await runWithObservations([
+    makeObs({ providerId: "p1", source: "p1/quote", title: "Quote: NVDA", value: 500, unit: "USD", observedTimestamp: now.toISOString() }),
+    makeObs({ providerId: "p2", source: "p2/quote", title: "Quote: NVDA", value: 12345.67, unit: "USD", observedTimestamp: now.toISOString() }),
+    makeObs({ providerId: "p3", source: "p3/quote", title: "Quote: NVDA", value: 0.01, unit: "USD", observedTimestamp: now.toISOString() }),
+  ]);
+
+  // 1. The arbitrator did its job: the conflict is surfaced, not hidden.
+  const conflicted = attacked.artifact.evidence.filter((e) => e.conflictState === "UNRESOLVED_CONFLICT");
+  assert.ok(conflicted.length >= 2, "conflicting sources must be flagged");
+  assert.ok(
+    attacked.limitations.some((l) => l.toLowerCase().includes("conflict")),
+    "a conflict limitation must be attached"
+  );
+
+  // 2. Yet the deterministic scenario math is BYTE-IDENTICAL to baseline:
+  // evidence values never entered the calculation layer.
+  assert.deepEqual(
+    baseline.artifact.scenarios,
+    attacked.artifact.scenarios,
+    "scenario math must be identical despite conflicting evidence"
   );
 });
