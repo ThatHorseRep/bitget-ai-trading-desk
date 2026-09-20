@@ -5,6 +5,7 @@ import { LegacyEvidenceProviderAdapter } from "./legacyAdapter";
 import { BitgetUsEquityMcpProvider } from "./bitgetUsEquityMcpProvider";
 import { BitgetSignalAgentBridge } from "./bitgetSignalAgentBridge";
 import { BitgetSignalProvider } from "./bitgetSignalProvider";
+import { ChainbaseAgentKeyBridge } from "./chainbaseAgentKeyBridge";
 import type { ResearchProvider } from "./types";
 
 /**
@@ -24,9 +25,13 @@ import type { ResearchProvider } from "./types";
  *    remains available as an opt-in alternative for environments where the
  *    five Skills run inside an AI host that writes observations to disk;
  *    pass `signalBridgePath` to select it.
- * 4. Chainbase AgentKey provider — RESERVED SLOT. The provider is not
- *    implemented yet; when it exists it must implement ResearchProvider and
- *    can be registered here without touching the core or the service.
+ * 4. Chainbase AgentKey provider (PRE24-05) — AI-host handoff bridge for
+ *    the EXTERNAL PARTNER Chainbase AgentKey (NOT a Bitget product). The
+ *    S2 handbook's documented architecture is Your App -> AI Agent ->
+ *    AgentKey -> External Data Sources; no programmatic endpoint is
+ *    documented and none is invented. Gated to tokenized-stock
+ *    multi-signal research only (rToken assets), so it never floods the
+ *    workflow with generic research.
  *
  * Every slot is optional at the type level: a caller may pass `undefined`
  * (or the provider itself may be omitted via the `providers` override) and
@@ -62,11 +67,15 @@ export interface DefaultResearchRegistryOptions {
    */
   signalBridgePath?: string;
   /**
-   * The Chainbase AgentKey provider slot. Not implemented yet — the type
-   * exists so the composition is explicit and the slot is documented.
-   * When the real provider lands, wire it here; the core never changes.
+   * The Chainbase AgentKey slot. Defaults to the documented AI-host handoff
+   * bridge; pass a custom provider to replace it (tests/seams).
    */
   chainbaseProvider?: ResearchProvider;
+  /**
+   * Chainbase AgentKey bridge file name override (testing/seam). Must keep
+   * the `-output.json` suffix so the request path derives correctly.
+   */
+  chainbaseBridgePath?: string;
   /**
    * Full override: when provided, these providers replace the default set
    * entirely (used by tests to prove absence/failure/isolation semantics).
@@ -112,9 +121,16 @@ export function createDefaultResearchRegistry(
     registry.register(new BitgetSignalProvider(options.signalMcpEndpoint));
   }
 
-  // Slot 4 — Chainbase AgentKey provider (reserved; not implemented yet).
+  // Slot 4 — Chainbase AgentKey provider (PRE24-05): AI-host handoff for
+  // the external partner's data, gated to tokenized-stock research.
   if (options.chainbaseProvider) {
     registry.register(options.chainbaseProvider);
+  } else {
+    registry.register(
+      options.chainbaseBridgePath
+        ? new ChainbaseAgentKeyBridge(options.chainbaseBridgePath)
+        : new ChainbaseAgentKeyBridge(),
+    );
   }
 
   return registry;

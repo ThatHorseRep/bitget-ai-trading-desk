@@ -416,6 +416,48 @@ The deterministic `EvidenceArbitrator` (wired into DecisionDeskService evidence 
 
 **Verdict: PRE24-04 PASS.**
 
+---
+
+## 16. PRE24-05 Chainbase AgentKey (2026-09-20) — COMPLETE
+
+**Identity rule honored:** AgentKey is Chainbase's EXTERNAL PARTNER sponsorship — not a Bitget product. Every imported observation carries `providerId = chainbase-agentkey` and `source = chainbase-agentkey/<capability>/<host-source>`; the handoff request itself embeds `providerIdentity: "chainbase-agentkey-external-partner-not-bitget"` so an AI host cannot mislabel the origin.
+
+**Integration determination (documented, not guessed):**
+- S2 handbook §"Chainbase AgentKey (External Partner Sponsorship · Not a Bitget Product)": "independent of Agent Hub, Playbook, MCP Server, and the rest of the Bitget toolchain"; recommended architecture **`Your App → AI Agent → AgentKey → External Data Sources`**; "AgentKey handles data retrieval; your Agent handles reasoning".
+- AgentKey's own documentation (agentkey.app, chainbase-labs/agentkey) positions it as a unified MCP gateway installed into AI hosts (Claude Code, Cursor, Codex, ...).
+- **No programmatic endpoint is documented for server-side consumption; none was invented.**
+- **Determination: AI-host integration only** → implemented the documented agent bridge/handoff. The feature is never claimed to be native web runtime.
+
+**Implementation (`ChainbaseAgentKeyBridge`, composition-root slot 4):**
+- Handoff contract: the Desk writes `AgentKeyResearchRequest` (integration mode, identity marker, asset, reference symbol, thesis, requested capabilities, use case) to the bridge input path; an AI host with AgentKey installed retrieves data and writes structured observations back; validated entries are imported; the output file is consumed once so stale research can never masquerade as fresh.
+- Validation: strict per-entry validation (id/title/summary/timestamp/capability), undocumented capabilities rejected, invalid entries skipped individually, batch bounded (24), summaries bounded (300 chars).
+- Use-case discipline: **only tokenized-stock (rToken) multi-signal research triggers the handoff** (plain crypto and garbage input never produce a request); capability routing covers the five official families (market, on-chain, news, social, company) and requests only topic-relevant ones. No new dashboard; AgentKey is optional (slot-4 override + providers override).
+- Credentials: none exist app-side, by design — the AI host's AgentKey installation holds its own key; the server never sees or stores credentials.
+
+**Tests (`tests/chainbaseAgentKeyBridge.test.cjs`, 10, hermetic):** asset gate (rToken mapping vs plain crypto), five-capability routing with topic gating, import validation (exact attribution, invalid-entry rejection, bounded batch), and the full RedTeam use case through the real workflow — run 1 writes the documented request, run 2 imports validated multi-signal observations into evidence + provenance with Chainbase attribution (`RESEARCH_PROVIDER` state), run 3 proves consume-once semantics, and out-of-scope assets never trigger the handoff.
+
+**Protected surfaces:** zero changes to `core/`, `components/`, `app/`, `fixtures/` (diff-verified); AgentKey not mandatory (slot overrides; registry-level isolation already proven in PRE24-01 tests).
+
+**Gates:** typecheck 0 · lint 0 · **tests 188: 187 pass, 0 fail, 1 skip (live gate)** · build 0.
+
+**Remaining (external):** claim AgentKey access at agentkey.app, connect an AI host, run a live handoff demo — the bridge contract is ready for it.
+
+---
+
+## 17. PRE24-05 Audit Record (2026-09-20) — PASS
+
+| Audit check | Result |
+|---|---|
+| Chainbase labelled external partner | **PASS** — bridge header, request payload (`providerIdentity: "chainbase-agentkey-external-partner-not-bitget"`), PENDING_TASKS.md, and this report all state EXTERNAL PARTNER / not a Bitget product |
+| No text claims it is official Bitget | **PASS** — repo-wide scan of `src/` and root docs finds zero claims of official-Bitget status; the only mentions are the negative/identity statements |
+| Every observation carries provider identity | **PASS** — validator FORCES `providerId = chainbase-agentkey` and `source = chainbase-agentkey/<capability>/<source>`; runtime-proven: a hostile entry claiming `providerId: "bitget-official-mcp"` is re-attributed to Chainbase on import (now a permanent test) |
+| Credential handling is safe | **PASS** — zero `process.env` / key / secret references in the bridge; no credentials exist app-side by design; the AI host's AgentKey installation holds its own key; nothing added to `.env.example` |
+| Failure does not break the core workflow | **PASS** — runtime-proven: a throwing AgentKey bridge leaves the workflow at `DECISION_READY` (registry isolation); invalid import entries are skipped individually; out-of-scope assets never trigger the handoff |
+| One realistic multi-signal use case works | **PASS** — tokenized-stock (rNVDA) multi-signal research driven end-to-end: documented request written (market + on-chain + news, topic-gated), validated observations imported into evidence + provenance with exact Chainbase attribution, consume-once semantics proven |
+| build / tests / typecheck | **PASS** — typecheck 0 · lint 0 · **tests 189: 188 pass, 0 fail, 1 skip (live gate)** · build 0 (bridge suite 11/11) |
+
+**Verdict: PRE24-05 PASS — documentation truthful.**
+
 ### 9.1 Contributor condition for merge
 
 At audit time the GitHub repo (`ThatHorseRep/bitget-ai-trading-desk`) has exactly **one collaborator (`ThatHorseRep`, admin)** and **zero pending invitations**; all commit authors/committers across all branches are the owner's two identities (`ThatHorseRep` / `Stallion`). There are no other contributors to remove — the removal condition is satisfied vacuously. Commits for this merge are authored solely as the owner (no co-author trailers, per owner request).
