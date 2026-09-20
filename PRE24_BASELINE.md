@@ -458,6 +458,39 @@ The deterministic `EvidenceArbitrator` (wired into DecisionDeskService evidence 
 
 **Verdict: PRE24-05 PASS — documentation truthful.**
 
+---
+
+## 18. PRE24-06 Agent Hub Read-Only Handoff (2026-09-20) — COMPLETE
+
+**Integration determination (documented, not guessed):** per the S2 handbook, Bitget Agent Hub's MCP Server registers in LOCAL AI hosts (Claude Desktop / Cursor / Windsurf / ChatGPT Desktop) and the `bgc` CLI installs into terminal agents (Claude Code / Codex / OpenClaw); `--read-only` is the documented safe mode (`--paper-trading` the demo mode). No hosted/browser Agent Hub API is documented for server-side consumption — and none was invented. **Determination: local MCP is the only supported route → developer/agent-host integration; a serverless function never launches a local stdio MCP.**
+
+**Implementation:**
+- `src/adapters/agenthub/handoff.ts` — `buildAgentHubHandoff(artifact)`: a pure function serializing the finished DecisionArtifact into `AgentHubHandoffPayload`: asset, `decisionArtifactId`, relevant market state, thesis, challenge, deterministic stress results, the product-generated verdict (+ reasons), and limitations. `executionAllowed` is typed as the literal `false` — no caller can construct a permissive payload; `validateAgentHubHandoff` rejects any payload claiming `executionAllowed: true` outright (not this contract).
+- Wiring: every `DECISION_READY` workflow result carries the payload as an additive optional field (`agentHubHandoff`) — the artifact itself is unchanged, no UI change, no new API route, and the app is fully functional with Agent Hub disconnected (no import of Agent Hub, no `fetch`, no `child_process`, no `process.env` in the module — test-enforced).
+- Explicitly absent: order placement, write tools, exchange credentials in the repo, auto-run account operations, autonomous monitoring.
+
+**Tests (`tests/agentHubHandoff.test.cjs`, 6, hermetic):** payload completeness through the real workflow (all required elements, verbatim artifact fidelity), product-verdict integrity (the deterministic policy verdict — never an LLM thesis-quality string), forgery rejection (`executionAllowed: true` → null), JSON round-trip survival, additive-only wiring (no handoff on non-ready steps), and the no-runtime-dependency proof.
+
+**Protected surfaces:** zero changes to `core/`, `domain/`, `components/`, `app/`, `fixtures/` (diff-verified; the only modified file is the service's result assembly). **Gates:** typecheck 0 · lint 0 · **tests 195: 194 pass, 0 fail, 1 skip (live gate)** · build 0.
+
+---
+
+## 19. PRE24-06 Audit Record (2026-09-20) — PASS
+
+**Safety boundary demonstrably effective — evidence:**
+
+| Audit proof | Result |
+|---|---|
+| Genuinely read-only path | **PASS** — the entire writable surface of the Agent Hub integration is one interface + two pure functions (`buildAgentHubHandoff`, `validateAgentHubHandoff`); no network, no `child_process`, no `process.env` in the module (grep-proven); no stdio MCP launch anywhere server-side |
+| Write-operation identification | **PASS** — full scan of the adapter for order/trade/account verbs (`place/submit order, buy, sell, cancel, withdraw, transfer, deposit, apiKey, secret, bearer, account ops`): zero matches. **Write tools are absent** (option 1); there is no path by which a write could reach Bitget because the application never connects to Agent Hub at all |
+| Type-level execution bar | **PASS** — compiler probe: `Type 'true' is not assignable to type 'false'` (TS2322) when attempting to forge `executionAllowed: true`; the validator additionally rejects any forged payload at runtime (proven) |
+| Handoff contains no secrets | **PASS** — secret-pattern scan of a REAL payload from the real workflow: CLEAN (GitHub PATs, AWS keys, `sk-` keys, apiKey/secret/password/bearer/PEM patterns, exchange credential names); repo-wide scan shows only pre-existing runtime env reads (`LLM_API_KEY`), never stored secrets |
+| Normal RedTeam workflow unchanged | **PASS** — repeat runs byte-identical scenarios, `DECISION_READY`, Agent Hub absent → fully functional (also test-enforced: no handoff on non-ready steps, artifact fidelity verbatim) |
+| Required elements present | **PASS** — asset, artifact id, market state, thesis, challenge, stress results, product verdict (WAIT from deterministic policy), limitations, `executionAllowed: false` |
+| Gates | **PASS** — typecheck 0 · lint 0 · tests 195: 194/0/1 · build 0 |
+
+**Verdict: PRE24-06 PASS — the read-only boundary is enforced by construction (no connectivity), by the type system (literal `false`), and by validation (forgery rejection).**
+
 ### 9.1 Contributor condition for merge
 
 At audit time the GitHub repo (`ThatHorseRep/bitget-ai-trading-desk`) has exactly **one collaborator (`ThatHorseRep`, admin)** and **zero pending invitations**; all commit authors/committers across all branches are the owner's two identities (`ThatHorseRep` / `Stallion`). There are no other contributors to remove — the removal condition is satisfied vacuously. Commits for this merge are authored solely as the owner (no co-author trailers, per owner request).

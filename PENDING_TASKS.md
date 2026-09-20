@@ -1,5 +1,20 @@
 # Pending Tasks: US Equity MCP Integration
 
+## Agent Hub (PRE24-06) — read-only handoff implemented; live session is a developer-side step
+
+- **Determination:** Agent Hub's MCP Server and `bgc` CLI are LOCAL AI-host
+  tools (official docs); `--read-only` is the documented safe mode. No
+  hosted/browser Agent Hub API is documented, so the app implements a
+  structured handoff payload — it never launches a stdio MCP from a
+  serverless function and never places orders.
+- **Payload:** every DECISION_READY workflow result carries
+  `agentHubHandoff` (asset, artifact id, market state, thesis, challenge,
+  stress results, product verdict, limitations) with `executionAllowed`
+  typed as literal `false` — the type system cannot express permission.
+- **To use:** copy the payload into your own AI host running
+  `@bitget-ai/bitget-agent-mcp --read-only` (or `bgc` read-only) and ask
+  read-only research questions. No exchange credentials exist in the repo.
+
 ## Chainbase AgentKey (PRE24-05) — implemented as documented AI-host handoff
 
 - **Integration determination (documented, not guessed):** the S2 handbook's
