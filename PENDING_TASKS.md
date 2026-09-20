@@ -110,3 +110,25 @@ documented-endpoint failure). The provider degraded exactly as designed
 endpoint is reachable from some environment and real payloads/tool names can
 be inspected. Re-run the script from a deployment environment (e.g. Vercel)
 before tightening schemas.
+
+## Agentic Account (PRE24-07) — handoff path implemented; authorization is a human-side step
+
+- **Determination:** per the official Agentic Account Connection Guide
+  (bitget.com/support/articles/12560603894122), OAuth runs ONLY via the official
+  `@bitget-ai/bitget-agent-mcp`'s `authorize_start` tool inside the user's own AI host;
+  credentials are written locally by that MCP (never env vars, never user-pasted, never
+  this repo). This app therefore implements the handoff only: no OAuth URL building, no
+  credentials, no stdio MCP launch, no execution.
+- **Delivered:** the seven-state connection state machine (UNAVAILABLE → AUTH_REQUIRED →
+  AUTHORIZING → AUTHORIZED → HUMAN_CONFIRMATION_REQUIRED → READY_FOR_EXTERNAL_EXECUTION,
+  with ERROR; no state meaning "order placed") + `AgenticHandoffDocument` on every
+  DECISION_READY result (`agenticHandoff` field), carrying asset, artifact id, market
+  state, product verdict, trade, stress results, limitations, the embedded read-only
+  research handoff, and the explicit "authorization is NOT execution" disclosures.
+- **Human-side steps for a live flow:** install the official skill + MCP
+  (`npx @bitget-ai/bitget-agent-skill --target all --skill agentic`, then register
+  `npx -y @bitget-ai/bitget-agent-mcp`), restart the AI-host session, call
+  `authorize_start`, finish OAuth in the browser, confirm via `get_auth_status`. Only then
+  review the handoff document and explicitly confirm any proposed action — execution
+  happens solely in the official Agentic session, never in this app.
+- **Not done (deliberately):** no live authorization, no order, no credential of any kind.

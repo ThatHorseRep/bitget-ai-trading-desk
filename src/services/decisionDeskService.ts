@@ -2,6 +2,8 @@ import type { DecisionArtifact, EvidenceItem, ProvenanceRecord } from "../domain
 import { EvidenceArbitrator } from "../adapters/evidence/arbitrator";
 import type { AgentHubHandoffPayload } from "../adapters/agenthub/handoff";
 import { buildAgentHubHandoff } from "../adapters/agenthub/handoff";
+import type { AgenticHandoffDocument } from "../adapters/agentic/handoff";
+import { buildAgenticHandoff } from "../adapters/agentic/handoff";
 import { rnvdaDemoMarketState } from "../fixtures/rnvda-demo";
 import type { MarketState } from "../domain/market/types";
 import type { NormalizedTrade, TradeIdea } from "../domain/trade/types";
@@ -42,6 +44,14 @@ export interface DecisionWorkflowResult {
    * literal false and can never authorize any account operation.
    */
   agentHubHandoff?: AgentHubHandoffPayload;
+  /**
+   * PRE24-07: optional Agentic Account handoff path. Present only on
+   * DECISION_READY. executionAllowed and orderPlaced are typed literal
+   * false; the official OAuth flow (authorize_start) runs in the human's
+   * own AI host — this application never builds a URL, stores credentials,
+   * or executes anything.
+   */
+  agenticHandoff?: AgenticHandoffDocument;
 }
 
 export class DecisionDeskService {
@@ -342,6 +352,11 @@ export class DecisionDeskService {
       // finished artifact. executionAllowed is typed literal false; the
       // app is fully functional without Agent Hub ever being connected.
       agentHubHandoff: buildAgentHubHandoff(artifact),
+      // PRE24-07: Agentic handoff document, built from the finished
+      // artifact with the connection state UNAVAILABLE by default — the
+      // app never claims a connection it did not observe from the
+      // official MCP. Purely additive; nothing executes here.
+      agenticHandoff: buildAgenticHandoff(artifact),
     };
   }
 }
