@@ -1,5 +1,26 @@
 # Pending Tasks: US Equity MCP Integration
 
+## Chainbase AgentKey (PRE24-05) — implemented as documented AI-host handoff
+
+- **Integration determination (documented, not guessed):** the S2 handbook's
+  recommended architecture is `Your App → AI Agent → AgentKey → External Data
+  Sources`, and AgentKey's own docs position it as a unified MCP gateway for
+  AI hosts. No programmatic endpoint is documented for server-side use; none
+  was invented. The bridge (`ChainbaseAgentKeyBridge`, slot 4) writes a
+  structured request; an AI host with AgentKey installed retrieves data and
+  writes validated structured observations back.
+- **Identity:** every imported observation is attributed
+  `chainbase-agentkey/<capability>/<source>` — Chainbase is an EXTERNAL
+  PARTNER, never labelled a Bitget product.
+- **Use-case gate:** only tokenized-stock (rToken) multi-signal research
+  triggers the handoff; plain crypto never produces a request. Capability
+  routing covers the five official families (market, on-chain, news, social,
+  company) — only topic-relevant ones are requested.
+- **No credentials app-side:** the AI host's AgentKey installation holds its
+  own key; the server never sees or stores one.
+- **Remaining (external):** claim AgentKey access at agentkey.app, connect
+  an AI host, and run a live handoff; the bridge is ready for a real demo.
+
 ## Bitget Signal (PRE24-03) — implemented, live-proven, upstream-dependent
 
 - **Programmatic path (runtime):** `BitgetSignalProvider` speaks the documented

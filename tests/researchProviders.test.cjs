@@ -92,10 +92,13 @@ test('PRE24-01: composition root registers the four provider slots', () => {
   const ids = registry.getRegisteredProviders();
   // PRE24-03: slot 3 defaults to the documented live Signal MCP provider;
   // the AI-host file bridge remains available via signalBridgePath.
+  // PRE24-05: slot 4 is now the Chainbase AgentKey AI-host handoff bridge,
+  // gated to tokenized-stock multi-signal research only.
   assert.deepEqual(ids, [
     'legacy-evidence-provider',
     'bitget-us-equity-mcp',
     'bitget-signal',
+    'chainbase-agentkey',
   ]);
   // Chainbase AgentKey slot is reserved but optional — when a provider is
   // supplied for it, it is appended without any core change.
