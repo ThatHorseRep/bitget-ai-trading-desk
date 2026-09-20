@@ -31,8 +31,23 @@ This document outlines the current MVP architecture, known technical constraints
 * **Current State (MVP)**: Due to constraints with the current LLM's streaming capabilities, the system uses synchronous JSON payload extraction. If the LLM returns slightly malformed data, the system automatically intercepts the failure and initiates a retry loop.
 * **Production Roadmap**: Migrate to a provider with native Structured Outputs (JSON Schema enforcement) and reliable Server-Sent Events (SSE) streaming to reduce latency and eliminate the need for multi-second retry loops.
 
+## Optional Ecosystem Integrations (PRE24 series)
+
+Beyond the core pipeline, the app optionally enriches its evidence with ecosystem providers, assembled at a single composition root (`src/adapters/research/defaultRegistry.ts`, PRE24-01). Every slot is optional at the type level; absent providers are a supported runtime state, and provenance records distinguish every source. Full classification (native vs external/agent-host), status, and safety boundaries are in [B07_Optional_Bitget_Ecosystem_Integrations.md](./B07_Optional_Bitget_Ecosystem_Integrations.md). Summary:
+
+- **Bitget US Equity MCP (PRE24-02):** read-only US Stocks/ETF market-data MCP over Streamable HTTP, implemented in-app with tool discovery, category dispatch, validation, and bounded timeouts. Live reachability unproven at time of writing; degrades to `UNAVAILABLE` when unreachable. Optional, native outbound.
+- **Bitget Signal (PRE24-03):** read-only sentiment/market-intel MCP, implemented in-app (programmatic HTTP default; opt-in AI-host Skills file bridge). Upstream-dependent; degrades gracefully. Optional.
+- **Chainbase AgentKey (PRE24-05):** **external partner, not a Bitget product.** Implemented as an AI-host handoff bridge (structured request file → AI host with AgentKey → validated observations back); no programmatic endpoint is documented and none was invented. Gated to tokenized-stock research. Optional.
+- **Agent Hub read-only handoff (PRE24-06):** a structured payload on every decision result with `executionAllowed` typed as literal `false`; the live read-only session runs in the developer's own AI host (`@bitget-ai/bitget-agent-mcp --read-only`). The app never launches a stdio MCP and never contacts Agent Hub. Optional.
+- **Agentic Account (PRE24-07):** handoff document plus a seven-state connection state machine with no "order placed" state; OAuth happens only in the official MCP inside the user's AI host. Authorization is not execution. Optional.
+- **Paper Trading (PRE24-08/10):** a demo-only verification harness driving the official Agent Hub MCP hardcoded to `--paper-trading` against Bitget's Demo Trading environment (separate `BITGET_DEMO_*` credentials, namespace-checked; human confirmation required for execution; every report labeled DEMO/PAPER). Not imported by any app route; the app itself never trades, even in demo. Optional, external developer tool.
+- **Playbook / GetAgent:** ecosystem distribution surfaces; **no integration implemented**. Track 3 does not require Playbook.
+
+These integrations only add evidence and handoff surfaces. No optional capability is a hidden dependency of the core, and none enables autonomous trading in any configuration.
+
 ## Graceful Degradation Philosophy
 A core design tenet of the RedTeam Desk is **Safety First**. The system is built to fail safely rather than process bad data:
 - If Reference Pricing fails, the system bypasses the basis shock but flags the missing data to the user.
 - If the LLM completely fails or hallucinates, the system halts and asks for manual clarification.
 - If live networks or APIs fail entirely, the **Deterministic Fixture** (Demo Mode) provides an offline, fully verified execution path to ensure continuous availability.
+- If any optional ecosystem provider (US Equity MCP, Signal, AgentKey bridge) is absent or unreachable, the workflow completes with the remaining evidence and attaches `UNAVAILABLE` provenance — integrations are enrichment, never dependencies (see B07).

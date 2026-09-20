@@ -23,6 +23,33 @@ import type { MarketState } from "../../domain/market/types";
  *   module is a pure function over an already-produced DecisionArtifact.
  */
 
+/**
+ * PRE24-10: Paper-trading companion state for GetAgent Studio workflow.
+ * Included only when user has explicitly enabled paper trading.
+ */
+export interface PaperTradingCompanion {
+  /**
+   * User has explicitly enabled paper trading (never auto-enabled).
+   * Must be true for any paper-trading workflow to proceed.
+   */
+  enabledByUser: boolean;
+  /**
+   * Indicates whether external setup (e.g., GetAgent Studio demo credentials)
+   * has been completed by the user.
+   */
+  externalSetupComplete: boolean;
+  /**
+   * Required label that must be displayed with any paper-trading results.
+   * Never omit or modify this string when enabledByUser is true.
+   */
+  environmentLabel: "DEMO / PAPER — Bitget Demo Trading environment — no real funds involved";
+  /**
+   * Optional safe link to complete external setup if not yet done.
+   * Only present when externalSetupComplete is false.
+   */
+  setupLink?: string;
+}
+
 /** The handoff payload given to a developer's AI host. */
 export interface AgentHubHandoffPayload {
   /** Marks the payload kind and contract version for the host. */
@@ -58,14 +85,23 @@ export interface AgentHubHandoffPayload {
   stressResults: DecisionArtifact["scenarios"];
   /** Limitations the human should read before acting on anything. */
   limitations: string[];
+  /**
+   * PRE24-10: Optional paper-trading companion for GetAgent Studio workflow.
+   * Absent by default; included only when user explicitly enables paper trading.
+   * Does not affect the core research handoff functionality.
+   */
+  paperTradingCompanion?: PaperTradingCompanion;
 }
 
 /**
  * Build a read-only Agent Hub handoff payload from a DecisionArtifact.
  * Pure: reads the artifact, writes nothing, calls nothing, launches nothing.
+ *
+ * PRE24-10: Includes paperTradingCompanion only when user has explicitly
+ * enabled paper trading AND external setup is complete.
  */
 export function buildAgentHubHandoff(artifact: DecisionArtifact): AgentHubHandoffPayload {
-  return {
+  const basePayload: Omit<AgentHubHandoffPayload, 'paperTradingCompanion'> = {
     handoffKind: "bitget-agent-hub-readonly-research-handoff",
     contractVersion: "1",
     intendedHostTool: "@bitget-ai/bitget-agent-mcp --read-only",
@@ -85,6 +121,26 @@ export function buildAgentHubHandoff(artifact: DecisionArtifact): AgentHubHandof
     stressResults: artifact.scenarios,
     limitations: artifact.limitations,
   };
+
+  // PRE24-10: Include paper trading companion ONLY when explicitly enabled by user
+  // and external setup is complete. Never auto-enabled.
+  if (artifact.paperTradingStatus?.enabledByUser) {
+    return {
+      ...basePayload,
+      paperTradingCompanion: {
+        enabledByUser: true,
+        externalSetupComplete: artifact.paperTradingStatus.externalSetupComplete,
+        environmentLabel: "DEMO / PAPER — Bitget Demo Trading environment — no real funds involved",
+        ...(artifact.paperTradingStatus.externalSetupComplete
+          ? {}
+          : {
+              setupLink: "https://getagent.studio/demo-setup",
+            }),
+      },
+    };
+  }
+
+  return basePayload;
 }
 
 /**
