@@ -1,5 +1,5 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { BitgetUsEquityMcpProvider, classifyTool } from "../adapters/research/bitgetUsEquityMcpProvider.js";
 
 const ENDPOINT = process.env.BITGET_MCP_ENDPOINT ?? "https://agent.bitget.com/mcp";
@@ -31,10 +31,10 @@ async function main() {
   // Step 2: Raw tool discovery dump
   // -----------------------------------------------------------------------
   console.log("[2/4] Discovering tools via listTools()...");
-  let transport: SSEClientTransport | null = null;
+  let transport: StreamableHTTPClientTransport | null = null;
   let client: Client | null = null;
   try {
-    transport = new SSEClientTransport(new URL(ENDPOINT));
+    transport = new StreamableHTTPClientTransport(new URL(ENDPOINT));
     client = new Client(
       { name: "verify-connectivity", version: "1.0.0" },
       { capabilities: {} },
