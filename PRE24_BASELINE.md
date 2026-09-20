@@ -494,3 +494,82 @@ The deterministic `EvidenceArbitrator` (wired into DecisionDeskService evidence 
 ### 9.1 Contributor condition for merge
 
 At audit time the GitHub repo (`ThatHorseRep/bitget-ai-trading-desk`) has exactly **one collaborator (`ThatHorseRep`, admin)** and **zero pending invitations**; all commit authors/committers across all branches are the owner's two identities (`ThatHorseRep` / `Stallion`). There are no other contributors to remove — the removal condition is satisfied vacuously. Commits for this merge are authored solely as the owner (no co-author trailers, per owner request).
+
+## 20. PRE24-07 — Bitget Agentic Account Handoff (2026-09-20)
+
+**Official determination (read, not guessed):** the Agentic Account Connection Guide
+(https://www.bitget.com/support/articles/12560603894122, fetched via the official mirror)
+specifies: OAuth is triggered ONLY by the official MCP's `authorize_start` tool ("the LLM
+must not assemble the URL itself or start a local server to listen for the callback");
+credentials (API Key / Secret / Passphrase) are received by the MCP's local callback and
+written to disk on the user's machine — BITGET_API_* env vars must NOT be set and the user
+never creates or pastes a Key; success counts ONLY when the official MCP confirms
+(`get_auth_status` authorized) — "a finished browser page is not proof of success"; and a
+newly registered MCP is invisible until the session restarts.
+
+**Consequence:** this application implements the handoff path only. It builds no OAuth URL,
+stores no credentials, asks for no API key, launches no local stdio MCP (impossible from
+Vercel), and executes nothing. The human drives the official flow in their own AI host.
+
+**What was built (`src/adapters/agentic/handoff.ts`, pure — no I/O):**
+- **State machine** — the seven official states (UNAVAILABLE, AUTH_REQUIRED, AUTHORIZING,
+  AUTHORIZED, HUMAN_CONFIRMATION_REQUIRED, READY_FOR_EXTERNAL_EXECUTION, ERROR) with a legal
+  transition table. There is deliberately NO state meaning "order placed": no
+  EXECUTED/FILLED/ORDER_PLACED state exists (test-enforced). AUTHORIZED can ONLY progress
+  through explicit human confirmation — no edge skips consent. `setState` refuses illegal
+  transitions (AUTHORIZING keeps AUTH_REQUIRED as its recovery path; ERROR/UNAVAILABLE
+  reachable per the table).
+- **`AgenticHandoffDocument`** — prepared from the finished DecisionArtifact: asset, artifact
+  id, approved market state, product verdict (+ deterministic policy reasons, never LLM), the
+  parsed trade, stress results, limitations, the embedded PRE24-06 read-only research
+  handoff, the handoff reason, the authorization contract (method, trigger/confirm/wait
+  tools, credentialsStoredBy, productStoresCredentials: false,
+  productAsksUserForApiKey: false, productBuildsOAuthUrl: false), the anti-deception
+  confirmation block (what authorization does NOT mean — explicitly "Authorization does NOT
+  mean an order was placed"), and the official flow steps.
+- **Safety in the type system:** `executionAllowed` AND `orderPlaced` are typed literal
+  `false`; compiler probe rejects both forgeries with TS2322 ("Type 'true' is not assignable
+  to type 'false'"). `validateAgenticHandoff` rejects any payload claiming either `true`, an
+  unknown state, or a missing proposedAction at runtime.
+- **Wiring (additive, 15 lines in the service):** DECISION_READY results carry the optional
+  `agenticHandoff` field built with the connection state UNAVAILABLE — the app never claims
+  a connection it did not observe from the official MCP. No UI change, no new route, the app
+  is fully functional with Agentic disconnected.
+
+**Tests (`tests/agenticHandoff.test.cjs`, 11, hermetic):** full legal path walk to
+READY_FOR_EXTERNAL_EXECUTION; AUTHORIZED-cannot-skip-confirmation; transition-table
+integrity (all targets real, exactly the seven states, no executed-order state); illegal
+transitions refused leaving state unchanged; failure/recovery paths; document completeness
+through the real workflow; JSON round-trip validation; forgery rejection (executionAllowed,
+orderPlaced, unknown state, wrong kind, non-objects, missing proposedAction); secret scan of
+a real payload (clean); additive-only wiring with verbatim artifact fidelity; and the
+purity proof (comment-stripped source: no fetch, no child_process, no process.env, no spawn).
+
+**Note:** the round-trip test caught and fixed a real validator bug during development —
+the original validator checked top-level `asset`/`decisionArtifactId` though the contract
+nests them in `proposedAction` (it rejected every valid document; forgeries were "rejected"
+vacuously). The fixed validator checks the nested identity fields plus `researchHandoff`.
+
+**Explicitly absent (per tasking):** no OAuth URL construction, no credential storage, no
+user-pasted API key, no automatic trading, no live order (none executed — the task itself
+forbids it and the type system makes it inexpressible).
+
+**Protected surfaces:** zero changes to `core/`, `domain/`, `components/`, `app/`,
+`fixtures/` (the domain layer is untouched; the service diff is purely additive). **Gates:**
+typecheck 0 · lint 0 · **tests 206: 205 pass, 0 fail, 1 skip (live gate)** · build 0.
+
+## 21. PRE24-07 Audit Record (2026-09-20) — PASS
+
+| Audit check | Result |
+|---|---|
+| OAuth follows the official guide | **PASS** — the authorization contract and flow steps mirror the official Agentic Connection Guide (read in full): `authorize_start` triggers OAuth; the returned `authorizeUrl` is used verbatim; `authorize_wait`/`get_auth_status` are the only success oracles ("a finished browser page is not proof"); session restart required before `authorize_start`; credentials received by the MCP's local callback only |
+| No hand-built authorization URL | **PASS** — zero URL-construction primitives in the adapters (`new URL`, `URLSearchParams`, `window.open`: none); the only URL string is the doc-comment citation of the official guide; `productBuildsOAuthUrl: false` in the contract; flow step: "never build or modify the OAuth URL" |
+| No API-key paste flow | **PASS** — zero interactive primitives (`readline`, `prompt(`, `confirm(`, `alert(`: none); `productAsksUserForApiKey: false`; the payload states the user never creates or pastes a Key |
+| No secrets committed | **PASS** — pattern scan across every file in the commit (PATs, AWS keys, `sk-`, private keys, apiKey/secret/passphrase assignments): clean; the single `PRIVATE KEY` match is the test's own detector regex; `.env*` gitignored and unstaged; no new env vars added |
+| Authorized ≠ order confirmation | **PASS** — exactly seven states exist; no EXECUTED/FILLED/ORDER_PLACED state anywhere (`setState('ORDER_PLACED')` throws); AUTHORIZED has no edge to execution; the payload itself lists "Authorization does NOT mean an order was placed" |
+| Human confirmation ≠ execution | **PASS** — AUTHORIZED → HUMAN_CONFIRMATION_REQUIRED → READY_FOR_EXTERNAL_EXECUTION, and READY is a *handoff* state: `executionAllowed` and `orderPlaced` are typed literal `false` (compiler probe: TS2322 for both forgeries); runtime forgery rejection proven; READY note: "Nothing has been executed by this application" |
+| No live order occurred | **PASS** — the compiled module (comments stripped by tsc) contains zero connectivity: its only require is the read-only research-handoff builder; no fetch/http/net/child_process/env anywhere; the application has no path to Bitget account operations |
+| External/agent-host marking (no faked in-app completion) | **PASS** — this environment cannot host OAuth (serverless; the official flow mandates the local MCP), and the implementation says so: workflow-built documents always report `currentState: UNAVAILABLE`; UI contains zero Agentic mentions; docs mark it handoff-only; a host may report AUTHORIZED as external truth, and even then the contract still bars execution |
+
+**Gates:** typecheck 0 · lint 0 · **tests 206: 205 pass, 0 fail, 1 skip** · build 0.
+**Verdict: PRE24-07 PASS.** The safety boundary is enforced by construction (no connectivity), by the type system (literal `false` on both execution flags), by the transition table (no consent-skip edge, no order state), and by validation (forgery rejection).
