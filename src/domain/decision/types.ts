@@ -102,7 +102,15 @@ export interface EvidenceItem {
   retrievedAt?: string;
   summary: string;
   state: EvidenceState;
-  provenanceType: "OBSERVED_FACT";
+  /**
+   * Provenance of the evidence itself. "OBSERVED_FACT" for directly
+   * observed data; "AI_INTERPRETATION" when the item reports an AI
+   * step's interpretation (e.g. an agent-host Skill verdict). Widened
+   * from a hardcoded "OBSERVED_FACT" in PRE24-04 so the Evidence layer
+   * can honestly distinguish the two; all existing producers still
+   * emit "OBSERVED_FACT".
+   */
+  provenanceType: ProvenanceType;
   providerId?: string;
   /**
    * Arbitration result. Present when the EvidenceArbitrator has processed

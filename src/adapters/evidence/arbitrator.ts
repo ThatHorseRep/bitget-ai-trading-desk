@@ -105,8 +105,12 @@ export class EvidenceArbitrator {
     const groups = new Map<string, NormalizedResearchObservation[]>();
 
     for (const obs of deduped) {
-      // Non-numeric observations are passed through as-is (OK)
-      if (typeof obs.value !== "number") {
+      // AI interpretations are NEVER cross-checked against observed facts
+      // and never enter numeric conflict detection — an AI reading must not
+      // be able to reconcile (or manufacture) a conflict between sources.
+      // They pass through with their provenance honestly labelled.
+      // Non-numeric observations are likewise passed through as-is (OK).
+      if (obs.provenanceType === "AI_INTERPRETATION" || typeof obs.value !== "number") {
         evidence.push(this.toEvidenceItem(obs, "OK", now, staleThresholdMs));
         continue;
       }
@@ -166,7 +170,7 @@ export class EvidenceArbitrator {
       summary: obs.summary,
       retrievedAt: obs.observedTimestamp,
       state: this.mapProviderState(obs.providerStatus),
-      provenanceType: "OBSERVED_FACT",
+      provenanceType: obs.provenanceType ?? "OBSERVED_FACT",
       providerId: obs.providerId,
       conflictState,
       observedValue: typeof obs.value === "number" ? obs.value : undefined,
@@ -186,7 +190,7 @@ export class EvidenceArbitrator {
       summary: obs.summary,
       retrievedAt: obs.observedTimestamp,
       state: this.mapProviderState(obs.providerStatus),
-      provenanceType: "OBSERVED_FACT",
+      provenanceType: obs.provenanceType ?? "OBSERVED_FACT",
       providerId: obs.providerId,
       conflictState: "DUPLICATE",
       observedValue: typeof obs.value === "number" ? obs.value : undefined,
@@ -270,7 +274,7 @@ export class EvidenceArbitrator {
             summary: obs.summary,
             retrievedAt: obs.observedTimestamp,
             state: this.mapProviderState(obs.providerStatus),
-            provenanceType: "OBSERVED_FACT",
+            provenanceType: obs.provenanceType ?? "OBSERVED_FACT",
             providerId: obs.providerId,
             conflictState: "UNAVAILABLE",
             observedValue: undefined,
@@ -317,7 +321,7 @@ export class EvidenceArbitrator {
           summary: obs.summary,
           retrievedAt: obs.observedTimestamp,
           state: this.mapProviderState(obs.providerStatus),
-          provenanceType: "OBSERVED_FACT" as const,
+          provenanceType: obs.provenanceType ?? ("OBSERVED_FACT" as const),
           providerId: obs.providerId,
           conflictState: "UNRESOLVED_CONFLICT" as const,
           conflictingSources: witnesses.map((w) => w.source),
