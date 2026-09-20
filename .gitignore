@@ -23,3 +23,7 @@ test_api*.js
 test_llm_direct.js
 check_credits.js
 list-tools.mjs
+
+# PRE24-08: local paper-trading verification logs (DEMO only, never commit)
+paper-trading-logs/
+.paper-verify/
