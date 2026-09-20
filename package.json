@@ -11,7 +11,8 @@
     "test": "npm run test:core",
     "test:core": "npm run build:core && node --env-file=.env.local --test tests/*.test.cjs",
     "build:core": "tsc -p tsconfig.core.json",
-    "verify-clean": "npm ci && npm run typecheck && npm run lint && npm run test && npm run build"
+    "verify-clean": "npm ci && npm run typecheck && npm run lint && npm run test && npm run build",
+    "verify-paper-trading": "npm run build:core && npx tsc src/scripts/verify-paper-trading.ts --outDir .paper-verify --skipLibCheck --target ES2022 --module CommonJS --moduleResolution Node --esModuleInterop && node .paper-verify/scripts/verify-paper-trading.js"
   },
   "engines": {
     "node": ">=20.0.0"

@@ -2,7 +2,7 @@
 
 This document is the operational manual for building the Bitget AI RedTeam Desk. It defines the exact prompts to feed into fresh AntiGravity conversations to execute the remaining build phases.
 
-**CRITICAL INSTRUCTION FOR AI OPERATORS:** Do not rely on hidden conversation history. Read the relevant Markdown specs (B01-B06) and inspect the codebase before writing code. You must execute the **Audit Prompt** before ending your conversation and committing the code.
+**CRITICAL INSTRUCTION FOR AI OPERATORS:** Do not rely on hidden conversation history. Read the relevant Markdown specs (B01-B07) and inspect the codebase before writing code. You must execute the **Audit Prompt** before ending your conversation and committing the code. (B07 defines the optional ecosystem integrations and their safety boundaries — when working on anything integration-related, treat B07's non-negotiable claims discipline as binding: core first, enrichment second, no hidden dependencies, no autonomous trading.)
 
 ---
 

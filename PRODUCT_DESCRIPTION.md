@@ -9,7 +9,7 @@
 
 ## 3. Validation Data & Key Metrics
 **Validation so far:**
-- 124/124 automated tests passing in our test suite (core scenario determinism, AI parsing fallbacks, off-hours session simulation, etc.).
+- 214/215 automated tests passing in our test suite (core scenario determinism, AI parsing fallbacks, off-hours session simulation, integration isolation, etc.; the one skip is a live-integration test that self-skips without credentials).
 - [TARGET/PLAN]: No live user data or user metrics collected yet.
 
 ## 4. Progress
@@ -20,10 +20,12 @@
 - Thesis vs. Position synthesis (src/core/ai/assessment.ts)
 - Decision Artifact generation & Policy (src/core/decision/policy.ts)
 - Transparent "Demo Mode" for off-hours trading simulation (src/components/workspace/RedTeamWorkspace.tsx and src/app/api/stress-test/route.ts)
+- Optional ecosystem integrations as pure enrichment: Bitget US Equity MCP, Bitget Signal, Chainbase AgentKey (external partner), Agent Hub read-only handoff, and Agentic Account handoff — the core decision is fully defensible with all of them disabled (see B07_Optional_Bitget_Ecosystem_Integrations.md)
 
 **What's not built yet / known gaps:**
 - Live user portfolio context integration (currently marked as deferred/post-MVP).
-- Direct paper-trading handoff / API execution natively within the desk.
+- Native trade execution of any kind. There is no autonomous trading and no execution code path. A demo-only paper-trading verification harness (driving the official Bitget Agent Hub MCP with `--paper-trading` against the Demo Trading environment, human-confirmed) exists as an external developer tool, but the desk itself never places orders — paper or live.
+- Playbook/GetAgent: no integration is implemented; they are potential future distribution surfaces for the handoff documents (Track 3 does not require Playbook).
 - Synthetic hedging suggestions.
 
 **Problems I hit and fixed:**
