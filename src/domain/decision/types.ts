@@ -47,6 +47,25 @@ export interface DecisionPolicyConfig {
   materialUncertaintyVerdict: "WAIT";
 }
 
+export interface PaperTradingStatus {
+  /**
+   * User has explicitly enabled paper trading for this artifact.
+   * Must be set to true before any paper-trading workflow can start.
+   * Never auto-enabled — requires explicit user action.
+   */
+  enabledByUser: boolean;
+  /**
+   * External setup completion status (e.g., GetAgent Studio demo credentials configured).
+   * When true, the handoff/workflow is ready to execute with user confirmation.
+   */
+  externalSetupComplete: boolean;
+  /**
+   * Label that must be displayed whenever showing paper-trading results.
+   * Always present when enabledByUser is true.
+   */
+  environmentLabel: "DEMO / PAPER — Bitget Demo Trading environment — no real funds involved";
+}
+
 export interface DecisionArtifact {
   artifactId: string;
   generatedAt: string;
@@ -61,6 +80,12 @@ export interface DecisionArtifact {
   evidence: EvidenceItem[];
   provenance: ProvenanceRecord[];
   limitations: string[];
+  /**
+   * PRE24-10: Optional paper-trading companion state for GetAgent Studio workflow.
+   * Absent by default; added only when user explicitly enables paper trading.
+   * The core Decision Artifact remains fully functional without this field.
+   */
+  paperTradingStatus?: PaperTradingStatus;
 }
 
 export type ProvenanceType = "OBSERVED_FACT" | "CALCULATED_METRIC" | "SCENARIO_ASSUMPTION" | "AI_INTERPRETATION";
