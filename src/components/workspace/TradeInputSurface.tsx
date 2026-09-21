@@ -12,7 +12,10 @@ const EXAMPLE_PROMPTS = [
   {
     label: "Reference scenario with BTC exposure",
     badge: "Official scenario",
-    text: "I am thinking about buying $2,000 of rNVDA before Monday because AI infrastructure demand still looks strong. I already have $10,000 of BTC exposure. Stress test this trade."
+    // Kept verbatim-identical to the embedded fixture statement
+    // (src/fixtures/rnvda-demo.ts rnvdaTradeIdea.thesis) so the canonical
+    // demo input and the fixture artifact always tell the same story.
+    text: "I'm thinking about buying $2,000 of rNVDA because AI infrastructure demand still looks strong. BTC has been weakening all weekend. Stress-test it."
   },
   {
     label: "Clarification test with missing size",

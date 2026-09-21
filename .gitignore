@@ -30,3 +30,7 @@ paper-trading-logs/
 
 # Regenerated test artifacts
 tests/fixtures/scenario_truth_table.md
+
+# Ad-hoc test/output noise
+test-output.txt
+failure-matrix.log
