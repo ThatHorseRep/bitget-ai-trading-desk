@@ -18,7 +18,16 @@ import { BRANDING } from "@/config/branding";
 
 export const metadata: Metadata = {
   title: BRANDING.PRODUCT_NAME,
-  description: "Deterministic trade stress testing, basis decoupling analysis, and thesis vs position deconstruction."
+  description: "Deterministic trade stress testing, basis decoupling analysis, and thesis vs position deconstruction.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" }
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }
+    ]
+  }
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -28,9 +28,12 @@ export function WorkspaceHeader({
       <header className="border-b border-zinc-200 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900 text-white font-bold text-sm tracking-wider shadow-xs">
-              BG
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/favicon.svg"
+              alt="Logo"
+              className="h-9 w-9 rounded-lg shadow-xs shrink-0 object-contain"
+            />
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base font-bold text-zinc-900 [text-wrap:balance]">
