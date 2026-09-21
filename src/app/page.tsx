@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { WorkspaceHeader } from "../components/workspace/WorkspaceHeader";
+import { MobileBottomNav } from "../components/workspace/MobileBottomNav";
 import { TradeInputSurface } from "../components/workspace/TradeInputSurface";
 import { ClarificationModal } from "../components/workspace/ClarificationModal";
 import { NormalizedReviewCard } from "../components/workspace/NormalizedReviewCard";
@@ -218,7 +219,7 @@ export default function WorkspacePage() {
             onViewOverview={() => setViewMode("landing")}
           />
 
-          <main className="px-4 py-8 sm:px-6 lg:px-8">
+          <main className="px-4 py-6 sm:py-8 sm:px-6 lg:px-8 pb-24 md:pb-12">
             {/* S01 / S02: Input State */}
             {step === "ENTRY" && (
               <TradeInputSurface
@@ -305,6 +306,17 @@ export default function WorkspacePage() {
               selectedRecord={selectedProvenance}
             />
           )}
+
+          {/* Mobile Persistent Bottom Navigation */}
+          <MobileBottomNav
+            useFixture={useFixture}
+            onToggleFixture={setUseFixture}
+            onNewTrade={handleReset}
+            canReset={step !== "ENTRY"}
+            onViewOverview={() => setViewMode("landing")}
+            onOpenProvenance={() => setIsDrawerOpen(true)}
+            hasArtifact={Boolean(artifact)}
+          />
         </>
       )}
     </div>

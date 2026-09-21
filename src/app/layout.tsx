@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -16,10 +16,18 @@ const geistMono = localFont({
 
 import { BRANDING } from "@/config/branding";
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#E7E9E6",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://ais-pre-76vg2p4vjuywawauv5ec3l-725903868758.europe-west2.run.app"),
   title: `${BRANDING.PRODUCT_NAME} | ${BRANDING.TAGLINE}`,
   description: "Adversarial pre-trade risk workbench for tokenized equities. Deterministic stress testing, off-hours basis decoupling analysis, and thesis vs. position deconstruction.",
+  manifest: "/manifest.webmanifest",
   openGraph: {
     title: `${BRANDING.PRODUCT_NAME} | ${BRANDING.TAGLINE}`,
     description: "Adversarial pre-trade risk workbench for tokenized equities. Deterministic verdict bands computed, not generated.",
@@ -50,10 +58,16 @@ export const metadata: Metadata = {
   }
 };
 
+import { PwaProvider } from "@/components/pwa/PwaManager";
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="antialiased font-sans bg-[var(--rt-surface-base)] text-[var(--rt-text-primary)]">{children}</body>
+      <body className="antialiased font-sans bg-[var(--rt-surface-base)] text-[var(--rt-text-primary)]">
+        <PwaProvider>
+          {children}
+        </PwaProvider>
+      </body>
     </html>
   );
 }

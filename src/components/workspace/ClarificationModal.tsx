@@ -89,6 +89,13 @@ export function ClarificationModal({
             <input
               id="clarification-input"
               type="text"
+              inputMode={
+                fieldName.toLowerCase().includes("size") ||
+                fieldName.toLowerCase().includes("price") ||
+                fieldName.toLowerCase().includes("amount")
+                  ? "decimal"
+                  : "text"
+              }
               autoFocus
               disabled={isSubmitting}
               value={answer}

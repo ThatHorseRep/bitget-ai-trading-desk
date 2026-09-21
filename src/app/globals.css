@@ -68,10 +68,26 @@
   --rt-fault-angle: -12deg;
 }
 
-body {
+html, body {
+  height: 100%;
   margin: 0;
-  min-height: 100vh;
   font-family: var(--rt-type-body);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pl-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+.pr-safe {
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 code, kbd, samp, pre {
@@ -79,9 +95,25 @@ code, kbd, samp, pre {
 }
 
 @media (pointer: coarse) {
-  button, [role="button"] {
+  button, [role="button"], a, input, select, textarea {
     min-height: 44px;
     min-width: 44px;
   }
+}
+
+/* Reveal Motion Primitive (TASK P7) */
+.rt-reveal-init {
+  opacity: 0;
+  transform: translateY(12px);
+  will-change: opacity, transform;
+}
+
+.rt-reveal-visible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+.rt-reveal-transition {
+  transition: opacity 400ms ease-out, transform 400ms ease-out;
 }
 

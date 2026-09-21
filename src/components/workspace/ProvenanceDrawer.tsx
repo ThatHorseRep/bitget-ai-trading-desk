@@ -65,20 +65,20 @@ export function ProvenanceDrawer({
   );
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 flex justify-end" role="dialog" aria-modal="true" aria-label="Provenance details">
-      <div className="w-full max-w-xl bg-[var(--rt-surface-raised)] shadow-2xl h-full flex flex-col border-l border-[var(--rt-border-subtle)]">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-black/50 flex justify-end" role="dialog" aria-modal="true" aria-label="Provenance details">
+      <div className="w-full md:max-w-xl bg-[var(--rt-surface-raised)] shadow-2xl h-full flex flex-col border-l border-[var(--rt-border-subtle)] pt-safe pb-safe">
         {/* Header */}
-        <div className="border-b border-[var(--rt-border-subtle)] px-6 py-4 flex items-center justify-between bg-[var(--rt-surface-base)]">
+        <div className="border-b border-[var(--rt-border-subtle)] px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between bg-[var(--rt-surface-base)]">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--rt-text-muted)]">
+              <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[var(--rt-text-muted)]">
                 Data provenance and audit S09
               </span>
             </div>
-            <h3 className="text-base font-mono font-bold text-[var(--rt-text-primary)] mt-0.5 [text-wrap:balance]">
+            <h3 className="text-sm sm:text-base font-mono font-bold text-[var(--rt-text-primary)] mt-0.5 [text-wrap:balance]">
               Evidence and verification chain
             </h3>
-            <p className="text-xs text-[var(--rt-text-muted)] [text-wrap:pretty]">
+            <p className="text-[11px] sm:text-xs text-[var(--rt-text-muted)] [text-wrap:pretty]">
               Deterministic separation of facts, formulas, and hypotheses
             </p>
           </div>
@@ -95,7 +95,7 @@ export function ProvenanceDrawer({
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex border-b border-[var(--rt-border-subtle)] px-6 gap-2 bg-[var(--rt-surface-raised)] overflow-x-auto py-2 text-xs">
+        <div className="flex border-b border-[var(--rt-border-subtle)] px-4 sm:px-6 gap-2 bg-[var(--rt-surface-raised)] overflow-x-auto py-2 text-xs">
           {(["ALL", "OBSERVED_FACT", "CALCULATED_METRIC", "SCENARIO_ASSUMPTION", "AI_INTERPRETATION"] as const).map(
             (tab) => (
               <button

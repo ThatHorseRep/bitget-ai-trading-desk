@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-
 import { BRANDING } from "@/config/branding";
+import { PwaInstallButton } from "../pwa/PwaManager";
 
 interface WorkspaceHeaderProps {
   useFixture: boolean;
@@ -20,15 +20,16 @@ export function WorkspaceHeader({
   onViewOverview
 }: WorkspaceHeaderProps) {
   return (
-    <div className="sticky top-0 z-30 flex flex-col">
+    <div className="sticky top-0 z-30 flex flex-col pt-safe">
       {/* DEMO MODE BANNER for off-hours simulation */}
       {useFixture && (
-        <div className="bg-[var(--rt-verdict-moderate)] px-4 py-1.5 text-center text-xs font-mono font-bold uppercase tracking-wider text-white shadow-xs">
+        <div className="bg-[var(--rt-verdict-moderate)] px-4 py-1 text-center text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-white shadow-xs">
           DEMO MODE: Simulating Weekend Off-Hours Session
         </div>
       )}
       <header className="border-b border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)]">
-        <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3">
+        {/* Desktop & Tablet Layout (>= md) */}
+        <div className="hidden md:flex mx-auto max-w-6xl px-4 py-3 sm:px-6 items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -53,7 +54,9 @@ export function WorkspaceHeader({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <PwaInstallButton />
+
             {onViewOverview && (
               <button
                 type="button"
@@ -76,7 +79,7 @@ export function WorkspaceHeader({
                 }`}
               >
                 <span className="inline-block w-2 h-2 rounded-full bg-[var(--rt-verdict-clear)] mr-1.5 align-middle motion-safe:animate-pulse" />
-                Live Bitget and reference
+                Live Bitget
               </button>
               <button
                 type="button"
@@ -103,6 +106,39 @@ export function WorkspaceHeader({
                 New stress test
               </button>
             )}
+          </div>
+        </div>
+
+        {/* Mobile Header (< md: 48px compact bar) */}
+        <div className="flex md:hidden h-12 px-3 items-center justify-between">
+          <div className="flex items-center gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/icon.svg"
+              alt="Bitget AI RedTeam Desk Mark"
+              width={28}
+              height={28}
+              className="h-7 w-7 shrink-0 object-contain"
+            />
+            <span className="font-mono font-bold text-sm tracking-tight text-[var(--rt-text-primary)] truncate max-w-[170px]">
+              {BRANDING.PRODUCT_NAME}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onToggleFixture(!useFixture)}
+              className={`inline-flex items-center px-2 py-1 text-[10px] font-mono font-bold border min-h-[44px] ${
+                useFixture
+                  ? "bg-[var(--rt-surface-base)] text-[var(--rt-verdict-moderate)] border-[var(--rt-verdict-moderate)]"
+                  : "bg-[var(--rt-surface-base)] text-[var(--rt-verdict-clear)] border-[var(--rt-border-subtle)]"
+              }`}
+              aria-label={`Toggle data mode (currently ${useFixture ? "Fixture" : "Live"})`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full mr-1 ${useFixture ? "bg-[var(--rt-verdict-moderate)]" : "bg-[var(--rt-verdict-clear)] animate-pulse"}`} />
+              {useFixture ? "Fixture" : "Live"}
+            </button>
           </div>
         </div>
       </header>
