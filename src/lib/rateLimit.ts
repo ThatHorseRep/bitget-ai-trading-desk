@@ -14,14 +14,18 @@ function cleanupExpired(now: number) {
   }
 }
 
-export function checkRateLimit(ip: string, maxRequests: number): boolean {
+export function checkRateLimit(ip: string, maxRequests: number, scope = "global"): boolean {
   const now = Date.now();
   cleanupExpired(now);
 
-  const record = rateLimitMap.get(ip);
+  // Scope keys keep each route's documented budget independent (e.g. the
+  // stress-test route's "10 per minute" must not be consumed by market-price
+  // prefetches).
+  const key = `${scope}:${ip}`;
+  const record = rateLimitMap.get(key);
   if (record) {
     if (now > record.resetTime) {
-      rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+      rateLimitMap.set(key, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
       return true;
     }
     if (record.count >= maxRequests) {
@@ -30,7 +34,7 @@ export function checkRateLimit(ip: string, maxRequests: number): boolean {
     record.count++;
     return true;
   }
-  rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+  rateLimitMap.set(key, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
   return true;
 }
 
