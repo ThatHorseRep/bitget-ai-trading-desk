@@ -310,6 +310,7 @@ test('resetToolCache clears the cached tool list', () => {
 // url_path/title/summary feed classifyTool for category assignment.
 const GUIDE_ENTRY_FIXTURES = [
   { id: 'equity_price_quote', url_path: 'equity_price_quote', title: 'Equity Price Quote', summary: 'Real-time quote for a US equity.', params_summary: [{ name: 'symbol', required: true }] },
+  { id: 'equity_price_historical', url_path: 'equity/price/historical', title: 'Stock Historical Kline', summary: 'Historical OHLCV data.', params_summary: [{ name: 'symbol', required: true }] },
   { id: 'equity_company_profile', url_path: 'equity_company_profile', title: 'Company Profile', summary: 'Company profile information.', params_summary: [{ name: 'symbol', required: true }] },
 ];
 
@@ -324,9 +325,21 @@ const QUOTE_ROW = {
 };
 
 // Live do_query envelope per DoQueryEnvelopeSchema (observed 2026-09-21).
-function doQueryEnvelope(row) {
-  return { success: true, status_code: 0, data: { results: [row] }, error: null };
+// Accepts a single row or an array of rows (historical series).
+function doQueryEnvelope(rows) {
+  return { success: true, status_code: 0, data: { results: Array.isArray(rows) ? rows : [rows] }, error: null };
 }
+
+// equity_price_historical returns an ARRAY of OHLCV bars, oldest first
+// (observed 2026-09-21 on QQQ: 19 bars from 2026-08-24 close 706.32 to
+// 2026-09-18 close 721.45). Bars carry date/close, never last_price.
+const HISTORY_BARS = [
+  { symbol: 'QQQ', date: '2026-08-24T04:00:00Z', open: 709.66, high: 709.79, low: 702.7, close: 706.32, volume: 37443142.25, time: 1787544000000 },
+  { symbol: 'QQQ', date: '2026-09-11T04:00:00Z', open: 715.1, high: 716.5, low: 713.9, close: 714.8, volume: 45000000, time: 1789099200000 },
+  { symbol: 'QQQ', date: '2026-09-18T04:00:00Z', open: 718.83, high: 721.73, low: 715.08, close: 721.45, volume: 48478713.83, time: 1789704000000 },
+];
+
+const LIVE_QUOTE_ROW = { symbol: 'QQQ', last_price: 722.05, bid: 722, ask: 722.05, volume: 41000000, last_timestamp: '2026-09-18T23:59:59Z' };
 
 async function startCatalogFixtureServer() {
   const state = { requestCount: 0, doQueryCalls: [] };
@@ -341,7 +354,14 @@ async function startCatalogFixtureServer() {
     server.registerTool(
       'guide',
       { description: 'Catalog guide', inputSchema: { category: z.string() } },
-      async () => ({ content: [{ type: 'text', text: JSON.stringify({ entries: GUIDE_ENTRY_FIXTURES }) }] }),
+      async (args) => {
+        // Live behavior (observed 2026-09-21): guide({ category }) returns
+        // only that domain's entries. Mirror it so entry ranking matches
+        // production instead of triplicating every entry across domains.
+        const a = args && typeof args === 'object' && 'arguments' in args ? args.arguments : args;
+        const entries = a && a.category === 'equity' ? GUIDE_ENTRY_FIXTURES : [];
+        return { content: [{ type: 'text', text: JSON.stringify({ entries }) }] };
+      },
     );
     server.registerTool(
       'do_query',
@@ -349,8 +369,13 @@ async function startCatalogFixtureServer() {
       async (args) => {
         const a = args && typeof args === 'object' && 'arguments' in args ? args.arguments : args;
         state.doQueryCalls.push(a);
-        const row = a && a.entry_id === 'equity_price_quote' ? QUOTE_ROW : {};
-        return { content: [{ type: 'text', text: JSON.stringify(doQueryEnvelope(row)) }] };
+        if (a && a.entry_id === 'equity_price_quote') {
+          return { content: [{ type: 'text', text: JSON.stringify(doQueryEnvelope(LIVE_QUOTE_ROW)) }] };
+        }
+        if (a && a.entry_id === 'equity_price_historical') {
+          return { content: [{ type: 'text', text: JSON.stringify(doQueryEnvelope(HISTORY_BARS)) }] };
+        }
+        return { content: [{ type: 'text', text: JSON.stringify(doQueryEnvelope({})) }] };
       },
     );
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
@@ -386,12 +411,44 @@ test('catalog protocol: guide+do_query entries normalize into provenance-carryin
     const quote = observations.find((o) => o.title.startsWith('Quote:'));
     assert.ok(quote, 'quote observation must be present');
     assert.strictEqual(quote.source, 'bitget-mcp-server/equity_price_quote');
-    assert.strictEqual(quote.value, 222.53);
-    assert.ok(quote.observedTimestamp, 'quote must carry an observation timestamp');
+    assert.strictEqual(quote.value, 722.05);
+    assert.strictEqual(quote.observedTimestamp, '2026-09-18T23:59:59Z');
     assert.ok(
       fixture.state.doQueryCalls.some((c) => c && c.entry_id === 'equity_price_quote'),
       'adapter must drive do_query with the guide-discovered entry id',
     );
+  } finally {
+    await fixture.close();
+  }
+});
+
+test('catalog protocol: historical series keeps its real bar date and never masquerades as a live quote', async () => {
+  const fixture = await startCatalogFixtureServer();
+  try {
+    const provider = new BitgetUsEquityMcpProvider(fixture.endpoint);
+    const observations = await provider.getObservations('rQQQ', 'thesis');
+
+    const quote = observations.find((o) => o.title === 'Quote: QQQ');
+    const history = observations.find((o) => o.title.startsWith('Price history'));
+    assert.ok(quote, 'live quote observation must be present');
+    assert.ok(history, 'historical observation must be present');
+
+    // The live quote keeps its own timestamp (Friday close), not 'now'.
+    assert.strictEqual(quote.observedTimestamp, '2026-09-18T23:59:59Z');
+    assert.strictEqual(quote.value, 722.05);
+
+    // The historical observation must carry the LATEST bar's REAL date and
+    // value (721.45 on 2026-09-18) - never the oldest bar (706.32) and
+    // never a build-time timestamp that would masquerade as current.
+    assert.strictEqual(history.value, 721.45);
+    assert.ok(history.observedTimestamp.startsWith('2026-09-18'), history.observedTimestamp);
+    assert.ok(
+      history.summary.includes('Historical close') && history.summary.includes('721.45'),
+      'summary must be explicit that this is a historical close',
+    );
+
+    // Distinct titles mean the arbitrator never groups these as one metric.
+    assert.notEqual(quote.title, history.title);
   } finally {
     await fixture.close();
   }
