@@ -46,7 +46,13 @@ class LLMProvider {
     }
 
     const controller = new AbortController();
-    const timeoutMs = process.env.VERCEL ? 15000 : 90000;
+    // Sizing vs the deployed constraint (Vercel): the stress-test route's
+    // maxDuration is 60s and this client retries once after a 2s backoff.
+    // Worst case = 25s call + 2s backoff + 25s retry = 52s < 60s, so even a
+    // double timeout still returns a degraded-but-valid response instead of
+    // killing the function. Measured qwen3.8-max calls (thinking off) run
+    // 9-22s locally, so 15s left no headroom; 25s covers observed variance.
+    const timeoutMs = process.env.VERCEL ? 25000 : 90000;
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     // Qwen3-class "thinking" models on OpenAI-compatible proxies burn 30-90s+
