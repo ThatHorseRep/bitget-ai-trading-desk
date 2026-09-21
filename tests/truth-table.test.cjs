@@ -108,5 +108,9 @@ test("Truth Table Verification", () => {
   verifyAndAppend("LONG", longTrade, longResults);
   verifyAndAppend("SHORT", shortTrade, shortResults);
 
-  fs.writeFileSync("C:/Users/HP/.gemini/antigravity/brain/4fb5fedb-26ce-4b81-a54b-9f66988d31da/scenario_truth_table.md", md);
+  // Regenerate the truth-table artifact portably: previously hardcoded to a
+  // machine-specific Windows path, which made this test fail on any other
+  // machine (CI: ENOENT). Written next to the committed fixture, gitignored
+  // so regenerated content never dirties the tree.
+  fs.writeFileSync(require("path").join(__dirname, "fixtures", "scenario_truth_table.md"), md);
 });
