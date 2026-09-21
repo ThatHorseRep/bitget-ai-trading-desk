@@ -75,17 +75,23 @@
 
 ## GAPS
 
-The identity documentation specifies the core brand, typography, and verdict scale, but does not explicitly declare every operational UI state. Below are the extrapolation rules for each required UI gap:
+The identity documentation specifies the core brand, typography, and verdict scale, but does not explicitly declare every operational UI state. Below are the extrapolation rules for each required UI gap with their resolved values:
 
 1. **Focus Ring Color**:
    - *Extrapolation Rule*: Derive from `--rt-text-muted` (`#54697E` Steel) with 2px offset on light surfaces, or `--rt-border-subtle` (`#CFD4CF`). Never use `--rt-verdict-critical` (`#C8102E` Stamp Red) for focus rings.
+   - *Resolved Value*: `var(--rt-text-muted)` (`#54697E`) / `ring-[var(--rt-text-muted)]` with `ring-offset-2`.
 2. **Disabled State**:
    - *Extrapolation Rule*: Set surface to `--rt-surface-base` (`#E7E9E6`) with text color `--rt-text-muted` at 40% opacity (`#54697E66`), border at 1px solid `--rt-border-subtle` (`#CFD4CF`).
+   - *Resolved Value*: Surface: `var(--rt-surface-base)` (`#E7E9E6`), Text: `rgba(84, 105, 126, 0.4)` (`#54697E66`), Border: `1px solid var(--rt-border-subtle)` (`#CFD4CF`).
 3. **Error / Destructive Color (Non-Verdict)**:
    - *Extrapolation Rule*: Operational errors (form validation, network timeout) use `--rt-text-muted` with an alert icon, reserving `--rt-verdict-critical` (`#C8102E`) strictly for thesis/position risk invalidations. If destructive confirmation is required, use high-contrast `--rt-text-primary` (`#0E2436`) with explicit text warnings.
+   - *Resolved Value*: Operational Error: `var(--rt-text-muted)` (`#54697E`); Destructive Action: `var(--rt-text-primary)` (`#0E2436`); Invalidation Verdict: `var(--rt-verdict-critical)` (`#C8102E`).
 4. **Chart Series Colors (Beyond Verdict Scale)**:
    - *Extrapolation Rule*: Primary benchmark curve = `--rt-text-primary` (`#0E2436`), secondary comparison curve = `--rt-text-muted` (`#54697E`), stress baseline = `--rt-border-subtle` (`#CFD4CF`), overlaid risk breaches = `--rt-verdict-critical` (`#C8102E`).
+   - *Resolved Values*: Benchmark: `#0E2436`, Secondary: `#54697E`, Baseline: `#CFD4CF`, Risk Breach: `#C8102E`.
 5. **Skeleton Placeholder Color**:
    - *Extrapolation Rule*: Subtle pulse between `#E2E5E1` and `#ECEEEB` (interpolated between `--rt-surface-base` `#E7E9E6` and `--rt-surface-raised` `#F7F8F6`).
+   - *Resolved Value*: Background: `#E2E5E1`, Pulse Highlight: `#ECEEEB`.
 6. **Scrollbar Styling**:
    - *Extrapolation Rule*: Track set to `--rt-surface-base` (`#E7E9E6`), thumb set to `--rt-border-subtle` (`#CFD4CF`) hovering to `--rt-text-muted` (`#54697E`), width 6px, border-radius 2px.
+   - *Resolved Value*: Track: `#E7E9E6`, Thumb: `#CFD4CF`, Hover: `#54697E`, Width: 6px, Radius: 2px (`--rt-radius-sharp`).

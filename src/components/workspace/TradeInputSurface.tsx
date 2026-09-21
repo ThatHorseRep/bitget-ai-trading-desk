@@ -47,31 +47,31 @@ export function TradeInputSurface({
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Hero Section */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-xs space-y-4">
-        <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-semibold text-zinc-700">
-          <span className="h-2 w-2 rounded-full bg-emerald-500" />
+      <div className="border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] p-6 sm:p-8 shadow-xs space-y-4">
+        <div className="inline-flex items-center gap-2 border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] px-3 py-1 text-xs font-semibold text-[var(--rt-text-primary)]">
+          <span className="h-2 w-2 rounded-full bg-[var(--rt-verdict-clear)]" />
           Desk thesis: separate thesis quality from position quality
         </div>
 
         <div className="max-w-[680px]">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight [text-wrap:balance] bg-clip-text text-transparent bg-gradient-to-r from-black to-zinc-600">
+          <h2 className="text-2xl sm:text-3xl font-mono font-bold tracking-tight [text-wrap:balance] text-[var(--rt-text-primary)]">
             Stress test your trade
             <br />
             before entering the market.
           </h2>
-          <p className="mt-3 text-sm sm:text-base text-zinc-600 leading-relaxed [text-wrap:pretty]">
+          <p className="mt-3 text-sm sm:text-base text-[var(--rt-text-muted)] leading-relaxed [text-wrap:pretty]">
             Tokenized equity markets trade around the clock on Bitget, while underlying United States equities trade only during regular exchange hours. Enter your proposed trade to evaluate basis decoupling, off hours liquidity, crypto contagion, and thesis fragility.
           </p>
         </div>
       </div>
 
       {/* Primary Input Form */}
-      <form onSubmit={handleSubmit} className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xs space-y-4">
+      <form onSubmit={handleSubmit} className="border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] p-6 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
-          <label htmlFor="trade-input" className="block text-sm font-semibold text-zinc-900">
+          <label htmlFor="trade-input" className="block text-sm font-semibold text-[var(--rt-text-primary)] font-mono">
             Proposed trade and rationale
           </label>
-          <span className="text-xs text-zinc-500">Natural language parsed deterministically</span>
+          <span className="text-xs text-[var(--rt-text-muted)] font-mono">Natural language parsed deterministically</span>
         </div>
 
         <div>
@@ -81,23 +81,23 @@ export function TradeInputSurface({
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Describe what you plan to buy or sell and why..."
-            className="w-full rounded-xl border border-zinc-300 p-4 text-base text-zinc-900 placeholder:text-zinc-500 focus-visible:border-zinc-900 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-zinc-900 motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] resize-y [text-wrap:pretty]"
+            className="w-full border border-[var(--rt-border-subtle)] bg-white p-4 text-base text-[var(--rt-text-primary)] placeholder:text-[var(--rt-text-muted)] focus-visible:border-[var(--rt-text-primary)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:ring-offset-2 motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] resize-y [text-wrap:pretty]"
             disabled={isLoading}
           />
         </div>
 
         {/* Quick select prompt chips */}
         <div className="space-y-2 pt-1">
-          <p className="text-xs font-medium text-zinc-500">Quick start scenarios:</p>
+          <p className="text-xs font-mono font-medium text-[var(--rt-text-muted)]">Quick start scenarios:</p>
           <div className="flex flex-wrap gap-2">
             {EXAMPLE_PROMPTS.map((ex, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => setPrompt(ex.text)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] text-left focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+                className="inline-flex min-h-[44px] items-center gap-1.5 border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] px-3 py-2 text-xs text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-raised)] hover:text-[var(--rt-text-primary)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] text-left focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden"
               >
-                <span className="font-semibold text-zinc-900">{ex.badge}:</span>
+                <span className="font-mono font-semibold text-[var(--rt-text-primary)]">{ex.badge}:</span>
                 <span className="truncate max-w-[200px] sm:max-w-xs">{ex.label}</span>
               </button>
             ))}
@@ -109,20 +109,17 @@ export function TradeInputSurface({
           <button
             type="submit"
             disabled={!prompt.trim() || isLoading}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-base font-semibold text-white shadow-xs hover:bg-zinc-800 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 bg-[var(--rt-surface-void)] px-6 py-2.5 text-sm font-mono font-semibold text-white shadow-xs hover:bg-[var(--rt-text-primary)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden"
           >
             {isLoading ? (
               <>
-                <svg className="motion-safe:animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
+                <span className="h-2 w-2 rounded-full bg-[var(--rt-verdict-clear)] motion-safe:animate-pulse motion-reduce:animate-none" />
                 <span>Analyzing trade...</span>
               </>
             ) : (
               <>
                 <span>Stress test trade</span>
-                <svg className="w-4 h-4 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 text-[var(--rt-surface-raised)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
               </>
@@ -132,17 +129,17 @@ export function TradeInputSurface({
       </form>
 
       {/* Tagline Reveal Section */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-xs">
+      <div className="border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] p-6 sm:p-8 shadow-xs">
         <div className="max-w-[680px] space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          <p className="text-xs font-mono font-semibold uppercase tracking-wider text-[var(--rt-text-muted)]">
             Core thesis
           </p>
-          <p className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 [text-wrap:balance]">
+          <p className="text-xl sm:text-2xl font-mono font-bold tracking-tight text-[var(--rt-text-primary)] [text-wrap:balance]">
             A trader can have a reasonable thesis
             <br />
             and still hold a vulnerable position.
           </p>
-          <p className="text-sm text-zinc-600 [text-wrap:pretty] pt-1">
+          <p className="text-sm text-[var(--rt-text-muted)] [text-wrap:pretty] pt-1 leading-relaxed">
             We isolate fundamental market rationale from off hours execution risk, illiquidity, and basis shocks so you know whether to proceed or wait for regular market hours.
           </p>
         </div>

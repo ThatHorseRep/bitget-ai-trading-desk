@@ -1,13 +1,77 @@
 @import "tailwindcss";
 
+@theme {
+  --color-surface-base: #E7E9E6;
+  --color-surface-raised: #F7F8F6;
+  --color-surface-void: #06121C;
+  --color-text-primary: #0E2436;
+  --color-text-muted: #54697E;
+  --color-border-subtle: #CFD4CF;
+  --color-accent: #0E2436;
+  --color-verdict-critical: #C8102E;
+  --color-verdict-elevated: #54697E;
+  --color-verdict-moderate: #C98A14;
+  --color-verdict-clear: #0E9F8B;
+
+  --color-rt-surface-base: #E7E9E6;
+  --color-rt-surface-raised: #F7F8F6;
+  --color-rt-surface-void: #06121C;
+  --color-rt-text-primary: #0E2436;
+  --color-rt-text-muted: #54697E;
+  --color-rt-border-subtle: #CFD4CF;
+  --color-rt-accent: #0E2436;
+  --color-rt-verdict-critical: #C8102E;
+  --color-rt-verdict-elevated: #54697E;
+  --color-rt-verdict-moderate: #C98A14;
+  --color-rt-verdict-clear: #0E9F8B;
+}
+
 :root {
   color-scheme: light;
+
+  /* Core Palette Tokens */
+  --rt-surface-base: #E7E9E6;
+  --rt-surface-raised: #F7F8F6;
+  --rt-surface-void: #06121C;
+  --rt-text-primary: #0E2436;
+  --rt-text-muted: #54697E;
+  --rt-border-subtle: #CFD4CF;
+  --rt-accent: #0E2436;
+  --rt-verdict-critical: #C8102E;
+  --rt-verdict-elevated: #54697E;
+  --rt-verdict-moderate: #C98A14;
+  --rt-verdict-clear: #0E9F8B;
+
+  /* Typography Tokens */
+  --rt-type-body: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --rt-type-h1: var(--font-geist-mono), ui-monospace, monospace;
+  --rt-type-h2: var(--font-geist-mono), ui-monospace, monospace;
+  --rt-type-lede: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --rt-type-kicker: var(--font-geist-mono), ui-monospace, monospace;
+  --rt-type-endorser: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --rt-type-wordmark: var(--font-geist-mono), ui-monospace, monospace;
+  --rt-type-figure: var(--font-geist-mono), ui-monospace, monospace;
+  --rt-type-verdict-title: var(--font-geist-mono), ui-monospace, monospace;
+  --rt-type-caption: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Spacing, Radius, and Fault Rules */
+  --rt-space-gutter: clamp(24px, 5vw, 88px);
+  --rt-space-section-y: clamp(48px, 7vw, 104px);
+  --rt-space-mast-gap: 22px;
+  --rt-space-card-padding: 30px;
+  --rt-radius-sharp: 2px;
+  --rt-radius-card: 0px;
+  --rt-border-width-hairline: 1px;
+  --rt-border-width-verdict: 3px;
+  --rt-fault-width: 240px;
+  --rt-fault-height: 6px;
+  --rt-fault-angle: -12deg;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--rt-type-body);
 }
 
 code, kbd, samp, pre {
@@ -20,3 +84,4 @@ code, kbd, samp, pre {
     min-width: 44px;
   }
 }
+

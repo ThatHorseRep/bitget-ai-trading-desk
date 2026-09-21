@@ -196,7 +196,7 @@ export default function WorkspacePage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 font-sans selection:bg-zinc-900 selection:text-white">
+    <div className="min-h-screen bg-[var(--rt-surface-base)] text-[var(--rt-text-primary)] font-sans selection:bg-[var(--rt-surface-void)] selection:text-[var(--rt-text-on-void)]">
       {/* Persistent Navigation / Desk Header */}
       <WorkspaceHeader
         useFixture={useFixture}
@@ -253,30 +253,28 @@ export default function WorkspacePage() {
 
         {/* S08: Error / Blocked State */}
         {step === "ERROR" && (
-          <div className="mx-auto max-w-xl rounded-2xl border border-rose-200 bg-white p-6 sm:p-8 shadow-xs space-y-4 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-600">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+          <div className="mx-auto max-w-xl border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] p-6 sm:p-8 shadow-xs space-y-4 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center border border-[var(--rt-verdict-critical)] bg-[var(--rt-surface-base)] text-[var(--rt-verdict-critical)] font-mono font-bold text-lg">
+              !
             </div>
-            <h3 className="text-lg font-bold text-zinc-900 [text-wrap:balance]">
-              Analysis could not proceed
+            <h3 className="text-lg font-mono font-bold text-[var(--rt-text-primary)] [text-wrap:balance]">
+              Analysis Could Not Proceed
             </h3>
-            <p className="text-sm text-zinc-600 [text-wrap:pretty]">
+            <p className="text-sm font-mono text-[var(--rt-text-muted)] [text-wrap:pretty]">
               {errorMessage || "An unexpected error occurred while stress testing your proposed trade."}
             </p>
             <div className="pt-2 flex justify-center gap-3">
               <button
                 type="button"
                 onClick={() => setStep("ENTRY")}
-                className="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+                className="border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] px-4 py-2 text-xs font-mono font-semibold text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-raised)] active:scale-[0.98] transition-colors"
               >
                 Back to edit
               </button>
               <button
                 type="button"
                 onClick={handleReset}
-                className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+                className="border border-[var(--rt-surface-void)] bg-[var(--rt-surface-void)] px-4 py-2 text-xs font-mono font-semibold text-[var(--rt-text-on-void)] hover:opacity-90 active:scale-[0.98] transition-opacity"
               >
                 Restart workspace
               </button>

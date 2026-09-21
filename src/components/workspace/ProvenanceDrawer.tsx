@@ -16,27 +16,27 @@ const CATEGORY_CONFIG: Record<
 > = {
   OBSERVED_FACT: {
     label: "Observed fact",
-    bg: "bg-emerald-50",
-    text: "text-emerald-800",
-    border: "border-emerald-200"
+    bg: "bg-[var(--rt-surface-raised)]",
+    text: "text-[var(--rt-verdict-clear)]",
+    border: "border-[var(--rt-verdict-clear)]"
   },
   CALCULATED_METRIC: {
     label: "Calculated metric",
-    bg: "bg-blue-50",
-    text: "text-blue-800",
-    border: "border-blue-200"
+    bg: "bg-[var(--rt-surface-raised)]",
+    text: "text-[var(--rt-text-primary)]",
+    border: "border-[var(--rt-border-subtle)]"
   },
   SCENARIO_ASSUMPTION: {
     label: "Scenario assumption",
-    bg: "bg-amber-50",
-    text: "text-amber-800",
-    border: "border-amber-200"
+    bg: "bg-[var(--rt-surface-raised)]",
+    text: "text-[var(--rt-verdict-moderate)]",
+    border: "border-[var(--rt-verdict-moderate)]"
   },
   AI_INTERPRETATION: {
     label: "AI interpretation",
-    bg: "bg-purple-50",
-    text: "text-purple-800",
-    border: "border-purple-200"
+    bg: "bg-[var(--rt-surface-raised)]",
+    text: "text-[var(--rt-text-muted)]",
+    border: "border-[var(--rt-border-subtle)]"
   }
 };
 
@@ -66,19 +66,19 @@ export function ProvenanceDrawer({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 flex justify-end" role="dialog" aria-modal="true" aria-label="Provenance details">
-      <div className="w-full max-w-xl bg-white shadow-2xl h-full flex flex-col border-l border-zinc-200">
+      <div className="w-full max-w-xl bg-[var(--rt-surface-raised)] shadow-2xl h-full flex flex-col border-l border-[var(--rt-border-subtle)]">
         {/* Header */}
-        <div className="border-b border-zinc-200 px-6 py-4 flex items-center justify-between bg-zinc-50">
+        <div className="border-b border-[var(--rt-border-subtle)] px-6 py-4 flex items-center justify-between bg-[var(--rt-surface-base)]">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--rt-text-muted)]">
                 Data provenance and audit S09
               </span>
             </div>
-            <h3 className="text-base font-bold text-zinc-900 mt-0.5 [text-wrap:balance]">
+            <h3 className="text-base font-mono font-bold text-[var(--rt-text-primary)] mt-0.5 [text-wrap:balance]">
               Evidence and verification chain
             </h3>
-            <p className="text-xs text-zinc-500 [text-wrap:pretty]">
+            <p className="text-xs text-[var(--rt-text-muted)] [text-wrap:pretty]">
               Deterministic separation of facts, formulas, and hypotheses
             </p>
           </div>
@@ -86,7 +86,7 @@ export function ProvenanceDrawer({
             type="button"
             onClick={onClose}
             aria-label="Close provenance drawer"
-            className="rounded-lg p-2 text-zinc-500 hover:text-zinc-800 hover:bg-zinc-200 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 text-[var(--rt-text-muted)] hover:text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-raised)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -95,17 +95,17 @@ export function ProvenanceDrawer({
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex border-b border-zinc-200 px-6 gap-2 bg-white overflow-x-auto py-2 text-xs">
+        <div className="flex border-b border-[var(--rt-border-subtle)] px-6 gap-2 bg-[var(--rt-surface-raised)] overflow-x-auto py-2 text-xs">
           {(["ALL", "OBSERVED_FACT", "CALCULATED_METRIC", "SCENARIO_ASSUMPTION", "AI_INTERPRETATION"] as const).map(
             (tab) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
-                className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden ${
+                className={`min-h-[44px] px-3 py-1.5 font-mono font-medium whitespace-nowrap active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden ${
                   activeTab === tab
-                    ? "bg-zinc-900 text-white font-semibold"
-                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                    ? "bg-[var(--rt-surface-void)] text-white font-semibold"
+                    : "text-[var(--rt-text-muted)] hover:bg-[var(--rt-surface-base)] hover:text-[var(--rt-text-primary)]"
                 }`}
               >
                 {tab === "ALL" ? "All records" : CATEGORY_CONFIG[tab].label}
@@ -123,37 +123,37 @@ export function ProvenanceDrawer({
             return (
               <div
                 key={rec.id}
-                className={`rounded-xl border p-4 motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                className={`border p-4 motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
                   isHighlight
-                    ? "ring-2 ring-zinc-900 border-zinc-900 bg-zinc-50"
-                    : "border-zinc-200 bg-white hover:border-zinc-300"
+                    ? "ring-2 ring-[var(--rt-text-muted)] border-[var(--rt-text-primary)] bg-[var(--rt-surface-base)]"
+                    : "border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] hover:border-[var(--rt-text-muted)]"
                 }`}
               >
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border ${config.bg} ${config.text} ${config.border}`}
+                      className={`inline-flex items-center px-2.5 py-0.5 text-xs font-mono font-semibold border ${config.bg} ${config.text} ${config.border}`}
                     >
                       {config.label}
                     </span>
                     {rec.evidenceState && (
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase border ${
+                      <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-mono font-bold tracking-wider uppercase border ${
                         rec.evidenceState === "LIVE_RETRIEVED"
-                          ? "bg-blue-100 text-blue-800 border-blue-200"
+                          ? "bg-[var(--rt-surface-base)] text-[var(--rt-verdict-clear)] border-[var(--rt-border-subtle)]"
                           : rec.evidenceState === "UNAVAILABLE"
-                          ? "bg-rose-100 text-rose-800 border-rose-200"
-                          : "bg-purple-100 text-purple-800 border-purple-200"
+                          ? "bg-[var(--rt-surface-base)] text-[var(--rt-verdict-critical)] border-[var(--rt-border-subtle)]"
+                          : "bg-[var(--rt-surface-base)] text-[var(--rt-text-muted)] border-[var(--rt-border-subtle)]"
                       }`}>
                         {rec.evidenceState.replace(/_/g, " ")}
                       </span>
                     )}
                   </div>
-                  <span className="font-mono text-xs text-zinc-500">
+                  <span className="font-mono text-xs text-[var(--rt-text-muted)]">
                     {rec.id}
                   </span>
                 </div>
 
-                <h4 className="text-sm font-semibold text-zinc-900 [text-wrap:balance] break-words">
+                <h4 className="text-sm font-semibold text-[var(--rt-text-primary)] [text-wrap:balance] break-words">
                   {rec.source || rec.generatedBy || "System observation"}
                 </h4>
 
@@ -162,7 +162,7 @@ export function ProvenanceDrawer({
                     href={rec.sourceRef}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-1 inline-flex items-center gap-1 text-xs text-blue-600 hover:underline font-medium break-all focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+                    className="mt-1 inline-flex items-center gap-1 text-xs text-[var(--rt-text-primary)] hover:underline font-mono font-medium break-all focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden"
                   >
                     <span>{rec.sourceRef}</span>
                     <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -173,8 +173,8 @@ export function ProvenanceDrawer({
 
                 {rec.inputs && rec.inputs.length > 0 && (
                   <div className="mt-2 text-xs">
-                    <span className="font-semibold text-zinc-500">Inputs and parameters:</span>
-                    <ul className="mt-1 list-disc list-inside space-y-0.5 text-zinc-700 font-mono text-xs bg-zinc-50 p-2.5 rounded-lg border border-zinc-200">
+                    <span className="font-mono font-semibold text-[var(--rt-text-muted)]">Inputs and parameters:</span>
+                    <ul className="mt-1 list-disc list-inside space-y-0.5 text-[var(--rt-text-primary)] font-mono text-xs bg-[var(--rt-surface-base)] p-2.5 border border-[var(--rt-border-subtle)]">
                       {rec.inputs.map((inp, idx) => (
                         <li key={idx} className="[text-wrap:pretty]">{inp}</li>
                       ))}
@@ -182,7 +182,7 @@ export function ProvenanceDrawer({
                   </div>
                 )}
 
-                <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-500 border-t border-zinc-100 pt-2">
+                <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-mono text-[var(--rt-text-muted)] border-t border-[var(--rt-border-subtle)] pt-2">
                   {rec.observedAt && (
                     <span>Observed: {new Date(rec.observedAt).toLocaleTimeString()}</span>
                   )}
@@ -199,12 +199,12 @@ export function ProvenanceDrawer({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-zinc-200 p-4 bg-zinc-50 text-xs text-zinc-500 flex justify-between items-center">
+        <div className="border-t border-[var(--rt-border-subtle)] p-4 bg-[var(--rt-surface-base)] text-xs font-mono text-[var(--rt-text-muted)] flex justify-between items-center">
           <span>{records.length} records verified</span>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 font-medium text-zinc-700 hover:bg-zinc-100 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:outline-hidden"
+            className="min-h-[44px] border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] px-4 py-2 font-mono font-medium text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-base)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden"
           >
             Close drawer
           </button>
