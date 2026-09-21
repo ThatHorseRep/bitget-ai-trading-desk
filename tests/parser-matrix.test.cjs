@@ -83,3 +83,30 @@ test("matrix 12: no entry price -> derive from timestamped observation", () => {
   assert.ok(!result.userProvidedFields.includes("entryPrice"));
   assert.ok(result.derivedFields.some(f => f.includes("entryPrice") && f.includes("system-derived")));
 });
+
+test("matrix 13: causal clause wins over earlier soft intent marker (canonical demo statement)", () => {
+  const result = parseNaturalLanguageTrade(
+    "I'm thinking about buying $2,000 of rNVDA before Monday because AI infrastructure demand still looks strong. I already have $10,000 of BTC exposure. Stress-test this trade."
+  );
+  assert.equal(result.tradeIdea.direction, "LONG");
+  assert.equal(result.tradeIdea.positionSizeUsd, 2000);
+  // The thesis must be the causal clause, not the intent fragment.
+  assert.equal(result.tradeIdea.thesis, "AI infrastructure demand still looks strong");
+});
+
+test("matrix 14: 'since' clause captured as thesis", () => {
+  const result = parseNaturalLanguageTrade("buy $1,000 of rNVDA since NVDA keeps beating earnings expectations.");
+  assert.equal(result.tradeIdea.thesis, "NVDA keeps beating earnings expectations");
+  assert.ok(result.userProvidedFields.includes("thesis"));
+});
+
+test("matrix 15: soft intent marker used only when no causal clause exists", () => {
+  const result = parseNaturalLanguageTrade("I'm expecting NVDA to rally on AI capex. buy $2,000 of rNVDA.");
+  assert.ok(result.tradeIdea.thesis.length > 0, "fallback thesis should not be empty");
+  assert.ok(!result.tradeIdea.thesis.includes("buying"), "intent fragment must not masquerade as thesis when causal clause exists elsewhere");
+});
+
+test("matrix 16: 'my thesis is' explicit phrasing captured", () => {
+  const result = parseNaturalLanguageTrade("buy $2,000 rNVDA. My thesis is AI demand keeps compounding into next year.");
+  assert.equal(result.tradeIdea.thesis, "AI demand keeps compounding into next year");
+});

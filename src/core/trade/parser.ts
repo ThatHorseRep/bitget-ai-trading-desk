@@ -76,10 +76,17 @@ export function parseNaturalLanguageTrade(
   }
 
   // 4. Thesis extraction
+  // Causal connectors carry the trader's actual reasoning. Soft intent markers
+  // ("I'm thinking about buying X because Y") often appear far earlier in the
+  // sentence, so they must never take priority over a causal clause — otherwise
+  // the thesis truncates to the intent fragment and loses the reasoning.
+  const terminator = "(?:\\.|$|\\b(?:stress-test|stress test|before Monday|already have|my exposure)\\b)";
   let thesis = "";
-  const becauseMatch = text.match(/\b(?:because|since|as|thesis is|expecting|thinking|believing)\s+(.+?)(?:\.|\b(?:stress-test|stress test|before Monday|already have|my exposure)\b|$)/i);
-  if (becauseMatch) {
-    thesis = becauseMatch[1].trim();
+  const causalMatch = text.match(new RegExp("\\b(?:because|since|thesis is|my thesis is)\\s+(.+?)" + terminator, "i"));
+  const softMatch = text.match(new RegExp("\\b(?:expecting|thinking|believing)\\s+(.+?)" + terminator, "i"));
+  const thesisMatch = causalMatch ?? softMatch;
+  if (thesisMatch) {
+    thesis = thesisMatch[1].trim();
     userProvided.push("thesis");
   } else if (text.length > 20) {
     // If no explicit 'because' but trader wrote a paragraph
