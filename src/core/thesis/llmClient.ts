@@ -8,6 +8,16 @@ export type SeekAiMessage = {
 export type SeekAiRequest = {
   model?: string;
   messages: SeekAiMessage[];
+  /**
+   * Wall-clock budget in milliseconds for this call INCLUDING its single
+   * retry. When set, the per-attempt timeout is clamped so attempt + 2s
+   * backoff + retry always fits the budget, and the retry is skipped when
+   * too little time remains to be useful. Callers under a hard function
+   * deadline (e.g. Vercel maxDuration) pass their remaining budget so the
+   * workflow degrades to an honest limitation instead of being killed
+   * mid-stream (observed 2026-09-21 on the deployed site).
+   */
+  budgetMs?: number;
   // any additional OpenAI‑compatible parameters can be added here
 };
 
@@ -46,13 +56,17 @@ class LLMProvider {
     }
 
     const controller = new AbortController();
-    // Sizing vs the deployed constraint (Vercel): the stress-test route's
-    // maxDuration is 60s and this client retries once after a 2s backoff.
-    // Worst case = 25s call + 2s backoff + 25s retry = 52s < 60s, so even a
-    // double timeout still returns a degraded-but-valid response instead of
-    // killing the function. Measured qwen3.8-max calls (thinking off) run
-    // 9-22s locally, so 15s left no headroom; 25s covers observed variance.
-    const timeoutMs = process.env.VERCEL ? 25000 : 90000;
+    const defaultMs = process.env.VERCEL ? 25000 : 90000;
+    const RETRY_BACKOFF_MS = 2000;
+    let timeoutMs = defaultMs;
+    if (typeof request.budgetMs === "number" && request.budgetMs > 0) {
+      // attempt1 + backoff + attempt2 must fit the budget: clamp each
+      // attempt to (budget - backoff) / 2. Never below a 5s floor — below
+      // that a call is pointless and the budget is already exhausted.
+      timeoutMs = Math.min(defaultMs, Math.max(5000, Math.floor((request.budgetMs - RETRY_BACKOFF_MS) / 2)));
+      // Skip the retry when even one clamped attempt cannot fit what remains.
+      if (request.budgetMs < timeoutMs + RETRY_BACKOFF_MS + 5000) isRetry = true;
+    }
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     // Qwen3-class "thinking" models on OpenAI-compatible proxies burn 30-90s+
@@ -118,9 +132,10 @@ class LLMProvider {
       };
     } catch (err) {
       clearTimeout(timeout);
-      if (!isRetry) {
+      const budgetLeft = typeof request.budgetMs === "number" ? request.budgetMs - (timeoutMs + RETRY_BACKOFF_MS) : Infinity;
+      if (!isRetry && budgetLeft >= 5000) {
         console.warn("LLM Request failed, retrying once in 2 seconds...");
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, RETRY_BACKOFF_MS));
         return this.chat(request, true);
       }
       console.error("LLM CLIENT ERROR (Retry failed or aborted):", err);

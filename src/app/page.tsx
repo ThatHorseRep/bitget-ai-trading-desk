@@ -146,7 +146,16 @@ export default function WorkspacePage() {
       }
 
       if (!finalData || finalData.step === "ERROR" || !finalData.artifact) {
-        setErrorMessage(finalData?.limitations?.[0] || `HTTP ${finalStatus}: Analysis failed.`);
+        // A stream that ends without a result line means the server function
+        // was killed (e.g. Vercel maxDuration) — HTTP stays 200 because the
+        // headers already went out with the stream. Say that honestly instead
+        // of the generic "Analysis failed".
+        setErrorMessage(
+          finalData?.limitations?.[0] ??
+          (finalStatus === 200
+            ? "The analysis ran out of its execution time budget before a decision could be returned. Try the Deterministic fixture mode, or narrow the trade question."
+            : `HTTP ${finalStatus}: Analysis failed.`)
+        );
         setStep("ERROR");
         setIsAnalyzing(false);
         return;

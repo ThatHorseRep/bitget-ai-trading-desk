@@ -23,7 +23,8 @@ export async function assessThesisVsPosition(
   marketState: MarketState,
   scenarios: StressScenario[],
   challenge: Challenge,
-  evidence: EvidenceItem[]
+  evidence: EvidenceItem[],
+  deadlineMs?: number
 ): Promise<ThesisPositionAssessment> {
   const deterministicResult = classifyPositionQuality(scenarios, marketState, trade);
   const systemPrompt = `You are the final decision-support synthesizer.
@@ -88,7 +89,7 @@ ${evidenceText}
   const maxAttempts = 2;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      resp = await client.chat(basePayload);
+      resp = await client.chat({ ...basePayload, budgetMs: deadlineMs ? Math.max(0, deadlineMs - Date.now()) : undefined });
       parsed = AssessmentSchema.parse(JSON.parse(resp.content));
       break;
     } catch (error) {

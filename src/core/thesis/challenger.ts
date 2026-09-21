@@ -18,7 +18,8 @@ export async function generateThesisChallenge(
   trade: NormalizedTrade,
   marketState: MarketState,
   scenarios: StressScenario[],
-  evidence: EvidenceItem[]
+  evidence: EvidenceItem[],
+  deadlineMs?: number
 ): Promise<Challenge> {
   const systemPrompt = `You are a RedTeam risk manager on a trading desk. 
 Your job is to aggressively but fairly challenge a proposed trade thesis.
@@ -91,7 +92,7 @@ ${evidenceText}
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      resp = await client.chat(payload);
+      resp = await client.chat({ ...payload, budgetMs: deadlineMs ? Math.max(0, deadlineMs - Date.now()) : undefined });
       parsed = ChallengerSchema.parse(JSON.parse(resp.content));
       break;
     } catch (err) {
