@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   reactStrictMode: true,
+  output: "standalone",
 };
 
 export default nextConfig;

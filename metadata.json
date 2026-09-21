@@ -1,0 +1,6 @@
+{
+  "name": "Bitget AI RedTeam Desk",
+  "description": "Adversarial pre-trade risk workbench for tokenized equities, basis decoupling analysis, and stress testing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
