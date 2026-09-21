@@ -4,7 +4,10 @@ const assert = require("node:assert/strict");
 process.env.TEST_MODE = "mock_llm";
 
 const { DecisionDeskService } = require("../dist-core/src/services/decisionDeskService.js");
+const { ResearchProviderRegistry } = require("../dist-core/src/adapters/research/registry.js");
 const { buildAgentHubHandoff, validateAgentHubHandoff } = require("../dist-core/src/adapters/agenthub/handoff.js");
+
+const emptyRegistry = () => new ResearchProviderRegistry([]);
 
 const MOCK_MARKET_STATE = {
   observedAt: "2026-01-01T18:00:00.000Z",
@@ -22,7 +25,7 @@ class MockMarketStateService {
 }
 
 async function readyResult(inputText) {
-  const desk = new DecisionDeskService(new MockMarketStateService());
+  const desk = new DecisionDeskService(new MockMarketStateService(), undefined, emptyRegistry());
   const result = await desk.runWorkflow(inputText, { useFixture: false });
   assert.equal(result.step, "DECISION_READY");
   return result;
@@ -55,7 +58,7 @@ test("PRE24-06: the product verdict — not the LLM's opinion — is the final v
   const h = result.agentHubHandoff;
   // The deterministic policy decided; the mock LLM says "STRONGER" — the
   // handoff must carry the policy verdict, never a thesis-quality string.
-  assert.ok(["EXECUTE", "WAIT", "REJECT", "MONITOR"].includes(h.finalVerdict), `unexpected verdict ${h.finalVerdict}`);
+  assert.ok(["PROCEED", "WAIT", "REDUCE", "REJECT"].includes(h.finalVerdict), `unexpected verdict ${h.finalVerdict}`);
   assert.notEqual(h.finalVerdict, "STRONGER");
   // Reasons come from the decision policy (deterministic reason codes).
   assert.ok(h.verdictReasons.every((r) => typeof r.code === "string" && typeof r.message === "string"));
@@ -95,7 +98,7 @@ test("PRE24-06: the handoff is additive — the artifact itself is unchanged and
   // function over the artifact. Prove the artifact math is untouched by
   // comparing two runs (already covered elsewhere) and that no handoff is
   // attached to non-ready steps.
-  const desk = new DecisionDeskService(new MockMarketStateService());
+  const desk = new DecisionDeskService(new MockMarketStateService(), undefined, emptyRegistry());
   const clarification = await desk.runWorkflow("LONG rNVDA", { useFixture: false });
   assert.equal(clarification.step, "CLARIFICATION");
   assert.equal(clarification.agentHubHandoff, undefined, "no handoff without a finished artifact");

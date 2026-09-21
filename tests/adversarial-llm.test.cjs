@@ -322,14 +322,27 @@ test("Adversarial LLM Tests", async (t) => {
     mockFetch(async (url, options) => {
       const bodyStr = options.body;
       let payload;
-      if (bodyStr.includes("quantitative")) {
+      if (bodyStr.includes("trading risk extraction engine")) {
         payload = {
-          normalizedThesis: "Thesis",
-          assumptions: [],
-          dependencies: [],
-          invalidationConditions: [],
-          supportingEvidenceRefs: [],
-          unresolvedAmbiguities: []
+          hasInvalidationLevel: true,
+          hasStatedHorizon: true,
+          hasNamedCatalyst: true,
+          hasDirectionalClaim: true
+        };
+      } else if (bodyStr.includes("quantitative")) {
+        payload = {
+          normalizedThesis: "AI data center capex continues to accelerate",
+          assumptions: [{ text: "Hyperscaler capex remains elevated", origin: "USER_STATED" }],
+          dependencies: [{ text: "TSMC wafer availability", origin: "AI_INFERRED" }],
+          invalidationConditions: [{ text: "Hyperscaler earnings call guidance cuts capex", origin: "AI_INFERRED" }],
+          supportingEvidenceRefs: ["ev-1"],
+          unresolvedAmbiguities: [],
+          signals: {
+            hasInvalidationLevel: true,
+            hasStatedHorizon: true,
+            hasNamedCatalyst: true,
+            hasDirectionalClaim: true
+          }
         };
       } else if (bodyStr.includes("RedTeam")) {
         payload = {

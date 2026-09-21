@@ -1,0 +1,21 @@
+{
+  "provider": "Bitget Reality Calendar",
+  "endpoint": "https://api.bitget.com/api/v3/reality/market/calendar",
+  "capturedAt": "2026-09-21T14:32:22.949Z",
+  "statusCode": 200,
+  "payload": {
+    "code": "00000",
+    "msg": "success",
+    "requestTime": 1790001140145,
+    "data": {
+      "timeZone": "EST",
+      "specificConfig": [
+        {
+          "remark": "Regular Trading Day",
+          "startTime": "2026-06-18 20:00",
+          "endTime": "2026-06-19 20:00"
+        }
+      ]
+    }
+  }
+}

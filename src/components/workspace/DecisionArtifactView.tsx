@@ -143,6 +143,13 @@ export function DecisionArtifactView({
           </div>
         )}
 
+        {(artifact.dataSource === 'fixture' || artifact.isFallbackDemo || artifact.marketState?.isSynthetic) && (
+          <div id="snapshot-data-fixture-banner" className="rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-xs text-amber-950 flex items-start gap-2 [text-wrap:pretty]">
+            <span className="font-bold shrink-0 text-amber-800">SNAPSHOT DATA:</span>
+            <span>Operating in deterministic fixture mode. The displayed market observations and baseline scenario derive from captured test snapshot fixtures.</span>
+          </div>
+        )}
+
         {artifact.evidence.some(e => e.state === "UNAVAILABLE" || e.state === "CURATED_DEMO_FIXTURE") && (
           <div className="rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs text-rose-900 flex items-start gap-2 [text-wrap:pretty]">
             <span className="font-bold shrink-0 text-rose-700">WARNING:</span>

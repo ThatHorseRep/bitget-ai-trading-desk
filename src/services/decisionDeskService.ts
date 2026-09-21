@@ -364,6 +364,7 @@ export class DecisionDeskService {
       evidence,
       provenance,
       limitations,
+      dataSource: (options.useFixture || marketState.isSynthetic || marketState.isFallbackDemo) ? "fixture" : "live",
       isFallbackDemo: options.useFixture || marketState.isFallbackDemo || false,
       fallbackReason: marketState.fallbackReason || (options.useFixture ? "Showing curated rNVDA weekend basis demo" : undefined)
     };

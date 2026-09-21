@@ -16,6 +16,7 @@ const {
   AGENTKEY_CAPABILITIES,
 } = require("../dist-core/src/adapters/research/chainbaseAgentKeyBridge.js");
 const { DecisionDeskService } = require("../dist-core/src/services/decisionDeskService.js");
+const { ResearchProviderRegistry } = require("../dist-core/src/adapters/research/registry.js");
 const { createDefaultResearchRegistry } = require("../dist-core/src/adapters/research/defaultRegistry.js");
 
 // Deterministic market state (same shape the production service returns).
@@ -150,7 +151,9 @@ const INPUT_PATH = path.join(os.tmpdir(), BRIDGE_NAME.replace("-output.json", "-
 const TOPIC = "Multi-signal research: NVDA price trend, on-chain whale flows and the latest news";
 
 async function runWorkflow() {
-  const registry = createDefaultResearchRegistry({ chainbaseBridgePath: BRIDGE_NAME });
+  const bridge = new ChainbaseAgentKeyBridge(BRIDGE_NAME);
+  const registry = new ResearchProviderRegistry();
+  registry.register(bridge);
   const desk = new DecisionDeskService(new MockMarketStateService(), undefined, registry);
   return desk.runWorkflow(
     "LONG rNVDA for 2000 dollars, exit before Monday. Multi-signal research: NVDA price trend, on-chain whale flows and the latest news.",

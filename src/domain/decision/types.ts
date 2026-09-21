@@ -80,6 +80,7 @@ export interface DecisionArtifact {
   evidence: EvidenceItem[];
   provenance: ProvenanceRecord[];
   limitations: string[];
+  dataSource?: "live" | "fixture";
   isFallbackDemo?: boolean;
   fallbackReason?: string;
   /**

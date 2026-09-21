@@ -1,0 +1,27 @@
+{
+  "provider": "Bitget Public Spot Instrument",
+  "endpoint": "https://api.bitget.com/api/v3/market/instruments?category=SPOT&symbol=BTCUSDT",
+  "capturedAt": "2026-09-21T14:32:22.949Z",
+  "statusCode": 200,
+  "payload": {
+    "code": "00000",
+    "msg": "success",
+    "requestTime": 1790001139635,
+    "data": [
+      {
+        "symbol": "BTCUSDT",
+        "category": "SPOT",
+        "baseCoin": "BTC",
+        "quoteCoin": "USDT",
+        "symbolType": "crypto",
+        "buyLimitPriceRatio": "0.02",
+        "sellLimitPriceRatio": "0.02",
+        "minOrderAmount": "0.0001",
+        "maxOrderAmount": "100.0",
+        "priceScale": "2",
+        "quantityScale": "4",
+        "status": "online"
+      }
+    ]
+  }
+}

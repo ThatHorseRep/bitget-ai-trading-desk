@@ -2,7 +2,7 @@
  * Pure Deterministic Verdict Scoring Module
  *
  * Requirements:
- * - Pure functions only: no network calls, no LLM calls, no Date.now(), no randomness.
+ * - Pure functions only: no network calls, no model calls, no timestamps, no non-determinism.
  * - Same output for same input, always.
  * - Deterministic verdict gating replacing LLM judgment.
  */

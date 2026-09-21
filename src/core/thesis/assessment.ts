@@ -18,9 +18,8 @@ import {
 
 const modelName = process.env.LLM_MODEL || "deepseek-v4-flash";
 
-// LLM provides qualitative narrative and optional assessment; scores are deterministic
+// LLM provides qualitative narrative only; scores and verdict bands are 100% deterministic
 const AssessmentSchema = z.object({
-  thesisQuality: z.enum(["STRONGER", "MIXED", "WEAKER", "INSUFFICIENT"]).optional(),
   keyMismatch: z.string().nullable().optional(),
   explanation: z.string().optional()
 });
@@ -189,7 +188,7 @@ ${evidenceText}
   }
 
   return {
-    thesisQuality: parsed?.thesisQuality ?? mappedThesisQuality,
+    thesisQuality: mappedThesisQuality,
     positionQuality,
     keyMismatch: parsed?.keyMismatch ?? (gatedVerdictResult.band === "clear" ? null : "Structural position risks outrun thesis"),
     explanation: parsed?.explanation ?? (gatedVerdictResult.reasons.length > 0 ? gatedVerdictResult.reasons.join(". ") : "Quantitative risk assessment completed."),

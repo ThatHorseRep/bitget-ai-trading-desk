@@ -1,0 +1,33 @@
+{
+  "provider": "Yahoo Finance Search",
+  "endpoint": "https://query1.finance.yahoo.com/v1/finance/search?q=NVDA&quotesCount=5&newsCount=5",
+  "capturedAt": "2026-09-21T14:32:22.949Z",
+  "statusCode": 200,
+  "payload": {
+    "explains": [],
+    "count": 9,
+    "quotes": [
+      {
+        "exchange": "NMS",
+        "shortname": "NVIDIA Corporation",
+        "quoteType": "EQUITY",
+        "symbol": "NVDA",
+        "index": "quotes",
+        "score": 286496992,
+        "typeDisp": "Equity",
+        "longname": "NVIDIA Corporation",
+        "isYahooFinance": true
+      }
+    ],
+    "news": [
+      {
+        "uuid": "8b5fd3f9-7f5b-3b32-9cbb-927914f6bdf6",
+        "title": "NVIDIA Corporate Capital Expenditure Surge",
+        "publisher": "Yahoo Finance",
+        "link": "https://finance.yahoo.com/news/nvda-capex-surge",
+        "providerPublishTime": 1790001000,
+        "type": "STORY"
+      }
+    ]
+  }
+}

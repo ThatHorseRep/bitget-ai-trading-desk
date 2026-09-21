@@ -127,7 +127,7 @@ test("Verdict Scoring - scorePosition band tests with hand-computed expectations
   });
 });
 
-test("Verdict Scoring - gateVerdict returns the worse band for all 16 combinations", () => {
+test("Verdict Scoring - gateVerdict returns the worse band for all 16 combinations", async (t) => {
   const bands: QualityBand[] = ["critical", "elevated", "moderate", "clear"];
   const rank: Record<QualityBand, number> = {
     critical: 0,
@@ -138,17 +138,19 @@ test("Verdict Scoring - gateVerdict returns the worse band for all 16 combinatio
 
   for (const b1 of bands) {
     for (const b2 of bands) {
-      const expectedWorse = rank[b1] <= rank[b2] ? b1 : b2;
-      const res = gateVerdict(
-        { score: 0.5, band: b1, reasons: [`thesis-${b1}`] },
-        { score: 0.5, band: b2, reasons: [`position-${b2}`] }
-      );
-      assert.equal(
-        res.band,
-        expectedWorse,
-        `Pair (${b1}, ${b2}) must return ${expectedWorse}, got ${res.band}`
-      );
-      assert.deepEqual(res.reasons, [`thesis-${b1}`, `position-${b2}`]);
+      await t.test(`combination (${b1}, ${b2})`, () => {
+        const expectedWorse = rank[b1] <= rank[b2] ? b1 : b2;
+        const res = gateVerdict(
+          { score: 0.5, band: b1, reasons: [`thesis-${b1}`] },
+          { score: 0.5, band: b2, reasons: [`position-${b2}`] }
+        );
+        assert.equal(
+          res.band,
+          expectedWorse,
+          `Pair (${b1}, ${b2}) must return ${expectedWorse}, got ${res.band}`
+        );
+        assert.deepEqual(res.reasons, [`thesis-${b1}`, `position-${b2}`]);
+      });
     }
   }
 });

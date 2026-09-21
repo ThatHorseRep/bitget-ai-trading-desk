@@ -1,0 +1,32 @@
+{
+  "provider": "Yahoo Finance Chart",
+  "endpoint": "https://query1.finance.yahoo.com/v8/finance/chart/NVDA?range=5d&interval=1d",
+  "capturedAt": "2026-09-21T14:32:22.949Z",
+  "statusCode": 200,
+  "payload": {
+    "chart": {
+      "result": [
+        {
+          "meta": {
+            "currency": "USD",
+            "symbol": "NVDA",
+            "exchangeName": "NMS",
+            "fullExchangeName": "NasdaqGS",
+            "instrumentType": "EQUITY",
+            "firstTradeDate": 917015400,
+            "regularMarketTime": 1790001139,
+            "hasPrePostMarketData": true,
+            "gmtoffset": -14400,
+            "timezone": "EDT",
+            "exchangeTimezoneName": "America/New_York",
+            "regularMarketPrice": 120.45,
+            "chartPreviousClose": 118.00,
+            "previousClose": 118.00,
+            "scale": 3,
+            "priceHint": 2
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "provider": "Bitget Public Spot Ticker",
+  "endpoint": "https://api.bitget.com/api/v3/market/tickers?category=SPOT&symbol=BTCUSDT",
+  "capturedAt": "2026-09-21T14:32:22.949Z",
+  "statusCode": 200,
+  "payload": {
+    "code": "00000",
+    "msg": "success",
+    "requestTime": 1790001139322,
+    "data": [
+      {
+        "category": "SPOT",
+        "symbol": "BTCUSDT",
+        "ts": "1790001137514",
+        "lastPrice": "85726.88",
+        "openPrice24h": "80575",
+        "highPrice24h": "85837.35",
+        "lowPrice24h": "80210.00",
+        "bidPr": "85726.87",
+        "askPr": "85726.88",
+        "bidSz": "1.452",
+        "askSz": "2.108",
+        "baseVolume": "12845.24",
+        "quoteVolume": "1083920194.20"
+      }
+    ]
+  }
+}
