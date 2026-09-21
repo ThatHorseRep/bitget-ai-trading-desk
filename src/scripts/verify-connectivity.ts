@@ -56,22 +56,68 @@ async function main() {
     console.log();
 
     // -------------------------------------------------------------------
-    // Step 3: Sample tool call (first quote-like tool)
+    // Step 3: Catalog protocol (live guide + do_query interface) or named
+    // tool sample call.
     // -------------------------------------------------------------------
-    const quoteTool = tools.find((t) => classifyTool(t.name, t.description) === "quotes");
-    if (quoteTool) {
-      console.log(`[3/4] Calling sample tool: ${quoteTool.name} with symbol=AAPL...`);
+    const toolNames = new Set(tools.map((t) => t.name));
+    if (toolNames.has("guide") && toolNames.has("do_query")) {
+      console.log("[3/4] Catalog protocol detected (guide + do_query). Walking the equity catalog...");
       try {
-        const callResult = await Promise.race([
-          client.callTool({ name: quoteTool.name, arguments: { symbol: "AAPL" } }),
+        const guideRes = await Promise.race([
+          client.callTool({ name: "guide", arguments: { category: "equity" } }),
           new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), TIMEOUT_MS)),
         ]);
-        console.log("  Raw result:", JSON.stringify(callResult, null, 2).substring(0, 2000));
+        const guidePayload = extractPayloadJson(guideRes);
+        const rawEntries: unknown[] = Array.isArray(guidePayload?.entries)
+          ? guidePayload.entries
+          : [];
+        const entries = rawEntries.filter(
+          (e): e is { id: string; params_summary?: Array<{ name: string; required?: boolean }> } =>
+            typeof e === "object" && e !== null && typeof (e as { id?: unknown }).id === "string",
+        );
+        console.log(`  guide(equity) returned ${entries.length} entr(ies).`);
+        const ranked = entries
+          .filter((e) =>
+            (e.params_summary ?? []).every((p) => !p.required || p.name === "symbol"))
+          .slice(0, 3);
+        for (const entry of ranked) {
+          const entryId = entry.id;
+          try {
+            const qRes = await Promise.race([
+              client.callTool({
+                name: "do_query",
+                arguments: { entry_id: entryId, params: { symbol: "AAPL" } },
+              }),
+              new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), TIMEOUT_MS)),
+            ]);
+            const text = ((qRes as { content?: Array<{ type: string; text?: string }> }).content ?? [])
+              .filter((c) => c.type === "text")
+              .map((c) => c.text ?? "")
+              .join("\n");
+            console.log(`  do_query(${entryId}): ${text.substring(0, 300)}`);
+          } catch (err) {
+            console.log(`  do_query(${entryId}) failed: ${err}`);
+          }
+        }
       } catch (err) {
-        console.log(`  Tool call failed: ${err}`);
+        console.log(`  Catalog walk failed: ${err}`);
       }
     } else {
-      console.log("[3/4] No quote-category tool found, skipping sample call.");
+      const quoteTool = tools.find((t) => classifyTool(t.name, t.description) === "quotes");
+      if (quoteTool) {
+        console.log(`[3/4] Calling sample tool: ${quoteTool.name} with symbol=AAPL...`);
+        try {
+          const callResult = await Promise.race([
+            client.callTool({ name: quoteTool.name, arguments: { symbol: "AAPL" } }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), TIMEOUT_MS)),
+          ]);
+          console.log("  Raw result:", JSON.stringify(callResult, null, 2).substring(0, 2000));
+        } catch (err) {
+          console.log(`  Tool call failed: ${err}`);
+        }
+      } else {
+        console.log("[3/4] No quote-category tool found, skipping sample call.");
+      }
     }
     console.log();
 
@@ -100,3 +146,15 @@ main().catch((err) => {
   console.error("Fatal:", err);
   process.exitCode = 1;
 });
+
+/** Parse the first text block of an MCP result as JSON (diagnostic helper). */
+function extractPayloadJson(raw: unknown): { entries?: unknown[] } | null {
+  const obj = raw as { content?: Array<{ type: string; text?: string }> } | null;
+  const text = (obj?.content ?? []).find((c) => c.type === "text")?.text;
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}

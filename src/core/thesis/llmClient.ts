@@ -49,6 +49,14 @@ class LLMProvider {
     const timeoutMs = process.env.VERCEL ? 15000 : 90000;
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
+    // Qwen3-class "thinking" models on OpenAI-compatible proxies burn 30-90s+
+    // in reasoning_content before answering (observed 2026-09-21 on the
+    // hackathon gateway: 55s extraction, 90s+ challenge timeouts with thinking
+    // on; ~3s with it off). These prompts are strict-schema and designed for
+    // fast non-thinking completion, so thinking is disabled by default. Set
+    // LLM_ENABLE_THINKING=1 to opt back in for endpoints that support it.
+    const enableThinking = process.env.LLM_ENABLE_THINKING === "1";
+
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -56,7 +64,7 @@ class LLMProvider {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`
         },
-        body: JSON.stringify({ ...request, model, stream: false, response_format: { type: "json_object" } }),
+        body: JSON.stringify({ ...request, model, stream: false, response_format: { type: "json_object" }, ...(enableThinking ? {} : { enable_thinking: false }) }),
         signal: controller.signal
       });
       clearTimeout(timeout);
