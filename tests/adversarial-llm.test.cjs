@@ -2,6 +2,25 @@ const assert = require("node:assert/strict");
 const { test, mock } = require("node:test");
 const { DecisionDeskService } = require("../dist-core/src/services/decisionDeskService.js");
 const { getSeekAiClient, sharedLlmClient } = require("../dist-core/src/core/thesis/llmClient.js");
+const { LegacyEvidenceProviderAdapter } = require("../dist-core/src/adapters/research/legacyAdapter.js");
+const { ResearchProviderRegistry } = require("../dist-core/src/adapters/research/registry.js");
+
+// Hermetic bootstrap: this suite mocks global.fetch for /chat/completions,
+// so the LLM client must reach the mock instead of throwing for missing
+// config or dialing a real gateway. Values are deliberately fake; real env
+// (developer machine or CI) is never overwritten.
+if (!process.env.LLM_API_BASE_URL) process.env.LLM_API_BASE_URL = "https://llm.mock.invalid/v1/chat/completions";
+if (!process.env.LLM_API_KEY) process.env.LLM_API_KEY = "mock-key-not-a-secret";
+
+// Hermetic registry: slot 1 = the same legacy evidence adapter the default
+// registry uses (fed by this suite's MockEvidenceProvider); slots 2-4
+// (optional MCP/bridge providers) are omitted so no live network calls are
+// attempted inside the suite.
+function makeStubRegistry(evidenceProvider) {
+  const reg = new ResearchProviderRegistry();
+  reg.register(new LegacyEvidenceProviderAdapter(evidenceProvider));
+  return reg;
+}
 
 const mockMarketState = {
   asset: "rNVDA",
@@ -41,7 +60,8 @@ class MockEvidenceProvider {
 test("Adversarial LLM Tests", async (t) => {
   const service = new DecisionDeskService(
     new MockMarketStateService(),
-    new MockEvidenceProvider()
+    new MockEvidenceProvider(),
+    makeStubRegistry(new MockEvidenceProvider())
   );
 
   // Helper to mock the LLM response at the fetch level
