@@ -16,7 +16,7 @@ const MAX_REQUESTS_PER_WINDOW = 10;
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
-    if (!checkRateLimit(ip, MAX_REQUESTS_PER_WINDOW)) {
+    if (!checkRateLimit(ip, MAX_REQUESTS_PER_WINDOW, "stress-test")) {
       return rateLimitExceededResponse();
     }
 

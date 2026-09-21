@@ -16,7 +16,7 @@ const MAX_REQUESTS_PER_WINDOW = 60;
 export async function GET(request: NextRequest) {
   try {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
-    if (!checkRateLimit(ip, MAX_REQUESTS_PER_WINDOW)) {
+    if (!checkRateLimit(ip, MAX_REQUESTS_PER_WINDOW, "market-price")) {
       return rateLimitExceededResponse();
     }
 
