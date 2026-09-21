@@ -23,6 +23,13 @@ const QuoteResponseSchema = z
     close: z.number().optional(),
     volume: z.number().optional(),
     timestamp: z.string().optional(),
+    // Live catalog (equity_price_quote) field names observed 2026-09-21:
+    last_price: z.number().optional(),
+    bid: z.number().optional(),
+    ask: z.number().optional(),
+    prev_close: z.number().optional(),
+    change_percent: z.number().optional(),
+    last_timestamp: z.string().optional(),
   })
   .passthrough();
 
@@ -35,6 +42,12 @@ const CompanyProfileSchema = z
     industry: z.string().optional(),
     marketCap: z.number().optional(),
     description: z.string().optional(),
+    // Live catalog (equity_profile) field names observed 2026-09-21:
+    name: z.string().optional(),
+    employees: z.number().optional(),
+    industry_name: z.string().optional(),
+    listed_board_name: z.string().optional(),
+    time: z.number().optional(),
   })
   .passthrough();
 
@@ -54,6 +67,34 @@ const EarningsCalendarSchema = z
     date: z.string().optional(),
     epsEstimate: z.number().optional(),
     epsActual: z.number().optional(),
+    // Live catalog (equity_calendar_earnings) field names observed 2026-09-21:
+    report_date: z.string().optional(),
+    eps_consensus: z.number().optional(),
+  })
+  .passthrough();
+
+// Live catalog guide listing (guide({ category: "equity" }) shape, observed
+// 2026-09-21): each entry describes one queryable dataset.
+const GuideParamSummarySchema = z
+  .object({
+    name: z.string(),
+    required: z.boolean().optional(),
+  })
+  .passthrough();
+
+const GuideEntrySchema = z
+  .object({
+    id: z.string(),
+    url_path: z.string().optional(),
+    title: z.string(),
+    summary: z.string().optional(),
+    params_summary: z.array(GuideParamSummarySchema).default([]),
+  })
+  .passthrough();
+
+const GuideResponseSchema = z
+  .object({
+    entries: z.array(GuideEntrySchema),
   })
   .passthrough();
 
@@ -102,6 +143,14 @@ const CONNECT_TIMEOUT_MS = 5_000;
 const TOOL_CALL_TIMEOUT_MS = 8_000;
 const MAX_OBSERVATIONS_PER_CATEGORY = 20;
 const MAX_SUMMARY_LENGTH = 500;
+/**
+ * Catalog-protocol bounds (live `guide` + `do_query` interface, observed
+ * 2026-09-21). Each do_query is a network round trip, so the per-run call
+ * cap keeps worst-case latency inside the workflow budget; entries are
+ * ranked so the most decision-relevant (quote, profile, earnings) go first.
+ */
+const MAX_DO_QUERY_CALLS = 5;
+const MAX_OBSERVATIONS_TOTAL = 24;
 
 /**
  * PRE24-02 — asset gating.
@@ -155,6 +204,20 @@ interface DiscoveredTool {
   category: ToolCategory | "unknown";
 }
 
+/**
+ * One entry of the live guide catalog (e.g. `equity_price_quote`).
+ * `requiredParams` gates dispatch: only entries whose required parameters
+ * are satisfiable with the reference symbol alone are ever called.
+ */
+interface DiscoveredEntry {
+  id: string;
+  urlPath?: string;
+  title: string;
+  summary?: string;
+  category: ToolCategory | "unknown";
+  requiredParams: string[];
+}
+
 // ---------------------------------------------------------------------------
 // Provider
 // ---------------------------------------------------------------------------
@@ -164,6 +227,9 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
 
   private endpoint: string;
   private discoveredTools: DiscoveredTool[] | null = null;
+  /** True when the live server exposes the `guide` + `do_query` catalog. */
+  private usesCatalogProtocol = false;
+  private catalogEntries: DiscoveredEntry[] | null = null;
 
   constructor(endpoint?: string) {
     this.endpoint = endpoint ?? "https://agent.bitget.com/mcp";
@@ -202,6 +268,16 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
     try {
       const tools = await this.discoverTools(client);
       if (tools.length === 0) return [];
+
+      // Live servers may expose the `guide` + `do_query` catalog interface
+      // (observed 2026-09-21 on agent.bitget.com/mcp) instead of named
+      // per-category tools. When present, it takes precedence.
+      // NOTE: `return await` is REQUIRED here — a bare `return <promise>`
+      // would run this function's `finally` (which closes the client)
+      // immediately, while the catalog calls are still in flight.
+      if (this.usesCatalogProtocol) {
+        return await this.getObservationsViaCatalog(client, referenceSymbol, topic);
+      }
 
       const categories = this.categoriesForTopic(topic);
       const results: NormalizedResearchObservation[] = [];
@@ -277,7 +353,135 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
       category: classifyTool(t.name, t.description),
     }));
 
+    // Catalog-protocol detection: the live server (observed 2026-09-21)
+    // exposes `guide` + `do_query` instead of named per-category tools.
+    const names = new Set(this.discoveredTools.map((t) => t.name));
+    this.usesCatalogProtocol = names.has("guide") && names.has("do_query");
+
     return this.discoveredTools;
+  }
+
+  // -----------------------------------------------------------------------
+  // Catalog protocol (live `guide` + `do_query` interface)
+  // -----------------------------------------------------------------------
+
+  /**
+   * Fetch the queryable catalog via `guide`. Only the equity / ETF / news
+   * domains are requested: this provider is asset-gated to US reference
+   * tickers, so crypto and crypto-sentiment entries can never apply.
+   * A failed domain listing is skipped — never fatal.
+   */
+  private async discoverCatalog(client: Client): Promise<DiscoveredEntry[]> {
+    if (this.catalogEntries) return this.catalogEntries;
+    if (!this.usesCatalogProtocol) return [];
+
+    const domains = ["equity", "etf", "news"];
+    const entries: DiscoveredEntry[] = [];
+
+    for (const domain of domains) {
+      let res: unknown;
+      try {
+        res = await Promise.race([
+          client.callTool({ name: "guide", arguments: { category: domain } }),
+          rejectAfter(TOOL_CALL_TIMEOUT_MS, `guide(${domain}) timeout`),
+        ]);
+      } catch (err) {
+        console.warn(`[${this.providerId}] guide(${domain}) failed:`, err);
+        continue;
+      }
+      const parsed = GuideResponseSchema.safeParse(extractPayload(res));
+      if (!parsed.success) {
+        console.warn(`[${this.providerId}] guide(${domain}) payload failed validation`);
+        continue;
+      }
+      for (const entry of parsed.data.entries) {
+        entries.push({
+          id: entry.id,
+          urlPath: entry.url_path,
+          title: entry.title,
+          summary: entry.summary,
+          category: classifyTool(`${entry.url_path ?? ""} ${entry.title} ${entry.summary ?? ""}`),
+          requiredParams: entry.params_summary.filter((p) => p.required).map((p) => p.name),
+        });
+      }
+    }
+
+    this.catalogEntries = entries;
+    return entries;
+  }
+
+  /**
+   * Rank catalog entries for one decision run. Entries whose required
+   * params are not satisfiable with the reference symbol alone are never
+   * called (-1). Quote / profile / earnings lead — the cheapest, most
+   * decision-relevant reads for a pre-trade stress test.
+   */
+  private rankCatalogEntries(entries: DiscoveredEntry[], topic?: string): DiscoveredEntry[] {
+    const t = (topic ?? "").toLowerCase();
+    const relevantCategories: Array<ToolCategory | "unknown"> = t
+      ? this.categoriesForTopic(t)
+      : [];
+    const score = (e: DiscoveredEntry): number => {
+      if (e.requiredParams.some((p) => p !== "symbol")) return -1;
+      const id = e.id.toLowerCase();
+      if (id.includes("quote")) return 100;
+      if (id.includes("profile")) return 90;
+      if (id.includes("earnings")) return 80;
+      if (relevantCategories.includes(e.category)) return 60;
+      if (e.category === "quotes" || e.category === "fundamentals") return 40;
+      return 20;
+    };
+    return entries
+      .map((e) => ({ e, s: score(e) }))
+      .filter((x) => x.s >= 0)
+      .sort((a, b) => b.s - a.s)
+      .map((x) => x.e);
+  }
+
+  /**
+   * Query the catalog: bounded do_query calls in ranked order, each
+   * validated and normalized exactly like a named-tool response.
+   */
+  private async getObservationsViaCatalog(
+    client: Client,
+    referenceSymbol: string,
+    topic?: string,
+  ): Promise<NormalizedResearchObservation[]> {
+    const entries = await this.discoverCatalog(client);
+    if (entries.length === 0) return [];
+
+    const ranked = this.rankCatalogEntries(entries, topic).slice(0, MAX_DO_QUERY_CALLS);
+    const results: NormalizedResearchObservation[] = [];
+
+    for (const entry of ranked) {
+      try {
+        const raw = await Promise.race([
+          client.callTool({
+            name: "do_query",
+            arguments: { entry_id: entry.id, params: { symbol: referenceSymbol } },
+          }),
+          rejectAfter(TOOL_CALL_TIMEOUT_MS, `do_query(${entry.id}) timeout`),
+        ]);
+        const payload = extractPayload(raw);
+        if (payload === null) continue;
+        const unwrapped = unwrapDoQueryResults(payload, entry.category);
+        if (unwrapped === null) continue; // server-side error envelope — never an observation
+        results.push(
+          ...this.normalisePayload(
+            unwrapped,
+            { name: entry.id, description: entry.summary, category: entry.category },
+            referenceSymbol,
+            entry.category,
+            entry.id,
+          ),
+        );
+        if (results.length >= MAX_OBSERVATIONS_TOTAL) break;
+      } catch (err) {
+        console.warn(`[${this.providerId}] do_query(${entry.id}) failed:`, err);
+      }
+    }
+
+    return results;
   }
 
   // -----------------------------------------------------------------------
@@ -315,7 +519,16 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
   ): NormalizedResearchObservation[] {
     const payload = extractPayload(raw);
     if (payload === null) return [];
+    return this.normalisePayload(payload, tool, asset, category);
+  }
 
+  private normalisePayload(
+    payload: unknown,
+    tool: DiscoveredTool,
+    asset: string,
+    category: ToolCategory | "unknown",
+    entryId?: string,
+  ): NormalizedResearchObservation[] {
     const now = new Date().toISOString();
 
     switch (category) {
@@ -323,22 +536,51 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
         const parsed = QuoteResponseSchema.safeParse(payload);
         if (!parsed.success) return this.genericObs(tool, asset, payload, now);
         const q = parsed.data;
+        const price = q.last_price ?? q.price ?? q.close;
+        const observedAt =
+          typeof q.last_timestamp === "string" && !Number.isNaN(Date.parse(q.last_timestamp))
+            ? q.last_timestamp
+            : now;
         return [
          makeObs(
            tool.name, asset, `Quote: ${asset}`,
-           `Price ${q.price ?? "N/A"} | Vol ${q.volume ?? "N/A"}`,
-            now, undefined, q.price, "USD",
+           `Price ${price ?? "N/A"} | Bid ${q.bid ?? "N/A"} / Ask ${q.ask ?? "N/A"} | Vol ${q.volume ?? "N/A"}`,
+            observedAt, undefined, price, "USD",
          ),
         ];
       }
       case "fundamentals": {
+        // Entry-id hints take precedence when the catalog protocol provides
+        // one — payload shapes alone cannot disambiguate statements from
+        // profiles because every live row carries `symbol`.
+        const hint = (entryId ?? tool.name).toLowerCase();
+        if (hint.includes("earnings")) {
+          const earn = EarningsCalendarSchema.safeParse(payload);
+          if (earn.success) {
+            const e = earn.data;
+            const est = e.eps_consensus ?? e.epsEstimate;
+            return [
+              makeObs(
+                tool.name, asset, `Earnings: ${asset}`,
+                `Next report ${e.report_date ?? e.date ?? "N/A"} | EPS est ${est ?? "N/A"}`, now,
+              ),
+            ];
+          }
+          return this.genericObs(tool, asset, payload, now);
+        }
+        if (hint.includes("balance") || hint.includes("income") || hint.includes("cash") || hint.includes("ratio") || hint.includes("valuation")) {
+          // Statement/ratio datasets: keep the raw bounded payload as the
+          // observation rather than guessing field names we have not
+          // verified — honesty over fabricated labels.
+          return this.genericObs(tool, asset, payload, now);
+        }
         const profile = CompanyProfileSchema.safeParse(payload);
         if (profile.success) {
           const p = profile.data;
           return [
             makeObs(
-              tool.name, asset, `Company: ${p.companyName ?? asset}`,
-              `Sector ${p.sector ?? "N/A"} | MCap ${p.marketCap ?? "N/A"}`, now,
+              tool.name, asset, `Company: ${p.companyName ?? p.name ?? asset}`,
+              `Industry ${p.industry_name ?? p.sector ?? "N/A"} | Employees ${p.employees ?? "N/A"} | Board ${p.listed_board_name ?? "N/A"}`, now,
             ),
           ];
         }
@@ -352,13 +594,14 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
             ),
           ];
         }
-        const earn = EarningsCalendarSchema.safeParse(payload);
-        if (earn.success) {
-          const e = earn.data;
+        const earn2 = EarningsCalendarSchema.safeParse(payload);
+        if (earn2.success) {
+          const e = earn2.data;
+          const est = e.eps_consensus ?? e.epsEstimate;
           return [
             makeObs(
               tool.name, asset, `Earnings: ${asset}`,
-              `Est ${e.epsEstimate ?? "N/A"} | Act ${e.epsActual ?? "N/A"}`, now,
+              `Next report ${e.report_date ?? e.date ?? "N/A"} | EPS est ${est ?? "N/A"}`, now,
             ),
           ];
         }
@@ -418,7 +661,6 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
     const summary = JSON.stringify(payload).substring(0, MAX_SUMMARY_LENGTH);
     return [makeObs(tool.name, asset, `${tool.name}: ${asset}`, summary, timestamp)];
   }
-
   // -----------------------------------------------------------------------
   // Topic -> category routing
   // -----------------------------------------------------------------------
@@ -455,6 +697,7 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
   /** Resets the cached tool list so the next call re-discovers tools. */
   resetToolCache(): void {
     this.discoveredTools = null;
+    this.catalogEntries = null;
   }
 }
 
@@ -489,6 +732,51 @@ export function classifyTool(
   }
 
   return "unknown";
+}
+
+/**
+ * Live catalog do_query envelope (observed 2026-09-21):
+ * `{ success: boolean, status_code: number, data: { results: [...] }, error: null }`.
+ * A `success: false` / non-null `error` payload is a server-side failure —
+ * unwrapping returns null so it is skipped, never normalized into an observation.
+ */
+const DoQueryEnvelopeSchema = z
+  .object({
+    success: z.boolean(),
+    status_code: z.number().optional(),
+    data: z
+      .object({
+        results: z.array(z.unknown()).optional(),
+      })
+      .passthrough()
+      .optional(),
+    error: z.unknown().optional(),
+  })
+  .passthrough();
+
+/**
+ * Reduce a do_query response to the dataset payload: unwrap the live
+ * envelope (`data.results`, first element when single-record datasets),
+ * pass through anything else (named-tool servers, already-naked payloads).
+ * Returns null only for an explicit server-side error envelope.
+ */
+export function unwrapDoQueryResults(
+  payload: unknown,
+  category: ToolCategory | "unknown",
+): unknown {
+  const env = DoQueryEnvelopeSchema.safeParse(payload);
+  if (env.success) {
+    if (!env.data.success || (env.data.error !== null && env.data.error !== undefined)) {
+      return null;
+    }
+    const results = env.data.data?.results;
+    if (!Array.isArray(results)) return null;
+    if (results.length === 0) return null;
+    // Multi-record datasets (news rows, statements) keep the array;
+    // single-record datasets (quote, profile, earnings) use the first row.
+    return category === "news_sentiment" ? results : results[0];
+  }
+  return payload;
 }
 
 /** Extract the JSON payload from an MCP tool-call result envelope. */

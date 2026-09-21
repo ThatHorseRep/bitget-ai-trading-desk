@@ -298,3 +298,113 @@ test('resetToolCache clears the cached tool list', () => {
   provider.resetToolCache();
   assert.strictEqual(provider.providerId, 'bitget-us-equity-mcp');
 });
+
+// ---------------------------------------------------------------------------
+// Catalog protocol (guide + do_query) — the shape the LIVE server exposes
+// (verified 2026-09-21: two tools, `guide` and `do_query`, entry_id-based).
+// The adapter must support BOTH protocols: named tools (documented) and the
+// catalog protocol (live). These tests pin the catalog path hermetically.
+// ---------------------------------------------------------------------------
+
+// Guide payload shape per GuideResponseSchema: { entries: [...] }.
+// url_path/title/summary feed classifyTool for category assignment.
+const GUIDE_ENTRY_FIXTURES = [
+  { id: 'equity_price_quote', url_path: 'equity_price_quote', title: 'Equity Price Quote', summary: 'Real-time quote for a US equity.', params_summary: [{ name: 'symbol', required: true }] },
+  { id: 'equity_company_profile', url_path: 'equity_company_profile', title: 'Company Profile', summary: 'Company profile information.', params_summary: [{ name: 'symbol', required: true }] },
+];
+
+const QUOTE_ROW = {
+  symbol: 'NVDA',
+  last_price: 222.53,
+  bid: 222.5,
+  ask: 222.53,
+  volume: 96500000,
+  prev_close: 219.34,
+  last_timestamp: '2026-09-19T20:00:00.000Z',
+};
+
+// Live do_query envelope per DoQueryEnvelopeSchema (observed 2026-09-21).
+function doQueryEnvelope(row) {
+  return { success: true, status_code: 0, data: { results: [row] }, error: null };
+}
+
+async function startCatalogFixtureServer() {
+  const state = { requestCount: 0, doQueryCalls: [] };
+
+  const httpServer = http.createServer(async (req, res) => {
+    state.requestCount += 1;
+    let body = '';
+    for await (const chunk of req) body += chunk;
+
+    // Stateless pattern: a fresh McpServer + transport per request.
+    const server = new McpServer({ name: 'fixture-us-equity-catalog', version: '1.0.0' });
+    server.registerTool(
+      'guide',
+      { description: 'Catalog guide', inputSchema: { category: z.string() } },
+      async () => ({ content: [{ type: 'text', text: JSON.stringify({ entries: GUIDE_ENTRY_FIXTURES }) }] }),
+    );
+    server.registerTool(
+      'do_query',
+      { description: 'Catalog query', inputSchema: { entry_id: z.string(), params: z.object({}).passthrough() } },
+      async (args) => {
+        const a = args && typeof args === 'object' && 'arguments' in args ? args.arguments : args;
+        state.doQueryCalls.push(a);
+        const row = a && a.entry_id === 'equity_price_quote' ? QUOTE_ROW : {};
+        return { content: [{ type: 'text', text: JSON.stringify(doQueryEnvelope(row)) }] };
+      },
+    );
+    const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+    res.on('close', () => transport.close());
+    try {
+      await server.connect(transport);
+      await transport.handleRequest(req, res, body ? JSON.parse(body) : undefined);
+    } catch {
+      if (!res.headersSent) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ jsonrpc: '2.0', error: { code: -32603, message: 'fixture failure' }, id: null }));
+      }
+    }
+  });
+
+  await new Promise((resolve) => httpServer.listen(0, '127.0.0.1', resolve));
+  const port = httpServer.address().port;
+  return {
+    state,
+    endpoint: `http://127.0.0.1:${port}/mcp`,
+    close: () => new Promise((resolve) => httpServer.close(resolve)),
+  };
+}
+
+test('catalog protocol: guide+do_query entries normalize into provenance-carrying observations', async () => {
+  const fixture = await startCatalogFixtureServer();
+  try {
+    const provider = new BitgetUsEquityMcpProvider(fixture.endpoint);
+    const observations = await provider.getObservations('rNVDA', 'price outlook');
+
+    assert.ok(Array.isArray(observations));
+    assert.ok(observations.length > 0, 'catalog path must produce observations');
+    const quote = observations.find((o) => o.title.startsWith('Quote:'));
+    assert.ok(quote, 'quote observation must be present');
+    assert.strictEqual(quote.source, 'bitget-mcp-server/equity_price_quote');
+    assert.strictEqual(quote.value, 222.53);
+    assert.ok(quote.observedTimestamp, 'quote must carry an observation timestamp');
+    assert.ok(
+      fixture.state.doQueryCalls.some((c) => c && c.entry_id === 'equity_price_quote'),
+      'adapter must drive do_query with the guide-discovered entry id',
+    );
+  } finally {
+    await fixture.close();
+  }
+});
+
+test('catalog protocol: crypto assets are gated before any MCP traffic', async () => {
+  const fixture = await startCatalogFixtureServer();
+  try {
+    const provider = new BitgetUsEquityMcpProvider(fixture.endpoint);
+    const observations = await provider.getObservations('BTC', 'price outlook');
+    assert.deepStrictEqual(observations, []);
+    assert.strictEqual(fixture.state.requestCount, 0, 'unsupported asset must not produce any MCP traffic');
+  } finally {
+    await fixture.close();
+  }
+});
