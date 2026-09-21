@@ -27,7 +27,23 @@ jobs:
         run: npm run build:core
 
       - name: Tests (build:core + full suite)
-        run: npm test
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee test-output.txt
+
+      - name: Report failing tests
+        if: failure()
+        run: |
+          {
+            echo "## Failing tests"
+            echo '```'
+            grep -A10 '^not ok' test-output.txt || echo '(no TAP not-ok lines found)'
+            echo '```'
+            echo '## Suite tail'
+            echo '```'
+            tail -20 test-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Production build
         run: npm run build
