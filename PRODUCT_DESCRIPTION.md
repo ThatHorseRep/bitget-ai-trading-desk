@@ -9,17 +9,17 @@
 
 ## 3. Validation Data & Key Metrics
 **Validation so far:**
-- 218/219 automated tests passing in our test suite (core scenario determinism, AI parsing fallbacks, off-hours session simulation, integration isolation, US Equity MCP catalog protocol, LLM client thinking-mode contract, etc.; the one skip is a live-integration test that self-skips without credentials).
+- 219/220 automated tests passing in our test suite (core scenario determinism, AI parsing fallbacks, off-hours session simulation, integration isolation, US Equity MCP catalog protocol, LLM client thinking-mode contract, etc.; the one skip is a live-integration test that self-skips without credentials).
 - [TARGET/PLAN]: No live user data or user metrics collected yet.
 
 ## 4. Progress
 **What's built and working:**
-- Natural language parsing & thesis deconstruction (src/core/ai/extractor.ts)
-- Adversarial reasoning / Counter-thesis generation (src/core/ai/challenger.ts)
+- Natural language parsing & thesis deconstruction (deterministic parsing in src/core/trade/parser.ts; LLM thesis extraction in src/core/thesis/extractor.ts)
+- Adversarial reasoning / Counter-thesis generation (src/core/thesis/challenger.ts)
 - Mathematical position stressing, deterministic scenarios, and P&L (src/core/scenarios/engine.ts)
-- Thesis vs. Position synthesis (src/core/ai/assessment.ts)
+- Thesis vs. Position synthesis (deterministic position quality in src/core/decision/classifyPosition.ts; LLM thesis-quality synthesis in src/core/thesis/assessment.ts)
 - Decision Artifact generation & Policy (src/core/decision/policy.ts)
-- Transparent "Demo Mode" for off-hours trading simulation (src/components/workspace/RedTeamWorkspace.tsx and src/app/api/stress-test/route.ts)
+- Transparent "Demo Mode" for off-hours trading simulation (fixture in src/fixtures/rnvda-demo.ts; UI toggle in src/components/workspace/WorkspaceHeader.tsx; API in src/app/api/stress-test/route.ts)
 - Optional ecosystem integrations as pure enrichment: Bitget US Equity MCP, Bitget Signal, Chainbase AgentKey (external partner), Agent Hub read-only handoff, and Agentic Account handoff — the core decision is fully defensible with all of them disabled (see B07_Optional_Bitget_Ecosystem_Integrations.md)
 
 **What's not built yet / known gaps:**

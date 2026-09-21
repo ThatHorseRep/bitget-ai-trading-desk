@@ -8,8 +8,9 @@ This document outlines the current MVP architecture, known technical constraints
 ## MVP Architecture
 - **Frontend / API**: Next.js (App Router) React application.
 - **Decision Engine**: 100% deterministic TypeScript rule engine (Zero LLM hallucinations in the risk math).
-- **Extraction Layer**: LLM endpoint utilized strictly for semantic extraction (Asset, Size, Direction, Thesis).
-- **Market State Synthesis**: Bitget API for tokenized equity pricing + scraped reference data for underlying cash equities.
+- **Trade Parsing Layer**: Deterministic rule-based parsing of natural-language statements (Asset, Size, Direction, Thesis) — no LLM in the parsing path (src/core/trade/parser.ts).
+- **Language Reasoning Layer**: The LLM performs three language-only jobs — thesis decomposition, adversarial counter-thesis, and thesis-quality synthesis. Position quality is computed deterministically *before* the LLM runs and is supplied to it as fixed input; the LLM narrates but never overrides it (src/core/thesis/).
+- **Market State Synthesis**: Bitget API for tokenized equity pricing + reference data providers for underlying cash equities, with explicit degraded/unavailable states when a source fails.
 
 ---
 

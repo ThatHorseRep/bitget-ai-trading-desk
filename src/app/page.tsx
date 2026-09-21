@@ -100,7 +100,15 @@ export default function WorkspacePage() {
       });
 
       if (!response.ok && !response.body) {
-         throw new Error(`HTTP ${response.status}: Analysis failed.`);
+        // Distinguish real rejections from transport failures. A 429 means
+        // the desk is rate-limiting, not that the analysis is broken.
+        if (response.status === 429) {
+          throw new Error("Rate limit reached: the desk accepts up to 10 stress tests per minute. Please wait about a minute and try again.");
+        }
+        if (response.status === 413) {
+          throw new Error("The trade statement is too large to analyze. Please shorten it and try again.");
+        }
+        throw new Error(`Analysis request rejected (HTTP ${response.status}).`);
       }
 
       const reader = response.body?.getReader();
