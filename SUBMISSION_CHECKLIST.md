@@ -2,28 +2,26 @@
 
 Before you submit your final project, make sure to complete these critical steps:
 
-## 1. 🔄 Switch Back to the Mandatory Hackathon LLM
-You MUST use the provided Bitget API for your final submission. Update your production environment variables (e.g., in Vercel Project Settings) and your local `.env.local` to:
+## 1. 🔄 Confirm the Hackathon LLM Configuration
+The production environment (Vercel Project Settings) and local `.env.local` must point at the provided hackathon gateway:
 ```env
 LLM_API_BASE_URL=https://hackathon.bitgetops.com/v1
 LLM_MODEL=qwen3.8-max
-# Make sure your original hackathon LLM_API_KEY is restored from .env.local.backup!
+LLM_API_KEY=<hackathon-provided key>
 ```
+The app sends `enable_thinking: false` by default (measured: raw model latency with hidden reasoning was blowing the workflow budget); set `LLM_ENABLE_THINKING=1` to opt back in.
 
-## 2. 📝 Update Your `README.md` for the Judges
-Since the provided Qwen API is known to hang indefinitely during heavy generation steps, **you must warn the judges** so they don't think your app is broken. Add this exact note to the top of your README:
+## 2. ⏱️ Know the Degradation Story (it is a feature, not an apology)
+The workflow runs under a hard wall-clock budget anchored at request start. If the LLM gateway is slow, the affected stage is skipped with an **explicit limitation line** ("Skipped adversarial challenge: workflow time budget exhausted…") and the deterministic stress math + policy still return a complete verdict. The serverless function is never killed mid-stream, and the UI never shows a silent "Analysis failed".
 
-> **⚠️ IMPORTANT NOTE FOR JUDGES:** 
-> The provided Hackathon Qwen API (`hackathon.bitgetops.com/v1`) currently experiences severe latency and connection hangs during complex reasoning tasks. 
-> 
-> To evaluate the full UI, logic, and user experience without API timeouts, please **Toggle ON "Deterministic Fixture"** in the top right corner of the dashboard. This will bypass the faulty API and instantly return a pre-computed perfect response.
-> 
-> *(Note: If you run it live without the fixture, our application is designed to degrade gracefully. Instead of crashing, it will safely abort the hanging LLM request after 15 seconds and display a "System Degradation" UI state while still executing the deterministic risk math).*
+Do **not** tell judges the API is "faulty" or that the app "aborts after 15 seconds" — neither is true anymore. The accurate framing: *the desk always returns a decision, degraded with honest limitations when a dependency underperforms.*
 
-## 3. 🚀 Deployment Verification
-- [ ] Are the Vercel production environment variables updated?
-- [ ] Did you redeploy on Vercel after updating the variables?
-- [ ] If you chose to deploy on Render or Railway instead, is the live URL accessible?
-- [ ] Did you record a quick video demo using the **Deterministic Fixture**? (Highly recommended!)
+## 3. 📝 Judge-Facing Copy
+`SUBMISSION.md` carries the Project Description, Target User, and Role of the LLM text. README links it. If judges hit gateway latency on a live run, the **Deterministic Fixture** toggle (top right) replays the canonical weekend scenario instantly — clearly banner-labeled as demo data, never passed off as live.
 
-Good luck! You've built an incredibly robust app that literally handles the failure of the judges' own API gracefully. That's a winning feature!
+## 4. 🚀 Deployment Verification
+- [ ] Vercel production env vars current (LLM gateway + key)?
+- [ ] Redeployed after the latest `main`?
+- [ ] Live URL answers: `https://www.redteamdesk.name.ng` (health: `/api/stress-test` GET)?
+- [ ] Demo video recorded — fixture mode for the guaranteed path, one live run to show graceful degradation?
+- [ ] `SUBMISSION.md`, X post text (in `SUBMISSION.md`), and `#BitgetHackathon @Bitget_AI` post published and linked in the form?

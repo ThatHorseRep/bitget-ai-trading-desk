@@ -1,5 +1,7 @@
 # Bitget AI RedTeam Desk
 
+[![CI](https://github.com/ThatHorseRep/bitget-ai-trading-desk/actions/workflows/ci.yml/badge.svg)](https://github.com/ThatHorseRep/bitget-ai-trading-desk/actions/workflows/ci.yml)
+
 Implementation workspace for the **Bitget AI Base Camp Hackathon S2**.
 
 ## About the Project
@@ -10,8 +12,8 @@ For full details on the project, the target user, the core job, and the role of 
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+ (20+ recommended)
-- npm or yarn
+- Node.js 22+ (required: the test script uses `--env-file-if-exists`, available from Node 22)
+- npm
 
 ### Installation
 ```bash
@@ -41,12 +43,12 @@ npm run test
 *(Note: If you encounter rate limit errors, wait 60 seconds and try again, or test manually via the UI).*
 
 ## Implementation Map (Capabilities)
-- **Natural Language Trade Parsing & Thesis Extraction:** Implemented in src/core/ai/extractor.ts.
-- **Adversarial Challenge (Red Teaming):** Implemented in src/core/ai/challenger.ts.
+- **Natural Language Trade Parsing & Thesis Extraction:** Deterministic parsing in src/core/trade/parser.ts; LLM thesis extraction in src/core/thesis/extractor.ts.
+- **Adversarial Challenge (Red Teaming):** Implemented in src/core/thesis/challenger.ts.
 - **Deterministic Scenario Stress Testing (P&L, basis, liquidity):** Implemented in src/core/scenarios/engine.ts.
-- **Thesis vs Position Assessment:** Implemented in src/core/ai/assessment.ts.
+- **Thesis vs Position Assessment:** Deterministic position quality in src/core/decision/classifyPosition.ts; LLM thesis-quality synthesis in src/core/thesis/assessment.ts.
 - **Deterministic Decision Policy:** Implemented in src/core/decision/policy.ts.
-- **Transparent Demo Mode (Off-Hours Wedge):** Triggered via UI in src/components/workspace/RedTeamWorkspace.tsx and processed in src/app/api/stress-test/route.ts.
+- **Transparent Demo Mode (Off-Hours Wedge):** Fixture data in src/fixtures/rnvda-demo.ts; triggered via the header toggle and src/components/workspace/TradeInputSurface.tsx, processed in src/app/api/stress-test/route.ts.
 - **Optional Ecosystem Integrations (enrichment, not dependencies):** The core decision is fully defensible with zero optional integrations enabled. Optional providers/handoffs — Bitget US Equity MCP, Bitget Signal, Chainbase AgentKey (external partner, not a Bitget product), Agent Hub read-only handoff, Agentic Account handoff, and a demo-only paper-trading harness — are documented in [B07_Optional_Bitget_Ecosystem_Integrations.md](./B07_Optional_Bitget_Ecosystem_Integrations.md), including their implemented vs external/agent-host status and safety boundaries. No autonomous trading exists in any configuration.
 - **Portfolio Context/Impact:** Marked as FUTURE/DEFERRED in documentation (not implemented in MVP).
 
