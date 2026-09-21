@@ -30,6 +30,9 @@ const QuoteResponseSchema = z
     prev_close: z.number().optional(),
     change_percent: z.number().optional(),
     last_timestamp: z.string().optional(),
+    // Historical OHLCV rows (equity_price_historical, observed 2026-09-21)
+    // carry a bar `date` and OHLC fields instead of last_price/bid/ask.
+    date: z.string().optional(),
   })
   .passthrough();
 
@@ -150,6 +153,11 @@ const MAX_SUMMARY_LENGTH = 500;
  * ranked so the most decision-relevant (quote, profile, earnings) go first.
  */
 const MAX_DO_QUERY_CALLS = 5;
+// Serverless functions have a hard wall-clock kill (Vercel maxDuration).
+// Research must leave room for the three sequential LLM stages, so the
+// catalog walk is capped tighter there; result: fewer observations, never
+// a killed workflow.
+const MAX_DO_QUERY_CALLS_SERVERLESS = 2;
 const MAX_OBSERVATIONS_TOTAL = 24;
 
 /**
@@ -450,7 +458,8 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
     const entries = await this.discoverCatalog(client);
     if (entries.length === 0) return [];
 
-    const ranked = this.rankCatalogEntries(entries, topic).slice(0, MAX_DO_QUERY_CALLS);
+    const callCap = process.env.VERCEL ? MAX_DO_QUERY_CALLS_SERVERLESS : MAX_DO_QUERY_CALLS;
+    const ranked = this.rankCatalogEntries(entries, topic).slice(0, callCap);
     const results: NormalizedResearchObservation[] = [];
 
     for (const entry of ranked) {
@@ -533,9 +542,44 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
 
     switch (category) {
       case "quotes": {
-        const parsed = QuoteResponseSchema.safeParse(payload);
-        if (!parsed.success) return this.genericObs(tool, asset, payload, now);
-        const q = parsed.data;
+        // A quotes payload is either a single live-quote row or a historical
+        // OHLCV series (multi-row, oldest first). Presenting a historical
+        // bar as "Quote: <asset>" stamped "now" manufactured a false
+        // evidence conflict (observed 2026-09-21: live quote 722.05 vs the
+        // OLDEST bar 706.32 of equity_price_historical, both titled
+        // "Quote: QQQ" — the arbitrator correctly refused to reconcile).
+        // Historical rows carry `date`+`close` and never `last_price`.
+        const rows: unknown[] = Array.isArray(payload) ? payload : [payload];
+        const parsedRows = rows.flatMap((r) => {
+          const p = QuoteResponseSchema.safeParse(r);
+          return p.success ? [p.data] : [];
+        });
+
+        const historical = parsedRows.filter(
+          (r) =>
+            typeof r.date === "string" &&
+            typeof r.close === "number" &&
+            r.last_price === undefined,
+        );
+        if (historical.length > 0 && historical.length === parsedRows.length) {
+          // Pick the LATEST bar by its real date — never assume series order.
+          const latest = historical.reduce((a, b) =>
+            Date.parse(b.date as string) > Date.parse(a.date as string) ? b : a,
+          );
+          const barMs = Date.parse(latest.date as string);
+          const observedAt = Number.isNaN(barMs) ? now : new Date(barMs).toISOString();
+          const barDay = observedAt.slice(0, 10);
+          return [
+            makeObs(
+              tool.name, asset, `Price history (as of ${barDay}): ${asset}`,
+              `Historical close ${latest.close} on ${barDay} (bar date, not a live quote) | Vol ${latest.volume ?? "N/A"}`,
+              observedAt, undefined, latest.close, "USD",
+            ),
+          ];
+        }
+
+        const q = parsedRows[0];
+        if (!q) return this.genericObs(tool, asset, payload, now);
         const price = q.last_price ?? q.price ?? q.close;
         const observedAt =
           typeof q.last_timestamp === "string" && !Number.isNaN(Date.parse(q.last_timestamp))
@@ -772,9 +816,13 @@ export function unwrapDoQueryResults(
     const results = env.data.data?.results;
     if (!Array.isArray(results)) return null;
     if (results.length === 0) return null;
-    // Multi-record datasets (news rows, statements) keep the array;
-    // single-record datasets (quote, profile, earnings) use the first row.
-    return category === "news_sentiment" ? results : results[0];
+    // Multi-record datasets (news rows, statements, historical OHLCV
+    // series) keep the array; true single-record datasets (profile,
+    // earnings) use the first row. Quotes keep the array so the normalizer
+    // can distinguish a live quote row from a historical bar series -
+    // taking results[0] here handed back the OLDEST historical bar as if
+    // it were current (the 2026-09-21 false-conflict bug).
+    return category === "news_sentiment" || category === "quotes" ? results : results[0];
   }
   return payload;
 }

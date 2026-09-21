@@ -17,7 +17,8 @@ const ExtractionSchema = z.object({
 export async function extractThesis(
   trade: NormalizedTrade,
   marketState: MarketState,
-  evidence: EvidenceItem[]
+  evidence: EvidenceItem[],
+  deadlineMs?: number
 ): Promise<Thesis> {
   const statement = trade.thesis;
   const systemPrompt = `You are a quantitative trading risk analyst.
@@ -83,7 +84,7 @@ ${evidenceText}
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      resp = await client.chat(basePayload);
+      resp = await client.chat({ ...basePayload, budgetMs: deadlineMs ? Math.max(0, deadlineMs - Date.now()) : undefined });
       parsed = ExtractionSchema.parse(JSON.parse(resp.content));
       break; // Success, exit retry loop
     } catch (err) {
