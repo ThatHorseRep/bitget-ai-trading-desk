@@ -9,7 +9,7 @@
 
 ## 3. Validation Data & Key Metrics
 **Validation so far:**
-- 214/215 automated tests passing in our test suite (core scenario determinism, AI parsing fallbacks, off-hours session simulation, integration isolation, etc.; the one skip is a live-integration test that self-skips without credentials).
+- 218/219 automated tests passing in our test suite (core scenario determinism, AI parsing fallbacks, off-hours session simulation, integration isolation, US Equity MCP catalog protocol, LLM client thinking-mode contract, etc.; the one skip is a live-integration test that self-skips without credentials).
 - [TARGET/PLAN]: No live user data or user metrics collected yet.
 
 ## 4. Progress

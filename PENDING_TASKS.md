@@ -67,7 +67,12 @@ The provider is fully implemented against the documented interface:
   (`toReferenceSymbol`, unit-tested).
 - **Automatic tool discovery** — `listTools()` result is classified into the six
   documented categories (quotes, fundamentals, corporate_actions, institutional_analyst,
-  etf, news_sentiment) via keyword heuristics. No tool names are guessed.
+  etf, news_sentiment) via keyword heuristics. No tool names are guessed. When the
+  live server instead exposes the `guide` + `do_query` catalog interface (the shape
+  actually observed on `agent.bitget.com/mcp`, 2026-09-21), the adapter detects it,
+  walks the catalog, ranks entries (quote > profile > earnings > topic-relevant),
+  and drives `do_query({ entry_id, params: { symbol } })` under a 5-call/24-obs cap.
+  Both protocols are supported; the catalog takes precedence when present.
 - **Category-based dispatch** — topic text is matched to relevant categories;
   default is quotes + fundamentals + news_sentiment.
 - **Zod validation** — lenient `.passthrough()` schemas in `usEquitySchemas.ts`
@@ -84,32 +89,47 @@ The provider is fully implemented against the documented interface:
 
 ## Remaining (requires live endpoint)
 
-1. **Tighten Zod schemas** — Once `listTools()` succeeds against the live
-   `agent.bitget.com/mcp` endpoint, inspect the actual response payloads and
-   replace `.passthrough()` with `.strict()`, adjusting field names as needed.
+1. ~~**Tighten Zod schemas**~~ — RESOLVED PRAGMATICALLY (2026-09-21): live payloads
+   were inspected via the catalog protocol and the schemas were EXTENDED to match
+   (`last_price`/`bid`/`ask`/`prev_close`, `name`/`employees`/`industry_name`,
+   `eps_consensus`, statement fields). `.passthrough()` is deliberately kept —
+   the live server returns localized fields (e.g. Chinese sector strings) and
+   extra fields that a strict schema would reject; leniency preserves honesty
+   via bounded raw-payload fallbacks instead of dropping observations.
 
-2. **Adjust `classifyTool` keywords** — The keyword heuristics may need tuning
-   once real tool names are visible. Run `verify-connectivity.ts` and review the
-   `[category]  toolName` dump to check classification accuracy.
+2. ~~**Adjust `classifyTool` keywords**~~ — RESOLVED (2026-09-21): the live server
+   exposes only `guide` + `do_query`, so per-name classification is moot there;
+   the catalog path assigns categories from `url_path`/`title`/`summary` per entry,
+   with entry-id hints (`earnings`, `profile`, statement ids) selecting the right
+   normalizer where payload shapes alone would mislabel. Keyword heuristics remain
+   for the documented named-tools protocol.
 
-3. **Confirm `{ symbol }` argument convention** — The provider currently passes
-   `{ symbol: asset }` to every tool call. If some tools use a different argument
-   name (e.g. `ticker`, `code`), add a per-category argument mapper.
+3. ~~**Confirm `{ symbol }` argument convention**~~ — RESOLVED (2026-09-21): the
+   live catalog contract is `do_query({ entry_id, params: { symbol } })`
+   (verified with real NVDA data). `{ symbol }` remains correct for named tools.
 
 4. ~~**Wire into DecisionDeskService**~~ — DONE: the provider is registered in
    the default registry via `createDefaultResearchRegistry` (PRE24-01).
 
-## Live-endpoint verification (2026-09-20)
+## Live-endpoint verification (2026-09-20 → 2026-09-21)
 
-`src/scripts/verify-connectivity.ts` (HTTP transport) was run against the live
-endpoint. Result: **DNS cannot resolve `agent.bitget.com` from the current
-network** (`ENOTFOUND`; control host `api.bitget.com` also failed at the same
-moment while github.com/npmjs.org resolved — a local network issue, not a
-documented-endpoint failure). The provider degraded exactly as designed
-(`UNAVAILABLE`, zero requests issued). Items 1–3 above remain open until the
-endpoint is reachable from some environment and real payloads/tool names can
-be inspected. Re-run the script from a deployment environment (e.g. Vercel)
-before tightening schemas.
+**2026-09-20:** DNS could not resolve `agent.bitget.com` from the current network
+(`ENOTFOUND`; control host `api.bitget.com` also failed at the same moment while
+github.com/npmjs.org resolved — a local network issue, not a documented-endpoint
+failure). The provider degraded exactly as designed (`UNAVAILABLE`, zero requests
+issued).
+
+**2026-09-21:** root cause isolated — local DNS was the ONLY broken layer. With a
+diagnostic DoH resolver (scratch tooling, not shipped; no system changes), the
+endpoint answered immediately. The live server exposes a `guide` + `do_query`
+catalog interface (not named per-category tools); the adapter was upgraded to
+speak both protocols. **Live proof through the app's own adapter: 5 real NVDA
+observations** — quote (last 222.53, bid 222.5 / ask 222.53, vol ~96.5M), company
+profile, earnings calendar (2026-11-17, EPS est 2.5231), price history, and
+balance-sheet statement — with the crypto gate intact (BTC → 0 requests).
+Hermetic catalog-protocol tests pin the contract; suite 216 pass / 0 fail /
+1 documented live-gate skip. The US Equity MCP provider is now live-verified,
+not merely implemented.
 
 ## Agentic Account (PRE24-07) — handoff path implemented; authorization is a human-side step
 

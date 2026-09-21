@@ -23,7 +23,7 @@ All optional research providers are assembled in exactly one place: `src/adapter
 | Slot | Provider | Status |
 | --- | --- | --- |
 | 1 | Legacy evidence provider (Yahoo-backed composite, adapted) | Implemented (in-app), live |
-| 2 | Bitget US Equity MCP provider | Implemented (in-app), endpoint reachability unproven |
+| 2 | Bitget US Equity MCP provider | Implemented (in-app) and live-verified 2026-09-21 via the `guide` + `do_query` catalog protocol — real NVDA quote/profile/earnings retrieved through the app's own adapter. Reachability from any given network is still environment-dependent (local DNS had to be bypassed with diagnostic DoH tooling). |
 | 3 | Bitget Signal provider (programmatic) or AI-host file bridge (opt-in) | Implemented (in-app); upstream-dependent |
 | 4 | Chainbase AgentKey bridge | Implemented as an AI-host handoff |
 
@@ -52,7 +52,7 @@ Every slot is optional at the type level: a caller may omit any provider and the
 - **What it is:** Bitget's read-only US Stocks/ETF market-data MCP service (per the S2 handbook), reached programmatically by this app over Streamable HTTP at the documented endpoint (`agent.bitget.com/mcp`). No credentials required.
 - **Implemented:** real MCP client with automatic tool discovery; discovered tools are keyword-classified into the six documented categories (quotes, fundamentals, corporate_actions, institutional_analyst, etf, news_sentiment); topic-based category dispatch; Zod `.passthrough()` validation; bounded timeouts (5 s connect / 8 s call); response caps (500-char summaries, 20 observations per category).
 - **Asset gating:** only rToken-mapped US reference tickers are requested (rNVDA → NVDA). Plain crypto assets never reach this service.
-- **Truthful caveat:** live-endpoint reachability has **not** been proven from the development network (DNS failure at verification time, control hosts failing simultaneously). Until verified from a reachable environment, schemas remain lenient and classification keywords may need tuning. Unreachable endpoint degrades to `UNAVAILABLE` / `[]` exactly as designed.
+- **Truthful caveat:** the integration is **live-verified as of 2026-09-21**: the endpoint answered, the MCP handshake succeeded, and the app's adapter returned five real NVDA observations (quote at 222.53, profile, earnings 2026-11-17, price history, balance statement) — but only after diagnostic DoH tooling bypassed a locally poisoned DNS resolver. Reachability is therefore **environment-dependent**: on networks where local DNS fails, the provider degrades to `UNAVAILABLE` / `[]` exactly as designed. The live catalog uses a `guide` + `do_query` protocol; the adapter supports it **and** the documented named-tools shape, with the catalog taking precedence when present.
 - **Classification:** native outbound call, read-only, optional.
 
 ### 4.2 Bitget Signal (PRE24-03) — Implemented (in-app), upstream-dependent
