@@ -4,6 +4,14 @@ import type { EvidenceItem } from "../../domain/decision/types";
 import type { MarketState } from "../../domain/market/types";
 import type { Thesis, ThesisItem } from "../../domain/thesis/types";
 import type { NormalizedTrade } from "../../domain/trade/types";
+import type { ThesisSignals } from "../../lib/verdict/scoring";
+
+export const ThesisSignalsSchema = z.object({
+  hasInvalidationLevel: z.boolean(),
+  hasStatedHorizon: z.boolean(),
+  hasNamedCatalyst: z.boolean(),
+  hasDirectionalClaim: z.boolean()
+});
 
 const ExtractionSchema = z.object({
   normalizedThesis: z.string(),
@@ -11,8 +19,78 @@ const ExtractionSchema = z.object({
   dependencies: z.array(z.object({ text: z.string(), origin: z.enum(["USER_STATED", "AI_INFERRED"]) })),
   invalidationConditions: z.array(z.object({ text: z.string(), origin: z.literal("AI_INFERRED") })),
   supportingEvidenceRefs: z.array(z.string()),
-  unresolvedAmbiguities: z.array(z.string())
+  unresolvedAmbiguities: z.array(z.string()),
+  signals: ThesisSignalsSchema.optional()
 });
+
+export async function parseThesisSignals(
+  statement: string,
+  deadlineMs?: number
+): Promise<{ signals: ThesisSignals; parseError: boolean }> {
+  const systemPrompt = `You are a trading risk extraction engine.
+Your sole job is to parse the trader's statement and extract four boolean signals.
+Do NOT score or evaluate the quality. Only extract whether the stated signal is present or absent.
+
+JSON schema:
+{
+  "hasInvalidationLevel": boolean,
+  "hasStatedHorizon": boolean,
+  "hasNamedCatalyst": boolean,
+  "hasDirectionalClaim": boolean
+}
+
+Rules:
+1. hasInvalidationLevel: true if the trader stated an explicit price, level, or condition where the trade is proven wrong.
+2. hasStatedHorizon: true if an explicit time horizon is stated (e.g., intraday, 3 days, holding until Monday open).
+3. hasNamedCatalyst: true if a specific event, announcement, or driver is named.
+4. hasDirectionalClaim: true if the thesis asserts a falsifiable directional claim, not vague sentiment.`;
+
+  if (process.env.TEST_MODE === "mock_llm") {
+    return {
+      signals: {
+        hasInvalidationLevel: true,
+        hasStatedHorizon: true,
+        hasNamedCatalyst: true,
+        hasDirectionalClaim: true,
+        precedentCount: 0
+      },
+      parseError: false
+    };
+  }
+
+  const client = getSeekAiClient();
+  try {
+    const resp = await client.chat({
+      model: process.env.LLM_MODEL || "deepseek-v4-flash",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `<untrusted_data>\nTrader Statement: ${statement}\n</untrusted_data>` }
+      ],
+      budgetMs: deadlineMs ? Math.max(0, deadlineMs - Date.now()) : undefined
+    });
+
+    const parsed = ThesisSignalsSchema.parse(JSON.parse(resp.content));
+    return {
+      signals: {
+        ...parsed,
+        precedentCount: 0
+      },
+      parseError: false
+    };
+  } catch (err) {
+    // Conservative default: on validation failure, default every boolean to FALSE
+    return {
+      signals: {
+        hasInvalidationLevel: false,
+        hasStatedHorizon: false,
+        hasNamedCatalyst: false,
+        hasDirectionalClaim: false,
+        precedentCount: 0
+      },
+      parseError: true
+    };
+  }
+}
 
 export async function extractThesis(
   trade: NormalizedTrade,
@@ -65,6 +143,14 @@ ${evidenceText}
       supportingEvidenceRefs: [],
       invalidationConditions: [{ text: "Mock invalidation", origin: "AI_INFERRED" }],
       unresolvedAmbiguities: [],
+      signals: {
+        hasInvalidationLevel: true,
+        hasStatedHorizon: true,
+        hasNamedCatalyst: true,
+        hasDirectionalClaim: true,
+        precedentCount: 0
+      },
+      signalsParseFailed: false,
       modelInfo: { model: "mock-model", provider: "mock-provider" }
     };
   }
@@ -119,6 +205,37 @@ ${evidenceText}
     origin: "AI_INFERRED"
   }));
 
+  let signals: ThesisSignals;
+  let signalsParseFailed = false;
+
+  if (parsed.signals) {
+    const signalCheck = ThesisSignalsSchema.safeParse(parsed.signals);
+    if (signalCheck.success) {
+      signals = {
+        ...signalCheck.data,
+        precedentCount: 0
+      };
+    } else {
+      signalsParseFailed = true;
+      signals = {
+        hasInvalidationLevel: false,
+        hasStatedHorizon: false,
+        hasNamedCatalyst: false,
+        hasDirectionalClaim: false,
+        precedentCount: 0
+      };
+    }
+  } else {
+    signalsParseFailed = true;
+    signals = {
+      hasInvalidationLevel: false,
+      hasStatedHorizon: false,
+      hasNamedCatalyst: false,
+      hasDirectionalClaim: false,
+      precedentCount: 0
+    };
+  }
+
   return {
     traderStatement: statement,
     normalizedThesis: parsed.normalizedThesis,
@@ -127,6 +244,8 @@ ${evidenceText}
     supportingEvidenceRefs: filteredEvidenceRefs,
     invalidationConditions,
     unresolvedAmbiguities: parsed.unresolvedAmbiguities,
+    signals,
+    signalsParseFailed,
     modelInfo: resp!.provenance
   };
 }

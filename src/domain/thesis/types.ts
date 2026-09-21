@@ -1,3 +1,5 @@
+import type { ThesisSignals, ScoringResult, VerdictGateResult } from "../../lib/verdict/scoring";
+
 export type ThesisItemOrigin = "USER_STATED" | "AI_INFERRED";
 export type ThesisQuality = "STRONGER" | "MIXED" | "WEAKER" | "INSUFFICIENT";
 
@@ -15,6 +17,8 @@ export interface Thesis {
   supportingEvidenceRefs: string[];
   invalidationConditions: ThesisItem[];
   unresolvedAmbiguities: string[];
+  signals?: ThesisSignals;
+  signalsParseFailed?: boolean;
   modelInfo?: { model: string; provider: string };
 }
 
@@ -48,4 +52,7 @@ export interface ThesisPositionAssessment {
   keyMismatch: string | null;
   explanation: string;
   modelInfo?: { model: string; provider: string };
+  thesisScoreResult?: ScoringResult;
+  positionScoreResult?: ScoringResult;
+  gatedVerdictResult?: VerdictGateResult;
 }

@@ -1,3 +1,15 @@
+/**
+ * Role of the LLM:
+ * The LLM's remaining responsibilities, and ONLY these:
+ * - parsing the trader's free-text thesis into the ThesisSignals booleans
+ *   (it extracts, it does not score)
+ * - writing the adversarial interrogation questions
+ * - writing the narrative explanation of a verdict it did not decide
+ * - summarising retrieved precedents
+ *
+ * The LLM performs extraction and explanation; verdict thresholds are deterministic and unit-tested.
+ */
+
 // Using global fetch (Node 18+). No external import needed.
 
 export type SeekAiMessage = {

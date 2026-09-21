@@ -1,4 +1,10 @@
 import type { Decision, DecisionInputs, DecisionPolicyConfig } from "../../domain/decision/types";
+import {
+  gateVerdict,
+  type ThesisSignals,
+  type PositionSignals,
+  type VerdictGateResult
+} from "../../lib/verdict/scoring";
 
 export const DECISION_POLICY_CONFIG: DecisionPolicyConfig = {
   unsupportedAssetVerdict: "REJECT",
@@ -35,40 +41,6 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     };
   }
 
-  if (inputs.thesisQuality === "INSUFFICIENT") {
-    return {
-      verdict: "REJECT",
-      reasons: [{
-        code: "INSUFFICIENT_THESIS",
-        message: "The trader thesis lacks causal reasoning or actionable substance to justify capital allocation."
-      }],
-      blockers: ["Insufficient thesis"],
-      changeConditions: ["Articulate a specific, falsifiable thesis or catalyst."]
-    };
-  }
-
-  if (inputs.thesisQuality === "WEAKER" && inputs.positionQuality.quality === "WEAKER") {
-    return {
-      verdict: "REJECT",
-      reasons: [
-        {
-          code: "THESIS_CONTRADICTED",
-          message: "The underlying thesis is contradicted by available market evidence."
-        },
-        {
-          code: "SEVERE_POSITION_RISK",
-          message: "The proposed position structure is vulnerable to adverse liquidity and microstructure shocks."
-        },
-        ...inputs.positionQuality.reasons.map((r: string) => ({
-          code: "SEVERE_POSITION_RISK" as const,
-          message: r
-        }))
-      ],
-      blockers: [],
-      changeConditions: ["Re-evaluate the trade only if fresh evidence invalidates the counter-thesis.", ...thesisConditions]
-    };
-  }
-
   if (inputs.materialUncertainty) {
     return {
       verdict: config.materialUncertaintyVerdict,
@@ -81,41 +53,96 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     };
   }
 
-  // Off-hours / weekend position stress check
   const isWeekendOrOffHours = inputs.marketState.sessionStatus === "WEEKEND" || inputs.marketState.sessionStatus === "OFF_HOURS";
-  if (isWeekendOrOffHours && inputs.positionQuality.quality === "WEAKER") {
-    const reasons = [
-      {
-        code: "OFF_HOURS_WAIT" as const,
-        message: `Underlying reference equity market is currently in ${inputs.marketState.sessionStatus} state with no continuous price discovery.`
-      }
-    ];
 
-    if (inputs.positionAssessment?.keyMismatch) {
-      reasons.push({
-        code: "OFF_HOURS_WAIT" as const,
-        message: inputs.positionAssessment.keyMismatch
-      });
-    }
+  // Derive signals or use precomputed gatedVerdictResult
+  let gated: VerdictGateResult;
+  if (inputs.positionAssessment?.gatedVerdictResult) {
+    gated = inputs.positionAssessment.gatedVerdictResult;
+  } else {
+    const thesisSignals: ThesisSignals = {
+      hasInvalidationLevel: inputs.thesis?.signals?.hasInvalidationLevel ?? (inputs.thesisQuality === "STRONGER"),
+      hasStatedHorizon: inputs.thesis?.signals?.hasStatedHorizon ?? (inputs.thesisQuality !== "INSUFFICIENT"),
+      hasNamedCatalyst: inputs.thesis?.signals?.hasNamedCatalyst ?? (inputs.thesisQuality === "STRONGER" || inputs.thesisQuality === "MIXED"),
+      hasDirectionalClaim: inputs.thesis?.signals?.hasDirectionalClaim ?? (inputs.thesisQuality !== "INSUFFICIENT"),
+      precedentCount: inputs.thesisQuality === "STRONGER" ? 2 : 0
+    };
 
-    reasons.push(...inputs.positionQuality.reasons.map((r: string) => ({
-      code: "OFF_HOURS_WAIT" as const,
-      message: r
-    })));
+    const applicableScenarios = inputs.scenarios?.filter(s => s.applicable && s.estimatedPnlPct !== null) ?? [];
+    const scenarioLosses = applicableScenarios.map(s => Math.max(0, -s.estimatedPnlPct! / 100));
+    const expectedShortfall = scenarioLosses.length > 0
+      ? scenarioLosses.reduce((sum, l) => sum + l, 0) / scenarioLosses.length
+      : (inputs.positionQuality.quality === "WEAKER" ? 0.30 : 0.05);
+
+    const positionSignals: PositionSignals = {
+      expectedShortfall,
+      valueAtRisk: scenarioLosses.length > 0 ? Math.max(...scenarioLosses) : expectedShortfall,
+      positionFraction: 0.25,
+      gapExposureFraction: isWeekendOrOffHours ? 0.75 : 0.0,
+      hedgeCoverageFraction: 0.0
+    };
+
+    gated = gateVerdict(thesisSignals, positionSignals);
+  }
+
+  // Band-driven deterministic verdict
+  if (gated.band === "critical" || inputs.thesisQuality === "INSUFFICIENT") {
+    const reasons = gated.reasons.length > 0
+      ? gated.reasons.map((r: string) => ({
+          code: r.toLowerCase().includes("thesis") ? ("INSUFFICIENT_THESIS" as const) : ("SEVERE_POSITION_RISK" as const),
+          message: r
+        }))
+      : [
+          {
+            code: "INSUFFICIENT_THESIS" as const,
+            message: "The trader thesis lacks causal reasoning or actionable substance to justify capital allocation."
+          }
+        ];
 
     return {
-      verdict: "WAIT",
+      verdict: "REJECT",
       reasons,
-      blockers: [],
-      changeConditions: [
-        "Wait for Monday 09:30 ET reference market open to confirm underlying price response to weekend events.",
-        "Ensure token/reference basis divergence does not widen prior to trade execution.",
-        ...thesisConditions
-      ]
+      blockers: ["Critical risk gating threshold reached"],
+      changeConditions: ["Articulate a specific, falsifiable thesis or catalyst.", ...thesisConditions]
     };
   }
 
-  if (inputs.positionQuality.quality === "WEAKER") {
+  if (gated.band === "elevated" || inputs.positionQuality.quality === "WEAKER") {
+    if (isWeekendOrOffHours) {
+      const reasons = [
+        {
+          code: "OFF_HOURS_WAIT" as const,
+          message: `Underlying reference equity market is currently in ${inputs.marketState.sessionStatus} state with no continuous price discovery.`
+        }
+      ];
+
+      if (inputs.positionAssessment?.keyMismatch) {
+        reasons.push({
+          code: "OFF_HOURS_WAIT" as const,
+          message: inputs.positionAssessment.keyMismatch
+        });
+      }
+
+      reasons.push(
+        ...gated.reasons.map((r: string) => ({
+          code: "OFF_HOURS_WAIT" as const,
+          message: r
+        }))
+      );
+
+      return {
+        verdict: "WAIT",
+        reasons,
+        blockers: [],
+        changeConditions: [
+          "Wait for Monday 09:30 ET reference market open to confirm underlying price response to weekend events.",
+          "Ensure token/reference basis divergence does not widen prior to trade execution.",
+          ...thesisConditions
+        ]
+      };
+    }
+
+    // Regular hours elevated risk -> REDUCE
     const reasons = [];
     if (inputs.positionAssessment?.keyMismatch) {
       reasons.push({
@@ -123,15 +150,20 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
         message: inputs.positionAssessment.keyMismatch
       });
     }
-    
-    reasons.push(...inputs.positionQuality.reasons.map((r: string) => ({
-      code: "REDUCE_POSITION_SIZE" as const,
-      message: r
-    })));
+
+    reasons.push(
+      ...gated.reasons.map((r: string) => ({
+        code: "REDUCE_POSITION_SIZE" as const,
+        message: r
+      }))
+    );
 
     return {
       verdict: "REDUCE",
-      reasons,
+      reasons: reasons.length > 0 ? reasons : [{
+        code: "REDUCE_POSITION_SIZE" as const,
+        message: "Elevated risk threshold reached: reduce position size."
+      }],
       blockers: [],
       changeConditions: [
         "Reduce proposed position size by 50% to mitigate scenario drawdown severity.",
@@ -141,34 +173,27 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     };
   }
 
+  // Clear or Moderate band -> PROCEED
   const proceedReasons = [];
+
+  if (gated.reasons.length > 0) {
+    proceedReasons.push(
+      ...gated.reasons.map((r: string) => ({
+        code: "PROCEED_OK" as const,
+        message: r
+      }))
+    );
+  } else {
+    proceedReasons.push({
+      code: "PROCEED_OK" as const,
+      message: "The proposed position structure survives deterministic stress scenarios within acceptable bounds."
+    });
+  }
 
   if (inputs.thesisQuality === "STRONGER" || inputs.thesisQuality === "MIXED") {
     proceedReasons.push({
       code: "PROCEED_OK" as const,
       message: `The underlying thesis is supported by current available evidence (quality: ${inputs.thesisQuality}).`
-    });
-  } else if (inputs.thesisQuality === "WEAKER") {
-    proceedReasons.push({
-      code: "THESIS_CONTRADICTED" as const,
-      message: "Warning: The underlying thesis is contradicted by evidence (quality: WEAKER), but the position structure risk remains acceptable."
-    });
-  } else if (inputs.thesisQuality === null) {
-    proceedReasons.push({
-      code: "MATERIAL_UNCERTAINTY" as const,
-      message: "Thesis assessment unavailable due to system degradation. Deterministic bounds still acceptable."
-    });
-  }
-
-  proceedReasons.push({
-    code: "PROCEED_OK" as const,
-    message: "The proposed position structure survives deterministic stress scenarios within acceptable bounds."
-  });
-
-  if (blockers.length === 0 && !inputs.materialUncertainty) {
-    proceedReasons.push({
-      code: "PROCEED_OK" as const,
-      message: "No configured hard blocker prevents the decision from proceeding to human judgment."
     });
   }
 

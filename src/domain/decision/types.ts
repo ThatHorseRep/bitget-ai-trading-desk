@@ -80,6 +80,8 @@ export interface DecisionArtifact {
   evidence: EvidenceItem[];
   provenance: ProvenanceRecord[];
   limitations: string[];
+  isFallbackDemo?: boolean;
+  fallbackReason?: string;
   /**
    * PRE24-10: Optional paper-trading companion state for GetAgent Studio workflow.
    * Absent by default; added only when user explicitly enables paper trading.

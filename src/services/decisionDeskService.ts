@@ -125,7 +125,9 @@ export class DecisionDeskService {
       };
     }
 
-    if (marketState.dataQuality === "DEGRADED") {
+    if (marketState.isFallbackDemo) {
+      limitations.push(marketState.fallbackReason || "Bitget API unavailable - showing curated rNVDA weekend basis demo");
+    } else if (marketState.dataQuality === "DEGRADED") {
       limitations.push("Market observations are partially degraded or missing optional secondary sources.");
     }
 
@@ -361,7 +363,9 @@ export class DecisionDeskService {
       changeConditions: decision.changeConditions,
       evidence,
       provenance,
-      limitations
+      limitations,
+      isFallbackDemo: options.useFixture || marketState.isFallbackDemo || false,
+      fallbackReason: marketState.fallbackReason || (options.useFixture ? "Showing curated rNVDA weekend basis demo" : undefined)
     };
 
     return {

@@ -149,6 +149,13 @@ export function DecisionArtifactView({
             <span>Live evidence is UNAVAILABLE. Operating on explicitly labeled CURATED DEMO FIXTURE data.</span>
           </div>
         )}
+
+        {(artifact.isFallbackDemo || artifact.marketState?.isFallbackDemo || limitations.some(l => l.includes("Bitget API unavailable"))) && (
+          <div id="demo-fallback-alert" className="rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-xs text-amber-950 flex items-start gap-2 [text-wrap:pretty]">
+            <span className="font-bold shrink-0 text-amber-800">DEMO SAFETY NET:</span>
+            <span>{artifact.fallbackReason || artifact.marketState?.fallbackReason || "Bitget API unavailable - showing curated rNVDA weekend basis demo"}</span>
+          </div>
+        )}
       </div>
 
       {/* 2. Decisive Reasons */}

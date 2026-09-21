@@ -61,14 +61,26 @@ export class MarketStateService {
     const now = options.now ?? new Date();
     const sources: SourceRef[] = [];
 
-    // 1. Fetch Bitget rToken instrument & ticker
-    const [rTokenInstrument, rTokenTicker] = await Promise.all([
-      this.bitgetClient.getSpotInstrument(mapping.bitgetSymbol),
-      this.bitgetClient.getSpotTicker(mapping.bitgetSymbol)
-    ]);
+    // 1. Fetch Bitget rToken instrument & ticker with Demo Safety Net fallback
+    let rTokenInstrument;
+    let rTokenTicker;
+    try {
+      [rTokenInstrument, rTokenTicker] = await Promise.all([
+        this.bitgetClient.getSpotInstrument(mapping.bitgetSymbol),
+        this.bitgetClient.getSpotTicker(mapping.bitgetSymbol)
+      ]);
 
-    if (!rTokenInstrument.isReality) {
-      throw new Error(`Instrument ${mapping.bitgetSymbol} is not identified as a Reality token by Bitget.`);
+      if (!rTokenInstrument.isReality) {
+        throw new Error(`Instrument ${mapping.bitgetSymbol} is not identified as a Reality token by Bitget.`);
+      }
+    } catch (bitgetError) {
+      console.warn("Bitget API unavailable, activating demo safety net fallback:", bitgetError);
+      return {
+        ...rnvdaDemoMarketState,
+        isFallbackDemo: true,
+        fallbackReason: "Bitget API unavailable - showing curated rNVDA weekend basis demo",
+        dataQuality: "DEGRADED"
+      };
     }
 
     const tokenMarketStatus = rTokenInstrument.isActive ? "ACTIVE" : "INACTIVE";

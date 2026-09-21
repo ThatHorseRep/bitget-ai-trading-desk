@@ -36,6 +36,8 @@ export interface MarketState {
   sources: SourceRef[];
   scenarioId?: string;
   isSynthetic?: boolean;
+  isFallbackDemo?: boolean;
+  fallbackReason?: string;
 }
 
 

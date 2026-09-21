@@ -22,4 +22,10 @@ Step 0 complete: backup verified, assets wired to standard locations, identity f
 <!-- filled by step N -->
 
 ## 7. Role of the LLM
-<!-- filled by step N -->
+The LLM's responsibilities are strictly restricted to, and ONLY these:
+- parsing the trader's free-text thesis into the ThesisSignals booleans (it extracts, it does not score)
+- writing the adversarial interrogation questions
+- writing the narrative explanation of a verdict it did not decide
+- summarising retrieved precedents
+
+The LLM performs extraction and explanation; verdict thresholds are deterministic and unit-tested.
