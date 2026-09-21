@@ -44,9 +44,10 @@ const BAND_RANKS: Record<QualityBand, number> = {
 };
 
 function assignBand(score: number): QualityBand {
-  if (score >= 0.80) return "clear";
-  if (score >= 0.60) return "moderate";
-  if (score >= 0.35) return "elevated";
+  const rounded = Math.round(score * 10000) / 10000;
+  if (rounded >= 0.80) return "clear";
+  if (rounded >= 0.60) return "moderate";
+  if (rounded >= 0.35) return "elevated";
   return "critical";
 }
 

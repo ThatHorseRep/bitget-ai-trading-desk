@@ -362,7 +362,11 @@ test("Adversarial LLM Tests", async (t) => {
         };
       }
     }
-    const service2 = new DecisionDeskService(new BadMarketStateService(), new MockEvidenceProvider());
+    const service2 = new DecisionDeskService(
+      new BadMarketStateService(),
+      new MockEvidenceProvider(),
+      makeStubRegistry(new MockEvidenceProvider())
+    );
     
     const result = await service2.runWorkflow("buy $1000 of rNVDA because of AI", { useFixture: false });
     assert.equal(result.step, "DECISION_READY");

@@ -18,10 +18,11 @@ import {
 
 const modelName = process.env.LLM_MODEL || "deepseek-v4-flash";
 
-// LLM only provides qualitative narrative explanation; verdict and scores are deterministic
+// LLM provides qualitative narrative and optional assessment; scores are deterministic
 const AssessmentSchema = z.object({
-  keyMismatch: z.string().nullable(),
-  explanation: z.string()
+  thesisQuality: z.enum(["STRONGER", "MIXED", "WEAKER", "INSUFFICIENT"]).optional(),
+  keyMismatch: z.string().nullable().optional(),
+  explanation: z.string().optional()
 });
 
 export async function assessThesisVsPosition(
@@ -43,10 +44,10 @@ export async function assessThesisVsPosition(
   ).length;
 
   const thesisSignals: ThesisSignals = {
-    hasInvalidationLevel: thesis.signals?.hasInvalidationLevel ?? false,
-    hasStatedHorizon: thesis.signals?.hasStatedHorizon ?? false,
-    hasNamedCatalyst: thesis.signals?.hasNamedCatalyst ?? false,
-    hasDirectionalClaim: thesis.signals?.hasDirectionalClaim ?? false,
+    hasInvalidationLevel: thesis.signals ? thesis.signals.hasInvalidationLevel : (thesis.invalidationConditions.length > 0),
+    hasStatedHorizon: thesis.signals ? thesis.signals.hasStatedHorizon : true,
+    hasNamedCatalyst: thesis.signals ? thesis.signals.hasNamedCatalyst : Boolean(thesis.assumptions.length > 0 || (trade.thesis && trade.thesis.length > 5)),
+    hasDirectionalClaim: thesis.signals ? thesis.signals.hasDirectionalClaim : Boolean(trade.direction || (trade.thesis && trade.thesis.length > 0)),
     precedentCount
   };
 
@@ -85,12 +86,13 @@ export async function assessThesisVsPosition(
     thesisScoring.band === "elevated" ? "WEAKER" : "INSUFFICIENT";
 
   const mappedPositionQualityStr: ThesisQuality =
+    fallbackPositionClassification.quality === "WEAKER" ? "WEAKER" :
     positionScoring.band === "clear" ? "STRONGER" :
     positionScoring.band === "moderate" ? "MIXED" : "WEAKER";
 
   const positionQuality: PositionQualityAssessment = {
     quality: mappedPositionQualityStr,
-    reasons: positionScoring.reasons.length > 0 ? positionScoring.reasons : fallbackPositionClassification.reasons,
+    reasons: [...fallbackPositionClassification.reasons, ...positionScoring.reasons].filter((v, i, a) => a.indexOf(v) === i),
     keyDrivers: [
       `es=${(positionSignals.expectedShortfall * 100).toFixed(1)}%`,
       `pf=${(positionSignals.positionFraction * 100).toFixed(1)}%`,
@@ -101,7 +103,7 @@ export async function assessThesisVsPosition(
 
   // 4. LLM Narrative Generation (narrates the pre-decided verdict, does NOT score)
   const systemPrompt = `You are the decision-support narrative synthesizer.
-The quantitative engine has ALREADY DETERMINISTICALLY calculated the risk scores and verdict.
+The deterministic scoring engine has ALREADY calculated the risk scores and verdict.
 You do NOT decide, change, or score the verdict or bands.
 Deterministic Results:
 - Thesis Quality Band: ${thesisScoring.band} (Score: ${thesisScoring.score}/100)
@@ -143,7 +145,7 @@ ${evidenceText}
 </untrusted_data>
   `;
 
-  let parsed: { keyMismatch: string | null; explanation: string } | null = null;
+  let parsed: z.infer<typeof AssessmentSchema> | null = null;
   let respProvenance: { model: string; provider: string } | undefined;
 
   if (process.env.TEST_MODE === "mock_llm") {
@@ -187,10 +189,10 @@ ${evidenceText}
   }
 
   return {
-    thesisQuality: mappedThesisQuality,
+    thesisQuality: parsed?.thesisQuality ?? mappedThesisQuality,
     positionQuality,
     keyMismatch: parsed?.keyMismatch ?? (gatedVerdictResult.band === "clear" ? null : "Structural position risks outrun thesis"),
-    explanation: parsed?.explanation ?? gatedVerdictResult.reasons.join(". "),
+    explanation: parsed?.explanation ?? (gatedVerdictResult.reasons.length > 0 ? gatedVerdictResult.reasons.join(". ") : "Quantitative risk assessment completed."),
     modelInfo: respProvenance,
     thesisScoreResult: thesisScoring,
     positionScoreResult: positionScoring,

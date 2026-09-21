@@ -78,13 +78,18 @@ Rules:
       parseError: false
     };
   } catch (err) {
-    // Conservative default: on validation failure, default every boolean to FALSE
+    const lower = statement.toLowerCase();
+    const hasDirectional = /buy|sell|long|short|bull|bear/i.test(lower);
+    const hasCatalyst = /because|due to|catalyst|earnings|ai|news|partnership|growth|fomc|fed|cpi/i.test(lower);
+    const hasHorizon = /day|week|month|year|intraday|swing|hours|holding|target|open/i.test(lower);
+    const hasInvalidation = /stop|invalidation|below|above|break|loss|under/i.test(lower);
+
     return {
       signals: {
-        hasInvalidationLevel: false,
-        hasStatedHorizon: false,
-        hasNamedCatalyst: false,
-        hasDirectionalClaim: false,
+        hasInvalidationLevel: hasInvalidation,
+        hasStatedHorizon: hasHorizon,
+        hasNamedCatalyst: hasCatalyst,
+        hasDirectionalClaim: hasDirectional,
         precedentCount: 0
       },
       parseError: true
