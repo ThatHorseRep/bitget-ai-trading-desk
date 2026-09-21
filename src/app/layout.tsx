@@ -17,6 +17,7 @@ const geistMono = localFont({
 import { BRANDING } from "@/config/branding";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://ais-pre-76vg2p4vjuywawauv5ec3l-725903868758.europe-west2.run.app"),
   title: `${BRANDING.PRODUCT_NAME} | ${BRANDING.TAGLINE}`,
   description: "Adversarial pre-trade risk workbench for tokenized equities. Deterministic stress testing, off-hours basis decoupling analysis, and thesis vs. position deconstruction.",
   openGraph: {

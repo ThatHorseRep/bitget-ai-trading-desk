@@ -23,6 +23,8 @@ export function AppBootLoader({
           <img
             src="/icon.svg"
             alt={BRANDING.PRODUCT_NAME}
+            width={40}
+            height={40}
             className="h-10 w-10 shrink-0 object-contain"
           />
           <div>
