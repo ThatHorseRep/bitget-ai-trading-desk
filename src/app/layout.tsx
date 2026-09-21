@@ -17,8 +17,27 @@ const geistMono = localFont({
 import { BRANDING } from "@/config/branding";
 
 export const metadata: Metadata = {
-  title: BRANDING.PRODUCT_NAME,
-  description: "Deterministic trade stress testing, basis decoupling analysis, and thesis vs position deconstruction.",
+  title: `${BRANDING.PRODUCT_NAME} | ${BRANDING.TAGLINE}`,
+  description: "Adversarial pre-trade risk workbench for tokenized equities. Deterministic stress testing, off-hours basis decoupling analysis, and thesis vs. position deconstruction.",
+  openGraph: {
+    title: `${BRANDING.PRODUCT_NAME} | ${BRANDING.TAGLINE}`,
+    description: "Adversarial pre-trade risk workbench for tokenized equities. Deterministic verdict bands computed, not generated.",
+    images: [
+      {
+        url: BRANDING.LOGOS.OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: `${BRANDING.PRODUCT_NAME} — ${BRANDING.TAGLINE}`,
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${BRANDING.PRODUCT_NAME} | ${BRANDING.TAGLINE}`,
+    description: "Adversarial pre-trade risk workbench for tokenized equities. Deterministic verdict bands computed, not generated.",
+    images: [BRANDING.LOGOS.OG_IMAGE],
+  },
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },

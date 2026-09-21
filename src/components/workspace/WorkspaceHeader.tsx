@@ -9,13 +9,15 @@ interface WorkspaceHeaderProps {
   onToggleFixture: (value: boolean) => void;
   onNewTrade: () => void;
   canReset: boolean;
+  onViewOverview?: () => void;
 }
 
 export function WorkspaceHeader({
   useFixture,
   onToggleFixture,
   onNewTrade,
-  canReset
+  canReset,
+  onViewOverview
 }: WorkspaceHeaderProps) {
   return (
     <div className="sticky top-0 z-30 flex flex-col">
@@ -31,7 +33,9 @@ export function WorkspaceHeader({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/icon.svg"
-              alt="Logo"
+              alt="Bitget AI RedTeam Desk Mark"
+              width={36}
+              height={36}
               className="h-9 w-9 shrink-0 object-contain"
             />
             <div>
@@ -50,6 +54,16 @@ export function WorkspaceHeader({
           </div>
 
           <div className="flex items-center gap-3">
+            {onViewOverview && (
+              <button
+                type="button"
+                onClick={onViewOverview}
+                className="min-h-[44px] px-3 py-1.5 border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] text-xs font-mono font-semibold text-[var(--rt-text-muted)] hover:text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-raised)] active:scale-[0.98] transition-all"
+              >
+                ← System overview
+              </button>
+            )}
+
             {/* Data Mode Switch */}
             <div className="flex items-center border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] p-1 text-xs font-mono font-semibold">
               <button

@@ -8,15 +8,15 @@ import { NormalizedReviewCard } from "../components/workspace/NormalizedReviewCa
 import { AnalysisProgressView } from "../components/workspace/AnalysisProgressView";
 import { DecisionArtifactView } from "../components/workspace/DecisionArtifactView";
 import { ProvenanceDrawer } from "../components/workspace/ProvenanceDrawer";
+import { LandingSurface } from "../components/landing/LandingSurface";
 import type { AnalysisStage, WorkspaceStep } from "../components/workspace/types";
 import type { DecisionWorkflowResult } from "../services/decisionDeskService";
 import type { DecisionArtifact, ProvenanceRecord } from "../domain/decision/types";
 import type { ParsedTradeResult } from "../core/trade/parser";
 import { parseNaturalLanguageTrade } from "../core/trade/parser";
 
-
-
 export default function WorkspacePage() {
+  const [viewMode, setViewMode] = useState<"landing" | "desk">("landing");
   const [step, setStep] = useState<WorkspaceStep>("ENTRY");
   const [prompt, setPrompt] = useState("");
   const [useFixture, setUseFixture] = useState(false);
@@ -29,6 +29,14 @@ export default function WorkspacePage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const handleLaunchFromLanding = (initialPrompt?: string) => {
+    setViewMode("desk");
+    if (initialPrompt) {
+      setPrompt(initialPrompt);
+      handleInitialSubmit(initialPrompt);
+    }
+  };
 
   // Step S02 -> S03 or S04
   const handleInitialSubmit = async (rawInput: string) => {
@@ -196,101 +204,108 @@ export default function WorkspacePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--rt-surface-base)] text-[var(--rt-text-primary)] font-sans selection:bg-[var(--rt-surface-void)] selection:text-[var(--rt-text-on-void)]">
-      {/* Persistent Navigation / Desk Header */}
-      <WorkspaceHeader
-        useFixture={useFixture}
-        onToggleFixture={setUseFixture}
-        onNewTrade={handleReset}
-        canReset={step !== "ENTRY"}
-      />
-
-      <main className="px-4 py-8 sm:px-6 lg:px-8">
-        {/* S01 / S02: Input State */}
-        {step === "ENTRY" && (
-          <TradeInputSurface
-            initialPrompt={prompt}
-            onSubmit={handleInitialSubmit}
-            isLoading={isSubmitting}
-          />
-        )}
-
-        {/* S03: Clarification State */}
-        {step === "CLARIFICATION" && parsedResult && (
-          <ClarificationModal
-            parsedResult={parsedResult}
-            originalPrompt={prompt}
-            isSubmitting={isSubmitting}
-            onResolve={handleClarificationResolved}
-            onEditOriginal={() => setStep("ENTRY")}
-          />
-        )}
-
-        {/* S04: Normalized Trade Review */}
-        {step === "REVIEW" && parsedResult && parsedResult.normalizedTrade && (
-          <NormalizedReviewCard
-            normalizedTrade={parsedResult.normalizedTrade}
-            parsedResult={parsedResult}
-            onConfirm={handleConfirmRunStressTest}
-            onEdit={() => setStep("ENTRY")}
-            isAnalyzing={isAnalyzing}
-          />
-        )}
-
-        {/* S05: Analysis Progress State */}
-        {step === "ANALYZING" && (
-          <AnalysisProgressView stages={stages} activeStageIndex={activeStageIndex} />
-        )}
-
-        {/* S06: Decision Artifact Ready State */}
-        {step === "DECISION_READY" && artifact && (
-          <DecisionArtifactView
-            artifact={artifact}
-            onOpenProvenance={() => setIsDrawerOpen(true)}
+    <div className="min-h-screen bg-[var(--rt-surface-base)] text-[var(--rt-text-primary)] font-sans selection:bg-[var(--rt-surface-void)] selection:text-[var(--rt-surface-raised)]">
+      {viewMode === "landing" ? (
+        <LandingSurface onLaunchDesk={handleLaunchFromLanding} />
+      ) : (
+        <>
+          {/* Persistent Navigation / Desk Header */}
+          <WorkspaceHeader
+            useFixture={useFixture}
+            onToggleFixture={setUseFixture}
             onNewTrade={handleReset}
+            canReset={step !== "ENTRY"}
+            onViewOverview={() => setViewMode("landing")}
           />
-        )}
 
-        {/* S08: Error / Blocked State */}
-        {step === "ERROR" && (
-          <div className="mx-auto max-w-xl border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] p-6 sm:p-8 shadow-xs space-y-4 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center border border-[var(--rt-verdict-critical)] bg-[var(--rt-surface-base)] text-[var(--rt-verdict-critical)] font-mono font-bold text-lg">
-              !
-            </div>
-            <h3 className="text-lg font-mono font-bold text-[var(--rt-text-primary)] [text-wrap:balance]">
-              Analysis Could Not Proceed
-            </h3>
-            <p className="text-sm font-mono text-[var(--rt-text-muted)] [text-wrap:pretty]">
-              {errorMessage || "An unexpected error occurred while stress testing your proposed trade."}
-            </p>
-            <div className="pt-2 flex justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => setStep("ENTRY")}
-                className="border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] px-4 py-2 text-xs font-mono font-semibold text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-raised)] active:scale-[0.98] transition-colors"
-              >
-                Back to edit
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="border border-[var(--rt-surface-void)] bg-[var(--rt-surface-void)] px-4 py-2 text-xs font-mono font-semibold text-[var(--rt-text-on-void)] hover:opacity-90 active:scale-[0.98] transition-opacity"
-              >
-                Restart workspace
-              </button>
-            </div>
-          </div>
-        )}
-      </main>
+          <main className="px-4 py-8 sm:px-6 lg:px-8">
+            {/* S01 / S02: Input State */}
+            {step === "ENTRY" && (
+              <TradeInputSurface
+                initialPrompt={prompt}
+                onSubmit={handleInitialSubmit}
+                isLoading={isSubmitting}
+              />
+            )}
 
-      {/* S09: Provenance Drawer */}
-      {artifact && (
-        <ProvenanceDrawer
-          artifact={artifact}
-          isOpen={isDrawerOpen}
-          onClose={() => setIsDrawerOpen(false)}
-          selectedRecord={selectedProvenance}
-        />
+            {/* S03: Clarification State */}
+            {step === "CLARIFICATION" && parsedResult && (
+              <ClarificationModal
+                parsedResult={parsedResult}
+                originalPrompt={prompt}
+                isSubmitting={isSubmitting}
+                onResolve={handleClarificationResolved}
+                onEditOriginal={() => setStep("ENTRY")}
+              />
+            )}
+
+            {/* S04: Normalized Trade Review */}
+            {step === "REVIEW" && parsedResult && parsedResult.normalizedTrade && (
+              <NormalizedReviewCard
+                normalizedTrade={parsedResult.normalizedTrade}
+                parsedResult={parsedResult}
+                onConfirm={handleConfirmRunStressTest}
+                onEdit={() => setStep("ENTRY")}
+                isAnalyzing={isAnalyzing}
+              />
+            )}
+
+            {/* S05: Analysis Progress State */}
+            {step === "ANALYZING" && (
+              <AnalysisProgressView stages={stages} activeStageIndex={activeStageIndex} />
+            )}
+
+            {/* S06: Decision Artifact Ready State */}
+            {step === "DECISION_READY" && artifact && (
+              <DecisionArtifactView
+                artifact={artifact}
+                onOpenProvenance={() => setIsDrawerOpen(true)}
+                onNewTrade={handleReset}
+              />
+            )}
+
+            {/* S08: Error / Blocked State */}
+            {step === "ERROR" && (
+              <div className="mx-auto max-w-xl border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] p-6 sm:p-8 shadow-xs space-y-4 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center border border-[var(--rt-verdict-critical)] bg-[var(--rt-surface-base)] text-[var(--rt-verdict-critical)] font-mono font-bold text-lg">
+                  !
+                </div>
+                <h3 className="text-lg font-mono font-bold text-[var(--rt-text-primary)] [text-wrap:balance]">
+                  Analysis Could Not Proceed
+                </h3>
+                <p className="text-sm font-mono text-[var(--rt-text-muted)] [text-wrap:pretty]">
+                  {errorMessage || "An unexpected error occurred while stress testing your proposed trade."}
+                </p>
+                <div className="pt-2 flex justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setStep("ENTRY")}
+                    className="border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] px-4 py-2 text-xs font-mono font-semibold text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-raised)] active:scale-[0.98] transition-colors"
+                  >
+                    Back to edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="border border-[var(--rt-surface-void)] bg-[var(--rt-surface-void)] px-4 py-2 text-xs font-mono font-semibold text-[var(--rt-surface-raised)] hover:opacity-90 active:scale-[0.98] transition-opacity"
+                  >
+                    Restart workspace
+                  </button>
+                </div>
+              </div>
+            )}
+          </main>
+
+          {/* S09: Provenance Drawer */}
+          {artifact && (
+            <ProvenanceDrawer
+              artifact={artifact}
+              isOpen={isDrawerOpen}
+              onClose={() => setIsDrawerOpen(false)}
+              selectedRecord={selectedProvenance}
+            />
+          )}
+        </>
       )}
     </div>
   );
