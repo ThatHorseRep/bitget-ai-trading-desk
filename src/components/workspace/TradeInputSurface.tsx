@@ -86,21 +86,78 @@ export function TradeInputSurface({
           />
         </div>
 
-        {/* Quick select prompt chips */}
-        <div className="space-y-2 pt-1">
-          <p className="text-xs font-mono font-medium text-[var(--rt-text-muted)]">Quick start scenarios:</p>
-          <div className="flex flex-wrap gap-2">
-            {EXAMPLE_PROMPTS.map((ex, i) => (
+        {/* Quick select prompt chips & Verdict Policy Preset Buttons */}
+        <div className="space-y-3 pt-1 border-t border-[var(--rt-border-subtle)]">
+          <div className="space-y-1.5">
+            <p className="text-xs font-mono font-bold text-[var(--rt-text-primary)] uppercase tracking-wider">
+              Test Verdict Policy Gates:
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
-                key={i}
                 type="button"
-                onClick={() => setPrompt(ex.text)}
-                className="inline-flex min-h-[44px] items-center gap-1.5 border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] px-3 py-2 text-xs text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-raised)] hover:text-[var(--rt-text-primary)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] text-left focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden"
+                onClick={() => setPrompt("I plan to buy $10,000 rNVDA token during US cash market hours at 10:15 AM ET with 0.02% basis spread. Data center revenue beat + low crypto correlation.")}
+                className="flex items-center justify-between p-2.5 bg-white border border-[#0E9F8B] hover:bg-[#0E9F8B]/5 transition-all text-left group"
               >
-                <span className="font-mono font-semibold text-[var(--rt-text-primary)]">{ex.badge}:</span>
-                <span className="truncate max-w-[200px] sm:max-w-xs">{ex.label}</span>
+                <div>
+                  <span className="block text-[10px] font-mono font-bold text-[#0E9F8B]">STATE 4</span>
+                  <span className="text-xs font-mono font-bold text-[var(--rt-text-primary)]">PROCEED</span>
+                </div>
+                <span className="text-xs font-mono font-bold text-[#0E9F8B] group-hover:translate-x-0.5 transition-transform">→</span>
               </button>
-            ))}
+
+              <button
+                type="button"
+                onClick={() => setPrompt("I plan to buy $50,000 rNVDA token with 5x leverage during extended hours. Basis spread elevated at 0.45%.")}
+                className="flex items-center justify-between p-2.5 bg-white border border-[#C98A14] hover:bg-[#C98A14]/5 transition-all text-left group"
+              >
+                <div>
+                  <span className="block text-[10px] font-mono font-bold text-[#C98A14]">STATE 3</span>
+                  <span className="text-xs font-mono font-bold text-[var(--rt-text-primary)]">REDUCE</span>
+                </div>
+                <span className="text-xs font-mono font-bold text-[#C98A14] group-hover:translate-x-0.5 transition-transform">→</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPrompt("I want to buy $25,000 rNVDA token on Sunday at 02:00 AM ET during 65.5-hour weekend market closure.")}
+                className="flex items-center justify-between p-2.5 bg-white border border-[#54697E] hover:bg-[#54697E]/5 transition-all text-left group"
+              >
+                <div>
+                  <span className="block text-[10px] font-mono font-bold text-[#54697E]">STATE 2</span>
+                  <span className="text-xs font-mono font-bold text-[var(--rt-text-primary)]">WAIT</span>
+                </div>
+                <span className="text-xs font-mono font-bold text-[#54697E] group-hover:translate-x-0.5 transition-transform">→</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPrompt("Ape $100,000 with max leverage into tokenized equity with no thesis, no stop loss, and liquidation cascade risk.")}
+                className="flex items-center justify-between p-2.5 bg-white border border-[#C8102E] hover:bg-[#C8102E]/5 transition-all text-left group"
+              >
+                <div>
+                  <span className="block text-[10px] font-mono font-bold text-[#C8102E]">STATE 1</span>
+                  <span className="text-xs font-mono font-bold text-[var(--rt-text-primary)]">REJECT</span>
+                </div>
+                <span className="text-xs font-mono font-bold text-[#C8102E] group-hover:translate-x-0.5 transition-transform">→</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1.5 pt-1">
+            <p className="text-xs font-mono font-medium text-[var(--rt-text-muted)]">Quick start scenarios:</p>
+            <div className="flex flex-wrap gap-2">
+              {EXAMPLE_PROMPTS.map((ex, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setPrompt(ex.text)}
+                  className="inline-flex min-h-[44px] items-center gap-1.5 border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] px-3 py-2 text-xs text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-raised)] hover:text-[var(--rt-text-primary)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] text-left focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden"
+                >
+                  <span className="font-mono font-semibold text-[var(--rt-text-primary)]">{ex.badge}:</span>
+                  <span className="truncate max-w-[200px] sm:max-w-xs">{ex.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

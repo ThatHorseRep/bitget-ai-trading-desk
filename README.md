@@ -1,3 +1,5 @@
+![Bitget AI RedTeam Desk](./public/readme-banner.png)
+
 # Bitget AI RedTeam Desk
 
 [![CI](https://github.com/ThatHorseRep/bitget-ai-trading-desk/actions/workflows/ci.yml/badge.svg)](https://github.com/ThatHorseRep/bitget-ai-trading-desk/actions/workflows/ci.yml)

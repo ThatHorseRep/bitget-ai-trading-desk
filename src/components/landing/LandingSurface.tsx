@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { BRANDING } from "@/config/branding";
 import { Reveal } from "@/components/motion/Reveal";
+import { VerdictGlyph } from "@/components/brand/VerdictGlyph";
 
 interface LandingSurfaceProps {
   onLaunchDesk: (initialPrompt?: string) => void;
@@ -40,18 +41,18 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
           {/* Navigation Links matching 05-website.svg */}
           <nav className="hidden md:flex items-center gap-6 text-xs font-mono font-semibold text-[var(--rt-text-muted)] uppercase tracking-wider">
             <a href="#how-it-works" className="hover:text-[var(--rt-text-primary)] transition-colors">HOW IT WORKS</a>
-            <a href="#verdict-system" className="hover:text-[var(--rt-text-primary)] transition-colors">VERDICTS</a>
-            <a href="#architecture" className="hover:text-[var(--rt-text-primary)] transition-colors">ARCHITECTURE</a>
-            <a href="#target-user" className="hover:text-[var(--rt-text-primary)] transition-colors">SPECIFICATION</a>
+            <a href="#verdict-system" className="hover:text-[var(--rt-text-primary)] transition-colors">TEMPLATES</a>
+            <a href="#architecture" className="hover:text-[var(--rt-text-primary)] transition-colors">BENCHMARKS</a>
+            <a href="#target-user" className="hover:text-[var(--rt-text-primary)] transition-colors">DOCUMENTATION</a>
           </nav>
 
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
-              className="px-5 py-2.5 bg-[var(--rt-surface-void)] text-[var(--rt-surface-raised)] text-xs font-mono font-bold tracking-wider uppercase hover:opacity-90 active:scale-95 transition-all border border-[var(--rt-surface-void)] shadow-xs"
+              className="px-5 py-2.5 bg-[#0E2436] text-white text-xs font-mono font-bold tracking-wider uppercase hover:opacity-90 active:scale-95 transition-all shadow-xs"
             >
-              RUN DESK →
+              RUN DESK
             </button>
           </div>
         </div>
@@ -72,7 +73,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
 
         <div className="max-w-6xl mx-auto space-y-8 relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#1A3043] border border-[#2B4459] text-[11px] font-mono text-[#9DB0BF] uppercase tracking-wider">
-            <span className="font-bold text-[#EDEFEC]">ADVERSARIAL RISK FIREWALL</span>
+            <span className="font-bold text-[#EDEFEC]">05 / APPLICATION WEBSITE</span>
             <span>•</span>
             <span>TOKENIZED EQUITIES PRE-TRADE</span>
           </div>
@@ -94,22 +95,15 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
               className="px-8 py-4 bg-[#C8102E] text-white text-sm font-mono font-bold tracking-wider uppercase hover:bg-[#b00e28] active:scale-95 transition-all text-center flex items-center justify-center gap-2 shadow-xs"
             >
-              <span>RUN GOLDEN PATH DESK</span>
-              <span>→</span>
+              <span>RUN DESK</span>
             </button>
             <button
               type="button"
               onClick={() => onLaunchDesk()}
               className="px-8 py-4 bg-transparent text-[#EDEFEC] text-sm font-mono font-medium tracking-wider uppercase border border-[#3A5266] hover:bg-[#1A3043] transition-colors text-center"
             >
-              OPEN BLANK WORKBENCH
+              EXPLORE ARCHITECTURE
             </button>
-          </div>
-
-          {/* Pre-loaded Golden Path Prompt Banner */}
-          <div className="p-4 bg-[#142A3C] border border-[#2B4459] font-mono text-xs text-[#9DB0BF] leading-relaxed max-w-3xl flex items-start gap-3">
-            <span className="px-2 py-0.5 bg-[#C8102E] text-white text-[10px] font-bold shrink-0 uppercase">GOLDEN PATH</span>
-            <span>&ldquo;{GOLDEN_PATH_PROMPT}&rdquo;</span>
           </div>
         </div>
       </section>
@@ -119,84 +113,136 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
         <div className="max-w-6xl mx-auto space-y-8">
           <div className="space-y-2">
             <span className="text-xs font-mono tracking-[0.2em] text-[var(--rt-text-muted)] uppercase font-semibold">
-              DETERMINISTIC VERDICT BANDS
+              01 / DETERMINISTIC VERDICT SCALE
             </span>
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--rt-text-primary)]">
               Automated policy gates evaluated on every trade.
             </h2>
           </div>
 
-          {/* 4 Cards Row matching 05-website.svg with top 3px colored indicator bars */}
+          {/* 4 Cards Row matching 05-website.svg with top 3px colored indicator bars & embedded VerdictGlyph logos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* PROCEED Card */}
-            <div className="bg-white border border-[var(--rt-border-subtle)] overflow-hidden shadow-xs relative flex flex-col justify-between p-5 space-y-4">
+            <div 
+              onClick={() => onLaunchDesk("I plan to buy $10,000 rNVDA token during US cash market hours at 10:15 AM ET with 0.02% basis spread. Data center revenue beat + low crypto correlation.")}
+              className="bg-white border border-[var(--rt-border-subtle)] overflow-hidden shadow-xs relative flex flex-col justify-between p-5 space-y-4 cursor-pointer hover:border-[#0E9F8B] hover:shadow-md transition-all group"
+            >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#0E9F8B]" />
-              <div className="space-y-2 pt-1">
-                <div className="text-xs font-mono font-bold text-[#0E9F8B] uppercase tracking-wider flex items-center justify-between">
-                  <span>STATE 4</span>
-                  <span>SCORE ≥ 0.80</span>
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-mono font-bold text-[#0E9F8B] uppercase tracking-wider">
+                    <span>STATE 4</span>
+                    <span className="block text-[10px] text-[var(--rt-text-muted)]">SCORE ≥ 0.80</span>
+                  </div>
+                  <div className="shrink-0 p-1 bg-[var(--rt-surface-base)] border border-[var(--rt-border-subtle)]">
+                    <VerdictGlyph verdict="PROCEED" size={36} />
+                  </div>
                 </div>
-                <h3 className="text-xl font-mono font-black text-[var(--rt-text-primary)]">PROCEED</h3>
+
+                <h3 className="text-xl font-mono font-black text-[var(--rt-text-primary)] group-hover:text-[#0E9F8B] transition-colors flex items-center justify-between">
+                  <span>PROCEED</span>
+                  <span className="text-xs text-[#0E9F8B] font-normal">→</span>
+                </h3>
                 <p className="text-xs text-[var(--rt-text-muted)] leading-relaxed">
                   Clear execution runway. Basis within parameters, thesis fully falsifiable, risk within account limit.
                 </p>
               </div>
-              <div className="pt-2 border-t border-[var(--rt-border-subtle)] text-[10px] font-mono text-[var(--rt-text-muted)] uppercase">
-                Gated Policy: Green
+              <div className="pt-2 border-t border-[var(--rt-border-subtle)] flex items-center justify-between text-[10px] font-mono text-[var(--rt-text-muted)] uppercase">
+                <span>Gated Policy: Green</span>
+                <span className="font-bold text-[#0E9F8B] group-hover:underline">TEST PROCEED →</span>
               </div>
             </div>
 
             {/* REDUCE Card */}
-            <div className="bg-white border border-[var(--rt-border-subtle)] overflow-hidden shadow-xs relative flex flex-col justify-between p-5 space-y-4">
+            <div 
+              onClick={() => onLaunchDesk("I plan to buy $50,000 rNVDA token with 5x leverage during extended hours. Basis spread elevated at 0.45%.")}
+              className="bg-white border border-[var(--rt-border-subtle)] overflow-hidden shadow-xs relative flex flex-col justify-between p-5 space-y-4 cursor-pointer hover:border-[#C98A14] hover:shadow-md transition-all group"
+            >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#C98A14]" />
-              <div className="space-y-2 pt-1">
-                <div className="text-xs font-mono font-bold text-[#C98A14] uppercase tracking-wider flex items-center justify-between">
-                  <span>STATE 3</span>
-                  <span>SCORE ≥ 0.60</span>
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-mono font-bold text-[#C98A14] uppercase tracking-wider">
+                    <span>STATE 3</span>
+                    <span className="block text-[10px] text-[var(--rt-text-muted)]">SCORE ≥ 0.60</span>
+                  </div>
+                  <div className="shrink-0 p-1 bg-[var(--rt-surface-base)] border border-[var(--rt-border-subtle)]">
+                    <VerdictGlyph verdict="REDUCE" size={36} />
+                  </div>
                 </div>
-                <h3 className="text-xl font-mono font-black text-[var(--rt-text-primary)]">REDUCE</h3>
+
+                <h3 className="text-xl font-mono font-black text-[var(--rt-text-primary)] group-hover:text-[#C98A14] transition-colors flex items-center justify-between">
+                  <span>REDUCE</span>
+                  <span className="text-xs text-[#C98A14] font-normal">→</span>
+                </h3>
                 <p className="text-xs text-[var(--rt-text-muted)] leading-relaxed">
                   Basis risk elevated. Trim notional position size by 40% or hedge crypto contagion drag.
                 </p>
               </div>
-              <div className="pt-2 border-t border-[var(--rt-border-subtle)] text-[10px] font-mono text-[var(--rt-text-muted)] uppercase">
-                Gated Policy: Warning
+              <div className="pt-2 border-t border-[var(--rt-border-subtle)] flex items-center justify-between text-[10px] font-mono text-[var(--rt-text-muted)] uppercase">
+                <span>Gated Policy: Warning</span>
+                <span className="font-bold text-[#C98A14] group-hover:underline">TEST REDUCE →</span>
               </div>
             </div>
 
             {/* WAIT Card */}
-            <div className="bg-white border border-[var(--rt-border-subtle)] overflow-hidden shadow-xs relative flex flex-col justify-between p-5 space-y-4">
+            <div 
+              onClick={() => onLaunchDesk("I want to buy $25,000 rNVDA token on Sunday at 02:00 AM ET during 65.5-hour weekend market closure.")}
+              className="bg-white border border-[var(--rt-border-subtle)] overflow-hidden shadow-xs relative flex flex-col justify-between p-5 space-y-4 cursor-pointer hover:border-[#54697E] hover:shadow-md transition-all group"
+            >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#54697E]" />
-              <div className="space-y-2 pt-1">
-                <div className="text-xs font-mono font-bold text-[#54697E] uppercase tracking-wider flex items-center justify-between">
-                  <span>STATE 2</span>
-                  <span>SCORE ≥ 0.35</span>
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-mono font-bold text-[#54697E] uppercase tracking-wider">
+                    <span>STATE 2</span>
+                    <span className="block text-[10px] text-[var(--rt-text-muted)]">SCORE ≥ 0.35</span>
+                  </div>
+                  <div className="shrink-0 p-1 bg-[var(--rt-surface-base)] border border-[var(--rt-border-subtle)]">
+                    <VerdictGlyph verdict="WAIT" size={36} />
+                  </div>
                 </div>
-                <h3 className="text-xl font-mono font-black text-[var(--rt-text-primary)]">WAIT</h3>
+
+                <h3 className="text-xl font-mono font-black text-[var(--rt-text-primary)] group-hover:text-[#54697E] transition-colors flex items-center justify-between">
+                  <span>WAIT</span>
+                  <span className="text-xs text-[#54697E] font-normal">→</span>
+                </h3>
                 <p className="text-xs text-[var(--rt-text-muted)] leading-relaxed">
                   Off-hours market close or un-anchored basis drift. Defer execution until cash open at 09:30 ET.
                 </p>
               </div>
-              <div className="pt-2 border-t border-[var(--rt-border-subtle)] text-[10px] font-mono text-[var(--rt-text-muted)] uppercase">
-                Gated Policy: Deferral
+              <div className="pt-2 border-t border-[var(--rt-border-subtle)] flex items-center justify-between text-[10px] font-mono text-[var(--rt-text-muted)] uppercase">
+                <span>Gated Policy: Deferral</span>
+                <span className="font-bold text-[#54697E] group-hover:underline">TEST WAIT →</span>
               </div>
             </div>
 
             {/* REJECT Card */}
-            <div className="bg-white border border-[var(--rt-border-subtle)] overflow-hidden shadow-xs relative flex flex-col justify-between p-5 space-y-4">
+            <div 
+              onClick={() => onLaunchDesk("Ape $100,000 with max leverage into tokenized equity with no thesis, no stop loss, and liquidation cascade risk.")}
+              className="bg-white border border-[var(--rt-border-subtle)] overflow-hidden shadow-xs relative flex flex-col justify-between p-5 space-y-4 cursor-pointer hover:border-[#C8102E] hover:shadow-md transition-all group"
+            >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#C8102E]" />
-              <div className="space-y-2 pt-1">
-                <div className="text-xs font-mono font-bold text-[#C8102E] uppercase tracking-wider flex items-center justify-between">
-                  <span>STATE 1</span>
-                  <span>SCORE &lt; 0.35</span>
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-mono font-bold text-[#C8102E] uppercase tracking-wider">
+                    <span>STATE 1</span>
+                    <span className="block text-[10px] text-[var(--rt-text-muted)]">SCORE &lt; 0.35</span>
+                  </div>
+                  <div className="shrink-0 p-1 bg-[var(--rt-surface-base)] border border-[var(--rt-border-subtle)]">
+                    <VerdictGlyph verdict="REJECT" size={36} />
+                  </div>
                 </div>
-                <h3 className="text-xl font-mono font-black text-[var(--rt-text-primary)]">REJECT</h3>
+
+                <h3 className="text-xl font-mono font-black text-[var(--rt-text-primary)] group-hover:text-[#C8102E] transition-colors flex items-center justify-between">
+                  <span>REJECT</span>
+                  <span className="text-xs text-[#C8102E] font-normal">→</span>
+                </h3>
                 <p className="text-xs text-[var(--rt-text-muted)] leading-relaxed">
                   Critical tail risk or unfalsifiable thesis. Position blocked from trade execution.
                 </p>
               </div>
-              <div className="pt-2 border-t border-[var(--rt-border-subtle)] text-[10px] font-mono text-[var(--rt-text-muted)] uppercase">
-                Gated Policy: Blocked
+              <div className="pt-2 border-t border-[var(--rt-border-subtle)] flex items-center justify-between text-[10px] font-mono text-[var(--rt-text-muted)] uppercase">
+                <span>Gated Policy: Blocked</span>
+                <span className="font-bold text-[#C8102E] group-hover:underline">TEST REJECT →</span>
               </div>
             </div>
           </div>

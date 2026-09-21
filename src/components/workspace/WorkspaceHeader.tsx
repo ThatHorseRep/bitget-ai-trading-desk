@@ -2,6 +2,7 @@
 
 import React from "react";
 import { BRANDING } from "@/config/branding";
+import { Lockup } from "@/components/brand/Logo";
 import { PwaInstallButton } from "../pwa/PwaManager";
 
 interface WorkspaceHeaderProps {
@@ -31,27 +32,10 @@ export function WorkspaceHeader({
         {/* Desktop & Tablet Layout (>= md) */}
         <div className="hidden md:flex mx-auto max-w-6xl px-4 py-3 sm:px-6 items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/icon.svg"
-              alt="Bitget AI RedTeam Desk Mark"
-              width={36}
-              height={36}
-              className="h-9 w-9 shrink-0 object-contain"
-            />
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-mono font-bold text-[var(--rt-text-primary)] [text-wrap:balance]">
-                  {BRANDING.PRODUCT_NAME}
-                </h1>
-                <span className="inline-flex items-center bg-[var(--rt-surface-base)] px-2 py-0.5 text-xs font-mono font-semibold text-[var(--rt-text-primary)] border border-[var(--rt-border-subtle)]">
-                  Risk workbench
-                </span>
-              </div>
-              <p className="text-xs font-mono text-[var(--rt-text-muted)] [text-wrap:pretty]">
-                Deterministic stress testing and position deconstruction
-              </p>
-            </div>
+            <Lockup height={34} endorsed />
+            <span className="inline-flex items-center bg-[var(--rt-surface-base)] px-2 py-0.5 text-xs font-mono font-semibold text-[var(--rt-text-primary)] border border-[var(--rt-border-subtle)]">
+              Risk workbench
+            </span>
           </div>
 
           <div className="flex items-center gap-2.5">

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import type { DecisionArtifact, DecisionVerdict } from "../../domain/decision/types";
 import { Reveal } from "../motion/Reveal";
+import { VerdictGlyph } from "../brand/VerdictGlyph";
 
 interface DecisionArtifactViewProps {
   artifact: DecisionArtifact;
@@ -104,21 +105,26 @@ export function DecisionArtifactView({
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-mono font-bold tracking-wider text-white ${verdictInfo.iconBg}`}>
-                {verdictInfo.badge}
-              </span>
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--rt-text-muted)]">
-                Deterministic policy
-              </span>
+          <div className="flex items-start gap-4">
+            <div className="shrink-0 pt-1">
+              <VerdictGlyph verdict={decision.verdict} size={48} />
             </div>
-            <h2 className={`text-xl sm:text-2xl md:text-3xl font-mono font-bold tracking-tight mt-1.5 [text-wrap:balance] ${verdictInfo.text}`}>
-              {verdictInfo.title}
-            </h2>
-            <p className="text-xs sm:text-sm font-medium text-[var(--rt-text-primary)] mt-1 [text-wrap:pretty]">
-              {verdictInfo.description}
-            </p>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-mono font-bold tracking-wider text-white ${verdictInfo.iconBg}`}>
+                  {verdictInfo.badge}
+                </span>
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--rt-text-muted)]">
+                  Deterministic policy
+                </span>
+              </div>
+              <h2 className={`text-xl sm:text-2xl md:text-3xl font-mono font-bold tracking-tight mt-1.5 [text-wrap:balance] ${verdictInfo.text}`}>
+                {verdictInfo.title}
+              </h2>
+              <p className="text-xs sm:text-sm font-medium text-[var(--rt-text-primary)] mt-1 [text-wrap:pretty]">
+                {verdictInfo.description}
+              </p>
+            </div>
           </div>
 
           <div className="border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] p-3 sm:p-4 sm:text-right shrink-0 shadow-xs">

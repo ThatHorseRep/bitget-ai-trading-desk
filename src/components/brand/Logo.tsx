@@ -1,0 +1,102 @@
+"use client";
+
+import { markGeometry, SPEC, SPEC_SMALL, type MarkSpec } from "./mark";
+import { BRANDING, COLOR } from "@/config/branding";
+
+interface MarkProps {
+  size?: number;
+  body?: string;
+  fault?: string;
+  offset?: number;
+  title?: string;
+  className?: string;
+}
+
+/**
+ * The mark. Below 32px it switches to the optical cut automatically so the
+ * seam survives the pixel grid — this is not a style choice, the hairline
+ * disappears otherwise.
+ */
+export function Mark({
+  size = 32,
+  body = COLOR.ink,
+  fault = COLOR.stamp,
+  offset,
+  title = BRANDING.SHORT_NAME,
+  className,
+}: MarkProps) {
+  const base: MarkSpec = size <= 32 ? SPEC_SMALL : SPEC;
+  const { blocks, seam } = markGeometry(
+    offset === undefined ? base : { ...base, offset }
+  );
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      width={size}
+      height={size}
+      role="img"
+      aria-label={title}
+      className={className}
+    >
+      {blocks.map((b, i) => (
+        <path key={i} d={`${b.outer} ${b.inner}`} fill={body} fillRule="evenodd" />
+      ))}
+      <path d={seam} fill={fault} />
+    </svg>
+  );
+}
+
+interface LockupProps {
+  height?: number;
+  reversed?: boolean;
+  endorsed?: boolean;
+  className?: string;
+}
+
+/**
+ * Horizontal lockup. The endorser is set in the sans face and the product in
+ * the mono face — the platform speaks, the desk computes.
+ */
+export function Lockup({
+  height = 32,
+  reversed = false,
+  endorsed = true,
+  className,
+}: LockupProps) {
+  const ink = reversed ? COLOR.proof : COLOR.ink;
+  const sub = reversed ? "#8FA3B5" : COLOR.steel;
+  return (
+    <span
+      className={className}
+      style={{ display: "inline-flex", alignItems: "center", gap: height * 0.34 }}
+    >
+      <Mark size={height} body={ink} fault={COLOR.stamp} />
+      <span style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
+        {endorsed && (
+          <span
+            style={{
+              fontSize: height * 0.23,
+              letterSpacing: height * 0.075,
+              color: sub,
+              fontWeight: 560,
+              marginBottom: height * 0.12,
+            }}
+          >
+            {BRANDING.ENDORSER.toUpperCase()}
+          </span>
+        )}
+        <span
+          style={{
+            fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
+            fontSize: height * 0.42,
+            letterSpacing: height * 0.035,
+            fontWeight: 620,
+            color: ink,
+          }}
+        >
+          {BRANDING.SHORT_NAME.toUpperCase()}
+        </span>
+      </span>
+    </span>
+  );
+}
