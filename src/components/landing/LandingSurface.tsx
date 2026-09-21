@@ -156,7 +156,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
       </Reveal>
 
       {/* SECTION 3: How It Works (The Real Pipeline Stages from docs/GOLDEN_PATH.md) */}
-      <section className="border-b border-[var(--rt-border-subtle)] py-20 px-6">
+      <Reveal as="section" className="border-b border-[var(--rt-border-subtle)] py-20 px-6">
         <div className="max-w-6xl mx-auto space-y-10">
           <div className="space-y-2">
             <span className="text-xs font-mono tracking-[0.2em] text-[var(--rt-text-muted)] uppercase font-semibold">
@@ -171,7 +171,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Reveal delay={0} className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
+            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
                 <span className="font-bold text-[var(--rt-text-primary)]">STAGE 1</span>
                 <span>S01 / S02</span>
@@ -182,9 +182,9 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
                 Normalizes free-text trade ideas into structured asset, direction, notional size, and thesis claims via deterministic grammar extractors.
               </p>
-            </Reveal>
+            </div>
 
-            <Reveal delay={1} className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
+            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
                 <span className="font-bold text-[var(--rt-text-primary)]">STAGE 2</span>
                 <span>S04 STREAM</span>
@@ -195,9 +195,9 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
                 Queries token orderbook depth, NASDAQ cash reference pricing, basis spread deviation, and active trading session classification.
               </p>
-            </Reveal>
+            </div>
 
-            <Reveal delay={2} className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
+            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
                 <span className="font-bold text-[var(--rt-text-primary)]">STAGE 3</span>
                 <span>ARBITRATION</span>
@@ -208,9 +208,9 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
                 Retrieves empirical market observations, corporate fundamentals, and macro indicators, arbitrating conflicts into verifiable fact nodes.
               </p>
-            </Reveal>
+            </div>
 
-            <Reveal delay={3} className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
+            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
                 <span className="font-bold text-[var(--rt-text-primary)]">STAGE 4</span>
                 <span>ADVERSARIAL CORE</span>
@@ -221,9 +221,9 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
                 Attacks vulnerable assumptions, checks invalidation criteria, examines semiconductor macro supply chains, and synthesizes counter-theses.
               </p>
-            </Reveal>
+            </div>
 
-            <Reveal delay={0} className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
+            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
                 <span className="font-bold text-[var(--rt-text-primary)]">STAGE 5</span>
                 <span>MATHEMATICAL SHOCK</span>
@@ -234,9 +234,9 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
                 Calculates exact dollar P&amp;L impact across 4 stress scenarios: Market Gap (-5%), Crypto Contagion (-8%), Token Illiquidity (+3% spread), and Combined Shock (-12%).
               </p>
-            </Reveal>
+            </div>
 
-            <Reveal delay={1} className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
+            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
                 <span className="font-bold text-[var(--rt-text-primary)]">STAGE 6</span>
                 <span>POLICY GATING</span>
@@ -247,9 +247,9 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
                 Applies deterministic decision policy rules, mathematically separating thesis validity from execution timing and structural fragility.
               </p>
-            </Reveal>
+            </div>
 
-            <Reveal delay={2} className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2 md:col-span-2">
+            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2 md:col-span-2">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
                 <span className="font-bold text-[var(--rt-text-primary)]">STAGE 7</span>
                 <span>S06 DECISION READY / S09 AUDIT</span>
@@ -260,10 +260,10 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
                 Compiles the complete Decision Artifact with interactive audit trails linking claims to observed prices, mathematical formulas, and scenario parameters.
               </p>
-            </Reveal>
+            </div>
           </div>
         </div>
-      </section>
+      </Reveal>
 
       {/* SECTION 4: Deterministic-Gating Differentiator */}
       <Reveal as="section" className="border-b border-[var(--rt-border-subtle)] py-20 px-6 bg-[var(--rt-surface-raised)]">
