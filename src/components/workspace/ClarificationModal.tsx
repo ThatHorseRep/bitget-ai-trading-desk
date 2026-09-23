@@ -101,7 +101,7 @@ export function ClarificationModal({
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               placeholder={fieldName.toLowerCase().includes("size") ? "For example, $2,000" : "For example, long"}
-              className="w-full border border-[var(--rt-border-subtle)] bg-white px-4 py-2.5 text-base text-[var(--rt-text-primary)] placeholder:text-[var(--rt-text-muted)] focus-visible:border-[var(--rt-text-primary)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] disabled:opacity-50 disabled:cursor-not-allowed motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
+              className="w-full border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] px-4 py-2.5 text-base text-[var(--rt-text-primary)] placeholder:text-[var(--rt-text-muted)] focus-visible:border-[var(--rt-text-primary)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] disabled:opacity-50 disabled:cursor-not-allowed motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
             />
           </div>
 

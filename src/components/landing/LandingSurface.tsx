@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { BRANDING, VERDICT_COLOR } from "@/config/branding";
 import { Reveal } from "@/components/motion/Reveal";
 import { Lockup } from "@/components/brand/Logo";
 import { VerdictGlyph } from "@/components/brand/VerdictGlyph";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import {
   getCalibratedBatch,
   getEpochRemainingSeconds,
@@ -20,19 +21,21 @@ interface LandingSurfaceProps {
 const GOLDEN_PATH_PROMPT =
   "I'm thinking about buying $2,000 of rNVDA because AI infrastructure demand still looks strong. BTC has been weakening all weekend. Stress-test it.";
 
+const emptySubscribe = () => () => {};
+
 export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   const [ttlSeconds, setTtlSeconds] = useState(CYCLE_SECONDS);
   const [batchIndex, setBatchIndex] = useState(0);
   const [isRecalibrating, setIsRecalibrating] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    setTtlSeconds(getEpochRemainingSeconds());
-    setBatchIndex(getEpochBatchIndex());
-
     const timer = setInterval(() => {
       const remaining = getEpochRemainingSeconds();
       setTtlSeconds(remaining);
@@ -105,8 +108,9 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             </a>
           </nav>
 
-          {/* Desktop Run a test button far right */}
-          <div className="hidden md:flex items-center">
+          {/* Desktop Run a test button and Theme Toggle far right */}
+          <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle />
             <button
               type="button"
               onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
@@ -118,6 +122,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
 
           {/* Mobile hamburger menu button */}
           <div className="flex md:hidden items-center gap-2">
+            <ThemeToggle compact />
             <button
               type="button"
               onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
@@ -280,7 +285,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="text-left md:text-right shrink-0 font-mono text-xs text-[var(--rtd-steel)] space-y-1.5 bg-white border border-[var(--rtd-steel)]/25 px-4 py-2.5 shadow-xs">
+            <div className="text-left md:text-right shrink-0 font-mono text-xs text-[var(--rtd-steel)] space-y-1.5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 px-4 py-2.5 shadow-xs">
               <div className="flex items-center justify-between md:justify-end gap-3">
                 <span className="text-[10px] uppercase tracking-wider text-[var(--rtd-steel)]">CALIBRATION TTL</span>
                 <button
@@ -311,7 +316,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             {calibratedPrompts.map((item) => (
               <div
                 key={item.id}
-                className="bg-white border border-[var(--rtd-steel)]/25 p-5 space-y-5 flex flex-col justify-between hover:border-[var(--rtd-ink)]/50 transition-colors relative overflow-hidden group h-full shadow-xs"
+                className="bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-5 space-y-5 flex flex-col justify-between hover:border-[var(--rtd-ink)]/50 transition-colors relative overflow-hidden group h-full shadow-xs"
               >
                 {/* Top colored indicator bar */}
                 <div
@@ -334,7 +339,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
                       </div>
                     </div>
 
-                    <div className="p-1.5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/20 shrink-0">
+                    <div className="p-1.5 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/20 shrink-0">
                       <VerdictGlyph verdict={item.verdict} size={36} />
                     </div>
                   </div>
@@ -367,7 +372,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
                       <button
                         type="button"
                         onClick={(e) => handleCopy(item.id, item.prompt, e)}
-                        className="px-2 py-0.5 border border-[var(--rtd-steel)]/30 hover:bg-white text-[var(--rtd-ink)] font-mono text-[10px] uppercase tracking-wider transition-colors cursor-pointer active:scale-95"
+                        className="px-2 py-0.5 border border-[var(--rtd-steel)]/30 hover:bg-[var(--rtd-paper)] text-[var(--rtd-ink)] font-mono text-[10px] uppercase tracking-wider transition-colors cursor-pointer active:scale-95"
                       >
                         {copiedId === item.id ? "COPIED ✓" : "COPY"}
                       </button>
@@ -421,7 +426,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 bg-white border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
+            <div className="p-6 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
               <div className="text-xs font-mono font-bold text-[var(--rtd-reject)] uppercase">
                 65.5-Hour Liquidity Void
               </div>
@@ -433,7 +438,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-6 bg-white border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
+            <div className="p-6 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
               <div className="text-xs font-mono font-bold text-[var(--rtd-reduce)] uppercase">
                 Contagion Spillover
               </div>
@@ -445,7 +450,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-6 bg-white border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
+            <div className="p-6 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
               <div className="text-xs font-mono font-bold text-[var(--rtd-ink)] uppercase">
                 Monday Open Snap
               </div>
@@ -476,7 +481,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
             {/* Left Card: Core Metrics & Explanation */}
-            <div className="p-8 bg-white border border-[var(--rtd-steel)]/25 space-y-6 shadow-xs flex flex-col justify-between">
+            <div className="p-8 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-6 shadow-xs flex flex-col justify-between">
               <div className="space-y-6">
                 <div className="grid grid-cols-3 gap-4 pb-6 border-b border-[var(--rtd-steel)]/20 font-mono text-center">
                   <div className="space-y-1">
@@ -513,7 +518,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             </div>
 
             {/* Right Card: Chronological Decoupling Timeline */}
-            <div className="p-8 bg-white border border-[var(--rtd-steel)]/25 space-y-6 shadow-xs flex flex-col justify-between">
+            <div className="p-8 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-6 shadow-xs flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between pb-4 border-b border-[var(--rtd-steel)]/20">
                   <span className="text-xs font-mono font-bold tracking-wider text-[var(--rtd-ink)] uppercase">
@@ -592,7 +597,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 1</span>
                 <span>S01 / S02</span>
@@ -605,7 +610,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 2</span>
                 <span>S04 STREAM</span>
@@ -618,7 +623,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 3</span>
                 <span>ARBITRATION</span>
@@ -631,7 +636,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 4</span>
                 <span>ADVERSARIAL CORE</span>
@@ -644,7 +649,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 5</span>
                 <span>MATHEMATICAL SHOCK</span>
@@ -657,7 +662,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 6</span>
                 <span>POLICY GATING</span>
@@ -670,7 +675,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs md:col-span-2">
+            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs md:col-span-2">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 7</span>
                 <span>DECISION READY &amp; AUDIT</span>
@@ -708,7 +713,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             <button
               type="button"
               onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
-              className="w-full sm:w-auto px-8 py-4 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-sm font-mono font-bold tracking-wider uppercase hover:bg-[var(--rtd-void)] active:scale-95 transition-all text-center flex items-center justify-center gap-2 shadow-xs"
+              className="w-full sm:w-auto px-8 py-4 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-sm font-mono font-bold tracking-wider uppercase hover:bg-[var(--rtd-void)] active:scale-95 transition-all text-center flex items-center justify-center gap-2 shadow-xs cursor-pointer"
             >
               <span>RUN GOLDEN PATH DESK</span>
               <span>→</span>
@@ -716,7 +721,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             <button
               type="button"
               onClick={() => onLaunchDesk()}
-              className="w-full sm:w-auto px-8 py-4 bg-white text-[var(--rtd-ink)] text-sm font-mono font-medium tracking-wider uppercase border border-[var(--rtd-steel)]/30 hover:bg-[var(--rtd-paper)] transition-colors text-center"
+              className="w-full sm:w-auto px-8 py-4 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] text-sm font-mono font-medium tracking-wider uppercase border border-[var(--rtd-steel)]/30 hover:bg-[var(--rtd-paper-subtle)] transition-colors text-center cursor-pointer"
             >
               ENTER CUSTOM THESIS
             </button>

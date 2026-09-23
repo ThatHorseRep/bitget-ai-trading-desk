@@ -101,12 +101,21 @@ export function parseNaturalLanguageTrade(
     inferred.push("thesis");
   }
 
-  // 4.5. Price extraction
+  // 4.5. Price extraction (must strictly distinguish prices from execution times like 'at 11:30 ET' and percentages like 'at 0.03%')
   let explicitPrice: number | null = null;
   let priceClarificationRequired = false;
-  const priceMatch = text.match(/(?:at|@)\s*\$?(-?[\d,]+(?:\.\d+)?)/i);
-  if (priceMatch) {
-     explicitPrice = parseFloat(priceMatch[1].replace(/,/g, ""));
+
+  // 1. Explicit dollar sign: at $350, @ $350, entry price $350
+  const explicitDollarMatch = text.match(/(?:at|@|entry(?:\s*price)?|price(?:\s*of)?)\s*\$\s*([\d,]+(?:\.\d+)?)(?!\s*[%])/i);
+  // 2. Explicit currency/unit: at 350 usd, @ 350 per token, price 350 dollars
+  const explicitCurrencyMatch = text.match(/(?:at|@|entry(?:\s*price)?|price(?:\s*of)?)\s*([\d,]+(?:\.\d+)?)\s*(?:usd|dollars|usdt|per\s+(?:share|token))\b/i);
+  // 3. Explicit "entry price X" or "at price X" without %, without timestamp colon
+  const priceKeywordMatch = text.match(/(?:entry\s*price|at\s*price|price\s*of)\s*(?:is|at|@)?\s*([\d,]+(?:\.\d+)?)(?!\s*(?:%|percent|bps|:\d))/i);
+
+  const matchedPriceStr = explicitDollarMatch?.[1] ?? explicitCurrencyMatch?.[1] ?? priceKeywordMatch?.[1];
+
+  if (matchedPriceStr) {
+     explicitPrice = parseFloat(matchedPriceStr.replace(/,/g, ""));
      if (explicitPrice <= 0 || isNaN(explicitPrice)) {
         priceClarificationRequired = true;
      } else {
@@ -125,6 +134,15 @@ export function parseNaturalLanguageTrade(
   } else if (/\bintraday|day trade\b/i.test(text)) {
     timeHorizon = "Intraday";
     userProvided.push("timeHorizon");
+  } else if (/\b(?:active\s+)?nasdaq\s+session\b/i.test(text)) {
+    timeHorizon = "Active NASDAQ session";
+    userProvided.push("timeHorizon");
+  } else {
+    const timeMatch = text.match(/\bat\s+(\d{1,2}:\d{2}(?:\s*(?:ET|EST|EDT|UTC|GMT|AM|PM))?)/i);
+    if (timeMatch) {
+      timeHorizon = `Session execution (${timeMatch[1]})`;
+      userProvided.push("timeHorizon");
+    }
   }
 
   // 6. Existing exposure extraction (e.g. "already have BTC exposure" or "have $10,000 in ETH")

@@ -58,8 +58,8 @@ export type SignalCapability = (typeof SIGNAL_CAPABILITIES)[number];
 // instead of stalling the workflow.
 // ---------------------------------------------------------------------------
 
-const CONNECT_TIMEOUT_MS = 5_000;
-const DEFAULT_TOOL_CALL_TIMEOUT_MS = 8_000;
+const CONNECT_TIMEOUT_MS = 2_500;
+const DEFAULT_TOOL_CALL_TIMEOUT_MS = 3_000;
 const MAX_SUMMARY_LENGTH = 300;
 const MAX_ITEMS_PER_CALL = 5;
 const MAX_TOTAL_OBSERVATIONS = 24;

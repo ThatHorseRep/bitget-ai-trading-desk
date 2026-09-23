@@ -21,11 +21,20 @@ export function VerdictGlyph({
   size?: number;
   reversed?: boolean;
 }) {
+  const faultColor =
+    verdict === "PROCEED"
+      ? "var(--rtd-proceed)"
+      : verdict === "REDUCE"
+      ? "var(--rtd-reduce)"
+      : verdict === "WAIT"
+      ? "var(--rtd-wait)"
+      : "var(--rtd-reject)";
+
   return (
     <Mark
       size={size}
-      body={reversed ? COLOR.proof : COLOR.ink}
-      fault={VERDICT_COLOR[verdict]}
+      body={reversed ? "var(--rtd-proof)" : "var(--rtd-ink)"}
+      fault={faultColor}
       offset={VERDICT_OFFSET[verdict]}
       title={`Verdict: ${verdict}`}
     />
@@ -39,6 +48,15 @@ export function VerdictBadge({
   verdict: Verdict;
   reversed?: boolean;
 }) {
+  const verdictColor =
+    verdict === "PROCEED"
+      ? "var(--rtd-proceed)"
+      : verdict === "REDUCE"
+      ? "var(--rtd-reduce)"
+      : verdict === "WAIT"
+      ? "var(--rtd-wait)"
+      : "var(--rtd-reject)";
+
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
       <VerdictGlyph verdict={verdict} size={28} reversed={reversed} />
@@ -48,7 +66,7 @@ export function VerdictBadge({
           fontWeight: 620,
           letterSpacing: "0.14em",
           fontSize: 14,
-          color: VERDICT_COLOR[verdict],
+          color: verdictColor,
         }}
       >
         {verdict}

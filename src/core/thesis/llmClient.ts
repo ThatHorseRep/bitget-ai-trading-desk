@@ -85,7 +85,7 @@ class LLMProvider {
       payload.systemInstruction = { parts: [{ text: systemMessage }] };
     }
 
-    const models = ["gemini-3.1-flash-lite", "gemini-3.8-flash"];
+    const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
     let lastErr: unknown = null;
 
     for (const model of models) {

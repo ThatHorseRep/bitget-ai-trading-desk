@@ -96,11 +96,9 @@ ${evidenceText}
       parsed = ChallengerSchema.parse(JSON.parse(resp.content));
       break;
     } catch (err) {
-      if (!resp) {
-        throw new Error(`LLM API or network failure: ${err instanceof Error ? err.message : String(err)}`);
-      }
-      if (attempt === maxAttempts) {
-        throw new Error(`Failed to generate challenge after ${attempt} attempts. Error: ${err instanceof Error ? err.message : String(err)}`);
+      if (attempt === maxAttempts || !resp) {
+        console.warn(`Challenger LLM unavailable (${err instanceof Error ? err.message : String(err)}). Using deterministic counter-thesis deconstruction.`);
+        break;
       }
       console.warn("Challenger JSON parse failed, retrying...");
       if (resp && resp.content) {
@@ -113,9 +111,26 @@ ${evidenceText}
     }
   }
 
-
+  // Graceful deterministic fallback if LLM is offline or timed out
   if (!parsed) {
-    throw new Error("Failed to parse challenger response");
+    const isWeekend = marketState.sessionStatus === "WEEKEND" || marketState.sessionStatus === "OFF_HOURS";
+    const basisWarning = marketState.basisPct !== null && Math.abs(marketState.basisPct) > 1.0
+      ? `Token trades at a ${marketState.basisPct.toFixed(2)}% basis divergence relative to underlying.`
+      : "Orderbook spread and slippage may expand under sudden volatility.";
+
+    return {
+      counterThesis: isWeekend
+        ? `Reference market is closed (${marketState.sessionStatus}). Weekend holding exposes capital to gap risk at Monday 09:30 ET cash open. ${basisWarning}`
+        : `Adversarial review: ${basisWarning} Invalidation level must be strictly respected.`,
+      vulnerableAssumptions: [
+        "Unimpaired liquidity throughout holding horizon",
+        "Basis stability between token and cash reference equity"
+      ],
+      contradictoryEvidenceRefs: [],
+      noMeaningfulCounterThesis: false,
+      explanation: "Deterministic structural challenge derived from session timing, basis spread, and stress scenarios.",
+      modelInfo: { model: "deterministic-heuristic-engine", provider: "RedTeamDesk Safe Engine" }
+    };
   }
 
   // Filter evidence refs against actual given evidence

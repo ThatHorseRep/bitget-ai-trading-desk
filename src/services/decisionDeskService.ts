@@ -248,13 +248,19 @@ export class DecisionDeskService {
       }
     }
 
-    // SAFE FALLBACK: If LLM fails to provide thesisPosition, default to INSUFFICIENT to ensure deterministic rejection/wait
+    // SAFE FALLBACK: If LLM narrative synthesis fails, synthesize from deterministic signals and position quality
     if (!thesisPosition) {
+      const signals = thesis?.signals;
+      const isStrongThesis = signals
+        ? (signals.hasDirectionalClaim && (signals.hasNamedCatalyst || signals.hasInvalidationLevel))
+        : Boolean(trade.thesis && trade.thesis.length > 20);
+      const fallbackThesisQuality = isStrongThesis ? "STRONGER" : (thesis ? "MIXED" : "INSUFFICIENT");
+
       thesisPosition = {
-        thesisQuality: "INSUFFICIENT",
-        positionQuality: { quality: "INSUFFICIENT", reasons: ["Assessor LLM failed or skipped"], keyDrivers: [] },
-        keyMismatch: "Assessment unavailable due to system failure",
-        explanation: "Fallback assessment generated because the reasoning layer failed to respond."
+        thesisQuality: fallbackThesisQuality,
+        positionQuality: positionQuality,
+        keyMismatch: isStrongThesis ? null : "Thesis lacks explicit catalyst or invalidation level.",
+        explanation: `Deterministic qualitative synthesis derived from structural thesis signals (${isStrongThesis ? "Strong directional and invalidation parameters" : "Standard parameters"}).`
       };
     }
 

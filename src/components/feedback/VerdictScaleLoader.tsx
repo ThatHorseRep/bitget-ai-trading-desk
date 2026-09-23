@@ -101,7 +101,7 @@ export function VerdictScaleLoader({
 
   return (
     <div
-      className="border border-[var(--rtd-steel)]/25 bg-white p-4 sm:p-8 space-y-6"
+      className="border border-[var(--rtd-steel)]/25 bg-[var(--rtd-paper)] p-4 sm:p-8 space-y-6"
       role="status"
       aria-live="polite"
       aria-atomic="true"
@@ -152,7 +152,7 @@ export function VerdictScaleLoader({
 
       {/* Active Stage Report */}
       {stages && stages.length > 0 && stages[activeStageIndex] && (
-        <div className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper)] p-4 space-y-1">
+        <div className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-4 space-y-1">
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--rtd-ink)]">
               CURRENT STEP: {stages[activeStageIndex].label}
@@ -180,7 +180,7 @@ export function VerdictScaleLoader({
                 key={stg.id}
                 className={`p-3 border text-xs font-mono transition-colors ${
                   isCurrent
-                    ? "border-[var(--rtd-ink)] bg-white text-[var(--rtd-ink)] shadow-xs"
+                    ? "border-[var(--rtd-ink)] bg-[var(--rtd-paper-subtle)] text-[var(--rtd-ink)] shadow-xs"
                     : isCompleted
                     ? "border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-steel)]"
                     : "border-[var(--rtd-steel)]/15 bg-[var(--rtd-paper)] text-[var(--rtd-steel)]/60 opacity-60"

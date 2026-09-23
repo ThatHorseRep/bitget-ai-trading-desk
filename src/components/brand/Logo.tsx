@@ -19,8 +19,8 @@ interface MarkProps {
  */
 export function Mark({
   size = 32,
-  body = COLOR.ink,
-  fault = COLOR.stamp,
+  body = "var(--rtd-ink)",
+  fault = "var(--rtd-stamp)",
   offset,
   title = BRANDING.SHORT_NAME,
   className,
@@ -67,14 +67,14 @@ export function Lockup({
   endorsed = true,
   className,
 }: LockupProps) {
-  const ink = reversed ? COLOR.proof : COLOR.ink;
-  const sub = reversed ? "#8FA3B5" : COLOR.steel;
+  const ink = reversed ? "var(--rtd-proof)" : "var(--rtd-ink)";
+  const sub = reversed ? "var(--rtd-steel)" : "var(--rtd-steel)";
   return (
     <span
       className={className}
       style={{ display: "inline-flex", alignItems: "center", gap: height * 0.34 }}
     >
-      <Mark size={height} body={ink} fault={COLOR.stamp} />
+      <Mark size={height} body={ink} fault="var(--rtd-stamp)" />
       <span style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
         {endorsed && (
           <span

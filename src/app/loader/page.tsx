@@ -70,7 +70,7 @@ export default function LoaderPreviewPage() {
             <button
               type="button"
               onClick={() => setActiveStage((prev) => (prev + 1) % DEMO_STAGES.length)}
-              className="px-3 py-1.5 bg-white border border-[var(--rtd-steel)]/30 text-xs font-mono font-bold uppercase hover:bg-[var(--rtd-paper)] transition-all cursor-pointer"
+              className="px-3 py-1.5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/30 text-xs font-mono font-bold uppercase hover:bg-[var(--rtd-paper-subtle)] transition-all cursor-pointer"
             >
               Advance Stage (0{activeStage + 1}) →
             </button>

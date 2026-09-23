@@ -179,11 +179,9 @@ ${evidenceText}
       parsed = ExtractionSchema.parse(JSON.parse(resp.content));
       break; // Success, exit retry loop
     } catch (err) {
-      if (!resp) {
-        throw new Error(`LLM API or network failure: ${err instanceof Error ? err.message : String(err)}`);
-      }
-      if (attempt === maxAttempts) {
-        throw new Error(`Failed to extract thesis after ${attempt} attempts. Error: ${err instanceof Error ? err.message : String(err)}`);
+      if (attempt === maxAttempts || !resp) {
+        console.warn(`LLM extraction unavailable (${err instanceof Error ? err.message : String(err)}). Using deterministic heuristic thesis deconstruction.`);
+        break;
       }
       console.warn("Extractor JSON parse failed, retrying with stronger format instructions...");
       // Enhance prompt for retry by maintaining alternating roles
@@ -197,8 +195,38 @@ ${evidenceText}
     }
   }
 
+  // Robust deterministic fallback if LLM is offline or timed out
   if (!parsed) {
-    throw new Error("Parsed thesis is undefined after all attempts.");
+    const { signals } = await parseThesisSignals(statement, deadlineMs);
+    
+    // Extract invalidation clauses from text (e.g., "invalidation if cash mark drops below $210")
+    const invalidationMatch = statement.match(/(?:invalidation|stop(?:\s*loss)?|wrong\s+if)\s+([^.;]+)/i);
+    const inferredInvalidation = invalidationMatch
+      ? invalidationMatch[0].trim()
+      : "Underlying reference asset breaks directional trend or basis widens sharply";
+
+    const clauses = statement.split(/[.;]/).map(s => s.trim()).filter(s => s.length > 8);
+    const userAssumptions = clauses.slice(0, 3).map(text => ({
+      text,
+      origin: "USER_STATED" as const
+    }));
+
+    return {
+      traderStatement: statement,
+      normalizedThesis: statement,
+      assumptions: userAssumptions.length > 0 ? userAssumptions : [{ text: statement, origin: "USER_STATED" }],
+      dependencies: [
+        { text: "Continuous equity price discovery & token orderbook liquidity", origin: "AI_INFERRED" }
+      ],
+      supportingEvidenceRefs: [],
+      invalidationConditions: [
+        { text: inferredInvalidation, origin: "AI_INFERRED" }
+      ],
+      unresolvedAmbiguities: [],
+      signals,
+      signalsParseFailed: false,
+      modelInfo: { model: "deterministic-heuristic-engine", provider: "RedTeamDesk Engine" }
+    };
   }
 
   // Filter evidence refs

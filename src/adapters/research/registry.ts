@@ -14,18 +14,23 @@ export class ResearchProviderRegistry {
   async gatherObservations(asset: string, topic?: string): Promise<NormalizedResearchObservation[]> {
     const promises = this.providers.map(async (provider) => {
       try {
-        const status = await provider.getStatus();
-        if (status === "UNAVAILABLE") {
-          return [];
-        }
-        const observations = await provider.getObservations(asset, topic);
-        // Defensive: a misbehaving provider must never break the gather loop.
-        // Normalize any non-array return (null, undefined, single object) to []
-        // so the core always receives a well-formed observation list.
-        return Array.isArray(observations) ? observations : [];
+        const timeoutPromise = new Promise<NormalizedResearchObservation[]>((_, reject) =>
+          setTimeout(() => reject(new Error(`Timeout gathering from ${provider.providerId}`)), 5000)
+        );
+
+        const gatherPromise = (async () => {
+          const status = await provider.getStatus();
+          if (status === "UNAVAILABLE") {
+            return [];
+          }
+          const observations = await provider.getObservations(asset, topic);
+          return Array.isArray(observations) ? observations : [];
+        })();
+
+        return await Promise.race([gatherPromise, timeoutPromise]);
       } catch (err) {
-        // Provider failure does not crash the core
-        console.warn(`[ResearchProviderRegistry] Provider ${provider.providerId} failed:`, err);
+        // Provider failure or timeout does not crash the core
+        console.warn(`[ResearchProviderRegistry] Provider ${provider.providerId} skipped:`, (err as Error).message);
         return [];
       }
     });

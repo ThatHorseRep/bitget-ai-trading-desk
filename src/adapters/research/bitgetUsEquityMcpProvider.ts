@@ -142,8 +142,8 @@ type ToolCategory = (typeof TOOL_CATEGORIES)[number];
 // Constants
 // ---------------------------------------------------------------------------
 
-const CONNECT_TIMEOUT_MS = 5_000;
-const TOOL_CALL_TIMEOUT_MS = 8_000;
+const CONNECT_TIMEOUT_MS = 2_500;
+const TOOL_CALL_TIMEOUT_MS = 3_000;
 const MAX_OBSERVATIONS_PER_CATEGORY = 20;
 const MAX_SUMMARY_LENGTH = 500;
 /**
@@ -152,11 +152,7 @@ const MAX_SUMMARY_LENGTH = 500;
  * cap keeps worst-case latency inside the workflow budget; entries are
  * ranked so the most decision-relevant (quote, profile, earnings) go first.
  */
-const MAX_DO_QUERY_CALLS = 5;
-// Serverless functions have a hard wall-clock kill (Vercel maxDuration).
-// Research must leave room for the three sequential LLM stages, so the
-// catalog walk is capped tighter there; result: fewer observations, never
-// a killed workflow.
+const MAX_DO_QUERY_CALLS = 3;
 const MAX_DO_QUERY_CALLS_SERVERLESS = 2;
 const MAX_OBSERVATIONS_TOTAL = 24;
 

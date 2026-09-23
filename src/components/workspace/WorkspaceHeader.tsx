@@ -4,6 +4,7 @@ import React from "react";
 import { BRANDING } from "@/config/branding";
 import { Lockup, Mark } from "@/components/brand/Logo";
 import { PwaInstallButton } from "../pwa/PwaManager";
+import { ThemeToggle } from "../theme/ThemeToggle";
 
 interface WorkspaceHeaderProps {
   useFixture: boolean;
@@ -39,6 +40,7 @@ export function WorkspaceHeader({
           </div>
 
           <div className="flex items-center gap-2.5">
+            <ThemeToggle />
             <PwaInstallButton />
 
             {onViewOverview && (
@@ -103,6 +105,7 @@ export function WorkspaceHeader({
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
+            <ThemeToggle compact />
             {onViewOverview && (
               <button
                 type="button"
