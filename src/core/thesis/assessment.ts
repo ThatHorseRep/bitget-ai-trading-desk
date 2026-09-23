@@ -16,8 +16,6 @@ import {
   type VerdictGateResult
 } from "../../lib/verdict/scoring";
 
-const modelName = process.env.LLM_MODEL || "deepseek-v4-flash";
-
 // LLM provides qualitative narrative only; scores and verdict bands are 100% deterministic
 const AssessmentSchema = z.object({
   keyMismatch: z.string().nullable().optional(),
@@ -156,7 +154,7 @@ ${evidenceText}
   } else {
     const client = getSeekAiClient();
     const basePayload: SeekAiRequest = {
-      model: modelName,
+      model: process.env.LLM_MODEL || "qwen3.8-max",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }

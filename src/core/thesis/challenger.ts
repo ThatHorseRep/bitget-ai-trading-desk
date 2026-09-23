@@ -78,7 +78,7 @@ ${evidenceText}
   }
 
   const payload: SeekAiRequest = {
-    model: process.env.LLM_MODEL || "deepseek-v4-flash",
+    model: process.env.LLM_MODEL || "qwen3.8-max",
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt }

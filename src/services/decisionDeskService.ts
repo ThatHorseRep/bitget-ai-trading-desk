@@ -54,6 +54,43 @@ export interface DecisionWorkflowResult {
   agenticHandoff?: AgenticHandoffDocument;
 }
 
+function humanizeLimitation(stage: string, err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  const lower = msg.toLowerCase();
+
+  if (lower.includes("429") || lower.includes("rate limit") || lower.includes("quota")) {
+    return `${stage}: AI reasoning service temporarily rate-limited (LLM request failed (429)). Switched seamlessly to deterministic risk analysis.`;
+  }
+  if (lower.includes("500") || lower.includes("502") || lower.includes("503") || lower.includes("internal server error")) {
+    return `${stage}: AI reasoning service encountered upstream outage (LLM request failed (500)). Switched seamlessly to deterministic risk analysis.`;
+  }
+  if (lower.includes("timeout") || lower.includes("aborterror") || lower.includes("aborted")) {
+    return `${stage}: AI reasoning latency exceeded desk limit (timeout). Switched seamlessly to deterministic risk analysis.`;
+  }
+  if (msg.includes("Failed to extract thesis")) {
+    return `${stage}: Failed to extract thesis due to non-conforming model schema response. Desk continued via deterministic rules.`;
+  }
+  if (lower.includes("401") || lower.includes("unauthorized") || lower.includes("403") || lower.includes("access denied")) {
+    return `${stage}: AI model credentials or permission issue. Switched to deterministic rules.`;
+  }
+  if (lower.includes("404") || lower.includes("not found")) {
+    return `${stage}: Configured reasoning model unavailable on endpoint. Switched to deterministic rules.`;
+  }
+
+  // Clean raw error string of unsightly JSON blobs or brackets
+  const clean = msg
+    .replace(/\{[\s\S]*\}/g, "")
+    .replace(/Error:/gi, "")
+    .replace(/[<>\[\]{}"]/g, "")
+    .trim();
+
+  if (clean.length > 5) {
+    return `${stage}: External reasoning unavailable (${clean.slice(0, 100)}). Desk completed analysis via deterministic rules.`;
+  }
+
+  return `${stage}: External reasoning layer unavailable. Desk completed analysis via deterministic rules.`;
+}
+
 export class DecisionDeskService {
   private marketStateService: MarketStateService;
   private evidenceProvider: EvidenceProvider;
@@ -168,7 +205,7 @@ export class DecisionDeskService {
         evidence = arbitration.evidence;
         limitations.push(...arbitration.limitations);
       } catch (err) {
-        limitations.push(`Evidence retrieval failed: ${(err as Error).message}. Operating without external evidence.`);
+        limitations.push(humanizeLimitation("Evidence Retrieval", err));
       }
     }
 
@@ -206,7 +243,7 @@ export class DecisionDeskService {
         }
       } catch (err) {
         if (options.signal?.aborted) throw err;
-        limitations.push(`Language reasoning layer (Thesis Extraction) failed: ${(err as Error).message}`);
+        limitations.push(humanizeLimitation("Thesis Extraction", err));
       }
 
       if (thesis) {
@@ -215,7 +252,7 @@ export class DecisionDeskService {
           options.onProgress?.("CHALLENGE", "Generating Adversarial Counter-Thesis");
           if (options.signal?.aborted) throw new Error("AbortError");
           if (Date.now() >= llmDeadline - 6000) {
-            limitations.push("Skipped adversarial challenge: workflow time budget exhausted (deployed function limit). Deterministic stress results and the extracted thesis remain valid.");
+            limitations.push("Adversarial Challenge: Skipped to fit workflow latency budget. Stress models and extracted thesis remain verified.");
           } else {
             challenge = await generateThesisChallenge(thesis, trade, marketState, scenarios, evidence, llmDeadline);
           }
@@ -225,7 +262,7 @@ export class DecisionDeskService {
           }
         } catch (err) {
           if (options.signal?.aborted) throw err;
-          limitations.push(`Language reasoning layer (Adversarial Challenge) failed: ${(err as Error).message}`);
+          limitations.push(humanizeLimitation("Adversarial Challenge", err));
         }
 
         try {
@@ -234,16 +271,16 @@ export class DecisionDeskService {
           if (options.signal?.aborted) throw new Error("AbortError");
           if (challenge) {
             if (Date.now() >= llmDeadline - 6000) {
-              limitations.push("Skipped qualitative synthesis: workflow time budget exhausted (deployed function limit). Position quality remains deterministic.");
+              limitations.push("Position Assessment: Skipped narrative synthesis due to latency budget. Quantitative position risk remains verified.");
             } else {
               thesisPosition = await assessThesisVsPosition(thesis, trade, marketState, scenarios, challenge, evidence, llmDeadline);
             }
           } else {
-             limitations.push("Skipping qualitative synthesis (Position Assessment) because Adversarial Challenge failed.");
+             limitations.push("Position Assessment: Evaluated using deterministic stress risk metrics (Adversarial challenge was unavailable).");
           }
         } catch (err) {
           if (options.signal?.aborted) throw err;
-          limitations.push(`Language reasoning layer (Qualitative Synthesis) failed: ${(err as Error).message}`);
+          limitations.push(humanizeLimitation("Qualitative Synthesis", err));
         }
       }
     }

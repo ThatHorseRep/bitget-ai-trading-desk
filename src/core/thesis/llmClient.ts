@@ -127,7 +127,12 @@ class LLMProvider {
       payload.systemInstruction = { parts: [{ text: systemMessage }] };
     }
 
-    const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+    const models = [
+      "gemini-flash-lite-latest",
+      "gemini-flash-latest",
+      "gemini-3.5-flash",
+      "gemini-3.6-flash"
+    ];
     let lastErr: unknown = null;
 
     for (const model of models) {
@@ -193,11 +198,25 @@ class LLMProvider {
     let apiKey = process.env.LLM_API_KEY;
     let model = request.model || process.env.LLM_MODEL || 'qwen3.8-max';
 
-    // Auto-correct if environment variables are inverted
-    if (apiKey && apiKey.toLowerCase().startsWith('qwen') && model && !model.toLowerCase().startsWith('qwen')) {
-      const temp = apiKey;
+    // Auto-detect inverted API key and Model name
+    const looksLikeModel = (val?: string) =>
+      Boolean(val && /^(qwen|deepseek|gpt|claude|gemini|meta|llama|mistral)/i.test(val.trim()));
+    const looksLikeKey = (val?: string) =>
+      Boolean(val && !looksLikeModel(val) && val.trim().length >= 8);
+
+    if (looksLikeModel(apiKey) && looksLikeKey(model)) {
+      const temp = apiKey!;
       apiKey = model;
       model = temp;
+    }
+
+    // Normalize model for Bitget Hackathon proxy:
+    // The proxy strictly permits only 'qwen3.8-max'. If another model name is supplied, normalize it.
+    if (endpoint.includes("hackathon.bitgetops.com")) {
+      if (!model || model !== "qwen3.8-max") {
+        console.warn(`[LLM-CLIENT] Hackathon proxy strictly supports 'qwen3.8-max'. Normalizing requested model '${model}' to 'qwen3.8-max'.`);
+        model = "qwen3.8-max";
+      }
     }
 
     // Check circuit breaker state
@@ -207,7 +226,11 @@ class LLMProvider {
     if (currentCircuit === "OPEN" && hasGemini) {
       const remainingSec = qwenCircuit.getCooldownRemainingSeconds();
       console.warn(`[CIRCUIT-BREAKER] Qwen circuit is OPEN. Auto-routing to Gemini (Probe in ${remainingSec}s)...`);
-      return this.callGemini(request, `Auto-Failover: Qwen Breaker Open, probe in ${remainingSec}s`);
+      try {
+        return await this.callGemini(request, `Auto-Failover: Qwen Breaker Open, probe in ${remainingSec}s`);
+      } catch (geminiErr) {
+        console.warn(`[CIRCUIT-BREAKER] Gemini failover while breaker open failed: ${geminiErr instanceof Error ? geminiErr.message : String(geminiErr)}`);
+      }
     }
 
     let resolvedEndpoint = endpoint;
@@ -254,9 +277,22 @@ class LLMProvider {
         }
         if (hasGemini) {
           console.warn(`[CIRCUIT-BREAKER] Qwen returned HTTP ${response.status}. Trip breaker & failover to Gemini...`);
-          return await this.callGemini(request, `Auto-Failover: Qwen HTTP ${response.status}`);
+          try {
+            return await this.callGemini(request, `Auto-Failover: Qwen HTTP ${response.status}`);
+          } catch (geminiErr) {
+            console.warn(`[CIRCUIT-BREAKER] Gemini failover error: ${geminiErr instanceof Error ? geminiErr.message : String(geminiErr)}`);
+          }
         }
-        throw new Error(`LLM request failed (${response.status}): ${text}`);
+        let cleanMsg = text;
+        try {
+          const parsed = JSON.parse(text);
+          if (parsed?.error?.message) {
+            cleanMsg = parsed.error.message;
+          }
+        } catch {
+          // keep text
+        }
+        throw new Error(`LLM provider returned HTTP ${response.status}: ${cleanMsg}`);
       }
 
       let content = "";
@@ -294,7 +330,11 @@ class LLMProvider {
       if (hasGemini) {
         const reason = err.name === 'AbortError' ? 'Qwen Timeout (5s)' : 'Qwen Connection Error';
         console.warn(`[CIRCUIT-BREAKER] ${reason}. Tripping breaker, routing instantly to Gemini...`);
-        return await this.callGemini(request, `Auto-Failover: ${reason}`);
+        try {
+          return await this.callGemini(request, `Auto-Failover: ${reason}`);
+        } catch (geminiErr) {
+          console.warn(`[CIRCUIT-BREAKER] Gemini failover error: ${geminiErr instanceof Error ? geminiErr.message : String(geminiErr)}`);
+        }
       }
 
       console.error("LLM CLIENT ERROR:", err);

@@ -61,7 +61,7 @@ Rules:
   const client = getSeekAiClient();
   try {
     const resp = await client.chat({
-      model: process.env.LLM_MODEL || "deepseek-v4-flash",
+      model: process.env.LLM_MODEL || "qwen3.8-max",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: `<untrusted_data>\nTrader Statement: ${statement}\n</untrusted_data>` }
@@ -162,7 +162,7 @@ ${evidenceText}
 
   const client = getSeekAiClient();
   const basePayload: SeekAiRequest = {
-    model: process.env.LLM_MODEL || "deepseek-v4-flash",
+    model: process.env.LLM_MODEL || "qwen3.8-max",
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt }
@@ -180,14 +180,7 @@ ${evidenceText}
       break; // Success, exit retry loop
     } catch (err) {
       if (attempt === maxAttempts) {
-        if (!resp) {
-          throw err;
-        }
         throw new Error(`Failed to extract thesis after ${attempt} attempts. Error: ${err instanceof Error ? err.message : String(err)}`);
-      }
-      if (!resp) {
-        console.warn(`Extractor attempt ${attempt} network/API failure, retrying...`);
-        continue;
       }
       console.warn("Extractor JSON parse failed, retrying with stronger format instructions...");
       // Enhance prompt for retry by maintaining alternating roles

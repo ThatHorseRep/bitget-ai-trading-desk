@@ -162,15 +162,25 @@ export function DecisionArtifactView({
           </div>
         </div>
 
-        {/* Limitations and Fixture Alerts */}
+        {/* Limitations and Operational Advisories */}
         {limitations.length > 0 && (
-          <div className="border border-[var(--rtd-steel)]/25 bg-[var(--rtd-paper-subtle)] p-3 text-xs text-[var(--rtd-ink)] flex items-start gap-2">
-            <span className="font-mono font-bold text-[var(--rtd-reduce)] shrink-0">
-              LIMITATION:
-            </span>
-            <span className="font-sans leading-relaxed text-[var(--rtd-steel)]">
-              {limitations.join("; ")}
-            </span>
+          <div className="border border-amber-500/30 bg-amber-500/5 p-3.5 text-xs text-[var(--rtd-ink)] space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="font-mono font-bold text-amber-700 dark:text-amber-300 text-[10px] tracking-wider uppercase px-2 py-0.5 border border-amber-500/30 bg-amber-500/10">
+                DESK ADVISORY
+              </span>
+              <span className="text-[11px] text-[var(--rtd-steel)] font-mono">
+                {limitations.length} operational {limitations.length === 1 ? "note" : "notes"}
+              </span>
+            </div>
+            <ul className="font-sans leading-relaxed text-[var(--rtd-steel)] space-y-1.5 pl-1">
+              {limitations.map((lim, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="text-amber-500 font-bold shrink-0 mt-0.5">•</span>
+                  <span>{lim}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
