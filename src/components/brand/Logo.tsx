@@ -29,9 +29,13 @@ export function Mark({
   const { blocks, seam } = markGeometry(
     offset === undefined ? base : { ...base, offset }
   );
+  // Displaced marks (e.g. REJECT with offset 15u) shift along the -12 deg fault line,
+  // extending outer coordinates from -8.7 to +108.7. A balanced 1:1 viewBox (-12 -12 124 124)
+  // ensures all 4 verdict states render with identical base scale and zero edge clipping.
+  const viewBox = offset !== undefined ? "-12 -12 124 124" : "0 0 100 100";
   return (
     <svg
-      viewBox="0 0 100 100"
+      viewBox={viewBox}
       width={size}
       height={size}
       role="img"

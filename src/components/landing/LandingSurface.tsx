@@ -23,11 +23,16 @@ const GOLDEN_PATH_PROMPT =
 export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [ttlSeconds, setTtlSeconds] = useState(() => getEpochRemainingSeconds());
-  const [batchIndex, setBatchIndex] = useState(() => getEpochBatchIndex());
+  const [mounted, setMounted] = useState(false);
+  const [ttlSeconds, setTtlSeconds] = useState(CYCLE_SECONDS);
+  const [batchIndex, setBatchIndex] = useState(0);
   const [isRecalibrating, setIsRecalibrating] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    setTtlSeconds(getEpochRemainingSeconds());
+    setBatchIndex(getEpochBatchIndex());
+
     const timer = setInterval(() => {
       const remaining = getEpochRemainingSeconds();
       setTtlSeconds(remaining);
@@ -287,13 +292,16 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
                   CYCLE ↻
                 </button>
               </div>
-              <div className="text-base font-bold text-[var(--rtd-ink)] rtd-figure flex items-center md:justify-end gap-1.5">
+              <div
+                className="text-base font-bold text-[var(--rtd-ink)] rtd-figure flex items-center md:justify-end gap-1.5"
+                suppressHydrationWarning
+              >
                 <span className={`w-2 h-2 rounded-full ${isRecalibrating ? "bg-[var(--rtd-reduce)] animate-ping" : "bg-[var(--rtd-proceed)]"}`} />
-                <span>{formatTtl(ttlSeconds)}</span>
+                <span suppressHydrationWarning>{formatTtl(ttlSeconds)}</span>
                 <span className="text-[11px] font-normal text-[var(--rtd-steel)]">REMAINING</span>
               </div>
-              <div className="text-[10px] text-[var(--rtd-steel)]">
-                ACTIVE: <span className="font-bold text-[var(--rtd-ink)]">{activeBatch.assetSymbol}</span> • {activeBatch.theme}
+              <div className="text-[10px] text-[var(--rtd-steel)]" suppressHydrationWarning>
+                ACTIVE: <span className="font-bold text-[var(--rtd-ink)]">{mounted ? activeBatch.assetSymbol : "rNVDA"}</span> • {mounted ? activeBatch.theme : "AI Semiconductor & Cloud Capex"}
               </div>
             </div>
           </div>
