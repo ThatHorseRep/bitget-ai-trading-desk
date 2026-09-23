@@ -167,13 +167,15 @@ export function TradeInputSurface({
 
     // Real-time extracted fields from actual user input
     const idea = parsedRealtime?.tradeIdea;
-    const hasAsset = Boolean(idea?.asset);
-    const hasDirection = Boolean(idea?.direction);
-    const hasSize = typeof idea?.positionSizeUsd === "number" && idea.positionSizeUsd > 0;
+    const hasAsset = Boolean(parsedRealtime?.userProvidedFields?.includes("asset"));
+    const hasDirection = Boolean(parsedRealtime?.userProvidedFields?.includes("direction"));
+    const hasSize = Boolean(parsedRealtime?.userProvidedFields?.includes("positionSizeUsd"));
 
-    const symbol = idea?.asset ? idea.asset : "—";
-    const direction = idea?.direction ? idea.direction.toLowerCase() : "—";
-    const size = hasSize ? `$${idea!.positionSizeUsd!.toLocaleString()}` : "—";
+    const symbol = hasAsset && idea?.asset ? idea.asset : "—";
+    const direction = hasDirection && idea?.direction ? idea.direction.toLowerCase() : "—";
+    const size = hasSize && typeof idea?.positionSizeUsd === "number" && idea.positionSizeUsd > 0
+      ? `$${idea.positionSizeUsd.toLocaleString()}`
+      : "—";
 
     const isComplete = hasAsset && hasDirection && hasSize;
 

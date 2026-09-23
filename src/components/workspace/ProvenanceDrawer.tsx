@@ -12,31 +12,27 @@ interface ProvenanceDrawerProps {
 
 const CATEGORY_CONFIG: Record<
   ProvenanceType,
-  { label: string; bg: string; text: string; border: string }
+  { label: string; text: string; border: string }
 > = {
   OBSERVED_FACT: {
     label: "Observed fact",
-    bg: "bg-[var(--rt-surface-raised)]",
-    text: "text-[var(--rt-verdict-clear)]",
-    border: "border-[var(--rt-verdict-clear)]"
+    text: "text-[var(--rtd-proceed)]",
+    border: "border-[var(--rtd-proceed)]"
   },
   CALCULATED_METRIC: {
     label: "Calculated metric",
-    bg: "bg-[var(--rt-surface-raised)]",
-    text: "text-[var(--rt-text-primary)]",
-    border: "border-[var(--rt-border-subtle)]"
+    text: "text-[var(--rtd-ink)]",
+    border: "border-[var(--rtd-steel)]/40"
   },
   SCENARIO_ASSUMPTION: {
     label: "Scenario assumption",
-    bg: "bg-[var(--rt-surface-raised)]",
-    text: "text-[var(--rt-verdict-moderate)]",
-    border: "border-[var(--rt-verdict-moderate)]"
+    text: "text-[var(--rtd-wait)]",
+    border: "border-[var(--rtd-wait)]"
   },
   AI_INTERPRETATION: {
     label: "AI interpretation",
-    bg: "bg-[var(--rt-surface-raised)]",
-    text: "text-[var(--rt-text-muted)]",
-    border: "border-[var(--rt-border-subtle)]"
+    text: "text-[var(--rtd-steel)]",
+    border: "border-[var(--rtd-steel)]/40"
   }
 };
 
@@ -65,153 +61,126 @@ export function ProvenanceDrawer({
   );
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-black/50 flex justify-end" role="dialog" aria-modal="true" aria-label="Provenance details">
-      <div className="w-full md:max-w-xl bg-[var(--rt-surface-raised)] shadow-2xl h-full flex flex-col border-l border-[var(--rt-border-subtle)] pt-safe pb-safe">
-        {/* Header */}
-        <div className="border-b border-[var(--rt-border-subtle)] px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between bg-[var(--rt-surface-base)]">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[var(--rt-text-muted)]">
-                Data provenance and audit S09
-              </span>
-            </div>
-            <h3 className="text-sm sm:text-base font-mono font-bold text-[var(--rt-text-primary)] mt-0.5 [text-wrap:balance]">
-              Evidence and verification chain
-            </h3>
-            <p className="text-[11px] sm:text-xs text-[var(--rt-text-muted)] [text-wrap:pretty]">
-              Deterministic separation of facts, formulas, and hypotheses
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close provenance drawer"
-            className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 text-[var(--rt-text-muted)] hover:text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-raised)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 overflow-hidden">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+        onClick={onClose}
+      />
 
-        {/* Filter Tabs */}
-        <div className="flex border-b border-[var(--rt-border-subtle)] px-4 sm:px-6 gap-2 bg-[var(--rt-surface-raised)] overflow-x-auto py-2 text-xs">
-          {(["ALL", "OBSERVED_FACT", "CALCULATED_METRIC", "SCENARIO_ASSUMPTION", "AI_INTERPRETATION"] as const).map(
-            (tab) => (
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+        <div className="w-screen max-w-xl bg-[var(--rtd-paper)] text-[var(--rtd-ink)] border-l border-[var(--rtd-steel)]/25 shadow-2xl flex flex-col justify-between">
+          {/* Header */}
+          <div className="p-5 sm:p-6 border-b border-[var(--rtd-steel)]/15 flex items-center justify-between">
+            <div>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--rtd-proceed)]">
+                Audit Trail
+              </span>
+              <h2 className="text-lg font-mono font-bold text-[var(--rtd-ink)]">
+                Provenance &amp; Data Lineage
+              </h2>
+              <p className="text-xs text-[var(--rtd-steel)] mt-0.5">
+                Full deterministic traceability for artifact {artifact.artifactId}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)] border border-[var(--rtd-steel)]/25 hover:bg-[var(--rtd-paper-subtle)] active:scale-95 transition-all cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Filter tabs */}
+          <div className="px-5 py-2.5 bg-[var(--rtd-paper-subtle)] border-b border-[var(--rtd-steel)]/15 flex flex-wrap gap-1.5 text-xs font-mono">
+            <button
+              type="button"
+              onClick={() => setActiveTab("ALL")}
+              className={`px-2.5 py-1 text-[11px] font-bold uppercase border transition-all cursor-pointer ${
+                activeTab === "ALL"
+                  ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)] border-[var(--rtd-ink)]"
+                  : "bg-[var(--rtd-paper)] text-[var(--rtd-steel)] border-[var(--rtd-steel)]/25 hover:text-[var(--rtd-ink)]"
+              }`}
+            >
+              All ({artifact.provenance.length})
+            </button>
+            {(["OBSERVED_FACT", "CALCULATED_METRIC", "SCENARIO_ASSUMPTION", "AI_INTERPRETATION"] as ProvenanceType[]).map((tab) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
-                className={`min-h-[44px] px-3 py-1.5 font-mono font-medium whitespace-nowrap active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden ${
+                className={`px-2.5 py-1 text-[11px] font-bold uppercase border transition-all cursor-pointer ${
                   activeTab === tab
-                    ? "bg-[var(--rt-surface-void)] text-white font-semibold"
-                    : "text-[var(--rt-text-muted)] hover:bg-[var(--rt-surface-base)] hover:text-[var(--rt-text-primary)]"
+                    ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)] border-[var(--rtd-ink)]"
+                    : "bg-[var(--rtd-paper)] text-[var(--rtd-steel)] border-[var(--rtd-steel)]/25 hover:text-[var(--rtd-ink)]"
                 }`}
               >
-                {tab === "ALL" ? "All records" : CATEGORY_CONFIG[tab].label}
+                {CATEGORY_CONFIG[tab].label}
               </button>
-            )
-          )}
-        </div>
+            ))}
+          </div>
 
-        {/* Record List */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {records.map((rec) => {
-            const config = CATEGORY_CONFIG[rec.type];
-            const isHighlight = selectedRecord && selectedRecord.id === rec.id;
-
-            return (
-              <div
-                key={rec.id}
-                className={`border p-4 motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-                  isHighlight
-                    ? "ring-2 ring-[var(--rt-text-muted)] border-[var(--rt-text-primary)] bg-[var(--rt-surface-base)]"
-                    : "border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] hover:border-[var(--rt-text-muted)]"
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 text-xs font-mono font-semibold border ${config.bg} ${config.text} ${config.border}`}
-                    >
-                      {config.label}
+          {/* Records List */}
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-3">
+            {records.map((rec) => {
+              const conf = CATEGORY_CONFIG[rec.type];
+              const isHighlighted = selectedRecord?.id === rec.id;
+              const timestamp = rec.observedAt || rec.retrievedAt || rec.publishedAt;
+              return (
+                <div
+                  key={rec.id}
+                  id={`prov-${rec.id}`}
+                  className={`p-4 border transition-all ${
+                    isHighlighted
+                      ? "border-[var(--rtd-ink)] bg-[var(--rtd-paper-subtle)] ring-1 ring-[var(--rtd-ink)]"
+                      : "border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper)] hover:border-[var(--rtd-steel)]/40"
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs font-mono pb-2 border-b border-[var(--rtd-steel)]/15">
+                    <span className={`font-bold uppercase tracking-wider ${conf.text}`}>
+                      {conf.label}
                     </span>
-                    {rec.evidenceState && (
-                      <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-mono font-bold tracking-wider uppercase border ${
-                        rec.evidenceState === "LIVE_RETRIEVED"
-                          ? "bg-[var(--rt-surface-base)] text-[var(--rt-verdict-clear)] border-[var(--rt-border-subtle)]"
-                          : rec.evidenceState === "UNAVAILABLE"
-                          ? "bg-[var(--rt-surface-base)] text-[var(--rt-verdict-critical)] border-[var(--rt-border-subtle)]"
-                          : "bg-[var(--rt-surface-base)] text-[var(--rt-text-muted)] border-[var(--rt-border-subtle)]"
-                      }`}>
-                        {rec.evidenceState.replace(/_/g, " ")}
+                    {timestamp && (
+                      <span className="text-[10px] text-[var(--rtd-steel)]">
+                        {new Date(timestamp).toLocaleTimeString()}
                       </span>
                     )}
                   </div>
-                  <span className="font-mono text-xs text-[var(--rt-text-muted)]">
-                    {rec.id}
-                  </span>
-                </div>
 
-                <h4 className="text-sm font-semibold text-[var(--rt-text-primary)] [text-wrap:balance] break-words">
-                  {rec.source || rec.generatedBy || "System observation"}
-                </h4>
-
-                {rec.sourceRef && (
-                  <a
-                    href={rec.sourceRef}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-1 inline-flex items-center gap-1 text-xs text-[var(--rt-text-primary)] hover:underline font-mono font-medium break-all focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden"
-                  >
-                    <span>{rec.sourceRef}</span>
-                    <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </a>
-                )}
-
-                {rec.inputs && rec.inputs.length > 0 && (
-                  <div className="mt-2 text-xs">
-                    <span className="font-mono font-semibold text-[var(--rt-text-muted)]">Inputs and parameters:</span>
-                    <ul className="mt-1 list-disc list-inside space-y-0.5 text-[var(--rt-text-primary)] font-mono text-xs bg-[var(--rt-surface-base)] p-2.5 border border-[var(--rt-border-subtle)]">
-                      {rec.inputs.map((inp, idx) => (
-                        <li key={idx} className="[text-wrap:pretty]">{inp}</li>
-                      ))}
-                    </ul>
+                  <div className="pt-2 space-y-1">
+                    <div className="text-xs font-mono font-bold text-[var(--rtd-ink)]">
+                      {rec.source || rec.generatedBy || "SYSTEM"}:{" "}
+                      <span className="font-normal text-[var(--rtd-steel)]">{rec.sourceRef || rec.id}</span>
+                    </div>
+                    {rec.evidenceState && (
+                      <div className="text-xs font-mono text-[var(--rtd-steel)]">
+                        State: <span className="font-bold text-[var(--rtd-ink)]">{rec.evidenceState}</span>
+                      </div>
+                    )}
+                    {rec.inputs && rec.inputs.length > 0 && (
+                      <div className="text-[11px] font-mono text-[var(--rtd-steel)]">
+                        Inputs: {rec.inputs.join(", ")}
+                      </div>
+                    )}
                   </div>
-                )}
-
-                <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-mono text-[var(--rt-text-muted)] border-t border-[var(--rt-border-subtle)] pt-2">
-                  {rec.observedAt && (
-                    <span>Observed: {new Date(rec.observedAt).toLocaleTimeString()}</span>
-                  )}
-                  {rec.publishedAt && (
-                    <span>Published: {new Date(rec.publishedAt).toLocaleDateString()}</span>
-                  )}
-                  {rec.generatedBy && (
-                    <span>Engine: {rec.generatedBy}</span>
-                  )}
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
 
-        {/* Footer */}
-        <div className="border-t border-[var(--rt-border-subtle)] p-4 bg-[var(--rt-surface-base)] text-xs font-mono text-[var(--rt-text-muted)] flex justify-between items-center">
-          <span>{records.length} records verified</span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-[44px] border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] px-4 py-2 font-mono font-medium text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-base)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden"
-          >
-            Close drawer
-          </button>
+          {/* Footer */}
+          <div className="p-4 border-t border-[var(--rtd-steel)]/15 bg-[var(--rtd-paper-subtle)] flex justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
-
