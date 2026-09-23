@@ -9,7 +9,7 @@
 
 ## 3. Validation Data & Key Metrics
 **Validation so far:**
-- 219/220 automated tests passing in our test suite (core scenario determinism, AI parsing fallbacks, off-hours session simulation, integration isolation, US Equity MCP catalog protocol, LLM client thinking-mode contract, etc.; the one skip is a live-integration test that self-skips without credentials).
+- 256/257 automated tests passing in the test suite (core scenario determinism, AI parsing fallbacks, off-hours session simulation, integration isolation, US Equity MCP catalog protocol, LLM client thinking-mode contract, etc.; the one skip is a live-integration test that self-skips without credentials).
 - [TARGET/PLAN]: No live user data or user metrics collected yet.
 
 ## 4. Progress
@@ -44,5 +44,5 @@
 - **Live demo link:** [Insert Live Demo URL once deployed]
 - **Demo video link:** [Insert Video URL once uploaded]
 
-## 6. Our Take on AI Trading
-We believe LLMs are currently dangerous when used for quantitative position sizing, mathematical shock calculation, or autonomous execution without guardrails. However, they are exceptionally good at qualitative reasoning, adversarial challenge, and extracting assumptions from natural language. By pairing a deterministic risk engine with an adversarial AI "Red Team", we can give retail traders institutional-grade pre-trade stress testing without the hallucination risks of generic AI agents.
+## 6. My Take on AI Trading
+I believe LLMs are currently dangerous when used for quantitative position sizing, mathematical shock calculation, or autonomous execution without guardrails. However, they are exceptionally good at qualitative reasoning, adversarial challenge, and extracting assumptions from natural language. By pairing a deterministic risk engine with an adversarial AI "Red Team", we can give retail traders institutional-grade pre-trade stress testing without the hallucination risks of generic AI agents.

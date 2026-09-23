@@ -2,7 +2,7 @@
 
 > **Document Type:** Institutional Market Survey & Product Strategy Blueprint  
 > **Target Event:** Bitget AI Base Camp Hackathon S2 — Track 3 (AI Trading Desk / Decision Stress Testing)  
-> **Author / Team:** Nelson / FUTMINNA  
+> **Author / Developer:** ThatHorseRep  
 > **Date:** September 2026  
 > **Status:** Final Architectural Specification  
 

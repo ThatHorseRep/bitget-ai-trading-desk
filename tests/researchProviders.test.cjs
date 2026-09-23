@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const { DecisionDeskService } = require('../dist-core/src/services/decisionDeskService.js');
 const { ResearchProviderRegistry } = require('../dist-core/src/adapters/research/registry.js');
 const { createDefaultResearchRegistry } = require('../dist-core/src/adapters/research/defaultRegistry.js');
-const { execSync } = require('node:child_process');
+const fs = require('node:fs');
 const path = require('node:path');
 
 // Hermetic LLM: the llmClient/extractor/challenger short-circuit to canned
@@ -80,11 +80,24 @@ function observation(overrides = {}) {
 // Prove the core domain never imports from the adapter layer (PRE24-01
 // boundary: no raw MCP responses — or any adapter type — inside the domain).
 test('PRE24-01: domain layer does not import adapters', () => {
-  const out = execSync(
-    `grep -rn "adapters/" ${JSON.stringify(path.join(__dirname, '..', 'src', 'domain'))} || true`,
-    { encoding: 'utf8' }
-  );
-  assert.equal(out.trim(), '', 'domain must not import from adapters');
+  const domainDir = path.join(__dirname, '..', 'src', 'domain');
+  function scan(dir) {
+    const hits = [];
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        hits.push(...scan(full));
+      } else if (entry.isFile() && (entry.name.endsWith('.ts') || entry.name.endsWith('.js'))) {
+        const content = fs.readFileSync(full, 'utf8');
+        if (content.includes('adapters/')) {
+          hits.push(full);
+        }
+      }
+    }
+    return hits;
+  }
+  const hits = scan(domainDir);
+  assert.equal(hits.length, 0, `domain must not import from adapters, found in: ${hits.join(', ')}`);
 });
 
 test('PRE24-01: composition root registers the four provider slots', () => {
