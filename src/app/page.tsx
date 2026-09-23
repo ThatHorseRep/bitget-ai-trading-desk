@@ -33,6 +33,9 @@ export default function WorkspacePage() {
 
   const handleLaunchFromLanding = (initialPrompt?: string) => {
     setViewMode("desk");
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
     if (initialPrompt && initialPrompt.trim()) {
       setPrompt(initialPrompt);
       handleInitialSubmit(initialPrompt);

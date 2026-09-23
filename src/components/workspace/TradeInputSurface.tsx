@@ -273,15 +273,15 @@ export function TradeInputSurface({
         {/* ==================================================================
             LEFT COLUMN: THE RESULTS VIEW (Matches 06-mobile-app.png)
             On mobile (< 768px), rendered when activeTab === "results".
-            On desktop, styled as the mobile app surface / cockpit.
+            On desktop, styled as the nocturnal cockpit device.
            ================================================================== */}
         <div
           className={`lg:col-span-6 xl:col-span-5 flex justify-center ${
             activeTab === "results" ? "block" : "hidden md:block"
           }`}
         >
-          {/* Mobile phone card frame matching 06-mobile-app.png */}
-          <div className="w-full max-w-[420px] bg-[var(--rtd-void)] text-[var(--rtd-paper)] border border-[var(--rtd-steel)]/30 shadow-2xl rounded-2xl sm:rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
+          {/* Mobile cockpit card frame matching 06-mobile-app.png */}
+          <div className="w-full max-w-[420px] bg-[var(--rtd-void)] text-white border border-white/20 shadow-2xl rounded-2xl sm:rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
             {/* Subtle top indicator bar */}
             <div
               className="absolute top-0 left-0 right-0 h-1.5"
@@ -289,25 +289,25 @@ export function TradeInputSurface({
             />
 
             {/* 1. HEADER: Current Position (symbol · direction · size) */}
-            <div className="border-b border-[var(--rtd-steel)]/25 pb-4 flex items-center justify-between">
+            <div className="border-b border-white/15 pb-4 flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-mono tracking-[0.2em] text-[var(--rtd-steel)] uppercase block mb-1">
+                <span className="text-[10px] font-mono tracking-[0.2em] text-slate-400 uppercase block mb-1">
                   CURRENT POSITION
                 </span>
-                <div className="text-base sm:text-lg font-mono font-bold tracking-wider text-[var(--rtd-paper)]">
+                <div className="text-base sm:text-lg font-mono font-bold tracking-wider text-white">
                   {positionInfo.symbol} · {positionInfo.direction} ·{" "}
                   <span className="rtd-figure">{positionInfo.size}</span>
                 </div>
               </div>
 
-              <div className="px-2.5 py-1 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/30 text-[10px] font-mono tracking-widest uppercase text-[var(--rtd-steel)]">
+              <div className="px-2.5 py-1 bg-white/10 border border-white/20 text-[10px] font-mono tracking-widest uppercase text-slate-300">
                 65.5H DESK
               </div>
             </div>
 
             {/* 2. RESULTS VIEW: Large centered glyph, verdict name, one-line summary */}
             <div className="py-4 flex flex-col items-center text-center space-y-4">
-              <div className="p-3 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/30 rounded-xl shadow-inner">
+              <div className="p-3 bg-white/5 border border-white/15 rounded-xl shadow-inner">
                 <VerdictGlyph verdict={positionInfo.verdict} size={76} reversed />
               </div>
 
@@ -318,54 +318,52 @@ export function TradeInputSurface({
                 >
                   {positionInfo.verdict}
                 </div>
-                <p className="text-xs sm:text-sm font-sans text-[var(--rtd-steel)] max-w-[280px] sm:max-w-xs mx-auto leading-relaxed">
+                <p className="text-xs sm:text-sm font-sans text-slate-300 max-w-[280px] sm:max-w-xs mx-auto leading-relaxed">
                   {positionInfo.summary}
                 </p>
               </div>
             </div>
 
-            {/* 3. STAT LIST: Expected shortfall, Basis gap, Depth vs. session, Crypto beta
-                Every numeric value has .rtd-figure applied for mono tabular figures. */}
-            <div className="border-t border-[var(--rtd-steel)]/25 divide-y divide-[var(--rtd-steel)]/20 text-xs font-mono">
+            {/* 3. STAT LIST: Expected shortfall, Basis gap, Depth vs. session, Crypto beta */}
+            <div className="border-t border-white/15 divide-y divide-white/10 text-xs font-mono">
               <div className="py-2.5 flex items-center justify-between">
-                <span className="text-[var(--rtd-steel)] uppercase tracking-wider">
+                <span className="text-slate-400 uppercase tracking-wider">
                   Expected shortfall
                 </span>
-                <span className="rtd-figure font-bold text-[var(--rtd-paper)]">
+                <span className="rtd-figure font-bold text-white">
                   {positionInfo.expectedShortfall}
                 </span>
               </div>
 
               <div className="py-2.5 flex items-center justify-between">
-                <span className="text-[var(--rtd-steel)] uppercase tracking-wider">
+                <span className="text-slate-400 uppercase tracking-wider">
                   Basis gap
                 </span>
-                <span className="rtd-figure font-bold text-[var(--rtd-paper)]">
+                <span className="rtd-figure font-bold text-white">
                   {positionInfo.basisGap}
                 </span>
               </div>
 
               <div className="py-2.5 flex items-center justify-between">
-                <span className="text-[var(--rtd-steel)] uppercase tracking-wider">
+                <span className="text-slate-400 uppercase tracking-wider">
                   Depth vs. session
                 </span>
-                <span className="rtd-figure font-bold text-[var(--rtd-paper)]">
+                <span className="rtd-figure font-bold text-white">
                   {positionInfo.depthVsSession}
                 </span>
               </div>
 
               <div className="py-2.5 flex items-center justify-between">
-                <span className="text-[var(--rtd-steel)] uppercase tracking-wider">
+                <span className="text-slate-400 uppercase tracking-wider">
                   Crypto beta
                 </span>
-                <span className="rtd-figure font-bold text-[var(--rtd-paper)]">
+                <span className="rtd-figure font-bold text-white">
                   {positionInfo.cryptoBeta}
                 </span>
               </div>
             </div>
 
-            {/* 4. FULL-WIDTH ACTION BUTTON AT BOTTOM
-                Only red if the verdict is REJECT; otherwise use appropriate non-stamp color. */}
+            {/* 4. FULL-WIDTH ACTION BUTTON AT BOTTOM */}
             <div className="pt-2">
               <button
                 type="button"
@@ -373,10 +371,10 @@ export function TradeInputSurface({
                 disabled={!prompt.trim() || isLoading}
                 className={`w-full py-4 text-xs sm:text-sm font-mono font-bold tracking-wider uppercase active:scale-[0.98] transition-all text-center flex items-center justify-center gap-2 shadow-md cursor-pointer ${
                   !prompt.trim()
-                    ? "bg-[var(--rtd-paper-subtle)] text-[var(--rtd-steel)] border border-[var(--rtd-steel)]/30 opacity-60 cursor-not-allowed"
+                    ? "bg-white/10 text-slate-400 border border-white/15 opacity-60 cursor-not-allowed"
                     : isReject
-                    ? "bg-[var(--rtd-stamp)] text-white hover:brightness-110"
-                    : "bg-[var(--rtd-paper-subtle)] text-[var(--rtd-paper)] border border-[var(--rtd-steel)]/40 hover:bg-[var(--rtd-proof)]"
+                    ? "bg-[var(--rtd-stamp)] text-white hover:brightness-110 shadow-lg"
+                    : "bg-white/15 text-white border border-white/30 hover:bg-white/25 shadow-md"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {isLoading ? (
@@ -498,9 +496,9 @@ export function TradeInputSurface({
               rows={4}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g. I plan to buy $2,400 of rNVDA token during weekend hours..."
+              placeholder="e.g. I plan to buy $2,000 of rNVDA token during weekend hours..."
               disabled={isLoading}
-              className="w-full border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] p-3.5 text-xs sm:text-sm font-mono text-[var(--rtd-ink)] placeholder:text-[var(--rtd-steel)]/60 focus:bg-[var(--rtd-paper-subtle)] focus:border-[var(--rtd-ink)] focus:outline-hidden transition-all resize-y"
+              className="w-full border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper-subtle)] p-3.5 text-xs sm:text-sm font-mono text-[var(--rtd-ink)] placeholder:text-[var(--rtd-steel)]/60 focus:bg-[var(--rtd-paper)] focus:border-[var(--rtd-ink)] focus:outline-hidden transition-all resize-y"
             />
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-[var(--rtd-steel)]/15">
@@ -514,7 +512,7 @@ export function TradeInputSurface({
               <button
                 type="submit"
                 disabled={!prompt.trim() || isLoading}
-                className="min-h-[44px] px-6 py-2.5 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold tracking-wider uppercase hover:bg-[var(--rtd-void)] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                className="min-h-[44px] px-6 py-2.5 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold tracking-wider uppercase hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isLoading ? (
                   <span>Stress-testing...</span>

@@ -3,7 +3,6 @@
 import React from "react";
 import { BRANDING } from "@/config/branding";
 import { Lockup, Mark } from "@/components/brand/Logo";
-import { PwaInstallButton } from "../pwa/PwaManager";
 import { ThemeToggle } from "../theme/ThemeToggle";
 
 interface WorkspaceHeaderProps {
@@ -14,6 +13,13 @@ interface WorkspaceHeaderProps {
   onViewOverview?: () => void;
 }
 
+/**
+ * RedTeam Desk Workspace Header
+ * Aligned with the Brand & Editorial Design Constitution:
+ * - Proof Sheet / Dark Room theme parity
+ * - High-contrast tactile segmented controls
+ * - Strict typographic hierarchy and mono tabular aesthetics
+ */
 export function WorkspaceHeader({
   useFixture,
   onToggleFixture,
@@ -22,130 +28,170 @@ export function WorkspaceHeader({
   onViewOverview
 }: WorkspaceHeaderProps) {
   return (
-    <div className="sticky top-0 z-30 flex flex-col pt-safe">
-      {/* DEMO MODE BANNER for off-hours simulation */}
+    <div className="sticky top-0 z-40 flex flex-col pt-safe bg-[var(--rtd-proof)]">
+      {/* Off-hours simulation banner if Fixture mode is active */}
       {useFixture && (
-        <div className="bg-[var(--rt-verdict-moderate)] px-4 py-1 text-center text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-white shadow-xs">
-          DEMO MODE: Simulating Weekend Off-Hours Session
+        <div className="bg-[var(--rtd-wait)] px-4 py-1 text-center text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-[0.16em] text-[var(--rtd-paper)] border-b border-[var(--rtd-steel)]/20 shadow-2xs flex items-center justify-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--rtd-paper)] animate-ping" />
+          <span>FIXTURE MODE ACTIVE • SIMULATING 65.5H OFF-HOURS WEEKEND SESSION</span>
         </div>
       )}
-      <header className="border-b border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)]">
-        {/* Desktop & Tablet Layout (>= md) */}
-        <div className="hidden md:flex mx-auto max-w-6xl px-4 py-3 sm:px-6 items-center justify-between gap-3">
+
+      <header className="h-16 border-b border-[var(--rtd-steel)]/25 bg-[var(--rtd-proof)] backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+          {/* Brand Lockup + Context Badge */}
           <div className="flex items-center gap-3">
-            <Lockup height={32} />
-            <span className="inline-flex items-center bg-[var(--rt-surface-base)] px-2 py-0.5 text-xs font-mono font-semibold text-[var(--rt-text-primary)] border border-[var(--rt-border-subtle)]">
-              Risk workbench
-            </span>
+            {onViewOverview ? (
+              <button
+                type="button"
+                onClick={onViewOverview}
+                className="flex items-center text-left hover:opacity-85 transition-opacity cursor-pointer focus:outline-hidden"
+                title="Return to System Overview"
+              >
+                <Lockup height={28} />
+              </button>
+            ) : (
+              <Lockup height={28} />
+            )}
+
+            <div className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 text-[10px] font-mono font-bold uppercase tracking-widest text-[var(--rtd-steel)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--rtd-proceed)]" />
+              <span>RISK CONSOLE</span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
-            <ThemeToggle />
-            <PwaInstallButton />
-
+          {/* Desktop Controls (>= md) */}
+          <div className="hidden md:flex items-center gap-2.5">
+            {/* Back to System Overview */}
             {onViewOverview && (
               <button
                 type="button"
                 onClick={onViewOverview}
-                className="min-h-[44px] px-3 py-1.5 border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] text-xs font-mono font-semibold text-[var(--rt-text-muted)] hover:text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-raised)] active:scale-[0.98] transition-all cursor-pointer"
+                className="h-[36px] px-3.5 border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper-subtle)] hover:border-[var(--rtd-steel)] active:scale-[0.98] transition-all text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
-                ← System overview
+                <span>←</span>
+                <span>Overview</span>
               </button>
             )}
 
-            {/* Data Mode Switch */}
-            <div className="flex items-center border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] p-1 text-xs font-mono font-semibold">
+            {/* Data Mode Switcher (Live vs Fixture) */}
+            <div
+              role="group"
+              aria-label="Market Data Mode Selector"
+              className="inline-flex items-center border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] p-0.5 shadow-2xs"
+            >
               <button
                 type="button"
                 onClick={() => onToggleFixture(false)}
-                className={`min-h-[44px] px-3 py-1.5 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden cursor-pointer ${
+                aria-pressed={!useFixture}
+                className={`h-[34px] px-3 text-[10.5px] font-mono font-bold tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
                   !useFixture
-                    ? "bg-[var(--rt-surface-raised)] text-[var(--rt-text-primary)] shadow-xs font-semibold"
-                    : "text-[var(--rt-text-muted)] hover:text-[var(--rt-text-primary)]"
+                    ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)] shadow-xs"
+                    : "text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper-subtle)]"
                 }`}
+                title="Query live orderbook and real-time prices from Bitget"
               >
-                <span className="inline-block w-2 h-2 rounded-full bg-[var(--rt-verdict-clear)] mr-1.5 align-middle motion-safe:animate-pulse" />
-                Live Bitget
+                <span className={`w-1.5 h-1.5 rounded-full ${!useFixture ? "bg-[var(--rtd-proceed)] animate-pulse" : "bg-[var(--rtd-steel)]/40"}`} />
+                <span>Live Bitget</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => onToggleFixture(true)}
-                className={`min-h-[44px] px-3 py-1.5 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden cursor-pointer ${
+                aria-pressed={useFixture}
+                className={`h-[34px] px-3 text-[10.5px] font-mono font-bold tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
                   useFixture
-                    ? "bg-[var(--rt-surface-raised)] text-[var(--rt-text-primary)] shadow-xs font-semibold"
-                    : "text-[var(--rt-text-muted)] hover:text-[var(--rt-text-primary)]"
+                    ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)] shadow-xs"
+                    : "text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper-subtle)]"
                 }`}
+                title="Run deterministic calibrated fixture scenario"
               >
-                Deterministic fixture
+                <span className={`w-1.5 h-1.5 rounded-full ${useFixture ? "bg-[var(--rtd-proceed)]" : "bg-[var(--rtd-steel)]/40"}`} />
+                <span>Fixture</span>
               </button>
             </div>
 
+            {/* Theme Toggle (Day / Night) */}
+            <ThemeToggle />
+
+            {/* Action / Reset Button */}
             {canReset && (
               <button
                 type="button"
                 onClick={onNewTrade}
-                className="inline-flex min-h-[44px] items-center gap-1.5 border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] px-4 py-2 text-sm font-mono font-semibold text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-base)] hover:text-[var(--rt-text-primary)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-xs focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden cursor-pointer"
+                className="h-[36px] px-4 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] hover:opacity-90 active:scale-95 transition-all text-xs font-mono font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-xs cursor-pointer"
               >
-                <svg className="w-3.5 h-3.5 text-[var(--rt-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                New stress test
+                <span>+</span>
+                <span>New Trade</span>
               </button>
             )}
           </div>
-        </div>
 
-        {/* Mobile Header (< md: min-h-[48px] with full 44px touch targets) */}
-        <div className="flex md:hidden min-h-[48px] px-3 py-1 items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <Mark size={28} />
-            <span className="font-mono font-bold text-xs tracking-tight text-[var(--rt-text-primary)] truncate">
-              {BRANDING.SHORT_NAME}
-            </span>
-          </div>
+          {/* Mobile Header (< md) */}
+          <div className="flex md:hidden items-center justify-between w-full gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              {onViewOverview ? (
+                <button
+                  type="button"
+                  onClick={onViewOverview}
+                  className="flex items-center gap-1.5 text-left focus:outline-hidden"
+                >
+                  <Mark size={24} />
+                  <span className="font-mono font-bold text-xs tracking-tight text-[var(--rtd-ink)] truncate">
+                    {BRANDING.SHORT_NAME}
+                  </span>
+                </button>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <Mark size={24} />
+                  <span className="font-mono font-bold text-xs tracking-tight text-[var(--rtd-ink)] truncate">
+                    {BRANDING.SHORT_NAME}
+                  </span>
+                </div>
+              )}
+            </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            <ThemeToggle compact />
-            {onViewOverview && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Compact Mode Toggle */}
               <button
                 type="button"
-                onClick={onViewOverview}
-                className="min-h-[44px] px-2.5 py-1 text-[10px] font-mono font-bold border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] text-[var(--rt-text-muted)] active:scale-95 flex items-center justify-center cursor-pointer"
-                title="System Overview"
+                onClick={() => onToggleFixture(!useFixture)}
+                className="min-h-[40px] px-2.5 text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-95 flex items-center gap-1 cursor-pointer shadow-2xs"
+                aria-label={`Toggle data mode (currently ${useFixture ? "Fixture" : "Live"})`}
               >
-                ← Desk
+                <span className={`w-1.5 h-1.5 rounded-full ${useFixture ? "bg-[var(--rtd-wait)]" : "bg-[var(--rtd-proceed)] animate-pulse"}`} />
+                <span>{useFixture ? "FIXTURE" : "LIVE"}</span>
               </button>
-            )}
 
-            <button
-              type="button"
-              onClick={() => onToggleFixture(!useFixture)}
-              className={`inline-flex items-center justify-center px-2 py-1 text-[10px] font-mono font-bold border min-h-[44px] cursor-pointer ${
-                useFixture
-                  ? "bg-[var(--rt-surface-base)] text-[var(--rt-verdict-moderate)] border-[var(--rt-verdict-moderate)]"
-                  : "bg-[var(--rt-surface-base)] text-[var(--rt-verdict-clear)] border-[var(--rt-border-subtle)]"
-              }`}
-              aria-label={`Toggle data mode (currently ${useFixture ? "Fixture" : "Live"})`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full mr-1 ${useFixture ? "bg-[var(--rt-verdict-moderate)]" : "bg-[var(--rt-verdict-clear)] animate-pulse"}`} />
-              {useFixture ? "Fixture" : "Live"}
-            </button>
+              {/* Compact Theme Toggle */}
+              <ThemeToggle compact />
 
-            {canReset && (
-              <button
-                type="button"
-                onClick={onNewTrade}
-                className="min-h-[44px] px-2.5 py-1 text-[10px] font-mono font-bold border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] text-[var(--rt-text-primary)] active:scale-95 flex items-center justify-center cursor-pointer"
-                title="New stress test"
-              >
-                + Reset
-              </button>
-            )}
+              {/* Back to Overview or Reset on Mobile */}
+              {onViewOverview && (
+                <button
+                  type="button"
+                  onClick={onViewOverview}
+                  className="min-h-[40px] px-2.5 text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs"
+                  title="Return to System Overview"
+                >
+                  ← DESK
+                </button>
+              )}
+
+              {canReset && (
+                <button
+                  type="button"
+                  onClick={onNewTrade}
+                  className="min-h-[40px] px-3 text-[10px] font-mono font-bold uppercase tracking-wider bg-[var(--rtd-ink)] text-[var(--rtd-paper)] active:scale-95 flex items-center justify-center cursor-pointer shadow-xs"
+                  title="Start New Trade Evaluation"
+                >
+                  + NEW
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>
     </div>
   );
 }
-
-
