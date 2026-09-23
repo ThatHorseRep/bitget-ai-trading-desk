@@ -24,12 +24,18 @@ const TRUSTED_YAHOO_ORIGINS = new Set([
   "https://query2.finance.yahoo.com"
 ]);
 
+function isAllowedYahooOrigin(url: string): boolean {
+  if (TRUSTED_YAHOO_ORIGINS.has(url)) return true;
+  if (url.startsWith("http://127.0.0.1:") || url.startsWith("http://localhost:")) return true;
+  return false;
+}
+
 export class YahooReferenceProvider implements ReferencePriceProvider {
   private baseUrl: string;
 
   constructor(baseUrl = "https://query1.finance.yahoo.com") {
     const cleanUrl = baseUrl.replace(/\/$/, "");
-    if (!TRUSTED_YAHOO_ORIGINS.has(cleanUrl)) {
+    if (!isAllowedYahooOrigin(cleanUrl)) {
       console.warn(`Untrusted Yahoo base URL: ${cleanUrl}. Falling back to default.`);
       this.baseUrl = "https://query1.finance.yahoo.com";
     } else {

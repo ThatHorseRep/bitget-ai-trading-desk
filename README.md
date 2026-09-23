@@ -55,7 +55,7 @@ npm run test
 - **Portfolio Context/Impact:** Marked as FUTURE/DEFERRED in documentation (not implemented in MVP).
 
 ## Architecture & Specifications
-The official product specs and architecture documents (B01-B07) are located in the root directory. Early research drafts and planning notes have been archived in the `docs/archive/` folder.
+The official product specs and architecture documents (B01-B07) are located in the `docs/specs/` directory. Early research drafts and planning notes have been archived in the `docs/archive/` folder.
 
 
 

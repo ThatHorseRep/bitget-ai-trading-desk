@@ -113,3 +113,20 @@ test("matrix 16: 'my thesis is' explicit phrasing captured", () => {
   const result = parseNaturalLanguageTrade("buy $2,000 rNVDA. My thesis is AI demand keeps compounding into next year.");
   assert.equal(result.tradeIdea.thesis, "AI demand keeps compounding into next year");
 });
+
+test("matrix 17: share quantity parsing -> derives position size from working price", () => {
+  const result = parseNaturalLanguageTrade("buy 50 shares of rNVDA because AI demand is strong.", 140);
+  assert.equal(result.requiresClarification, false);
+  assert.equal(result.tradeIdea.direction, "LONG");
+  assert.equal(result.tradeIdea.positionSizeUsd, 7000);
+  assert.equal(result.tradeIdea.asset, "rNVDA");
+});
+
+test("matrix 18: token quantity phrasing with units", () => {
+  const result = parseNaturalLanguageTrade("long 10 tokens of rNVDA at $150 because datacenter revenues are accelerating.");
+  assert.equal(result.requiresClarification, false);
+  assert.equal(result.tradeIdea.direction, "LONG");
+  assert.equal(result.tradeIdea.positionSizeUsd, 1500);
+  assert.equal(result.tradeIdea.asset, "rNVDA");
+});
+

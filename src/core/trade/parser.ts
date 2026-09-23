@@ -55,53 +55,7 @@ export function parseNaturalLanguageTrade(
     assetClarificationRequired = true;
   }
 
-  // 3. Position size extraction ($2,000 or 2000 usd or $2k)
-  let positionSizeUsd: number | null = null;
-  
-  const textToNum: Record<string, number> = {
-    one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10
-  };
-  const grandMatch = text.match(/(one|two|three|four|five|six|seven|eight|nine|ten)\s+grand\b/i);
-
-  const sizeMatch = text.match(/(-?)\s*\$\s*([\d,]+(?:\.\d+)?)\s*(k|m)?/i) ||
-    text.match(/(-?)\s*([\d,]+(?:\.\d+)?)\s*(?:usd|dollars|usdt)\b/i);
-
-  if (grandMatch) {
-    positionSizeUsd = textToNum[grandMatch[1].toLowerCase()] * 1000;
-    userProvided.push("positionSizeUsd");
-  } else if (sizeMatch) {
-    const isNegative = sizeMatch[1] === "-";
-    const rawNum = parseFloat(sizeMatch[2].replace(/,/g, ""));
-    const multiplierStr = sizeMatch[3] || "";
-    const multiplier = multiplierStr.toLowerCase() === "k" ? 1000 : (multiplierStr.toLowerCase() === "m" ? 1000000 : 1);
-    if (Number.isFinite(rawNum)) {
-      positionSizeUsd = (isNegative ? -rawNum : rawNum) * multiplier;
-      if (positionSizeUsd > 0) {
-        userProvided.push("positionSizeUsd");
-      }
-    }
-  }
-
-  // 4. Thesis extraction
-  // Causal connectors carry the trader's actual reasoning. Soft intent markers
-  // ("I'm thinking about buying X because Y") often appear far earlier in the
-  // sentence, so they must never take priority over a causal clause — otherwise
-  // the thesis truncates to the intent fragment and loses the reasoning.
-  const terminator = "(?:\\.|$|\\b(?:stress-test|stress test|before Monday|already have|my exposure)\\b)";
-  let thesis = "";
-  const causalMatch = text.match(new RegExp("\\b(?:because|since|thesis is|my thesis is)\\s+(.+?)" + terminator, "i"));
-  const softMatch = text.match(new RegExp("\\b(?:expecting|thinking|believing)\\s+(.+?)" + terminator, "i"));
-  const thesisMatch = causalMatch ?? softMatch;
-  if (thesisMatch) {
-    thesis = thesisMatch[1].trim();
-    userProvided.push("thesis");
-  } else if (text.length > 20) {
-    // If no explicit 'because' but trader wrote a paragraph
-    thesis = text;
-    inferred.push("thesis");
-  }
-
-  // 4.5. Price extraction (must strictly distinguish prices from execution times like 'at 11:30 ET' and percentages like 'at 0.03%')
+  // 3. Price extraction (must strictly distinguish prices from execution times like 'at 11:30 ET' and percentages like 'at 0.03%')
   let explicitPrice: number | null = null;
   let priceClarificationRequired = false;
 
@@ -123,6 +77,65 @@ export function parseNaturalLanguageTrade(
      } else {
         userProvided.push("entryPrice");
      }
+  }
+
+  // 4. Position size extraction ($2,000 or 2000 usd or $2k, or share quantities)
+  let positionSizeUsd: number | null = null;
+  
+  const textToNum: Record<string, number> = {
+    one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10
+  };
+  const grandMatch = text.match(/(one|two|three|four|five|six|seven|eight|nine|ten)\s+grand\b/i);
+
+  // 4a. Share / Token count extraction takes precedence when explicit unit is used (e.g. "50 shares", "10 tokens of rNVDA at $150")
+  const sharesMatch = text.match(/([\d,]+(?:\.\d+)?)\s*(?:shares|tokens|units|contracts)\b/i);
+
+  const sizeMatch = text.match(/(-?)\s*\$\s*([\d,]+(?:\.\d+)?)\s*(k|m)?/i) ||
+    text.match(/(-?)\s*([\d,]+(?:\.\d+)?)\s*(?:usd|dollars|usdt)\b/i);
+
+  if (sharesMatch) {
+    const shareCount = parseFloat(sharesMatch[1].replace(/,/g, ""));
+    if (Number.isFinite(shareCount) && shareCount > 0) {
+      const effectivePrice = explicitPrice ?? (workingPrice > 0 ? workingPrice : 140);
+      positionSizeUsd = Math.round(shareCount * effectivePrice * 100) / 100;
+      if (positionSizeUsd > 0) {
+        userProvided.push("positionSizeUsd");
+        derived.push("positionSizeUsd (derived from share count and working price)");
+      }
+    }
+  } else if (grandMatch) {
+    positionSizeUsd = textToNum[grandMatch[1].toLowerCase()] * 1000;
+    userProvided.push("positionSizeUsd");
+  } else if (sizeMatch) {
+    const isNegative = sizeMatch[1] === "-";
+    const rawNum = parseFloat(sizeMatch[2].replace(/,/g, ""));
+    const multiplierStr = sizeMatch[3] || "";
+    const multiplier = multiplierStr.toLowerCase() === "k" ? 1000 : (multiplierStr.toLowerCase() === "m" ? 1000000 : 1);
+    if (Number.isFinite(rawNum)) {
+      positionSizeUsd = (isNegative ? -rawNum : rawNum) * multiplier;
+      if (positionSizeUsd > 0) {
+        userProvided.push("positionSizeUsd");
+      }
+    }
+  }
+
+  // 5. Thesis extraction
+  // Causal connectors carry the trader's actual reasoning. Soft intent markers
+  // ("I'm thinking about buying X because Y") often appear far earlier in the
+  // sentence, so they must never take priority over a causal clause — otherwise
+  // the thesis truncates to the intent fragment and loses the reasoning.
+  const terminator = "(?:\\.|$|\\b(?:stress-test|stress test|before Monday|already have|my exposure)\\b)";
+  let thesis = "";
+  const causalMatch = text.match(new RegExp("\\b(?:because|since|thesis is|my thesis is)\\s+(.+?)" + terminator, "i"));
+  const softMatch = text.match(new RegExp("\\b(?:expecting|thinking|believing)\\s+(.+?)" + terminator, "i"));
+  const thesisMatch = causalMatch ?? softMatch;
+  if (thesisMatch) {
+    thesis = thesisMatch[1].trim();
+    userProvided.push("thesis");
+  } else if (text.length > 20) {
+    // If no explicit 'because' but trader wrote a paragraph
+    thesis = text;
+    inferred.push("thesis");
   }
 
   // 5. Time horizon extraction

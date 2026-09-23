@@ -15,7 +15,7 @@
     "verify-paper-trading": "npm run build:core && npx tsc src/scripts/verify-paper-trading.ts --outDir .paper-verify --skipLibCheck --target ES2022 --module CommonJS --moduleResolution Node --esModuleInterop && node .paper-verify/scripts/verify-paper-trading.js"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

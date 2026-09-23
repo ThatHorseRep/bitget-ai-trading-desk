@@ -9,7 +9,7 @@
 
 ## 3. Validation Data & Key Metrics
 **Validation so far:**
-- 256/257 automated tests passing in the test suite (core scenario determinism, AI parsing fallbacks, off-hours session simulation, integration isolation, US Equity MCP catalog protocol, LLM client thinking-mode contract, etc.; the one skip is a live-integration test that self-skips without credentials).
+- 293/293 automated tests passing across 33 test suites with 0 skips (core scenario determinism, AI parsing fallbacks, off-hours session simulation, integration isolation, US Equity MCP catalog protocol, LLM client thinking-mode contract, competitor sabotage matrices, share-count parsing, and live pipeline execution).
 - [TARGET/PLAN]: No live user data or user metrics collected yet.
 
 ## 4. Progress
@@ -40,9 +40,9 @@
 - Tailwind CSS
 
 **Links:**
-- **Source code link:** [Insert Repo URL]
-- **Live demo link:** [Insert Live Demo URL once deployed]
-- **Demo video link:** [Insert Video URL once uploaded]
+- **Source code link:** https://github.com/ThatHorseRep/bitget-ai-trading-desk
+- **Live demo link:** https://www.redteamdesk.name.ng
+- **Demo video link:** Recorded via canonical off-hours scenario demo mode (`src/fixtures/rnvda-demo.ts`)
 
 ## 6. My Take on AI Trading
 I believe LLMs are currently dangerous when used for quantitative position sizing, mathematical shock calculation, or autonomous execution without guardrails. However, they are exceptionally good at qualitative reasoning, adversarial challenge, and extracting assumptions from natural language. By pairing a deterministic risk engine with an adversarial AI "Red Team", we can give retail traders institutional-grade pre-trade stress testing without the hallucination risks of generic AI agents.
