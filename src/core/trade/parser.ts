@@ -111,8 +111,10 @@ export function parseNaturalLanguageTrade(
   const explicitCurrencyMatch = text.match(/(?:at|@|entry(?:\s*price)?|price(?:\s*of)?)\s*([\d,]+(?:\.\d+)?)\s*(?:usd|dollars|usdt|per\s+(?:share|token))\b/i);
   // 3. Explicit "entry price X" or "at price X" without %, without timestamp colon
   const priceKeywordMatch = text.match(/(?:entry\s*price|at\s*price|price\s*of)\s*(?:is|at|@)?\s*([\d,]+(?:\.\d+)?)(?!\s*(?:%|percent|bps|:\d))/i);
+  // 4. Plain numeric at/price: at 130.50, @ -50 (excluding times like 11:30 and percentages like 0.03%)
+  const plainAtMatch = text.match(/(?:at|@)\s*(-?[\d,]+(?:\.\d+)?)(?!\s*(?:%|percent|bps|:\d|\s*(?:am|pm|et|est|edt|utc|gmt)\b))/i);
 
-  const matchedPriceStr = explicitDollarMatch?.[1] ?? explicitCurrencyMatch?.[1] ?? priceKeywordMatch?.[1];
+  const matchedPriceStr = explicitDollarMatch?.[1] ?? explicitCurrencyMatch?.[1] ?? priceKeywordMatch?.[1] ?? plainAtMatch?.[1];
 
   if (matchedPriceStr) {
      explicitPrice = parseFloat(matchedPriceStr.replace(/,/g, ""));
