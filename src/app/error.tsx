@@ -38,7 +38,7 @@ export default function GlobalError({
           <button
             type="button"
             onClick={() => reset()}
-            className="border border-[var(--rt-surface-void)] bg-[var(--rt-surface-void)] px-4 py-2 text-xs font-mono font-semibold text-[var(--rt-text-on-void)] hover:opacity-90 active:scale-[0.98] transition-opacity"
+            className="border border-[var(--rt-surface-void)] bg-[var(--rt-surface-void)] px-4 py-2 text-xs font-mono font-semibold text-[var(--rt-surface-raised)] hover:opacity-90 active:scale-[0.98] transition-opacity"
           >
             Retry operation
           </button>

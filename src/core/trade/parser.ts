@@ -35,14 +35,21 @@ export function parseNaturalLanguageTrade(
   // 2. Asset extraction
   let asset: string | null = null;
   let assetClarificationRequired = false;
-  
-  const genericRTokenMatch = text.match(/\b(r[A-Z]{2,10})(?:USDT)?\b/i);
-  
-  if (genericRTokenMatch) {
-    // e.g. rNVDA, rAAPL, rTSLA
-    asset = genericRTokenMatch[1].toUpperCase();
-    if (asset === "RNVDA") asset = "rNVDA"; // keep preferred casing
-    else asset = "r" + asset.substring(1);
+
+  // Case matters: real r-tokens are camelCase (rNVDA, rAAPL) — a case-
+  // insensitive r[A-Za-z]+ rule would swallow ordinary words like "risk"
+  // or "return" as fake tickers. Match the rNVDA literal permissively and
+  // require an UPPERCASE ticker for the generic r-token rule.
+  const rnvdaLiteralMatch = text.match(/\brNVDA(?:USDT)?\b/i);
+  const genericRTokenMatch = text.match(/\br([A-Z]{2,10})(?:USDT)?\b/);
+
+  if (rnvdaLiteralMatch) {
+    asset = "rNVDA";
+    userProvided.push("asset");
+  } else if (genericRTokenMatch) {
+    // e.g. rAAPL, rTSLA
+    const ticker = genericRTokenMatch[1];
+    asset = ticker.toUpperCase() === "NVDA" ? "rNVDA" : "r" + ticker;
     userProvided.push("asset");
   } else if (/\bnvda\b/i.test(text)) {
     assetClarificationRequired = true;

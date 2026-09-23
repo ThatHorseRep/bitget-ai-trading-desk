@@ -74,13 +74,20 @@ export class MarketStateService {
         throw new Error(`Instrument ${mapping.bitgetSymbol} is not identified as a Reality token by Bitget.`);
       }
     } catch (bitgetError) {
-      console.warn("Bitget API unavailable, activating demo safety net fallback:", bitgetError);
-      return {
-        ...rnvdaDemoMarketState,
-        isFallbackDemo: true,
-        fallbackReason: "Bitget API unavailable - showing curated rNVDA weekend basis demo",
-        dataQuality: "DEGRADED"
-      };
+      // The curated demo fixture describes rNVDA only. Substituting it for any
+      // other asset would present NVDA demo prices as the requested asset's
+      // market — so fall back ONLY when the request is actually rNVDA;
+      // otherwise rethrow so callers get an honest failure.
+      console.warn("Bitget API unavailable:", bitgetError);
+      if (mapping.referenceSymbol === "NVDA") {
+        return {
+          ...rnvdaDemoMarketState,
+          isFallbackDemo: true,
+          fallbackReason: "Bitget API unavailable - showing curated rNVDA weekend basis demo",
+          dataQuality: "DEGRADED"
+        };
+      }
+      throw bitgetError;
     }
 
     const tokenMarketStatus = rTokenInstrument.isActive ? "ACTIVE" : "INACTIVE";
@@ -157,8 +164,11 @@ export class MarketStateService {
     );
 
     // Initial state before validation
+    // observedAt uses the EXCHANGE's ticker timestamp, not the local clock —
+    // assessMarketDataQuality compares this against `now` to detect stale
+    // observations, so stamping it with `now` would make that check a no-op.
     const candidateState: MarketState = {
-      observedAt: now.toISOString(),
+      observedAt: rTokenTicker.observedAt,
       instrumentPrice: rTokenTicker.lastPrice,
       bid: rTokenTicker.bid,
       ask: rTokenTicker.ask,

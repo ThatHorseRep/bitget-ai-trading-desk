@@ -1,8 +1,8 @@
-import { Verdict } from "@/config/branding";
+import type { DecisionVerdict } from "../domain/decision/types";
 
 export interface VerdictRecord {
   id: string;
-  verdict: Verdict;
+  verdict: DecisionVerdict;
   confidence: number;
   timestamp: number;
   tradeAsset: string;

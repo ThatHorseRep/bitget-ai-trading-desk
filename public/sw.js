@@ -11,8 +11,7 @@ const PRECACHE_ASSETS = [
   '/icon-192.png',
   '/icon-512.png',
   '/maskable-icon-512.png',
-  '/apple-touch-icon.png',
-  '/brand/bitget-endorsed-lockup.svg'
+  '/apple-touch-icon.png'
 ];
 
 // Offline fallback HTML

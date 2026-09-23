@@ -45,9 +45,9 @@ const VERDICT_CONFIG: Record<
     title: "REDUCE NOTIONAL SIZE",
     badge: "REDUCE",
     bg: "bg-[var(--rt-surface-raised)]",
-    text: "text-[var(--rt-verdict-high)]",
-    border: "border-[var(--rt-verdict-high)]",
-    iconBg: "bg-[var(--rt-verdict-high)]",
+    text: "text-[var(--rt-verdict-elevated)]",
+    border: "border-[var(--rt-verdict-elevated)]",
+    iconBg: "bg-[var(--rt-verdict-elevated)]",
     description: "Notional size exceeds safe liquidity thresholds for current orderbook depth."
   },
   REJECT: {

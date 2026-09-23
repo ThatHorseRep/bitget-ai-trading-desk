@@ -54,7 +54,7 @@ export function VerdictScaleLoader({
         <div className="flex items-center justify-between text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--rt-text-muted)]">
           <span className="text-[var(--rt-verdict-clear)]">Clear</span>
           <span className="text-[var(--rt-verdict-moderate)]">Moderate</span>
-          <span className="text-[var(--rt-verdict-high)]">High Risk</span>
+          <span className="text-[var(--rt-verdict-elevated)]">High Risk</span>
           <span className="text-[var(--rt-verdict-critical)]">Critical</span>
         </div>
         <div className="h-2 w-full border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] p-0.5">

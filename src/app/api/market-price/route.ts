@@ -6,7 +6,7 @@ import { z } from "zod";
 import { checkRateLimit, rateLimitExceededResponse } from "../../../lib/rateLimit";
 
 const requestSchema = z.object({
-  asset: z.string().min(1)
+  asset: z.string().min(1).max(16)
 }).strict();
 
 // Each market-state build fans out to 3-4 upstream fetches (Bitget ticker,
@@ -33,7 +33,17 @@ export async function GET(request: NextRequest) {
     const marketStateService = new MarketStateService();
     // useFixture true here? No, the user wants the REAL price.
     const marketState = await marketStateService.getMarketState(parseResult.data.asset, { useFixture: false });
-    
+
+    // Never serve the curated demo fixture as a real price: this endpoint is
+    // the client's entry-price source of truth. A fabricated price here would
+    // silently propagate into the normalized trade.
+    if (marketState.isFallbackDemo) {
+      return NextResponse.json(
+        { error: "Live market data unavailable; refusing to serve demo fixture as a real price.", price: null },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json({ price: marketState.instrumentPrice, timestamp: marketState.observedAt }, { status: 200 });
   } catch (error) {
     console.error("Failed to fetch market price:", error);
