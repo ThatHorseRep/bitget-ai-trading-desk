@@ -34,3 +34,38 @@ tests/fixtures/scenario_truth_table.md
 # Ad-hoc test/output noise
 test-output.txt
 failure-matrix.log
+
+# Session/local artifacts - never commit
+recon/
+recon_surface*.py
+local-full.tar.gz
+local-extras.tar.gz
+local-extras.zip
+local-test-render.png
+artifact_output.json
+.backup/
+.freebuff/preview-*.log
+.freebuff/preview-*.log.err
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Deleted ad-hoc root scripts (kept out in case of local re-creation)
+/test_theses.ts
+/test_run.ts
+/scratch_test.ts
+/parse-html.cjs
+/a11y-test.js
+/test-stream.cjs
+/test-real.ts
+/test-real.cjs
+/test-resilience.js
+/test-resilience.cjs
+/test-qwen.cjs
+/test-qwen3.cjs
+/test-qwen4.cjs
+/test-qwen5.cjs
+/test-extractor-llm.cjs
+/test-extractor-llm2.cjs
