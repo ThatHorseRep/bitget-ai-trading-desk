@@ -164,20 +164,20 @@ export function DecisionArtifactView({
 
         {/* Limitations and Operational Advisories */}
         {limitations.length > 0 && (
-          <div className="border border-amber-500/30 bg-amber-500/5 p-3.5 text-xs text-[var(--rtd-ink)] space-y-2">
+          <div className="border border-amber-500/40 dark:border-amber-400/30 bg-amber-50/70 dark:bg-amber-950/20 p-3.5 text-xs text-[var(--rtd-ink)] space-y-2">
             <div className="flex items-center gap-2">
-              <span className="font-mono font-bold text-amber-700 dark:text-amber-300 text-[10px] tracking-wider uppercase px-2 py-0.5 border border-amber-500/30 bg-amber-500/10">
+              <span className="font-mono font-bold text-amber-900 dark:text-amber-200 text-[10px] tracking-wider uppercase px-2 py-0.5 border border-amber-300 dark:border-amber-700/60 bg-amber-100 dark:bg-amber-900/40">
                 DESK ADVISORY
               </span>
-              <span className="text-[11px] text-[var(--rtd-steel)] font-mono">
+              <span className="text-[11px] text-[var(--rtd-ink)]/70 font-mono">
                 {limitations.length} operational {limitations.length === 1 ? "note" : "notes"}
               </span>
             </div>
-            <ul className="font-sans leading-relaxed text-[var(--rtd-steel)] space-y-1.5 pl-1">
+            <ul className="font-sans leading-relaxed text-[var(--rtd-ink)] space-y-1.5 pl-1">
               {limitations.map((lim, idx) => (
                 <li key={idx} className="flex items-start gap-2">
-                  <span className="text-amber-500 font-bold shrink-0 mt-0.5">•</span>
-                  <span>{lim}</span>
+                  <span className="text-amber-700 dark:text-amber-400 font-bold shrink-0 mt-0.5">•</span>
+                  <span className="text-[var(--rtd-ink)]/90">{lim}</span>
                 </li>
               ))}
             </ul>
