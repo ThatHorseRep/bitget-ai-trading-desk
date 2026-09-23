@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { VERDICT_COLOR, type Verdict } from "@/config/branding";
+import type { Verdict } from "@/config/branding";
 import { VerdictGlyph } from "@/components/brand/VerdictGlyph";
 
 interface TradeInputSurfaceProps {
@@ -27,11 +27,46 @@ interface ScenarioPreset {
   promptText: string;
 }
 
+// Exactly 4 calibrated canonical scenarios matching the 4 desk verdicts (Symmetrical 2x2 grid)
 const PRESET_SCENARIOS: ScenarioPreset[] = [
   {
-    id: "canonical",
-    label: "Reference rNVDA Thesis",
-    badge: "Official fixture",
+    id: "proceed",
+    label: "Cash Hours Confirmed Arbitrage",
+    badge: "Execution Runway",
+    symbol: "rNVDA",
+    direction: "LONG",
+    size: "$10,000",
+    verdict: "PROCEED",
+    summary: "US cash market open. Tight 0.02% spread with confirmed arbitrage depth.",
+    expectedShortfall: "-2.1%",
+    basisGap: "+0.02%",
+    depthVsSession: "0.12x",
+    cryptoBeta: "0.15",
+    actionText: "Execute Trade Runway",
+    promptText:
+      "I plan to buy $10,000 rNVDA token during US cash market hours at 10:15 AM ET with 0.02% basis spread. Data center revenue beat + low crypto correlation."
+  },
+  {
+    id: "reduce",
+    label: "High Leverage Extended Hours",
+    badge: "Leverage Bound",
+    symbol: "rNVDA",
+    direction: "LONG",
+    size: "$50,000",
+    verdict: "REDUCE",
+    summary: "Notional size overwhelms thin off-hours orderbook depth. Resize required.",
+    expectedShortfall: "-15.2%",
+    basisGap: "+0.45%",
+    depthVsSession: "1.85x",
+    cryptoBeta: "0.45",
+    actionText: "Resize to Recommended Limit",
+    promptText:
+      "I plan to buy $50,000 rNVDA token with 5x leverage during extended hours. Basis spread elevated at 0.45%."
+  },
+  {
+    id: "wait",
+    label: "Weekend 65.5h Liquidity Void",
+    badge: "Off-Hours Drift",
     symbol: "rNVDA",
     direction: "LONG",
     size: "$2,000",
@@ -41,48 +76,14 @@ const PRESET_SCENARIOS: ScenarioPreset[] = [
     basisGap: "+2.56%",
     depthVsSession: "0.35x",
     cryptoBeta: "0.20",
-    actionText: "Stress test trade",
+    actionText: "Defer to Monday Open",
     promptText:
       "I'm thinking about buying $2,000 of rNVDA because AI infrastructure demand still looks strong. BTC has been weakening all weekend. Stress-test it."
   },
   {
-    id: "reduce",
-    label: "High Leverage Extended Hours",
-    badge: "Leverage test",
-    symbol: "rNVDA",
-    direction: "LONG",
-    size: "$50,000",
-    verdict: "REDUCE",
-    summary: "Notional size overwhelms thin off-hours orderbook depth.",
-    expectedShortfall: "-15.2%",
-    basisGap: "+0.45%",
-    depthVsSession: "1.85x",
-    cryptoBeta: "0.45",
-    actionText: "Resize to $15,000",
-    promptText:
-      "I plan to buy $50,000 rNVDA token with 5x leverage during extended hours. Basis spread elevated at 0.45%."
-  },
-  {
-    id: "wait",
-    label: "Sunday Night Liquidity Void",
-    badge: "Weekend closure",
-    symbol: "rNVDA",
-    direction: "LONG",
-    size: "$25,000",
-    verdict: "WAIT",
-    summary: "Cash market closed. 65.5h un-anchored drift until Monday 09:30 ET.",
-    expectedShortfall: "-6.8%",
-    basisGap: "+3.10%",
-    depthVsSession: "0.18x",
-    cryptoBeta: "0.30",
-    actionText: "Defer to Monday Open",
-    promptText:
-      "I want to buy $25,000 rNVDA token on Sunday at 02:00 AM ET during 65.5-hour weekend market closure."
-  },
-  {
     id: "reject",
     label: "Unhedged Weekend Cascade",
-    badge: "Tail risk",
+    badge: "Tail Risk",
     symbol: "rNVDA",
     direction: "LONG",
     size: "$100,000",
@@ -92,26 +93,9 @@ const PRESET_SCENARIOS: ScenarioPreset[] = [
     basisGap: "+5.80%",
     depthVsSession: "4.50x",
     cryptoBeta: "0.85",
-    actionText: "Reject capital allocation",
+    actionText: "Reject Capital Allocation",
     promptText:
       "Ape $100,000 with max leverage into tokenized equity with no thesis, no stop loss, and liquidation cascade risk."
-  },
-  {
-    id: "proceed",
-    label: "Cash Hours Confirmed Arbitrage",
-    badge: "Execution runway",
-    symbol: "rNVDA",
-    direction: "LONG",
-    size: "$10,000",
-    verdict: "PROCEED",
-    summary: "Cash market open. Tight 0.02% spread with confirmed arbitrage depth.",
-    expectedShortfall: "-2.1%",
-    basisGap: "+0.02%",
-    depthVsSession: "0.12x",
-    cryptoBeta: "0.15",
-    actionText: "Execute trade runway",
-    promptText:
-      "I plan to buy $10,000 rNVDA token during US cash market hours at 10:15 AM ET with 0.02% basis spread. Data center revenue beat + low crypto correlation."
   }
 ];
 
@@ -132,7 +116,7 @@ export function TradeInputSurface({
     initialPrompt ? "results" : "input"
   );
 
-  // Derive active preset or parse inputs from prompt
+  // Derive active preset if matching
   const matchedPreset = useMemo(() => {
     if (!prompt.trim()) return undefined;
     return PRESET_SCENARIOS.find((p) => p.promptText.trim() === prompt.trim());
@@ -146,12 +130,12 @@ export function TradeInputSurface({
         direction: "—",
         size: "—",
         verdict: "WAIT" as Verdict,
-        summary: "Enter your trade thesis or choose a preset scenario below to stress-test your trade.",
+        summary: "Enter your trade thesis or choose a preset scenario below to stress-test your position.",
         expectedShortfall: "—",
         basisGap: "—",
         depthVsSession: "—",
         cryptoBeta: "—",
-        actionText: "Enter trade thesis to evaluate"
+        actionText: "Enter Trade Thesis to Evaluate"
       };
     }
 
@@ -170,7 +154,7 @@ export function TradeInputSurface({
       };
     }
 
-    // Heuristic inference for custom prompt
+    // Heuristic inference for custom user prompt
     const lower = prompt.toLowerCase();
     const symbolMatch = prompt.match(/\b(rNVDA|rTSLA|rAAPL|rMSFT|rAMZN|NVDA|TSLA)\b/i);
     const symbol = symbolMatch ? symbolMatch[1].toUpperCase() : "rNVDA";
@@ -184,7 +168,7 @@ export function TradeInputSurface({
     let basisGap = "+2.40%";
     let depthVsSession = "0.28x";
     let cryptoBeta = "0.35";
-    let actionText = "Stress test trade";
+    let actionText = "Stress Test Trade";
 
     if (lower.includes("ape") || lower.includes("cascade") || lower.includes("no thesis") || lower.includes("liquidation")) {
       verdict = "REJECT";
@@ -193,7 +177,7 @@ export function TradeInputSurface({
       basisGap = "+5.40%";
       depthVsSession = "3.80x";
       cryptoBeta = "0.85";
-      actionText = "Reject capital allocation";
+      actionText = "Reject Capital Allocation";
     } else if (lower.includes("50,000") || lower.includes("leverage") || lower.includes("elevated")) {
       verdict = "REDUCE";
       summary = "Notional size overwhelms thin off-hours orderbook depth.";
@@ -201,7 +185,7 @@ export function TradeInputSurface({
       basisGap = "+0.45%";
       depthVsSession = "1.60x";
       cryptoBeta = "0.45";
-      actionText = "Resize to recommended limit";
+      actionText = "Resize to Recommended Limit";
     } else if (lower.includes("cash market") || lower.includes("0.02%") || lower.includes("low crypto")) {
       verdict = "PROCEED";
       summary = "Cash market open. Tight spread with confirmed arbitrage depth.";
@@ -209,7 +193,7 @@ export function TradeInputSurface({
       basisGap = "+0.02%";
       depthVsSession = "0.12x";
       cryptoBeta = "0.15";
-      actionText = "Execute trade runway";
+      actionText = "Execute Trade Runway";
     }
 
     return {
@@ -235,21 +219,40 @@ export function TradeInputSurface({
   const isReject = positionInfo.verdict === "REJECT";
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6">
+    <div className="w-full max-w-6xl mx-auto space-y-6 pt-2">
+      {/* Editorial Workbench Banner */}
+      <div className="bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-[0.18em] text-[var(--rtd-steel)]">
+              01 / PRE-TRADE ADVERSARIAL WORKBENCH
+            </span>
+            <span>•</span>
+            <span className="text-[11px] font-mono text-[var(--rtd-proceed)] font-bold">
+              POLICY RUNWAY ACTIVE
+            </span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-mono font-bold text-[var(--rtd-ink)] tracking-tight">
+            Stress-test tokenized equity trades before execution.
+          </h2>
+          <p className="text-xs sm:text-sm text-[var(--rtd-steel)] font-sans max-w-3xl leading-relaxed">
+            Tokenized equities trade 24/7 on Bitget across the 65.5-hour off-hours window when NYSE is closed. Select a canonical test scenario or specify your custom trade thesis below.
+          </p>
+        </div>
+
+        <div className="hidden lg:flex flex-col items-end shrink-0 space-y-1">
+          <div className="px-3 py-1 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 text-[10.5px] font-mono font-bold tracking-wider uppercase text-[var(--rtd-ink)]">
+            BITGET RISK ENGINE
+          </div>
+          <span className="text-[10px] font-mono text-[var(--rtd-steel)]">
+            Deterministic Rule Base v2.4
+          </span>
+        </div>
+      </div>
+
       {/* Mobile view switcher for small screens (< 768px) */}
       <div className="flex md:hidden items-center justify-between border-b border-[var(--rtd-steel)]/25 pb-3">
-        <div className="flex items-center gap-1 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-1 rounded-xs">
-          <button
-            type="button"
-            onClick={() => setActiveTab("results")}
-            className={`min-h-[44px] px-3.5 py-2 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center cursor-pointer ${
-              activeTab === "results"
-                ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)] shadow-xs"
-                : "text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)]"
-            }`}
-          >
-            06 / Results View
-          </button>
+        <div className="flex items-center gap-1 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-1">
           <button
             type="button"
             onClick={() => setActiveTab("input")}
@@ -261,6 +264,17 @@ export function TradeInputSurface({
           >
             Edit Trade Thesis
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("results")}
+            className={`min-h-[44px] px-3.5 py-2 text-xs font-mono font-bold uppercase transition-all flex items-center justify-center cursor-pointer ${
+              activeTab === "results"
+                ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)] shadow-xs"
+                : "text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)]"
+            }`}
+          >
+            Cockpit Preview
+          </button>
         </div>
 
         <span className="text-[11px] font-mono font-bold text-[var(--rtd-steel)] uppercase">
@@ -268,27 +282,25 @@ export function TradeInputSurface({
         </span>
       </div>
 
-      {/* Main Grid: On desktop (>= 1024px) side-by-side. On tablet/mobile stacked or tabbed */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* Main Workbench Grid (Side-by-side on desktop, cohesive layout) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* ==================================================================
-            LEFT COLUMN: THE RESULTS VIEW (Matches 06-mobile-app.png)
-            On mobile (< 768px), rendered when activeTab === "results".
-            On desktop, styled as the nocturnal cockpit device.
+            LEFT COLUMN: THE COCKPIT TERMINAL DECK (40% width on desktop)
+            Nocturnal high-contrast console matching 06-mobile-app.png
            ================================================================== */}
         <div
-          className={`lg:col-span-6 xl:col-span-5 flex justify-center ${
-            activeTab === "results" ? "block" : "hidden md:block"
+          className={`lg:col-span-5 flex flex-col ${
+            activeTab === "results" ? "block" : "hidden md:flex"
           }`}
         >
-          {/* Mobile cockpit card frame matching 06-mobile-app.png */}
-          <div className="w-full max-w-[420px] bg-[var(--rtd-void)] text-white border border-white/20 shadow-2xl rounded-2xl sm:rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
-            {/* Subtle top indicator bar */}
+          <div className="w-full h-full bg-[var(--rtd-void)] text-white border border-white/20 shadow-xl rounded-xl sm:rounded-2xl p-6 sm:p-7 flex flex-col justify-between space-y-6 relative overflow-hidden">
+            {/* Dynamic Verdict Indicator Bar */}
             <div
-              className="absolute top-0 left-0 right-0 h-1.5"
+              className="absolute top-0 left-0 right-0 h-1.5 transition-colors duration-300"
               style={{ backgroundColor: VERDICT_THEME_COLOR[positionInfo.verdict] }}
             />
 
-            {/* 1. HEADER: Current Position (symbol · direction · size) */}
+            {/* 1. Header: Current Position (symbol · direction · size) */}
             <div className="border-b border-white/15 pb-4 flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-mono tracking-[0.2em] text-slate-400 uppercase block mb-1">
@@ -301,30 +313,30 @@ export function TradeInputSurface({
               </div>
 
               <div className="px-2.5 py-1 bg-white/10 border border-white/20 text-[10px] font-mono tracking-widest uppercase text-slate-300">
-                65.5H DESK
+                65.5H COCKPIT
               </div>
             </div>
 
-            {/* 2. RESULTS VIEW: Large centered glyph, verdict name, one-line summary */}
-            <div className="py-4 flex flex-col items-center text-center space-y-4">
-              <div className="p-3 bg-white/5 border border-white/15 rounded-xl shadow-inner">
+            {/* 2. Center Verdict Display */}
+            <div className="py-2 flex flex-col items-center text-center space-y-4">
+              <div className="p-3.5 bg-white/5 border border-white/15 rounded-xl shadow-inner">
                 <VerdictGlyph verdict={positionInfo.verdict} size={76} reversed />
               </div>
 
               <div className="space-y-1.5">
                 <div
-                  className="text-3xl sm:text-4xl font-mono font-black tracking-widest uppercase"
+                  className="text-3xl sm:text-4xl font-mono font-black tracking-widest uppercase transition-colors"
                   style={{ color: VERDICT_THEME_COLOR[positionInfo.verdict] }}
                 >
                   {positionInfo.verdict}
                 </div>
-                <p className="text-xs sm:text-sm font-sans text-slate-300 max-w-[280px] sm:max-w-xs mx-auto leading-relaxed">
+                <p className="text-xs sm:text-sm font-sans text-slate-300 max-w-[290px] mx-auto leading-relaxed">
                   {positionInfo.summary}
                 </p>
               </div>
             </div>
 
-            {/* 3. STAT LIST: Expected shortfall, Basis gap, Depth vs. session, Crypto beta */}
+            {/* 3. Real-Time Risk Statistics Table */}
             <div className="border-t border-white/15 divide-y divide-white/10 text-xs font-mono">
               <div className="py-2.5 flex items-center justify-between">
                 <span className="text-slate-400 uppercase tracking-wider">
@@ -363,7 +375,7 @@ export function TradeInputSurface({
               </div>
             </div>
 
-            {/* 4. FULL-WIDTH ACTION BUTTON AT BOTTOM */}
+            {/* 4. Action Trigger Button */}
             <div className="pt-2">
               <button
                 type="button"
@@ -380,7 +392,7 @@ export function TradeInputSurface({
                 {isLoading ? (
                   <span>Evaluating Risk Pipeline...</span>
                 ) : !prompt.trim() ? (
-                  <span>Enter trade thesis to evaluate →</span>
+                  <span>Enter Thesis to Run Stress Test →</span>
                 ) : (
                   <>
                     <span>{positionInfo.actionText}</span>
@@ -393,45 +405,25 @@ export function TradeInputSurface({
         </div>
 
         {/* ==================================================================
-            RIGHT COLUMN: THESIS CONTROLS & PRESETS
-            Gives room to breathe on desktop (768px, 1280px).
-            Contains preset triggers, custom textarea, and test harness.
+            RIGHT COLUMN: THESIS CONTROLS & PRESET SCENARIOS (60% width)
            ================================================================== */}
         <div
-          className={`lg:col-span-6 xl:col-span-7 space-y-6 ${
-            activeTab === "input" ? "block" : "hidden md:block"
+          className={`lg:col-span-7 flex flex-col space-y-6 ${
+            activeTab === "input" ? "block" : "hidden md:flex"
           }`}
         >
-          {/* Editorial Banner */}
-          <div className="bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-6 shadow-xs space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold uppercase tracking-widest text-[var(--rtd-steel)]">
-                06 / TRADE ADVERSARY INPUT
-              </span>
-              <span className="text-[11px] font-mono text-[var(--rtd-proceed)] font-bold">
-                POLICY RUNWAY ACTIVE
-              </span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-mono font-bold text-[var(--rtd-ink)] tracking-tight">
-              Pre-trade stress test workbench.
-            </h2>
-            <p className="text-xs sm:text-sm text-[var(--rtd-steel)] font-sans leading-relaxed">
-              Tokenized equities trade 24/7 on Bitget, while underlying NYSE/Nasdaq equities trade only during cash sessions. Select a canonical test scenario or specify your custom trade thesis.
-            </p>
-          </div>
-
-          {/* Quick Verdict Policy Selectors */}
+          {/* Symmetrical 2x2 Preset Policy Grid */}
           <div className="bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-5 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--rtd-ink)]">
-                Test Verdict Policy Scenarios:
+                Calibrated Policy Scenarios:
               </span>
               <span className="text-[10px] font-mono text-[var(--rtd-steel)] uppercase">
-                5 PRESETS
+                4 PRESETS (1-CLICK LOAD)
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {PRESET_SCENARIOS.map((preset) => {
                 const isSelected = prompt.trim() === preset.promptText.trim();
                 return (
@@ -442,9 +434,9 @@ export function TradeInputSurface({
                       setPrompt(preset.promptText);
                       setActiveTab("results");
                     }}
-                    className={`p-3 text-left border transition-all flex flex-col justify-between space-y-2 group cursor-pointer ${
+                    className={`p-3.5 text-left border transition-all flex flex-col justify-between space-y-2.5 group cursor-pointer ${
                       isSelected
-                        ? "bg-[var(--rtd-paper-subtle)] border-[var(--rtd-ink)] shadow-xs"
+                        ? "bg-[var(--rtd-paper-subtle)] border-[var(--rtd-ink)] ring-1 ring-[var(--rtd-ink)] shadow-xs"
                         : "bg-[var(--rtd-paper)] border-[var(--rtd-steel)]/25 hover:border-[var(--rtd-steel)]"
                     }`}
                   >
@@ -464,7 +456,7 @@ export function TradeInputSurface({
                       <div className="text-xs font-mono font-bold text-[var(--rtd-ink)] group-hover:text-[var(--rtd-void)]">
                         {preset.label}
                       </div>
-                      <div className="text-[11px] font-mono text-[var(--rtd-steel)] rtd-figure">
+                      <div className="text-[11px] font-mono text-[var(--rtd-steel)] rtd-figure mt-0.5">
                         {preset.symbol} · {preset.size}
                       </div>
                     </div>
@@ -477,31 +469,44 @@ export function TradeInputSurface({
           {/* Natural Language Input Form */}
           <form
             onSubmit={handleSubmit}
-            className="bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-5 shadow-xs space-y-4"
+            className="bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-5 shadow-xs space-y-4 flex-1 flex flex-col justify-between"
           >
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="trade-thesis-input"
-                className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--rtd-ink)]"
-              >
-                Trade Thesis &amp; Rationale
-              </label>
-              <span className="text-[11px] font-mono text-[var(--rtd-steel)]">
-                Deterministic Grammar Extraction
-              </span>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="trade-thesis-input"
+                  className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--rtd-ink)]"
+                >
+                  Trade Thesis &amp; Rationale Statement
+                </label>
+                <div className="flex items-center gap-2">
+                  {prompt.trim() && (
+                    <button
+                      type="button"
+                      onClick={() => setPrompt("")}
+                      className="text-[11px] font-mono text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)] underline cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
+                  <span className="text-[11px] font-mono text-[var(--rtd-steel)]">
+                    Deterministic Grammar Extraction
+                  </span>
+                </div>
+              </div>
+
+              <textarea
+                id="trade-thesis-input"
+                rows={5}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="e.g. I plan to buy $2,000 of rNVDA token during weekend off-hours because AI infrastructure demand still looks strong..."
+                disabled={isLoading}
+                className="w-full border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper-subtle)] p-4 text-xs sm:text-sm font-mono text-[var(--rtd-ink)] placeholder:text-[var(--rtd-steel)]/60 focus:bg-[var(--rtd-paper)] focus:border-[var(--rtd-ink)] focus:outline-hidden transition-all resize-y"
+              />
             </div>
 
-            <textarea
-              id="trade-thesis-input"
-              rows={4}
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g. I plan to buy $2,000 of rNVDA token during weekend hours..."
-              disabled={isLoading}
-              className="w-full border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper-subtle)] p-3.5 text-xs sm:text-sm font-mono text-[var(--rtd-ink)] placeholder:text-[var(--rtd-steel)]/60 focus:bg-[var(--rtd-paper)] focus:border-[var(--rtd-ink)] focus:outline-hidden transition-all resize-y"
-            />
-
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-[var(--rtd-steel)]/15">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-[var(--rtd-steel)]/15">
               <div className="text-[11px] font-mono text-[var(--rtd-steel)]">
                 Detected:{" "}
                 <span className="font-bold text-[var(--rtd-ink)]">

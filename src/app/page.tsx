@@ -227,7 +227,7 @@ export default function WorkspacePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--rt-surface-base)] text-[var(--rt-text-primary)] font-sans selection:bg-[var(--rt-surface-void)] selection:text-[var(--rt-surface-raised)]">
+    <div className="min-h-screen bg-[var(--rtd-proof)] text-[var(--rtd-ink)] font-sans selection:bg-[var(--rtd-ink)] selection:text-[var(--rtd-paper)]">
       {viewMode === "landing" ? (
         <LandingSurface onLaunchDesk={handleLaunchFromLanding} />
       ) : (
