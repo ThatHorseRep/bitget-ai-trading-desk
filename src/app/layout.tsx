@@ -16,6 +16,20 @@ const geistMono = localFont({
 
 import { BRANDING } from "@/config/branding";
 
+/**
+ * Canonical origin for absolute metadata URLs (OG images, twitter cards).
+ * An explicit NEXT_PUBLIC_SITE_URL wins; on Vercel the production/deployment
+ * domains are used automatically; the legacy Cloud Run staging host remains
+ * the last-resort fallback so absolute links never resolve to nothing.
+ */
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "") ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
+  "https://ais-pre-76vg2p4vjuywawauv5ec3l-725903868758.europe-west2.run.app";
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -24,7 +38,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ais-pre-76vg2p4vjuywawauv5ec3l-725903868758.europe-west2.run.app"),
+  metadataBase: new URL(SITE_URL),
   title: `${BRANDING.PRODUCT_NAME} | ${BRANDING.TAGLINE}`,
   description: "Adversarial pre-trade risk workbench for tokenized equities. Deterministic stress testing, off-hours basis decoupling analysis, and thesis vs. position deconstruction.",
   manifest: "/manifest.webmanifest",

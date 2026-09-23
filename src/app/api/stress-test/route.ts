@@ -80,17 +80,22 @@ export async function POST(request: NextRequest) {
           controller.close();
         } catch (error) {
           console.error("Internal service error during stream:", error);
-          controller.enqueue(encoder.encode(JSON.stringify({ 
-            type: "error", 
-            status: 500,
-            data: {
-              step: "ERROR",
-              parsedResult: null,
-              artifact: null,
-              limitations: ["An internal error occurred while processing your request."],
-            }
-          }) + "\n"));
-          controller.close();
+          try {
+            controller.enqueue(encoder.encode(JSON.stringify({ 
+              type: "error", 
+              status: 500,
+              data: {
+                step: "ERROR",
+                parsedResult: null,
+                artifact: null,
+                limitations: ["An internal error occurred while processing your request."],
+              }
+            }) + "\n"));
+            controller.close();
+          } catch (e) {
+            // Client disconnected mid-stream: enqueue/close on an aborted
+            // request's controller rejects — same guard as the progress path.
+          }
         }
       }
     });
