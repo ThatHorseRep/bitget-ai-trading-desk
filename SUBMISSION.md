@@ -33,6 +33,13 @@ The LLM is **never** used for market parsing, price selection, scenario math, P&
 - Publication and execution boundaries require explicit human confirmation; the paper-trading harness is a developer-side, human-confirmed external tool against Bitget Demo Trading — the desk itself never places orders, paper or live.
 - Optional ecosystem integrations (Bitget US Equity MCP, Bitget Signal, Agent Hub read-only handoff, Agentic Account handoff, Chainbase AgentKey — an external partner, not a Bitget product) are enrichment only: the core decision is fully defensible with every one of them disabled (see `docs/specs/B07_Optional_Bitget_Ecosystem_Integrations.md`).
 
+## External Forces & Engineering Resilience Surmounted
+
+1. **Shared Hackathon Qwen Gateway Sockets & Rate Limits (HTTP 429):** The shared gateway (`hackathon.bitgetops.com`) regularly returned 429 rate-limit spikes under heavy concurrent hackathon traffic. We implemented a low-latency Circuit Breaker with instant failover to secondary model endpoints (Gemini Flash) and graceful degradation to rule-based evaluation. The desk never crashes or times out the user.
+2. **Deterministic Risk Separation vs. LLM Hallucinations:** Eliminated LLM hallucination risk in quantitative calculations by separating language tasks from numerical logic. P&L, basis uncoupling, and scenario shocks are 100% computed in a deterministic TypeScript engine.
+3. **Market Hours Barrier (The Deterministic Demo Wedge):** Because hackathon judges review submissions during active market hours when off-hours basis spreads are minimal, we built an explicit Deterministic Fixture toggle that simulates an authentic 65.5-hour weekend closure and basis gap.
+4. **Upstream MCP Outages & Latency Bounds:** Unstable or slow third-party research MCPs (e.g., Bitget Signal / US Equity) are bounded to 2.5–3.0s parallel timeouts with upstream failure payload filters, preserving pipeline execution under strict serverless budgets.
+
 ## Suggested X (Twitter) Post Text
 
 > Most traders judge a tokenized stock by its chart. Nobody stress-tests the *structure* underneath it.

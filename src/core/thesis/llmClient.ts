@@ -20,6 +20,7 @@ export type SeekAiMessage = {
 export type SeekAiRequest = {
   model?: string;
   messages: SeekAiMessage[];
+  max_tokens?: number;
   /**
    * Wall-clock budget in milliseconds for this call INCLUDING its single
    * retry. When set, the per-attempt timeout is clamped so attempt + 2s
@@ -128,10 +129,12 @@ class LLMProvider {
     }
 
     const models = [
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-1.5-flash",
       "gemini-flash-lite-latest",
       "gemini-flash-latest",
-      "gemini-3.5-flash",
-      "gemini-3.6-flash"
+      "gemini-3.5-flash"
     ];
     let lastErr: unknown = null;
 
@@ -263,6 +266,7 @@ class LLMProvider {
           ...request,
           model,
           stream: false,
+          max_tokens: request.max_tokens || 1024,
           response_format: { type: "json_object" },
           ...(enableThinking ? {} : { enable_thinking: false })
         }),
