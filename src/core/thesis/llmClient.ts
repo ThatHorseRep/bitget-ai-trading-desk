@@ -43,7 +43,7 @@ export type SeekAiResponse = {
   };
 };
 
-function extractCleanJson(raw: string): string {
+export function extractCleanJson(raw: string): string {
   let content = raw.trim();
   const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
   if (jsonMatch) {

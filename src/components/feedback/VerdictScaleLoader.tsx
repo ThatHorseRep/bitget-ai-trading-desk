@@ -93,10 +93,10 @@ export function VerdictScaleLoader({
   activeStageIndex = 0,
   message = "Evaluating market state, basis risk, and position resilience"
 }: VerdictScaleLoaderProps) {
-  const totalStages = stages?.length || 8;
+  const totalStages = stages?.length || 6;
   const progressPct = Math.min(
-    100,
-    Math.round((Math.max(0, activeStageIndex) / Math.max(1, totalStages)) * 100)
+    95,
+    Math.round(((activeStageIndex + 0.6) / Math.max(1, totalStages)) * 100)
   );
 
   return (
@@ -145,7 +145,7 @@ export function VerdictScaleLoader({
         <div className="h-1.5 w-full bg-[var(--rtd-proof)] border border-[var(--rtd-steel)]/20">
           <div
             className="h-full bg-[var(--rtd-ink)] transition-all motion-reduce:transition-none duration-300"
-            style={{ width: `${Math.max(4, progressPct)}%` }}
+            style={{ width: `${Math.max(6, progressPct)}%` }}
           />
         </div>
       </div>
@@ -170,7 +170,7 @@ export function VerdictScaleLoader({
 
       {/* Stages Grid */}
       {stages && stages.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-2">
           {stages.map((stg, idx) => {
             const isCompleted = idx < activeStageIndex;
             const isCurrent = idx === activeStageIndex;

@@ -1,4 +1,4 @@
-import { getSeekAiClient, type SeekAiRequest } from "./llmClient";
+import { getSeekAiClient, type SeekAiRequest, extractCleanJson } from "./llmClient";
 import { z } from "zod";
 import type { EvidenceItem } from "../../domain/decision/types";
 import type { MarketState } from "../../domain/market/types";
@@ -93,7 +93,7 @@ ${evidenceText}
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       resp = await client.chat({ ...payload, budgetMs: deadlineMs ? Math.max(0, deadlineMs - Date.now()) : undefined });
-      parsed = ChallengerSchema.parse(JSON.parse(resp.content));
+      parsed = ChallengerSchema.parse(JSON.parse(extractCleanJson(resp.content)));
       break;
     } catch (err) {
       if (attempt === maxAttempts || !resp) {

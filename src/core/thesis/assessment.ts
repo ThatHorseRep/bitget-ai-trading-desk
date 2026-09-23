@@ -1,4 +1,4 @@
-import { getSeekAiClient, type SeekAiRequest } from "./llmClient";
+import { getSeekAiClient, type SeekAiRequest, extractCleanJson } from "./llmClient";
 import { z } from "zod";
 import type { EvidenceItem } from "../../domain/decision/types";
 import type { MarketState } from "../../domain/market/types";
@@ -166,7 +166,7 @@ ${evidenceText}
       try {
         const resp = await client.chat({ ...basePayload, budgetMs: deadlineMs ? Math.max(0, deadlineMs - Date.now()) : undefined });
         respProvenance = resp.provenance;
-        parsed = AssessmentSchema.parse(JSON.parse(resp.content));
+        parsed = AssessmentSchema.parse(JSON.parse(extractCleanJson(resp.content)));
         break;
       } catch (error) {
         if (attempt === maxAttempts) {

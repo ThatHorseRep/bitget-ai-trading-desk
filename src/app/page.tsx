@@ -127,8 +127,17 @@ export default function WorkspacePage() {
     handleInitialSubmit(supplementalText);
   };
 
-  const [stages, setStages] = useState<AnalysisStage[]>([]);
-  const [activeStageIndex, setActiveStageIndex] = useState(-1);
+  const PIPELINE_STAGES: AnalysisStage[] = [
+    { id: "MARKET_STATE", label: "Reconstructing Market State", description: "Querying token orderbook, reference quotes, basis spread, and trading session." },
+    { id: "EVIDENCE", label: "Retrieving External Evidence", description: "Gathering corporate news, macro catalysts, and institutional evidence." },
+    { id: "SCENARIOS", label: "Running Deterministic Stress Scenarios", description: "Computing exact scenario shocks: Market Risk (-5%), Crypto Contagion (-8%), and Illiquidity." },
+    { id: "THESIS_EXTRACTION", label: "Extracting and Decomposing Thesis", description: "Deconstructing core assumptions, causal dependencies, and invalidation thresholds." },
+    { id: "CHALLENGE", label: "Generating Adversarial Counter-Thesis", description: "Challenging vulnerable assumptions against off-hours structural risks." },
+    { id: "ASSESSMENT", label: "Evaluating Thesis vs. Position", description: "Synthesizing position quality and executing deterministic policy rules." },
+  ];
+
+  const [stages, setStages] = useState<AnalysisStage[]>(PIPELINE_STAGES);
+  const [activeStageIndex, setActiveStageIndex] = useState(0);
 
   // Step S04 Confirmed -> Run S05 Analysis and Fetch Artifact
   const handleConfirmRunStressTest = async () => {
@@ -137,8 +146,8 @@ export default function WorkspacePage() {
     setStep("ANALYZING");
     setIsAnalyzing(true);
     setErrorMessage(null);
-    setStages([]);
-    setActiveStageIndex(-1);
+    setStages(PIPELINE_STAGES);
+    setActiveStageIndex(0);
 
     abortControllerRef.current = new AbortController();
 
@@ -181,17 +190,10 @@ export default function WorkspacePage() {
           try {
             const parsed = JSON.parse(line);
             if (parsed.type === "progress") {
-              setStages(prev => {
-                 const exists = prev.find(s => s.id === parsed.stageId);
-                 if (exists) return prev;
-                 return [...prev, {
-                    id: parsed.stageId,
-                    label: parsed.message,
-                    description: parsed.message,
-                    status: "active"
-                 }];
-              });
-              setActiveStageIndex(prev => prev + 1);
+              const matchedIdx = PIPELINE_STAGES.findIndex(s => s.id === parsed.stageId);
+              if (matchedIdx >= 0) {
+                setActiveStageIndex(matchedIdx);
+              }
             } else if (parsed.type === "result" || parsed.type === "error") {
               finalData = parsed.data;
               finalStatus = parsed.status || 200;

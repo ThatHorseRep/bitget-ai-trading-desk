@@ -106,7 +106,7 @@ export function DecisionArtifactView({
             <button
               type="button"
               onClick={onOpenProvenance}
-              className="inline-flex min-h-[38px] items-center gap-1.5 bg-[var(--rtd-ink)] px-3.5 py-1.5 text-xs font-mono font-bold text-[var(--rtd-paper)] hover:opacity-90 shadow-2xs active:scale-[0.98] transition-all cursor-pointer"
+              className="inline-flex min-h-[38px] items-center gap-1.5 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 px-3.5 py-1.5 text-xs font-mono font-bold shadow-2xs active:scale-[0.98] transition-all cursor-pointer border border-transparent dark:border-slate-300"
             >
               Audit provenance
             </button>
@@ -654,7 +654,7 @@ export function DecisionArtifactView({
         <button
           type="button"
           onClick={onNewTrade}
-          className="inline-flex min-h-[44px] items-center justify-center gap-2 bg-[var(--rtd-ink)] px-6 py-2.5 text-xs sm:text-sm font-mono font-bold uppercase tracking-wider text-[var(--rtd-paper)] shadow-xs hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+          className="inline-flex min-h-[44px] items-center justify-center gap-2 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 px-6 py-2.5 text-xs sm:text-sm font-mono font-bold uppercase tracking-wider shadow-xs active:scale-[0.98] transition-all cursor-pointer border border-transparent dark:border-slate-300"
         >
           Stress test another trade →
         </button>

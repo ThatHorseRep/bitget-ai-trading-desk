@@ -117,7 +117,7 @@ export function ClarificationModal({
             <button
               type="submit"
               disabled={!answer.trim() || isSubmitting}
-              className="min-h-[40px] px-5 py-2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+              className="min-h-[40px] px-5 py-2 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 text-xs font-mono font-bold uppercase tracking-wider active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer border border-transparent dark:border-slate-300"
             >
               {isSubmitting ? "Processing..." : "Continue →"}
             </button>

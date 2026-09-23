@@ -1,4 +1,4 @@
-import { getSeekAiClient, type SeekAiRequest } from "./llmClient";
+import { getSeekAiClient, type SeekAiRequest, extractCleanJson } from "./llmClient";
 import { z } from "zod";
 import type { EvidenceItem } from "../../domain/decision/types";
 import type { MarketState } from "../../domain/market/types";
@@ -7,19 +7,19 @@ import type { NormalizedTrade } from "../../domain/trade/types";
 import type { ThesisSignals } from "../../lib/verdict/scoring";
 
 export const ThesisSignalsSchema = z.object({
-  hasInvalidationLevel: z.boolean(),
-  hasStatedHorizon: z.boolean(),
-  hasNamedCatalyst: z.boolean(),
-  hasDirectionalClaim: z.boolean()
+  hasInvalidationLevel: z.boolean().default(false),
+  hasStatedHorizon: z.boolean().default(false),
+  hasNamedCatalyst: z.boolean().default(false),
+  hasDirectionalClaim: z.boolean().default(false)
 });
 
 const ExtractionSchema = z.object({
-  normalizedThesis: z.string(),
-  assumptions: z.array(z.object({ text: z.string(), origin: z.enum(["USER_STATED", "AI_INFERRED"]) })),
-  dependencies: z.array(z.object({ text: z.string(), origin: z.enum(["USER_STATED", "AI_INFERRED"]) })),
-  invalidationConditions: z.array(z.object({ text: z.string(), origin: z.literal("AI_INFERRED") })),
-  supportingEvidenceRefs: z.array(z.string()),
-  unresolvedAmbiguities: z.array(z.string()),
+  normalizedThesis: z.string().default(""),
+  assumptions: z.array(z.object({ text: z.string(), origin: z.enum(["USER_STATED", "AI_INFERRED"]).default("USER_STATED") })).default([]),
+  dependencies: z.array(z.object({ text: z.string(), origin: z.enum(["USER_STATED", "AI_INFERRED"]).default("AI_INFERRED") })).default([]),
+  invalidationConditions: z.array(z.object({ text: z.string(), origin: z.enum(["USER_STATED", "AI_INFERRED"]).default("AI_INFERRED") })).default([]),
+  supportingEvidenceRefs: z.array(z.string()).default([]),
+  unresolvedAmbiguities: z.array(z.string()).default([]),
   signals: ThesisSignalsSchema.optional()
 });
 
@@ -69,7 +69,7 @@ Rules:
       budgetMs: deadlineMs ? Math.max(0, deadlineMs - Date.now()) : undefined
     });
 
-    const parsed = ThesisSignalsSchema.parse(JSON.parse(resp.content));
+    const parsed = ThesisSignalsSchema.parse(JSON.parse(extractCleanJson(resp.content)));
     return {
       signals: {
         ...parsed,
@@ -176,7 +176,7 @@ ${evidenceText}
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       resp = await client.chat({ ...basePayload, budgetMs: deadlineMs ? Math.max(0, deadlineMs - Date.now()) : undefined });
-      parsed = ExtractionSchema.parse(JSON.parse(resp.content));
+      parsed = ExtractionSchema.parse(JSON.parse(extractCleanJson(resp.content)));
       break; // Success, exit retry loop
     } catch (err) {
       if (attempt === maxAttempts) {

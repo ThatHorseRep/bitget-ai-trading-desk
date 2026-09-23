@@ -141,7 +141,7 @@ export function WorkspaceHeader({
               <button
                 type="button"
                 onClick={onNewTrade}
-                className="h-[36px] px-4 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] hover:opacity-90 active:scale-95 transition-all text-xs font-mono font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-xs cursor-pointer"
+                className="h-[36px] px-4 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 active:scale-95 transition-all text-xs font-mono font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-xs cursor-pointer border border-transparent dark:border-slate-300"
               >
                 <span>+</span>
                 <span>New Trade</span>
@@ -204,7 +204,7 @@ export function WorkspaceHeader({
                 <button
                   type="button"
                   onClick={onNewTrade}
-                  className="min-h-[40px] px-3 text-[10px] font-mono font-bold uppercase tracking-wider bg-[var(--rtd-ink)] text-[var(--rtd-paper)] active:scale-95 flex items-center justify-center cursor-pointer shadow-xs"
+                  className="min-h-[40px] px-3 text-[10px] font-mono font-bold uppercase tracking-wider bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 active:scale-95 flex items-center justify-center cursor-pointer shadow-xs border border-transparent dark:border-slate-300"
                   title="Start New Trade Evaluation"
                 >
                   + NEW
