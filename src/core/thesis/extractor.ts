@@ -179,9 +179,11 @@ ${evidenceText}
       parsed = ExtractionSchema.parse(JSON.parse(resp.content));
       break; // Success, exit retry loop
     } catch (err) {
-      if (attempt === maxAttempts || !resp) {
-        console.warn(`LLM extraction unavailable (${err instanceof Error ? err.message : String(err)}). Using deterministic heuristic thesis deconstruction.`);
-        break;
+      if (!resp) {
+        throw new Error(`LLM API or network failure: ${err instanceof Error ? err.message : String(err)}`);
+      }
+      if (attempt === maxAttempts) {
+        throw new Error(`Failed to extract thesis after ${attempt} attempts. Error: ${err instanceof Error ? err.message : String(err)}`);
       }
       console.warn("Extractor JSON parse failed, retrying with stronger format instructions...");
       // Enhance prompt for retry by maintaining alternating roles
