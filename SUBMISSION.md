@@ -30,7 +30,7 @@ The LLM is **never** used for market parsing, price selection, scenario math, P&
 
 - No trade execution exists in any code path; there is no autonomous trading in any configuration.
 - Publication and execution boundaries require explicit human confirmation; the paper-trading harness is a developer-side, human-confirmed external tool against Bitget Demo Trading — the desk itself never places orders, paper or live.
-- Optional ecosystem integrations (Bitget US Equity MCP, Bitget Signal, Agent Hub read-only handoff, Agentic Account handoff, Chainbase AgentKey — an external partner, not a Bitget product) are enrichment only: the core decision is fully defensible with every one of them disabled (see `B07_Optional_Bitget_Ecosystem_Integrations.md`).
+- Optional ecosystem integrations (Bitget US Equity MCP, Bitget Signal, Agent Hub read-only handoff, Agentic Account handoff, Chainbase AgentKey — an external partner, not a Bitget product) are enrichment only: the core decision is fully defensible with every one of them disabled (see `docs/specs/B07_Optional_Bitget_Ecosystem_Integrations.md`).
 
 ## Suggested X (Twitter) Post Text
 

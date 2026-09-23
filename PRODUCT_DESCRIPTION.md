@@ -20,7 +20,7 @@
 - Thesis vs. Position synthesis (deterministic position quality in src/core/decision/classifyPosition.ts; LLM thesis-quality synthesis in src/core/thesis/assessment.ts)
 - Decision Artifact generation & Policy (src/core/decision/policy.ts)
 - Transparent "Demo Mode" for off-hours trading simulation (fixture in src/fixtures/rnvda-demo.ts; UI toggle in src/components/workspace/WorkspaceHeader.tsx; API in src/app/api/stress-test/route.ts)
-- Optional ecosystem integrations as pure enrichment: Bitget US Equity MCP, Bitget Signal, Chainbase AgentKey (external partner), Agent Hub read-only handoff, and Agentic Account handoff — the core decision is fully defensible with all of them disabled (see B07_Optional_Bitget_Ecosystem_Integrations.md)
+- Optional ecosystem integrations as pure enrichment: Bitget US Equity MCP, Bitget Signal, Chainbase AgentKey (external partner), Agent Hub read-only handoff, and Agentic Account handoff — the core decision is fully defensible with all of them disabled (see docs/specs/B07_Optional_Bitget_Ecosystem_Integrations.md)
 
 **What's not built yet / known gaps:**
 - Live user portfolio context integration (currently marked as deferred/post-MVP).
