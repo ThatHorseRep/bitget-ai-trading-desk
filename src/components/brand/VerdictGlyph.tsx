@@ -33,7 +33,7 @@ export function VerdictGlyph({
   return (
     <Mark
       size={size}
-      body={reversed ? "var(--rtd-proof)" : "var(--rtd-ink)"}
+      body={reversed ? "#FFFFFF" : "var(--rtd-ink)"}
       fault={faultColor}
       offset={VERDICT_OFFSET[verdict]}
       title={`Verdict: ${verdict}`}

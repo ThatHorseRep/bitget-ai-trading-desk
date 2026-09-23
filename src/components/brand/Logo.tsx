@@ -67,8 +67,8 @@ export function Lockup({
   endorsed = true,
   className,
 }: LockupProps) {
-  const ink = reversed ? "var(--rtd-proof)" : "var(--rtd-ink)";
-  const sub = reversed ? "var(--rtd-steel)" : "var(--rtd-steel)";
+  const ink = reversed ? "#FFFFFF" : "var(--rtd-ink)";
+  const sub = reversed ? "rgba(240, 244, 248, 0.7)" : "var(--rtd-steel)";
   return (
     <span
       className={className}

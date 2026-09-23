@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
-import { BRANDING, VERDICT_COLOR } from "@/config/branding";
+import { BRANDING, type Verdict } from "@/config/branding";
 import { Reveal } from "@/components/motion/Reveal";
 import { Lockup } from "@/components/brand/Logo";
 import { VerdictGlyph } from "@/components/brand/VerdictGlyph";
@@ -22,6 +22,13 @@ const GOLDEN_PATH_PROMPT =
   "I'm thinking about buying $2,000 of rNVDA because AI infrastructure demand still looks strong. BTC has been weakening all weekend. Stress-test it.";
 
 const emptySubscribe = () => () => {};
+
+const VERDICT_THEME_COLOR: Record<Verdict, string> = {
+  PROCEED: "var(--rtd-proceed)",
+  REDUCE: "var(--rtd-reduce)",
+  WAIT: "var(--rtd-wait)",
+  REJECT: "var(--rtd-reject)",
+};
 
 export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -190,7 +197,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
       {/* ----------------------------------------------------------------------
           2. HERO SECTION (matching 05-website.png)
          ---------------------------------------------------------------------- */}
-      <section className="relative overflow-hidden bg-[var(--rtd-void)] text-[var(--rtd-paper)] py-16 sm:py-20 lg:py-24 px-4 sm:px-6 border-b border-[var(--rtd-steel)]/30">
+      <section className="relative overflow-hidden bg-[var(--rtd-void)] text-white py-16 sm:py-20 lg:py-24 px-4 sm:px-6 border-b border-[var(--rtd-steel)]/30">
         {/* Subtle Watermark Mark from 05-website.png */}
         <div className="absolute right-[-60px] top-1/2 -translate-y-1/2 opacity-[0.06] pointer-events-none hidden lg:block select-none">
           <Image
@@ -205,26 +212,26 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
 
         <div className="max-w-6xl mx-auto space-y-8 relative z-10">
           {/* Eyebrow Label */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[var(--rtd-ink)] border border-[var(--rtd-steel)]/30 text-[11px] font-mono text-[var(--rtd-steel)] uppercase tracking-[0.16em]">
-            <span className="font-bold text-[var(--rtd-paper)]">PRE-TRADE ADVERSARIAL FIREWALL</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/20 text-[11px] font-mono text-slate-300 uppercase tracking-[0.16em]">
+            <span className="font-bold text-white">PRE-TRADE ADVERSARIAL FIREWALL</span>
             <span>•</span>
             <span>TOKENIZED EQUITIES RISK ENGINE</span>
           </div>
 
           {/* Headline "Thesis ≠ Position." matching 05-website.png */}
           <div className="space-y-6 max-w-4xl">
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-mono font-black tracking-tight text-[var(--rtd-paper)] leading-[1.05] uppercase">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-mono font-black tracking-tight text-white leading-[1.05] uppercase">
               Thesis{" "}
               {/* The fault-cut Not-Equal glyph (two white horizontal bars with red diagonal shear) */}
               <span className="inline-flex items-center justify-center align-middle mx-1 sm:mx-2 h-[0.75em] w-[0.75em] relative select-none">
-                <span className="absolute top-[26%] left-0 right-0 h-[12%] bg-[var(--rtd-paper)]" />
-                <span className="absolute bottom-[26%] left-0 right-0 h-[12%] bg-[var(--rtd-paper)]" />
+                <span className="absolute top-[26%] left-0 right-0 h-[12%] bg-white" />
+                <span className="absolute bottom-[26%] left-0 right-0 h-[12%] bg-white" />
                 <span className="absolute inset-y-0 w-[14%] bg-[var(--rtd-stamp)] transform -rotate-[22deg] left-[43%]" />
               </span>{" "}
               Position.
             </h1>
 
-            <p className="text-base sm:text-xl text-[var(--rtd-steel)] leading-relaxed max-w-2xl font-sans">
+            <p className="text-base sm:text-xl text-slate-300 leading-relaxed max-w-2xl font-sans">
               Tokenized US equities trade 65.5 hours after NYSE closes. Over that window, the token un-anchors from the asset. The RedTeam Desk stresses your trade before the market does.
             </p>
           </div>
@@ -244,7 +251,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             <button
               type="button"
               onClick={() => onLaunchDesk()}
-              className="px-8 py-4 bg-transparent text-[var(--rtd-paper)] text-sm font-mono font-medium tracking-wider uppercase border border-[var(--rtd-steel)]/50 hover:bg-[var(--rtd-ink)] hover:border-[var(--rtd-paper)]/40 transition-all text-center cursor-pointer"
+              className="px-8 py-4 bg-transparent text-white text-sm font-mono font-medium tracking-wider uppercase border border-white/30 hover:bg-white/10 hover:border-white/60 transition-all text-center cursor-pointer"
             >
               See a sample run
             </button>
@@ -321,7 +328,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
                 {/* Top colored indicator bar */}
                 <div
                   className="absolute top-0 left-0 right-0 h-1"
-                  style={{ backgroundColor: VERDICT_COLOR[item.verdict] }}
+                  style={{ backgroundColor: VERDICT_THEME_COLOR[item.verdict] }}
                 />
 
                 <div className="space-y-4 pt-1">
@@ -330,7 +337,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
                     <div className="space-y-0.5 font-mono">
                       <div
                         className="text-xs font-black tracking-wider uppercase"
-                        style={{ color: VERDICT_COLOR[item.verdict] }}
+                        style={{ color: VERDICT_THEME_COLOR[item.verdict] }}
                       >
                         {item.stateLabel}
                       </div>
@@ -349,13 +356,13 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
                     <div className="flex items-center gap-2">
                       <h3
                         className="text-2xl font-mono font-black tracking-tight"
-                        style={{ color: VERDICT_COLOR[item.verdict] }}
+                        style={{ color: VERDICT_THEME_COLOR[item.verdict] }}
                       >
                         {item.verdict}
                       </h3>
                       <span
                         className="font-mono text-lg font-bold"
-                        style={{ color: VERDICT_COLOR[item.verdict] }}
+                        style={{ color: VERDICT_THEME_COLOR[item.verdict] }}
                       >
                         →
                       </span>
@@ -389,7 +396,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span
                       className="w-1.5 h-1.5 rounded-full shrink-0"
-                      style={{ backgroundColor: VERDICT_COLOR[item.verdict] }}
+                      style={{ backgroundColor: VERDICT_THEME_COLOR[item.verdict] }}
                     />
                     <span className="text-[10px] font-mono uppercase font-bold text-[var(--rtd-steel)] tracking-wider whitespace-nowrap">
                       {item.policyGate}
@@ -400,7 +407,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
                     type="button"
                     onClick={() => onLaunchDesk(item.prompt)}
                     className="min-h-[36px] px-2 py-1 flex items-center gap-1 text-xs font-mono uppercase font-bold tracking-wider hover:brightness-125 transition-all cursor-pointer whitespace-nowrap shrink-0 group-hover:translate-x-0.5"
-                    style={{ color: VERDICT_COLOR[item.verdict] }}
+                    style={{ color: VERDICT_THEME_COLOR[item.verdict] }}
                   >
                     <span>TEST {item.verdict} →</span>
                   </button>
@@ -426,7 +433,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
+            <div className="p-6 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
               <div className="text-xs font-mono font-bold text-[var(--rtd-reject)] uppercase">
                 65.5-Hour Liquidity Void
               </div>
@@ -438,7 +445,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-6 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
+            <div className="p-6 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
               <div className="text-xs font-mono font-bold text-[var(--rtd-reduce)] uppercase">
                 Contagion Spillover
               </div>
@@ -450,8 +457,8 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-6 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
-              <div className="text-xs font-mono font-bold text-[var(--rtd-ink)] uppercase">
+            <div className="p-6 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
+              <div className="text-xs font-mono font-bold text-[var(--rtd-wait)] uppercase">
                 Monday Open Snap
               </div>
               <h3 className="text-base font-bold text-[var(--rtd-ink)]">
@@ -597,7 +604,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+            <div className="p-5 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 1</span>
                 <span>S01 / S02</span>
@@ -610,7 +617,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+            <div className="p-5 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 2</span>
                 <span>S04 STREAM</span>
@@ -623,7 +630,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+            <div className="p-5 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 3</span>
                 <span>ARBITRATION</span>
@@ -636,7 +643,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+            <div className="p-5 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 4</span>
                 <span>ADVERSARIAL CORE</span>
@@ -649,7 +656,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+            <div className="p-5 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 5</span>
                 <span>MATHEMATICAL SHOCK</span>
@@ -662,7 +669,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+            <div className="p-5 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 6</span>
                 <span>POLICY GATING</span>
@@ -675,7 +682,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
               </p>
             </div>
 
-            <div className="p-5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs md:col-span-2">
+            <div className="p-5 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs md:col-span-2">
               <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
                 <span className="font-bold text-[var(--rtd-ink)]">STAGE 7</span>
                 <span>DECISION READY &amp; AUDIT</span>
@@ -696,7 +703,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
          ---------------------------------------------------------------------- */}
       <Reveal as="section" className="py-20 sm:py-24 px-4 sm:px-6 bg-[var(--rtd-proof)]">
         <div className="max-w-6xl mx-auto space-y-8 text-center flex flex-col items-center">
-          <div className="p-3 bg-[var(--rtd-void)]">
+          <div className="p-3 bg-[var(--rtd-void)] border border-[var(--rtd-steel)]/30 shadow-xs">
             <Lockup height={32} reversed />
           </div>
 
@@ -713,7 +720,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             <button
               type="button"
               onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
-              className="w-full sm:w-auto px-8 py-4 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-sm font-mono font-bold tracking-wider uppercase hover:bg-[var(--rtd-void)] active:scale-95 transition-all text-center flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+              className="w-full sm:w-auto px-8 py-4 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-sm font-mono font-bold tracking-wider uppercase hover:opacity-90 active:scale-95 transition-all text-center flex items-center justify-center gap-2 shadow-xs cursor-pointer"
             >
               <span>RUN GOLDEN PATH DESK</span>
               <span>→</span>
