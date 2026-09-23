@@ -1,4 +1,5 @@
 # Submission — Bitget AI RedTeam Desk
+> *Supplementary judge-facing material — architecture overview, safety boundaries, and X post draft. The canonical Google Form text is [PRODUCT_DESCRIPTION.md](./PRODUCT_DESCRIPTION.md).*
 
 **Track:** Track 3 — AI Trading Desk (Decision Stress Testing). Track 3 does not require Playbook, and no such dependency is claimed.
 

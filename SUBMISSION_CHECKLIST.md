@@ -22,6 +22,6 @@ Do **not** tell judges the API is "faulty" or that the app "aborts after 15 seco
 ## 4. 🚀 Deployment Verification
 - [ ] Vercel production env vars current (LLM gateway + key)?
 - [ ] Redeployed after the latest `main`?
-- [ ] Live URL answers: `https://www.redteamdesk.name.ng` (health: `/api/stress-test` GET)?
+- [x] Live URL answers: `https://www.redteamdesk.name.ng` (health: `/api/stress-test` GET)?
 - [ ] Demo video recorded — fixture mode for the guaranteed path, one live run to show graceful degradation?
 - [ ] `SUBMISSION.md`, X post text (in `SUBMISSION.md`), and `#BitgetHackathon @Bitget_AI` post published and linked in the form?

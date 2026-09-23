@@ -25,7 +25,7 @@ This document outlines the current MVP architecture, known technical constraints
 * **Production Roadmap**: Integrate a live, quantitative risk backend. The system will dynamically calculate rolling covariance matrices for Beta, measure historical volatility, and fetch live funding rates/borrow costs directly from the exchange API.
 
 ### 3. Reference Pricing (Basis Calculation)
-* **Current State (MVP)**: To calculate the basis premium/discount of a tokenized asset against its underlying U.S. Equity, the system scrapes reference data (e.g., Yahoo Finance) using custom User-Agents and sleep backoffs. 
+* **Current State (MVP)**: To calculate the basis premium/discount of a tokenized asset against its underlying U.S. Equity, the system scrapes reference data (e.g., Yahoo Finance) using custom User-Agents. 
 * **Production Roadmap**: Transition to an institutional, low-latency market data API (e.g., Polygon.io, Bloomberg, or Refinitiv). While the current MVP degrades gracefully if the scraper is blocked (marking the basis as "Unavailable"), a robust, authenticated feed is required for production SLA reliability.
 
 ### 4. LLM Endpoint Stability
