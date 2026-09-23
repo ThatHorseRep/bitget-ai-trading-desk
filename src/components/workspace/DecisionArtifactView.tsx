@@ -260,7 +260,10 @@ export function DecisionArtifactView({
             <div className="text-base font-bold text-[var(--rtd-ink)] font-mono rtd-figure">
               ${marketState.instrumentPrice.toFixed(2)}
             </div>
-            <div className="text-[10px] text-[var(--rtd-steel)] font-mono truncate">
+            <div
+              className="text-[10px] text-[var(--rtd-steel)] font-mono truncate"
+              title={trade.canonicalSymbol || trade.asset}
+            >
               {trade.canonicalSymbol || trade.asset}
             </div>
           </div>
@@ -272,7 +275,10 @@ export function DecisionArtifactView({
             <div className="text-base font-bold text-[var(--rtd-ink)] font-mono rtd-figure">
               ${marketState.referencePrice ? marketState.referencePrice.toFixed(2) : "N/A"}
             </div>
-            <div className="text-[10px] text-[var(--rtd-steel)] font-mono truncate">
+            <div
+              className="text-[10px] text-[var(--rtd-steel)] font-mono truncate"
+              title={trade.referenceAsset || "Underlying"}
+            >
               {trade.referenceAsset || "Underlying"}
             </div>
           </div>

@@ -442,7 +442,7 @@ export function TradeInputSurface({
                     </div>
 
                     <div>
-                      <div className="text-[11.5px] sm:text-xs font-mono font-bold text-[var(--rtd-ink)] group-hover:text-[var(--rtd-void)] truncate">
+                      <div className="text-[11.5px] sm:text-xs font-mono font-bold text-[var(--rtd-ink)] group-hover:text-[var(--rtd-void)] leading-snug line-clamp-2 min-h-[2rem] flex items-center">
                         {preset.label}
                       </div>
                       <div className="text-[10px] font-mono text-[var(--rtd-steel)] rtd-figure mt-0.5">

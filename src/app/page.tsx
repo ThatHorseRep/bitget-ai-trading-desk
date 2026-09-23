@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { WorkspaceHeader } from "../components/workspace/WorkspaceHeader";
 import { MobileBottomNav } from "../components/workspace/MobileBottomNav";
 import { TradeInputSurface } from "../components/workspace/TradeInputSurface";
@@ -9,27 +9,59 @@ import { NormalizedReviewCard } from "../components/workspace/NormalizedReviewCa
 import { AnalysisProgressView } from "../components/workspace/AnalysisProgressView";
 import { DecisionArtifactView } from "../components/workspace/DecisionArtifactView";
 import { ProvenanceDrawer } from "../components/workspace/ProvenanceDrawer";
+import { AuditHistoryModal } from "../components/workspace/AuditHistoryModal";
 import { LandingSurface } from "../components/landing/LandingSurface";
 import type { AnalysisStage, WorkspaceStep } from "../components/workspace/types";
 import type { DecisionWorkflowResult } from "../services/decisionDeskService";
 import type { DecisionArtifact, ProvenanceRecord } from "../domain/decision/types";
 import type { ParsedTradeResult } from "../core/trade/parser";
 import { parseNaturalLanguageTrade } from "../core/trade/parser";
+import {
+  loadPersistedWorkspaceState,
+  savePersistedWorkspaceState,
+  clearPersistedWorkspaceState,
+  loadAuditHistory,
+  recordAuditHistory,
+  clearAuditHistory,
+  type AuditHistoryEntry
+} from "../lib/deskStorage";
 
 export default function WorkspacePage() {
-  const [viewMode, setViewMode] = useState<"landing" | "desk">("landing");
-  const [step, setStep] = useState<WorkspaceStep>("ENTRY");
-  const [prompt, setPrompt] = useState("");
-  const [useFixture, setUseFixture] = useState(false);
-  const [parsedResult, setParsedResult] = useState<ParsedTradeResult | null>(null);
-  const [artifact, setArtifact] = useState<DecisionArtifact | null>(null);
+  const [persistedInitial] = useState(() => loadPersistedWorkspaceState());
+
+  const [viewMode, setViewMode] = useState<"landing" | "desk">(() => persistedInitial?.viewMode ?? "landing");
+  const [step, setStep] = useState<WorkspaceStep>(() => {
+    if (persistedInitial?.step === "ANALYZING") {
+      return persistedInitial.artifact ? "DECISION_READY" : "REVIEW";
+    }
+    return persistedInitial?.step ?? "ENTRY";
+  });
+  const [prompt, setPrompt] = useState(() => persistedInitial?.prompt ?? "");
+  const [useFixture, setUseFixture] = useState(() => Boolean(persistedInitial?.useFixture));
+  const [parsedResult, setParsedResult] = useState<ParsedTradeResult | null>(() => persistedInitial?.parsedResult ?? null);
+  const [artifact, setArtifact] = useState<DecisionArtifact | null>(() => persistedInitial?.artifact ?? null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [auditHistory, setAuditHistory] = useState<AuditHistoryEntry[]>(() => loadAuditHistory());
   const [selectedProvenance, setSelectedProvenance] = useState<ProvenanceRecord | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Auto-persist active state changes so page refresh never loses context
+  useEffect(() => {
+    savePersistedWorkspaceState({
+      viewMode,
+      step,
+      prompt,
+      useFixture,
+      parsedResult,
+      artifact,
+      timestamp: Date.now()
+    });
+  }, [viewMode, step, prompt, useFixture, parsedResult, artifact]);
 
   const handleLaunchFromLanding = (initialPrompt?: string) => {
     setViewMode("desk");
@@ -119,8 +151,6 @@ export default function WorkspacePage() {
       });
 
       if (!response.ok && !response.body) {
-        // Distinguish real rejections from transport failures. A 429 means
-        // the desk is rate-limiting, not that the analysis is broken.
         if (response.status === 429) {
           throw new Error("Rate limit reached: the desk accepts up to 10 stress tests per minute. Please wait about a minute and try again.");
         }
@@ -185,10 +215,6 @@ export default function WorkspacePage() {
       }
 
       if (!finalData || finalData.step === "ERROR" || !finalData.artifact) {
-        // A stream that ends without a result line means the server function
-        // was killed (e.g. Vercel maxDuration) — HTTP stays 200 because the
-        // headers already went out with the stream. Say that honestly instead
-        // of the generic "Analysis failed".
         setErrorMessage(
           finalData?.limitations?.[0] ??
           (finalStatus === 200
@@ -202,6 +228,9 @@ export default function WorkspacePage() {
 
       setArtifact(finalData.artifact);
       setStep("DECISION_READY");
+      // Record into audit log history
+      recordAuditHistory(finalData.artifact);
+      setAuditHistory(loadAuditHistory());
     } catch (err: any) {
       if (err.name === "AbortError") {
         return;
@@ -220,10 +249,28 @@ export default function WorkspacePage() {
       abortControllerRef.current = null;
     }
     setStep("ENTRY");
+    setPrompt("");
     setArtifact(null);
     setParsedResult(null);
     setErrorMessage(null);
     setSelectedProvenance(null);
+    clearPersistedWorkspaceState();
+  };
+
+  const handleSelectAuditFromHistory = (entry: AuditHistoryEntry) => {
+    setArtifact(entry.artifact);
+    setPrompt(entry.artifact.trade.thesis || `${entry.artifact.trade.direction} $${entry.artifact.trade.positionSizeUsd} ${entry.artifact.trade.asset}`);
+    setStep("DECISION_READY");
+    setViewMode("desk");
+    setIsHistoryOpen(false);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleClearHistory = () => {
+    clearAuditHistory();
+    setAuditHistory([]);
   };
 
   return (
@@ -239,6 +286,8 @@ export default function WorkspacePage() {
             onNewTrade={handleReset}
             canReset={step !== "ENTRY"}
             onViewOverview={() => setViewMode("landing")}
+            onOpenHistory={() => setIsHistoryOpen(true)}
+            historyCount={auditHistory.length}
           />
 
           <main
@@ -334,6 +383,15 @@ export default function WorkspacePage() {
               selectedRecord={selectedProvenance}
             />
           )}
+
+          {/* S10: Institutional Audit History Modal */}
+          <AuditHistoryModal
+            isOpen={isHistoryOpen}
+            history={auditHistory}
+            onSelectAudit={handleSelectAuditFromHistory}
+            onClearHistory={handleClearHistory}
+            onClose={() => setIsHistoryOpen(false)}
+          />
 
           {/* Mobile Persistent Bottom Navigation */}
           <MobileBottomNav

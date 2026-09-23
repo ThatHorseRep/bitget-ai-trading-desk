@@ -205,7 +205,7 @@ export class DecisionDeskService {
           thesis.supportingEvidenceRefs = thesis.supportingEvidenceRefs.filter(ref => evidence.some(e => e.id === ref));
         }
       } catch (err) {
-        if ((err as Error).message === "AbortError" || (err as Error).name === "AbortError") throw err;
+        if (options.signal?.aborted) throw err;
         limitations.push(`Language reasoning layer (Thesis Extraction) failed: ${(err as Error).message}`);
       }
 
@@ -224,7 +224,7 @@ export class DecisionDeskService {
             challenge.contradictoryEvidenceRefs = challenge.contradictoryEvidenceRefs.filter(ref => evidence.some(e => e.id === ref));
           }
         } catch (err) {
-          if ((err as Error).message === "AbortError" || (err as Error).name === "AbortError") throw err;
+          if (options.signal?.aborted) throw err;
           limitations.push(`Language reasoning layer (Adversarial Challenge) failed: ${(err as Error).message}`);
         }
 
@@ -242,7 +242,7 @@ export class DecisionDeskService {
              limitations.push("Skipping qualitative synthesis (Position Assessment) because Adversarial Challenge failed.");
           }
         } catch (err) {
-          if ((err as Error).message === "AbortError" || (err as Error).name === "AbortError") throw err;
+          if (options.signal?.aborted) throw err;
           limitations.push(`Language reasoning layer (Qualitative Synthesis) failed: ${(err as Error).message}`);
         }
       }

@@ -11,6 +11,8 @@ interface WorkspaceHeaderProps {
   onNewTrade: () => void;
   canReset: boolean;
   onViewOverview?: () => void;
+  onOpenHistory?: () => void;
+  historyCount?: number;
 }
 
 /**
@@ -25,7 +27,9 @@ export function WorkspaceHeader({
   onToggleFixture,
   onNewTrade,
   canReset,
-  onViewOverview
+  onViewOverview,
+  onOpenHistory,
+  historyCount = 0
 }: WorkspaceHeaderProps) {
   return (
     <div className="sticky top-0 z-40 flex flex-col pt-safe bg-[var(--rtd-proof)]">
@@ -71,6 +75,24 @@ export function WorkspaceHeader({
               >
                 <span>←</span>
                 <span>Overview</span>
+              </button>
+            )}
+
+            {/* Audit History Log Button */}
+            {onOpenHistory && (
+              <button
+                type="button"
+                onClick={onOpenHistory}
+                className="h-[36px] px-3 border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper-subtle)] hover:border-[var(--rtd-steel)] active:scale-[0.98] transition-all text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                title="View persisted audit decisions log"
+              >
+                <span className="text-[11px]">📋</span>
+                <span>History</span>
+                {historyCount > 0 && (
+                  <span className="px-1.5 py-0.2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-[10px] font-bold">
+                    {historyCount}
+                  </span>
+                )}
               </button>
             )}
 

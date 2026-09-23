@@ -25,7 +25,7 @@ function stubFetch(captured) {
   };
 }
 
-function withEnv(overrides, fn) {
+async function withEnv(overrides, fn) {
   const keys = ["LLM_API_BASE_URL", "LLM_API_KEY", "LLM_ENABLE_THINKING"];
   const saved = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
   process.env.LLM_API_BASE_URL = "https://llm.example.invalid/v1/chat/completions";
@@ -33,7 +33,7 @@ function withEnv(overrides, fn) {
   delete process.env.LLM_ENABLE_THINKING;
   Object.assign(process.env, overrides);
   try {
-    fn();
+    await fn();
   } finally {
     for (const k of keys) {
       if (saved[k] === undefined) delete process.env[k];
@@ -46,7 +46,7 @@ test("llmClient sends enable_thinking:false by default (thinking-model latency f
   const captured = [];
   const restore = stubFetch(captured);
   try {
-    withEnv({}, async () => {
+    await withEnv({}, async () => {
       const res = await sharedLlmClient.chat({ messages: [{ role: "user", content: "Return json: {\"ok\": true}" }] });
       assert.equal(res.content, '{"ok":true}');
       assert.equal(captured.length, 1);
@@ -63,7 +63,7 @@ test("llmClient omits enable_thinking when LLM_ENABLE_THINKING=1 (opt-in)", asyn
   const captured = [];
   const restore = stubFetch(captured);
   try {
-    withEnv({ LLM_ENABLE_THINKING: "1" }, async () => {
+    await withEnv({ LLM_ENABLE_THINKING: "1" }, async () => {
       await sharedLlmClient.chat({ messages: [{ role: "user", content: "Return json: {\"ok\": true}" }] });
       assert.equal(captured.length, 1);
       assert.equal(

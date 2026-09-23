@@ -11,6 +11,7 @@ const { ResearchProviderRegistry } = require("../dist-core/src/adapters/research
 // (developer machine or CI) is never overwritten.
 if (!process.env.LLM_API_BASE_URL) process.env.LLM_API_BASE_URL = "https://llm.mock.invalid/v1/chat/completions";
 if (!process.env.LLM_API_KEY) process.env.LLM_API_KEY = "mock-key-not-a-secret";
+process.env.DISABLE_LLM_FAILOVER = "1";
 
 // Hermetic registry: slot 1 = the same legacy evidence adapter the default
 // registry uses (fed by this suite's MockEvidenceProvider); slots 2-4

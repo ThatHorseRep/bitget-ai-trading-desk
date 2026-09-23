@@ -38,6 +38,7 @@ export type SeekAiResponse = {
   provenance: {
     model: string;
     provider: string;
+    circuitState?: "PRIMARY" | "FAILOVER_GEMINI" | "PROBE_RECOVERY";
   };
 };
 
@@ -62,11 +63,52 @@ function extractCleanJson(raw: string): string {
   return content;
 }
 
+// Circuit Breaker State for External LLM (Qwen)
+type CircuitState = "CLOSED" | "OPEN" | "HALF_OPEN";
+
+class CircuitBreaker {
+  private state: CircuitState = "CLOSED";
+  private failureCount = 0;
+  private lastFailureTime = 0;
+  private readonly failureThreshold = 1; // Trip on first hard timeout/failure to keep desk fast
+  private readonly cooldownMs = 45000; // 45s cooldown before probing Qwen again
+
+  getState(): CircuitState {
+    if (this.state === "OPEN") {
+      const now = Date.now();
+      if (now - this.lastFailureTime > this.cooldownMs) {
+        this.state = "HALF_OPEN";
+        return "HALF_OPEN";
+      }
+    }
+    return this.state;
+  }
+
+  recordSuccess() {
+    this.failureCount = 0;
+    this.state = "CLOSED";
+  }
+
+  recordFailure() {
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+    this.state = "OPEN";
+  }
+
+  getCooldownRemainingSeconds(): number {
+    if (this.state !== "OPEN") return 0;
+    const remaining = this.cooldownMs - (Date.now() - this.lastFailureTime);
+    return Math.max(0, Math.ceil(remaining / 1000));
+  }
+}
+
+const qwenCircuit = new CircuitBreaker();
+
 class LLMProvider {
-  private async callGemini(request: SeekAiRequest): Promise<SeekAiResponse> {
+  private async callGemini(request: SeekAiRequest, circuitNote?: string): Promise<SeekAiResponse> {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      throw new Error("Missing GEMINI_API_KEY");
+      throw new Error("Missing GEMINI_API_KEY for LLM failover.");
     }
 
     const systemMessage = request.messages.find(m => m.role === 'system')?.content;
@@ -91,11 +133,16 @@ class LLMProvider {
     for (const model of models) {
       try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          signal: controller.signal
         });
+        clearTimeout(timeout);
 
         if (!res.ok) {
           const errText = await res.text();
@@ -109,8 +156,9 @@ class LLMProvider {
         return {
           content,
           provenance: {
-            model,
-            provider: "Google Gemini"
+            model: circuitNote ? `${model} (${circuitNote})` : model,
+            provider: "Google Gemini",
+            circuitState: "FAILOVER_GEMINI"
           }
         };
       } catch (err) {
@@ -130,24 +178,39 @@ class LLMProvider {
           keyMismatch: null,
           explanation: 'Mock explanation for testing.'
         }),
-        provenance: { model: 'mock-model', provider: 'mock-provider' }
+        provenance: { model: 'mock-model', provider: 'mock-provider', circuitState: 'PRIMARY' }
       };
     }
 
-    const hasGemini = Boolean(process.env.GEMINI_API_KEY);
+    const isMockOrTestEndpoint =
+      Boolean(process.env.LLM_API_BASE_URL?.includes("mock.invalid")) ||
+      Boolean(process.env.LLM_API_BASE_URL?.includes("example.invalid")) ||
+      process.env.TEST_MODE === "mock_llm" ||
+      process.env.DISABLE_LLM_FAILOVER === "1";
+
+    const hasGemini = Boolean(process.env.GEMINI_API_KEY) && !isMockOrTestEndpoint;
     let endpoint = process.env.LLM_API_BASE_URL || 'https://hackathon.bitgetops.com/v1';
     let apiKey = process.env.LLM_API_KEY;
     let model = request.model || process.env.LLM_MODEL || 'qwen3.8-max';
 
-    // Auto-correct if environment variables are inverted (LLM_API_KEY containing model name like qwen3.8-max)
+    // Auto-correct if environment variables are inverted
     if (apiKey && apiKey.toLowerCase().startsWith('qwen') && model && !model.toLowerCase().startsWith('qwen')) {
       const temp = apiKey;
       apiKey = model;
       model = temp;
     }
 
+    // Check circuit breaker state
+    const currentCircuit = qwenCircuit.getState();
+
+    // If circuit is OPEN (tripped), bypass Qwen immediately and go straight to Gemini
+    if (currentCircuit === "OPEN" && hasGemini) {
+      const remainingSec = qwenCircuit.getCooldownRemainingSeconds();
+      console.warn(`[CIRCUIT-BREAKER] Qwen circuit is OPEN. Auto-routing to Gemini (Probe in ${remainingSec}s)...`);
+      return this.callGemini(request, `Auto-Failover: Qwen Breaker Open, probe in ${remainingSec}s`);
+    }
+
     let resolvedEndpoint = endpoint;
-    
     if (!resolvedEndpoint || !apiKey) {
       if (hasGemini) {
         return this.callGemini(request);
@@ -159,15 +222,10 @@ class LLMProvider {
       resolvedEndpoint = resolvedEndpoint.replace(/\/$/, '') + '/chat/completions';
     }
 
+    // FAST-FAIL TIMEOUT: 5000ms max for Qwen so the desk never hangs in live mode
+    const QWEN_MAX_TIMEOUT_MS = isMockOrTestEndpoint ? 30000 : 5000;
     const controller = new AbortController();
-    const defaultMs = process.env.VERCEL ? 25000 : 90000;
-    const RETRY_BACKOFF_MS = 2000;
-    let timeoutMs = defaultMs;
-    if (typeof request.budgetMs === "number" && request.budgetMs > 0) {
-      timeoutMs = Math.min(defaultMs, Math.max(5000, Math.floor((request.budgetMs - RETRY_BACKOFF_MS) / 2)));
-      if (request.budgetMs < timeoutMs + RETRY_BACKOFF_MS + 5000) isRetry = true;
-    }
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const timeout = setTimeout(() => controller.abort(), QWEN_MAX_TIMEOUT_MS);
 
     const enableThinking = process.env.LLM_ENABLE_THINKING === "1";
 
@@ -178,21 +236,29 @@ class LLMProvider {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`
         },
-        body: JSON.stringify({ ...request, model, stream: false, response_format: { type: "json_object" }, ...(enableThinking ? {} : { enable_thinking: false }) }),
+        body: JSON.stringify({
+          ...request,
+          model,
+          stream: false,
+          response_format: { type: "json_object" },
+          ...(enableThinking ? {} : { enable_thinking: false })
+        }),
         signal: controller.signal
       });
       clearTimeout(timeout);
 
       if (!response.ok) {
         const text = await response.text();
-        // If external endpoint failed and Gemini is available, failover to Gemini
+        if (!isMockOrTestEndpoint) {
+          qwenCircuit.recordFailure();
+        }
         if (hasGemini) {
-          console.warn(`External LLM failed (${response.status}), falling back to Gemini...`);
-          return await this.callGemini(request);
+          console.warn(`[CIRCUIT-BREAKER] Qwen returned HTTP ${response.status}. Trip breaker & failover to Gemini...`);
+          return await this.callGemini(request, `Auto-Failover: Qwen HTTP ${response.status}`);
         }
         throw new Error(`LLM request failed (${response.status}): ${text}`);
       }
-      
+
       let content = "";
       try {
         const jsonBody = await response.json();
@@ -204,26 +270,34 @@ class LLMProvider {
       } catch (err) {
         throw new Error("Failed to parse non-stream JSON response: " + (err as Error).message);
       }
-      
+
       content = extractCleanJson(content);
-      
-      return { 
+      // Successful Qwen response -> close / reset circuit
+      if (!isMockOrTestEndpoint) {
+        qwenCircuit.recordSuccess();
+      }
+
+      return {
         content,
-        provenance: { model, provider: new URL(resolvedEndpoint).hostname }
+        provenance: {
+          model,
+          provider: new URL(resolvedEndpoint).hostname,
+          circuitState: currentCircuit === "HALF_OPEN" ? "PROBE_RECOVERY" : "PRIMARY"
+        }
       };
-    } catch (err) {
+    } catch (err: any) {
       clearTimeout(timeout);
+      if (!isMockOrTestEndpoint) {
+        qwenCircuit.recordFailure();
+      }
+
       if (hasGemini) {
-        console.warn("External LLM errored, falling back to Gemini:", err);
-        return await this.callGemini(request);
+        const reason = err.name === 'AbortError' ? 'Qwen Timeout (5s)' : 'Qwen Connection Error';
+        console.warn(`[CIRCUIT-BREAKER] ${reason}. Tripping breaker, routing instantly to Gemini...`);
+        return await this.callGemini(request, `Auto-Failover: ${reason}`);
       }
-      const budgetLeft = typeof request.budgetMs === "number" ? request.budgetMs - (timeoutMs + RETRY_BACKOFF_MS) : Infinity;
-      if (!isRetry && budgetLeft >= 5000) {
-        console.warn("LLM Request failed, retrying once in 2 seconds...");
-        await new Promise(r => setTimeout(r, RETRY_BACKOFF_MS));
-        return this.chat(request, true);
-      }
-      console.error("LLM CLIENT ERROR (Retry failed or aborted):", err);
+
+      console.error("LLM CLIENT ERROR:", err);
       throw err;
     }
   }

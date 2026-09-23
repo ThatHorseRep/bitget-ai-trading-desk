@@ -179,11 +179,15 @@ ${evidenceText}
       parsed = ExtractionSchema.parse(JSON.parse(resp.content));
       break; // Success, exit retry loop
     } catch (err) {
-      if (!resp) {
-        throw new Error(`LLM API or network failure: ${err instanceof Error ? err.message : String(err)}`);
-      }
       if (attempt === maxAttempts) {
+        if (!resp) {
+          throw err;
+        }
         throw new Error(`Failed to extract thesis after ${attempt} attempts. Error: ${err instanceof Error ? err.message : String(err)}`);
+      }
+      if (!resp) {
+        console.warn(`Extractor attempt ${attempt} network/API failure, retrying...`);
+        continue;
       }
       console.warn("Extractor JSON parse failed, retrying with stronger format instructions...");
       // Enhance prompt for retry by maintaining alternating roles

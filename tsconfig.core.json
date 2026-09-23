@@ -8,9 +8,22 @@
     "skipLibCheck": true,
     "outDir": "dist-core",
     "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
     "types": ["node"]
   },
-  "include": ["src/domain/**/*.ts", "src/core/**/*.ts", "src/fixtures/**/*.ts", "src/adapters/**/*.ts", "src/services/**/*.ts", "src/lib/**/*.ts", "src/config/**/*.ts"],
+  "include": [
+    "src/domain/**/*.ts",
+    "src/core/**/*.ts",
+    "src/fixtures/**/*.ts",
+    "src/adapters/**/*.ts",
+    "src/services/**/*.ts",
+    "src/lib/**/*.ts",
+    "src/config/**/*.ts",
+    "src/components/**/*.ts"
+  ],
   "exclude": ["node_modules", "**/*.test.ts", "**/*.test.tsx"]
 }
 
