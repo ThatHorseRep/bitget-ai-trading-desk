@@ -41,7 +41,86 @@ export type SeekAiResponse = {
   };
 };
 
+function extractCleanJson(raw: string): string {
+  let content = raw.trim();
+  const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (jsonMatch) {
+    content = jsonMatch[1].trim();
+  } else {
+    const startIdx = content.indexOf('{');
+    const startArrayIdx = content.indexOf('[');
+    const firstChar = startIdx !== -1 && (startArrayIdx === -1 || startIdx < startArrayIdx) ? startIdx : startArrayIdx;
+    if (firstChar !== -1) {
+      const lastBrace = content.lastIndexOf('}');
+      const lastBracket = content.lastIndexOf(']');
+      const lastChar = Math.max(lastBrace, lastBracket);
+      if (lastChar > firstChar) {
+        content = content.substring(firstChar, lastChar + 1);
+      }
+    }
+  }
+  return content;
+}
+
 class LLMProvider {
+  private async callGemini(request: SeekAiRequest): Promise<SeekAiResponse> {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("Missing GEMINI_API_KEY");
+    }
+
+    const systemMessage = request.messages.find(m => m.role === 'system')?.content;
+    const conversationMessages = request.messages.filter(m => m.role !== 'system');
+
+    const contents = conversationMessages.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }));
+
+    const payload: Record<string, unknown> = {
+      contents: contents.length > 0 ? contents : [{ role: 'user', parts: [{ text: 'Evaluate' }] }],
+      generationConfig: { responseMimeType: "application/json" }
+    };
+    if (systemMessage) {
+      payload.systemInstruction = { parts: [{ text: systemMessage }] };
+    }
+
+    const models = ["gemini-3.1-flash-lite", "gemini-3.8-flash"];
+    let lastErr: unknown = null;
+
+    for (const model of models) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`Gemini ${model} returned ${res.status}: ${errText}`);
+        }
+
+        const data = await res.json();
+        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        const content = extractCleanJson(rawText);
+
+        return {
+          content,
+          provenance: {
+            model,
+            provider: "Google Gemini"
+          }
+        };
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+
+    throw lastErr || new Error("Gemini API call failed");
+  }
+
   async chat(request: SeekAiRequest, isRetry = false): Promise<SeekAiResponse> {
     const testMode = process.env.TEST_MODE === 'mock_llm';
     if (testMode) {
@@ -55,16 +134,29 @@ class LLMProvider {
       };
     }
 
-    let endpoint = process.env.LLM_API_BASE_URL;
-    const apiKey = process.env.LLM_API_KEY;
-    const model = request.model || process.env.LLM_MODEL || "deepseek-v4-flash";
+    const hasGemini = Boolean(process.env.GEMINI_API_KEY);
+    let endpoint = process.env.LLM_API_BASE_URL || 'https://hackathon.bitgetops.com/v1';
+    let apiKey = process.env.LLM_API_KEY;
+    let model = request.model || process.env.LLM_MODEL || 'qwen3.8-max';
+
+    // Auto-correct if environment variables are inverted (LLM_API_KEY containing model name like qwen3.8-max)
+    if (apiKey && apiKey.toLowerCase().startsWith('qwen') && model && !model.toLowerCase().startsWith('qwen')) {
+      const temp = apiKey;
+      apiKey = model;
+      model = temp;
+    }
+
+    let resolvedEndpoint = endpoint;
     
-    if (!endpoint || !apiKey) {
+    if (!resolvedEndpoint || !apiKey) {
+      if (hasGemini) {
+        return this.callGemini(request);
+      }
       throw new Error("Missing required LLM configuration: LLM_API_BASE_URL and/or LLM_API_KEY");
     }
 
-    if (!endpoint.endsWith('/chat/completions')) {
-      endpoint = endpoint.replace(/\/$/, '') + '/chat/completions';
+    if (!resolvedEndpoint.endsWith('/chat/completions')) {
+      resolvedEndpoint = resolvedEndpoint.replace(/\/$/, '') + '/chat/completions';
     }
 
     const controller = new AbortController();
@@ -72,25 +164,15 @@ class LLMProvider {
     const RETRY_BACKOFF_MS = 2000;
     let timeoutMs = defaultMs;
     if (typeof request.budgetMs === "number" && request.budgetMs > 0) {
-      // attempt1 + backoff + attempt2 must fit the budget: clamp each
-      // attempt to (budget - backoff) / 2. Never below a 5s floor — below
-      // that a call is pointless and the budget is already exhausted.
       timeoutMs = Math.min(defaultMs, Math.max(5000, Math.floor((request.budgetMs - RETRY_BACKOFF_MS) / 2)));
-      // Skip the retry when even one clamped attempt cannot fit what remains.
       if (request.budgetMs < timeoutMs + RETRY_BACKOFF_MS + 5000) isRetry = true;
     }
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-    // Qwen3-class "thinking" models on OpenAI-compatible proxies burn 30-90s+
-    // in reasoning_content before answering (observed 2026-09-21 on the
-    // hackathon gateway: 55s extraction, 90s+ challenge timeouts with thinking
-    // on; ~3s with it off). These prompts are strict-schema and designed for
-    // fast non-thinking completion, so thinking is disabled by default. Set
-    // LLM_ENABLE_THINKING=1 to opt back in for endpoints that support it.
     const enableThinking = process.env.LLM_ENABLE_THINKING === "1";
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch(resolvedEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,6 +185,11 @@ class LLMProvider {
 
       if (!response.ok) {
         const text = await response.text();
+        // If external endpoint failed and Gemini is available, failover to Gemini
+        if (hasGemini) {
+          console.warn(`External LLM failed (${response.status}), falling back to Gemini...`);
+          return await this.callGemini(request);
+        }
         throw new Error(`LLM request failed (${response.status}): ${text}`);
       }
       
@@ -118,32 +205,18 @@ class LLMProvider {
         throw new Error("Failed to parse non-stream JSON response: " + (err as Error).message);
       }
       
-      // Transparently extract JSON if it's wrapped in markdown
-      content = content.trim();
-      const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (jsonMatch) {
-        content = jsonMatch[1].trim();
-      } else {
-        // Sometimes it just outputs plain text, try to find the first { or [
-        const startIdx = content.indexOf('{');
-        const startArrayIdx = content.indexOf('[');
-        const firstChar = startIdx !== -1 && (startArrayIdx === -1 || startIdx < startArrayIdx) ? startIdx : startArrayIdx;
-        if (firstChar !== -1) {
-            const lastBrace = content.lastIndexOf('}');
-            const lastBracket = content.lastIndexOf(']');
-            const lastChar = Math.max(lastBrace, lastBracket);
-            if (lastChar > firstChar) {
-                content = content.substring(firstChar, lastChar + 1);
-            }
-        }
-      }
+      content = extractCleanJson(content);
       
       return { 
         content,
-        provenance: { model, provider: new URL(endpoint).hostname }
+        provenance: { model, provider: new URL(resolvedEndpoint).hostname }
       };
     } catch (err) {
       clearTimeout(timeout);
+      if (hasGemini) {
+        console.warn("External LLM errored, falling back to Gemini:", err);
+        return await this.callGemini(request);
+      }
       const budgetLeft = typeof request.budgetMs === "number" ? request.budgetMs - (timeoutMs + RETRY_BACKOFF_MS) : Infinity;
       if (!isRetry && budgetLeft >= 5000) {
         console.warn("LLM Request failed, retrying once in 2 seconds...");
@@ -151,7 +224,7 @@ class LLMProvider {
         return this.chat(request, true);
       }
       console.error("LLM CLIENT ERROR (Retry failed or aborted):", err);
-      throw err; // Caller must handle the failure
+      throw err;
     }
   }
 }

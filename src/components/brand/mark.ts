@@ -68,6 +68,8 @@ function translate(poly: Pt[], dx: number, dy: number): Pt[] {
 }
 
 function hull(points: Pt[]): Pt[] {
+  // Round and de-duplicate first: collinear duplicates would otherwise survive
+  // into the seam polygon as repeated vertices.
   const seen = new Set<string>();
   const pts: Pt[] = [];
   for (const [x, y] of points) {

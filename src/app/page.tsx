@@ -162,6 +162,18 @@ export default function WorkspacePage() {
         }
       }
 
+      if (buffer.trim()) {
+        try {
+          const parsed = JSON.parse(buffer.trim());
+          if (parsed.type === "result" || parsed.type === "error") {
+            finalData = parsed.data;
+            finalStatus = parsed.status || 200;
+          }
+        } catch (e) {
+          console.error("Failed to parse remaining stream buffer:", buffer);
+        }
+      }
+
       if (!finalData || finalData.step === "ERROR" || !finalData.artifact) {
         // A stream that ends without a result line means the server function
         // was killed (e.g. Vercel maxDuration) — HTTP stays 200 because the

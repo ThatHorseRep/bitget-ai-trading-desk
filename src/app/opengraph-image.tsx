@@ -1,15 +1,19 @@
 import { ImageResponse } from "next/og";
-import { BRANDING } from "@/config/branding";
+import { BRANDING, COLOR } from "@/config/branding";
+import { markGeometry, SPEC } from "@/components/brand/mark";
 
-export const runtime = "edge";
-export const alt = `${BRANDING.PRODUCT_NAME} — ${BRANDING.TAGLINE}`;
+export const runtime = "nodejs";
+
+export const alt = `${BRANDING.PRODUCT_NAME} • ${BRANDING.TAGLINE}`;
 export const size = {
   width: 1200,
   height: 630,
 };
 export const contentType = "image/png";
 
-export default function OpenGraphImage() {
+export default async function Image() {
+  const { blocks, seam } = markGeometry({ ...SPEC, offset: 9 });
+
   return new ImageResponse(
     (
       <div
@@ -19,58 +23,59 @@ export default function OpenGraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "64px 72px",
-          backgroundColor: "#06121C",
-          color: "#F7F8F6",
-          fontFamily: "sans-serif",
-          border: "8px solid #0E2436",
+          padding: "72px 80px",
+          backgroundColor: COLOR.void, // Deep Field #06121C - matching website hero
+          color: COLOR.paper,
+          fontFamily: "monospace",
+          position: "relative",
         }}
       >
-        {/* Top Bar / Endorser */}
+        {/* Top Header: Brand Lockup & Endorser */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            borderBottom: "1px solid #1E384D",
-            paddingBottom: "24px",
+            width: "100%",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <div
-              style={{
-                width: "48px",
-                height: "48px",
-                backgroundColor: "#0E2436",
-                border: "1px solid #54697E",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#0E9F8B",
-                fontSize: "24px",
-                fontWeight: "bold",
-              }}
+          {/* Logo mark + Brand wordmark */}
+          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+            <svg
+              viewBox="0 0 100 100"
+              width="64"
+              height="64"
+              style={{ display: "block" }}
             >
-              ⯛
-            </div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
+              {blocks.map((b, i) => (
+                <path
+                  key={i}
+                  d={`${b.outer} ${b.inner}`}
+                  fill="#FFFFFF"
+                  fillRule="evenodd"
+                />
+              ))}
+              <path d={seam} fill={COLOR.stamp} />
+            </svg>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               <span
                 style={{
-                  fontSize: "14px",
+                  fontSize: 14,
                   letterSpacing: "0.2em",
-                  color: "#54697E",
+                  color: COLOR.steel,
                   textTransform: "uppercase",
-                  fontWeight: "bold",
+                  fontWeight: 600,
                 }}
               >
                 {BRANDING.ENDORSER}
               </span>
               <span
                 style={{
-                  fontSize: "24px",
-                  fontWeight: "bold",
-                  letterSpacing: "0.05em",
-                  color: "#F7F8F6",
+                  fontSize: 26,
+                  fontWeight: 800,
+                  letterSpacing: "0.08em",
+                  color: "#FFFFFF",
                 }}
               >
                 {BRANDING.WORDMARK}
@@ -78,119 +83,99 @@ export default function OpenGraphImage() {
             </div>
           </div>
 
+          {/* Operational Window Tag */}
           <div
             style={{
-              padding: "6px 16px",
-              backgroundColor: "#0E2436",
-              border: "1px solid #54697E",
-              color: "#0E9F8B",
-              fontSize: "14px",
-              fontWeight: "bold",
-              textTransform: "uppercase",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              border: `1px solid ${COLOR.steel}`,
+              padding: "8px 16px",
+              fontSize: 13,
               letterSpacing: "0.1em",
+              color: COLOR.steel,
+              textTransform: "uppercase",
+              fontWeight: 700,
             }}
           >
-            Deterministic Risk Engine S05
+            65.5h Off-Hours Window
           </div>
         </div>
 
-        {/* Center Content */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-          <h1
+        {/* Center: Hero Thesis Headline matching website */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div
             style={{
-              fontSize: "52px",
-              fontWeight: "900",
-              lineHeight: 1.15,
-              color: "#F7F8F6",
-              letterSpacing: "-0.02em",
-              maxWidth: "1000px",
+              fontSize: 68,
+              fontWeight: 900,
+              letterSpacing: "-0.03em",
+              lineHeight: 1.05,
+              color: "#FFFFFF",
+              display: "flex",
+              alignItems: "center",
+              gap: 16,
             }}
           >
-            Adversarial Pre-Trade Risk Workbench
-          </h1>
-          <p
-            style={{
-              fontSize: "22px",
-              color: "#8B9EB0",
-              lineHeight: 1.4,
-              maxWidth: "920px",
-            }}
-          >
-            Stress-test off-hours basis decoupling, crypto liquidity contagion, and thesis invalidation on 24/7 tokenized equities.
-          </p>
-        </div>
-
-        {/* Bottom Bar: Deterministic Gating Verdict Bands */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            borderTop: "1px solid #1E384D",
-            paddingTop: "24px",
-          }}
-        >
-          <div style={{ display: "flex", gap: "12px" }}>
-            <div
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#0E2436",
-                border: "1px solid #C8102E",
-                color: "#C8102E",
-                fontSize: "14px",
-                fontWeight: "bold",
-              }}
-            >
-              STATE 1 • REJECT
-            </div>
-            <div
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#0E2436",
-                border: "1px solid #54697E",
-                color: "#8B9EB0",
-                fontSize: "14px",
-                fontWeight: "bold",
-              }}
-            >
-              STATE 2 • WAIT
-            </div>
-            <div
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#0E2436",
-                border: "1px solid #C98A14",
-                color: "#C98A14",
-                fontSize: "14px",
-                fontWeight: "bold",
-              }}
-            >
-              STATE 3 • REDUCE
-            </div>
-            <div
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#0E2436",
-                border: "1px solid #0E9F8B",
-                color: "#0E9F8B",
-                fontSize: "14px",
-                fontWeight: "bold",
-              }}
-            >
-              STATE 4 • PROCEED
-            </div>
+            <span>Thesis</span>
+            <span style={{ color: COLOR.stamp, fontWeight: 900 }}>≠</span>
+            <span>Position.</span>
           </div>
 
-          <span
+          <div
             style={{
-              fontSize: "14px",
-              color: "#54697E",
-              fontFamily: "monospace",
-              letterSpacing: "0.05em",
+              fontSize: 22,
+              lineHeight: 1.45,
+              color: COLOR.steel,
+              maxWidth: 880,
+              fontFamily: "system-ui, sans-serif",
             }}
           >
-            PURE MATH GATING • PROVENANCE TRACEABLE
-          </span>
+            Pre-trade adversarial risk firewall for tokenized US equities.
+            Stress test basis decoupling, liquidity collapse, and contagion
+            during the weekend gap.
+          </div>
+        </div>
+
+        {/* Bottom Bar: Deterministic Outcomes & Fault Line Rule */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          {/* Fault line separator */}
+          <div
+            style={{
+              display: "flex",
+              width: "100%",
+              height: "2px",
+              backgroundColor: COLOR.steel,
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 120,
+                width: 60,
+                height: 2,
+                backgroundColor: COLOR.stamp,
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontSize: 13,
+              letterSpacing: "0.12em",
+              color: COLOR.steel,
+              textTransform: "uppercase",
+            }}
+          >
+            <span>DETERMINISTIC VERDICTS: PROCEED • REDUCE • WAIT • REJECT</span>
+            <span style={{ color: "#FFFFFF", fontWeight: 700 }}>
+              BITGET AI REDTEAM DESK
+            </span>
+          </div>
         </div>
       </div>
     ),

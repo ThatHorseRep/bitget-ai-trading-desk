@@ -1,42 +1,59 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { Lockup } from "@/components/brand/Logo";
+import { Mark } from "@/components/brand/Logo";
+import { BRANDING, COLOR } from "@/config/branding";
 
 export default function OfflinePage() {
   return (
-    <div className="min-h-screen bg-[var(--rt-surface-inverse)] text-[var(--rt-text-inverse)] flex flex-col items-center justify-center p-6 text-center">
-      <div className="max-w-md space-y-6">
-        <div className="flex justify-center">
-          <Lockup height={40} reversed />
+    <main className="min-h-screen bg-[var(--rtd-proof)] text-[var(--rtd-ink)] flex flex-col items-center justify-center p-6 selection:bg-[var(--rtd-ink)] selection:text-[var(--rtd-paper)]">
+      <div className="max-w-md w-full text-center space-y-6">
+        {/* Centered Mark at small size with neutral colors (no red) */}
+        <div className="flex justify-center" aria-hidden="true">
+          <Mark
+            size={32}
+            body={COLOR.ink}
+            fault={COLOR.steel}
+            title={BRANDING.SHORT_NAME}
+          />
         </div>
 
-        <div className="p-6 bg-[var(--rt-surface-inverse-raised)] border border-[var(--rt-border-inverse)] space-y-4 shadow-xl">
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-[var(--rt-verdict-critical)] text-white text-[10px] font-mono font-bold tracking-wider uppercase">
-            OFFLINE MODE
+        {/* Product Name (mono) and calm offline message (sans) */}
+        <div className="space-y-2">
+          <div className="text-xs font-mono font-bold tracking-wider uppercase text-[var(--rtd-steel)]">
+            {BRANDING.PRODUCT_NAME}
           </div>
-
-          <h1 className="text-2xl font-mono font-bold tracking-tight text-[var(--rt-text-inverse)]">
-            Network Connection Unavailable
-          </h1>
-
-          <p className="text-sm text-[var(--rt-text-inverse-muted)] leading-relaxed">
-            The Bitget AI RedTeam Desk requires network connectivity to stream live orderbook data and evaluate real-time basis spreads.
+          <p className="text-base font-sans text-[var(--rtd-ink)] leading-relaxed">
+            You&apos;re offline. Reconnect to keep stress-testing.
           </p>
-
-          <div className="pt-2">
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center w-full px-6 py-3 bg-[var(--rt-text-inverse)] text-[var(--rt-surface-inverse)] text-xs font-mono font-bold uppercase tracking-wider hover:bg-white active:scale-95 transition-all"
-            >
-              RETRY CONNECTION →
-            </Link>
-          </div>
         </div>
 
-        <div className="text-[11px] font-mono text-[var(--rt-verdict-elevated)]">
-          BITGET AI REDTEAM DESK • PRE-TRADE ADVERSARIAL FIREWALL
+        {/* Action Button */}
+        <div className="pt-2 flex justify-center">
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.location.reload();
+              }
+            }}
+            className="w-full sm:w-auto min-h-[44px] px-8 py-3 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold tracking-wider uppercase hover:bg-[var(--rtd-void)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shadow-xs"
+          >
+            Reconnect
+          </button>
+        </div>
+
+        {/* Closing fault rule below the text block */}
+        <div className="pt-4">
+          <div className="rtd-fault" aria-hidden="true" />
+        </div>
+
+        {/* Footnote */}
+        <div className="text-[11px] font-mono text-[var(--rtd-steel)] uppercase tracking-wider">
+          OFFLINE CACHE ACTIVE • RECONNECT FOR LIVE ORDERBOOK BASIS
         </div>
       </div>
-    </div>
+    </main>
   );
 }

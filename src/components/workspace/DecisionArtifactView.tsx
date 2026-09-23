@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import type { DecisionArtifact, DecisionVerdict } from "../../domain/decision/types";
 import { Reveal } from "../motion/Reveal";
-import { VerdictGlyph } from "../brand/VerdictGlyph";
+import { VerdictGlyph, VerdictBadge } from "../brand/VerdictGlyph";
 
 interface DecisionArtifactViewProps {
   artifact: DecisionArtifact;
@@ -111,9 +111,7 @@ export function DecisionArtifactView({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-mono font-bold tracking-wider text-white ${verdictInfo.iconBg}`}>
-                  {verdictInfo.badge}
-                </span>
+                <VerdictBadge verdict={decision.verdict} />
                 <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--rt-text-muted)]">
                   Deterministic policy
                 </span>
@@ -182,9 +180,11 @@ export function DecisionArtifactView({
             Decisive policy reasons
           </h3>
         </div>
-        <p className="text-xs text-[var(--rt-text-muted)] [text-wrap:pretty]">
-          The decisive drivers that determined the {decision.verdict} verdict under deterministic desk rules:
-        </p>
+        <div className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--rt-text-muted)] [text-wrap:pretty]">
+          <span>The decisive drivers that determined the</span>
+          <VerdictBadge verdict={decision.verdict} />
+          <span>verdict under deterministic desk rules:</span>
+        </div>
         <div className="grid grid-cols-1 gap-2 pt-1">
           {decision.reasons.map((reason, idx) => (
             <div
@@ -711,9 +711,11 @@ export function DecisionArtifactView({
             Actionable change conditions
           </h3>
         </div>
-        <p className="text-xs text-[var(--rt-text-muted)] [text-wrap:pretty]">
-          The observable triggers that would materially change the verdict from {decision.verdict} to PROCEED:
-        </p>
+        <div className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--rt-text-muted)] [text-wrap:pretty]">
+          <span>The observable triggers that would materially change the verdict from</span>
+          <VerdictBadge verdict={decision.verdict} />
+          <span>to PROCEED:</span>
+        </div>
         <div className="space-y-2">
           {changeConditions.map((condition, idx) => (
             <div
@@ -732,11 +734,11 @@ export function DecisionArtifactView({
       </section>
 
       {/* 8. Footer Navigation CTA */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[var(--rt-border-subtle)]">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-[var(--rt-border-subtle)]">
         <button
           type="button"
           onClick={onNewTrade}
-          className="inline-flex min-h-[44px] min-w-[44px] items-center gap-2 bg-[var(--rt-surface-void)] px-5 sm:px-6 py-2.5 text-sm font-mono font-semibold text-white shadow-xs hover:bg-[var(--rt-text-primary)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden"
+          className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 bg-[var(--rt-surface-void)] px-5 sm:px-6 py-2.5 text-sm font-mono font-semibold text-white shadow-xs hover:bg-[var(--rt-text-primary)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -747,7 +749,7 @@ export function DecisionArtifactView({
         <button
           type="button"
           onClick={onOpenProvenance}
-          className="inline-flex min-h-[44px] min-w-[44px] items-center gap-2 border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] px-5 sm:px-6 py-2.5 text-sm font-mono font-semibold text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-base)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden"
+          className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] px-5 sm:px-6 py-2.5 text-sm font-mono font-semibold text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-base)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden cursor-pointer"
         >
           <svg className="w-4 h-4 text-[var(--rt-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

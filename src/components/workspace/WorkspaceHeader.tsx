@@ -2,7 +2,7 @@
 
 import React from "react";
 import { BRANDING } from "@/config/branding";
-import { Lockup } from "@/components/brand/Logo";
+import { Lockup, Mark } from "@/components/brand/Logo";
 import { PwaInstallButton } from "../pwa/PwaManager";
 
 interface WorkspaceHeaderProps {
@@ -32,7 +32,7 @@ export function WorkspaceHeader({
         {/* Desktop & Tablet Layout (>= md) */}
         <div className="hidden md:flex mx-auto max-w-6xl px-4 py-3 sm:px-6 items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <Lockup height={34} endorsed />
+            <Lockup height={32} />
             <span className="inline-flex items-center bg-[var(--rt-surface-base)] px-2 py-0.5 text-xs font-mono font-semibold text-[var(--rt-text-primary)] border border-[var(--rt-border-subtle)]">
               Risk workbench
             </span>
@@ -45,7 +45,7 @@ export function WorkspaceHeader({
               <button
                 type="button"
                 onClick={onViewOverview}
-                className="min-h-[44px] px-3 py-1.5 border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] text-xs font-mono font-semibold text-[var(--rt-text-muted)] hover:text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-raised)] active:scale-[0.98] transition-all"
+                className="min-h-[44px] px-3 py-1.5 border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] text-xs font-mono font-semibold text-[var(--rt-text-muted)] hover:text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-raised)] active:scale-[0.98] transition-all cursor-pointer"
               >
                 ← System overview
               </button>
@@ -56,7 +56,7 @@ export function WorkspaceHeader({
               <button
                 type="button"
                 onClick={() => onToggleFixture(false)}
-                className={`min-h-[44px] px-3 py-1.5 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden ${
+                className={`min-h-[44px] px-3 py-1.5 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden cursor-pointer ${
                   !useFixture
                     ? "bg-[var(--rt-surface-raised)] text-[var(--rt-text-primary)] shadow-xs font-semibold"
                     : "text-[var(--rt-text-muted)] hover:text-[var(--rt-text-primary)]"
@@ -68,7 +68,7 @@ export function WorkspaceHeader({
               <button
                 type="button"
                 onClick={() => onToggleFixture(true)}
-                className={`min-h-[44px] px-3 py-1.5 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden ${
+                className={`min-h-[44px] px-3 py-1.5 active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden cursor-pointer ${
                   useFixture
                     ? "bg-[var(--rt-surface-raised)] text-[var(--rt-text-primary)] shadow-xs font-semibold"
                     : "text-[var(--rt-text-muted)] hover:text-[var(--rt-text-primary)]"
@@ -82,7 +82,7 @@ export function WorkspaceHeader({
               <button
                 type="button"
                 onClick={onNewTrade}
-                className="inline-flex min-h-[44px] items-center gap-1.5 border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] px-4 py-2 text-sm font-mono font-semibold text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-base)] hover:text-[var(--rt-text-primary)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-xs focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden"
+                className="inline-flex min-h-[44px] items-center gap-1.5 border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] px-4 py-2 text-sm font-mono font-semibold text-[var(--rt-text-primary)] hover:bg-[var(--rt-surface-base)] hover:text-[var(--rt-text-primary)] active:scale-[0.98] motion-safe:transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-xs focus-visible:ring-2 focus-visible:ring-[var(--rt-text-muted)] focus-visible:outline-hidden cursor-pointer"
               >
                 <svg className="w-3.5 h-3.5 text-[var(--rt-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -93,27 +93,31 @@ export function WorkspaceHeader({
           </div>
         </div>
 
-        {/* Mobile Header (< md: 48px compact bar) */}
-        <div className="flex md:hidden h-12 px-3 items-center justify-between">
-          <div className="flex items-center gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/icon.svg"
-              alt="Bitget AI RedTeam Desk Mark"
-              width={28}
-              height={28}
-              className="h-7 w-7 shrink-0 object-contain"
-            />
-            <span className="font-mono font-bold text-sm tracking-tight text-[var(--rt-text-primary)] truncate max-w-[170px]">
-              {BRANDING.PRODUCT_NAME}
+        {/* Mobile Header (< md: min-h-[48px] with full 44px touch targets) */}
+        <div className="flex md:hidden min-h-[48px] px-3 py-1 items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Mark size={28} />
+            <span className="font-mono font-bold text-xs tracking-tight text-[var(--rt-text-primary)] truncate">
+              {BRANDING.SHORT_NAME}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 shrink-0">
+            {onViewOverview && (
+              <button
+                type="button"
+                onClick={onViewOverview}
+                className="min-h-[44px] px-2.5 py-1 text-[10px] font-mono font-bold border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-base)] text-[var(--rt-text-muted)] active:scale-95 flex items-center justify-center cursor-pointer"
+                title="System Overview"
+              >
+                ← Desk
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => onToggleFixture(!useFixture)}
-              className={`inline-flex items-center px-2 py-1 text-[10px] font-mono font-bold border min-h-[44px] ${
+              className={`inline-flex items-center justify-center px-2 py-1 text-[10px] font-mono font-bold border min-h-[44px] cursor-pointer ${
                 useFixture
                   ? "bg-[var(--rt-surface-base)] text-[var(--rt-verdict-moderate)] border-[var(--rt-verdict-moderate)]"
                   : "bg-[var(--rt-surface-base)] text-[var(--rt-verdict-clear)] border-[var(--rt-border-subtle)]"
@@ -123,6 +127,17 @@ export function WorkspaceHeader({
               <span className={`w-1.5 h-1.5 rounded-full mr-1 ${useFixture ? "bg-[var(--rt-verdict-moderate)]" : "bg-[var(--rt-verdict-clear)] animate-pulse"}`} />
               {useFixture ? "Fixture" : "Live"}
             </button>
+
+            {canReset && (
+              <button
+                type="button"
+                onClick={onNewTrade}
+                className="min-h-[44px] px-2.5 py-1 text-[10px] font-mono font-bold border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] text-[var(--rt-text-primary)] active:scale-95 flex items-center justify-center cursor-pointer"
+                title="New stress test"
+              >
+                + Reset
+              </button>
+            )}
           </div>
         </div>
       </header>

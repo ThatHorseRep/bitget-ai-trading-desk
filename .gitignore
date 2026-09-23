@@ -17,6 +17,9 @@ package/
 nul
 stripped.txt
 gitbook.md
+.backup/
+_delete-me/
+local-test-render.png
 
 # Ad-hoc test scripts
 test_api*.js

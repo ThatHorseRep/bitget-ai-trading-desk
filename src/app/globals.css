@@ -1,86 +1,95 @@
 @import "tailwindcss";
 
-@theme {
-  --color-surface-base: #E7E9E6;
-  --color-surface-raised: #F7F8F6;
-  --color-surface-void: #06121C;
-  --color-text-primary: #0E2436;
-  --color-text-muted: #54697E;
-  --color-border-subtle: #CFD4CF;
-  --color-accent: #0E2436;
-  --color-verdict-critical: #C8102E;
-  --color-verdict-elevated: #54697E;
-  --color-verdict-moderate: #C98A14;
-  --color-verdict-clear: #0E9F8B;
-
-  --color-rt-surface-base: #E7E9E6;
-  --color-rt-surface-raised: #F7F8F6;
-  --color-rt-surface-void: #06121C;
-  --color-rt-text-primary: #0E2436;
-  --color-rt-text-muted: #54697E;
-  --color-rt-border-subtle: #CFD4CF;
-  --color-rt-accent: #0E2436;
-  --color-rt-verdict-critical: #C8102E;
-  --color-rt-verdict-elevated: #54697E;
-  --color-rt-verdict-moderate: #C98A14;
-  --color-rt-verdict-clear: #0E9F8B;
-}
+/* ---------------------------------------------------------------------------
+   Bitget AI RedTeam Desk — design tokens.
+   Merge into src/app/globals.css. Stamp Red is reserved for the logo fault and
+   the REJECT verdict; do not use it for links, hovers, focus, or emphasis.
+   --------------------------------------------------------------------------- */
 
 :root {
   color-scheme: light;
 
-  /* Core Palette Tokens */
-  --rt-surface-base: #E7E9E6;
-  --rt-surface-raised: #F7F8F6;
-  --rt-surface-void: #06121C;
-  --rt-text-primary: #0E2436;
-  --rt-text-muted: #54697E;
+  --rtd-ink: #0E2436;
+  --rtd-void: #06121C;
+  --rtd-stamp: #C8102E;
+  --rtd-proof: #E7E9E6;
+  --rtd-paper: #F7F8F6;
+  --rtd-steel: #54697E;
+
+  --rtd-proceed: #0E9F8B;
+  --rtd-reduce: #C98A14;
+  --rtd-wait: #54697E;
+  --rtd-reject: #C8102E;
+
+  /* the fault angle, available to any decorative rule */
+  --rtd-fault-angle: -12deg;
+
+  --rtd-rule: color-mix(in srgb, #54697E 28%, transparent);
+
+  /* Legacy tokens mapped directly to brand tokens */
+  --rt-surface-base: var(--rtd-proof);
+  --rt-surface-raised: var(--rtd-paper);
+  --rt-surface-void: var(--rtd-void);
+  --rt-text-primary: var(--rtd-ink);
+  --rt-text-muted: var(--rtd-steel);
   --rt-border-subtle: #CFD4CF;
-  --rt-accent: #0E2436;
-  --rt-verdict-critical: #C8102E;
-  --rt-verdict-elevated: #54697E;
-  --rt-verdict-moderate: #C98A14;
-  --rt-verdict-clear: #0E9F8B;
+  --rt-accent: var(--rtd-ink);
+  --rt-verdict-critical: var(--rtd-reject);
+  --rt-verdict-elevated: var(--rtd-wait);
+  --rt-verdict-moderate: var(--rtd-reduce);
+  --rt-verdict-clear: var(--rtd-proceed);
 
-  /* Inverse (dark) surface family — for deliberate dark sections such as
-     the offline page. Values carried from the identity kit; see
-     docs/IDENTITY_TOKENS.md. */
-  --rt-surface-inverse: #0E2436;
-  --rt-surface-inverse-raised: #142A3C;
-  --rt-border-inverse: #2B4459;
-  --rt-text-inverse: #EDEFEC;
-  --rt-text-inverse-muted: #9DB0BF;
-
-  /* Typography Tokens */
   --rt-type-body: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --rt-type-h1: var(--font-geist-mono), ui-monospace, monospace;
   --rt-type-h2: var(--font-geist-mono), ui-monospace, monospace;
-  --rt-type-lede: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --rt-type-kicker: var(--font-geist-mono), ui-monospace, monospace;
-  --rt-type-endorser: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --rt-type-wordmark: var(--font-geist-mono), ui-monospace, monospace;
   --rt-type-figure: var(--font-geist-mono), ui-monospace, monospace;
-  --rt-type-verdict-title: var(--font-geist-mono), ui-monospace, monospace;
-  --rt-type-caption: var(--font-geist-mono), ui-monospace, monospace;
 
-  /* Spacing, Radius, and Fault Rules */
-  --rt-space-gutter: clamp(24px, 5vw, 88px);
-  --rt-space-section-y: clamp(48px, 7vw, 104px);
-  --rt-space-mast-gap: 22px;
-  --rt-space-card-padding: 30px;
-  --rt-radius-sharp: 2px;
-  --rt-radius-card: 0px;
-  --rt-border-width-hairline: 1px;
-  --rt-border-width-verdict: 3px;
-  --rt-fault-width: 240px;
-  --rt-fault-height: 6px;
   --rt-fault-angle: -12deg;
 }
 
-html, body {
-  height: 100%;
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
   margin: 0;
-  font-family: var(--rt-type-body);
+  min-height: 100vh;
+  background: var(--rtd-proof);
+  color: var(--rtd-ink);
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+code, kbd, samp, pre {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* Every number the desk states is set in mono. The face is the claim that the
+   figure was computed, not narrated. Apply to any element holding a figure the
+   deterministic engine produced. */
+.rtd-figure {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+/* The fault device: a measured rule at the mark's angle. Use it to close a
+   text block. It never crosses type. */
+.rtd-fault {
+  display: block;
+  width: 210px;
+  height: 4px;
+  background: var(--rtd-stamp);
+  transform: rotate(var(--rtd-fault-angle));
+  transform-origin: left center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .pt-safe {
@@ -99,8 +108,47 @@ html, body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
-code, kbd, samp, pre {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+/* Suppress ugly browser scrollbars on mobile and tablet while keeping smooth touch scrolling */
+@media (max-width: 1024px) {
+  html, body, div, section, main, article {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+}
+
+/* Elegant, slim scrollbar for desktop matching brand steel & proof colors */
+@media (min-width: 1025px) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--rtd-steel) 45%, transparent) var(--rtd-proof);
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--rtd-proof);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--rtd-steel) 40%, transparent);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--rtd-steel);
+  }
+}
+
+.no-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
 }
 
 @media (pointer: coarse) {
@@ -110,7 +158,7 @@ code, kbd, samp, pre {
   }
 }
 
-/* Reveal Motion Primitive (TASK P7) */
+/* Reveal Motion Primitive */
 .rt-reveal-init {
   opacity: 0;
   transform: translateY(12px);
@@ -125,4 +173,3 @@ code, kbd, samp, pre {
 .rt-reveal-transition {
   transition: opacity 400ms ease-out, transform 400ms ease-out;
 }
-

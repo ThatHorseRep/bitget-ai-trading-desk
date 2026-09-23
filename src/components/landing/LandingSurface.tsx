@@ -1,8 +1,17 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { BRANDING } from "@/config/branding";
+import { BRANDING, VERDICT_COLOR } from "@/config/branding";
 import { Reveal } from "@/components/motion/Reveal";
+import { Lockup } from "@/components/brand/Logo";
 import { VerdictGlyph } from "@/components/brand/VerdictGlyph";
+import {
+  getCalibratedBatch,
+  getEpochRemainingSeconds,
+  getEpochBatchIndex,
+  CYCLE_SECONDS
+} from "@/lib/calibratedPrompts";
 
 interface LandingSurfaceProps {
   onLaunchDesk: (initialPrompt?: string) => void;
@@ -12,288 +21,430 @@ const GOLDEN_PATH_PROMPT =
   "I'm thinking about buying $2,000 of rNVDA because AI infrastructure demand still looks strong. BTC has been weakening all weekend. Stress-test it.";
 
 export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [ttlSeconds, setTtlSeconds] = useState(() => getEpochRemainingSeconds());
+  const [batchIndex, setBatchIndex] = useState(() => getEpochBatchIndex());
+  const [isRecalibrating, setIsRecalibrating] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const remaining = getEpochRemainingSeconds();
+      setTtlSeconds(remaining);
+
+      // Trigger automatic prompt rotation on 15-minute epoch cycle boundary
+      if (remaining === CYCLE_SECONDS) {
+        setIsRecalibrating(true);
+        setBatchIndex(getEpochBatchIndex());
+        setTimeout(() => setIsRecalibrating(false), 1200);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleManualCycle = () => {
+    setIsRecalibrating(true);
+    setBatchIndex((prev) => (prev + 1) % 3);
+    setTimeout(() => setIsRecalibrating(false), 600);
+  };
+
+  const formatTtl = (sec: number) => {
+    const mins = Math.floor(sec / 60);
+    const secs = sec % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleCopy = (id: string, text: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard?.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const activeBatch = getCalibratedBatch(batchIndex);
+  const calibratedPrompts = activeBatch.prompts;
+
   return (
-    <div className="w-full bg-[var(--rt-surface-base)] text-[var(--rt-text-primary)] font-sans selection:bg-[var(--rt-surface-void)] selection:text-[var(--rt-surface-raised)]">
-      {/* Top Header Navigation matching 05-website.svg */}
-      <header className="border-b border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div className="w-full bg-[var(--rtd-proof)] text-[var(--rtd-ink)] font-sans selection:bg-[var(--rtd-ink)] selection:text-[var(--rtd-paper)] min-h-screen">
+      {/* ----------------------------------------------------------------------
+          1. TOP NAVIGATION BAR (matching 05-website.png)
+          Height explicitly set to 4rem (h-16) to ensure viewport math is exact.
+         ---------------------------------------------------------------------- */}
+      <header className="h-16 border-b border-[var(--rtd-steel)]/25 bg-[var(--rtd-proof)] sticky top-0 z-40 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          {/* Brand lockup left */}
           <div className="flex items-center gap-3">
-            <div className="relative w-8 h-8 flex-shrink-0 bg-[var(--rt-surface-void)] flex items-center justify-center">
-              <Image
-                src={BRANDING.LOGOS.MARK}
-                alt="Bitget AI RedTeam Desk Mark"
-                width={20}
-                height={20}
-                className="w-5 h-5 object-contain"
-                priority
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-mono tracking-[0.2em] text-[var(--rt-text-muted)] uppercase font-semibold">
-                {BRANDING.ENDORSER}
-              </span>
-              <span className="text-sm font-black tracking-tight text-[var(--rt-text-primary)]">
-                {BRANDING.WORDMARK}
-              </span>
-            </div>
+            <Lockup height={28} />
           </div>
 
-          {/* Navigation Links matching 05-website.svg */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-mono font-semibold text-[var(--rt-text-muted)] uppercase tracking-wider">
-            <a href="#how-it-works" className="hover:text-[var(--rt-text-primary)] transition-colors">HOW IT WORKS</a>
-            <a href="#verdict-system" className="hover:text-[var(--rt-text-primary)] transition-colors">TEMPLATES</a>
-            <a href="#architecture" className="hover:text-[var(--rt-text-primary)] transition-colors">BENCHMARKS</a>
-            <a href="#target-user" className="hover:text-[var(--rt-text-primary)] transition-colors">DOCUMENTATION</a>
+          {/* Desktop Nav Links center-right */}
+          <nav className="hidden md:flex items-center gap-8 text-xs font-mono font-bold text-[var(--rtd-steel)] uppercase tracking-wider">
+            <a
+              href="#how-it-works"
+              className="hover:text-[var(--rtd-ink)] transition-colors py-2"
+            >
+              How it works
+            </a>
+            <a
+              href="#the-65-5h-window"
+              className="hover:text-[var(--rtd-ink)] transition-colors py-2"
+            >
+              The 65.5h window
+            </a>
+            <a
+              href="#method"
+              className="hover:text-[var(--rtd-ink)] transition-colors py-2"
+            >
+              Method
+            </a>
           </nav>
 
-          <div className="flex items-center gap-3">
+          {/* Desktop Run a test button far right */}
+          <div className="hidden md:flex items-center">
             <button
               type="button"
               onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
-              className="px-5 py-2.5 bg-[#0E2436] text-white text-xs font-mono font-bold tracking-wider uppercase hover:opacity-90 active:scale-95 transition-all shadow-xs"
+              className="px-5 py-2.5 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold tracking-wider uppercase hover:bg-[var(--rtd-void)] active:scale-95 transition-all shadow-xs cursor-pointer"
             >
-              RUN DESK
+              Run a test
+            </button>
+          </div>
+
+          {/* Mobile hamburger menu button */}
+          <div className="flex md:hidden items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
+              className="min-h-[44px] px-3.5 py-2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold tracking-wider uppercase active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+            >
+              Run test
+            </button>
+            <button
+              type="button"
+              aria-label="Toggle navigation menu"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center border border-[var(--rtd-steel)]/30 text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper)] transition-colors font-mono text-base cursor-pointer"
+            >
+              {mobileMenuOpen ? "✕" : "☰"}
             </button>
           </div>
         </div>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-[var(--rtd-steel)]/25 bg-[var(--rtd-proof)] px-4 sm:px-6 py-4 space-y-2 font-mono text-xs font-bold uppercase tracking-wider text-[var(--rtd-steel)] shadow-lg">
+            <div>
+              <a
+                href="#how-it-works"
+                onClick={() => setMobileMenuOpen(false)}
+                className="min-h-[44px] flex items-center py-2 hover:text-[var(--rtd-ink)] active:bg-[var(--rtd-steel)]/10 px-2"
+              >
+                How it works
+              </a>
+            </div>
+            <div>
+              <a
+                href="#the-65-5h-window"
+                onClick={() => setMobileMenuOpen(false)}
+                className="min-h-[44px] flex items-center py-2 hover:text-[var(--rtd-ink)] active:bg-[var(--rtd-steel)]/10 px-2"
+              >
+                The 65.5h window
+              </a>
+            </div>
+            <div>
+              <a
+                href="#method"
+                onClick={() => setMobileMenuOpen(false)}
+                className="min-h-[44px] flex items-center py-2 hover:text-[var(--rtd-ink)] active:bg-[var(--rtd-steel)]/10 px-2"
+              >
+                Method
+              </a>
+            </div>
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onLaunchDesk(GOLDEN_PATH_PROMPT);
+                }}
+                className="min-h-[44px] w-full py-3 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold tracking-wider uppercase active:scale-95 transition-all text-center flex items-center justify-center cursor-pointer"
+              >
+                Run a test →
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* SECTION 1: Dark Full-Bleed Hero matching 05-website.svg */}
-      <section className="relative overflow-hidden bg-[#0E2436] text-[#EDEFEC] py-20 px-6 border-b border-[#2A3B49]">
-        {/* Background Watermark matching 05-website.svg */}
-        <div className="absolute right-[-40px] top-1/2 -translate-y-1/2 opacity-10 pointer-events-none hidden lg:block">
+      {/* ----------------------------------------------------------------------
+          2. HERO SECTION (matching 05-website.png)
+         ---------------------------------------------------------------------- */}
+      <section className="relative overflow-hidden bg-[var(--rtd-void)] text-[var(--rtd-paper)] py-16 sm:py-20 lg:py-24 px-4 sm:px-6 border-b border-[var(--rtd-steel)]/30">
+        {/* Subtle Watermark Mark from 05-website.png */}
+        <div className="absolute right-[-60px] top-1/2 -translate-y-1/2 opacity-[0.06] pointer-events-none hidden lg:block select-none">
           <Image
             src={BRANDING.LOGOS.MARK}
-            alt="Watermark"
-            width={480}
-            height={480}
-            className="w-[480px] h-[480px] object-contain"
+            alt="RedTeam Mark Watermark"
+            width={580}
+            height={580}
+            className="w-[580px] h-[580px] object-contain"
+            priority
           />
         </div>
 
         <div className="max-w-6xl mx-auto space-y-8 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#1A3043] border border-[#2B4459] text-[11px] font-mono text-[#9DB0BF] uppercase tracking-wider">
-            <span className="font-bold text-[#EDEFEC]">05 / APPLICATION WEBSITE</span>
+          {/* Eyebrow Label */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[var(--rtd-ink)] border border-[var(--rtd-steel)]/30 text-[11px] font-mono text-[var(--rtd-steel)] uppercase tracking-[0.16em]">
+            <span className="font-bold text-[var(--rtd-paper)]">PRE-TRADE ADVERSARIAL FIREWALL</span>
             <span>•</span>
-            <span>TOKENIZED EQUITIES PRE-TRADE</span>
+            <span>TOKENIZED EQUITIES RISK ENGINE</span>
           </div>
 
-          <div className="space-y-4 max-w-4xl">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-[#EDEFEC] leading-[1.08] uppercase">
-              THIS IS NOT A COPILOT.<br />
-              <span className="text-[#C8102E]">THIS IS AN ADVERSARY.</span>
+          {/* Headline "Thesis ≠ Position." matching 05-website.png */}
+          <div className="space-y-6 max-w-4xl">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-mono font-black tracking-tight text-[var(--rtd-paper)] leading-[1.05] uppercase">
+              Thesis{" "}
+              {/* The fault-cut Not-Equal glyph (two white horizontal bars with red diagonal shear) */}
+              <span className="inline-flex items-center justify-center align-middle mx-1 sm:mx-2 h-[0.75em] w-[0.75em] relative select-none">
+                <span className="absolute top-[26%] left-0 right-0 h-[12%] bg-[var(--rtd-paper)]" />
+                <span className="absolute bottom-[26%] left-0 right-0 h-[12%] bg-[var(--rtd-paper)]" />
+                <span className="absolute inset-y-0 w-[14%] bg-[var(--rtd-stamp)] transform -rotate-[22deg] left-[43%]" />
+              </span>{" "}
+              Position.
             </h1>
-            <p className="text-lg sm:text-xl text-[#9DB0BF] leading-relaxed max-w-3xl">
-              An adversarial pre-trade risk workbench for tokenized equities. It stress-tests basis decoupling, liquidity cliffs, and thesis invalidation before you commit capital.
+
+            <p className="text-base sm:text-xl text-[var(--rtd-steel)] leading-relaxed max-w-2xl font-sans">
+              Tokenized US equities trade 65.5 hours after NYSE closes. Over that window, the token un-anchors from the asset. The RedTeam Desk stresses your trade before the market does.
             </p>
           </div>
 
-          {/* Action CTA Row matching 05-website.svg */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+          {/* Two CTA Buttons:
+              1. Primary: "Stress a trade" (stamp red background — authorized use)
+              2. Secondary: "See a sample run" (outlined) */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
             <button
               type="button"
               onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
-              className="px-8 py-4 bg-[#C8102E] text-white text-sm font-mono font-bold tracking-wider uppercase hover:bg-[#b00e28] active:scale-95 transition-all text-center flex items-center justify-center gap-2 shadow-xs"
+              className="px-8 py-4 bg-[var(--rtd-stamp)] text-white text-sm font-mono font-bold tracking-wider uppercase hover:brightness-110 active:scale-95 transition-all text-center flex items-center justify-center gap-2 shadow-sm cursor-pointer"
             >
-              <span>RUN DESK</span>
+              <span>Stress a trade</span>
+              <span>→</span>
             </button>
             <button
               type="button"
               onClick={() => onLaunchDesk()}
-              className="px-8 py-4 bg-transparent text-[#EDEFEC] text-sm font-mono font-medium tracking-wider uppercase border border-[#3A5266] hover:bg-[#1A3043] transition-colors text-center"
+              className="px-8 py-4 bg-transparent text-[var(--rtd-paper)] text-sm font-mono font-medium tracking-wider uppercase border border-[var(--rtd-steel)]/50 hover:bg-[var(--rtd-ink)] hover:border-[var(--rtd-paper)]/40 transition-all text-center cursor-pointer"
             >
-              EXPLORE ARCHITECTURE
+              See a sample run
             </button>
           </div>
-        </div>
-      </section>
 
-      {/* SECTION 2: 4 Verdict Bands System Row matching 05-website.svg */}
-      <section id="verdict-system" className="border-b border-[var(--rt-border-subtle)] py-16 px-6 bg-[var(--rt-surface-base)]">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <div className="space-y-2">
-            <span className="text-xs font-mono tracking-[0.2em] text-[var(--rt-text-muted)] uppercase font-semibold">
-              01 / DETERMINISTIC VERDICT SCALE
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--rt-text-primary)]">
-              Automated policy gates evaluated on every trade.
-            </h2>
-          </div>
-
-          {/* 4 Cards Row matching 05-website.svg with top 3px colored indicator bars & embedded VerdictGlyph logos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* PROCEED Card */}
-            <div 
-              onClick={() => onLaunchDesk("I plan to buy $10,000 rNVDA token during US cash market hours at 10:15 AM ET with 0.02% basis spread. Data center revenue beat + low crypto correlation.")}
-              className="bg-white border border-[var(--rt-border-subtle)] overflow-hidden shadow-xs relative flex flex-col justify-between p-5 space-y-4 cursor-pointer hover:border-[#0E9F8B] hover:shadow-md transition-all group"
-            >
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#0E9F8B]" />
-              <div className="space-y-3 pt-1">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-mono font-bold text-[#0E9F8B] uppercase tracking-wider">
-                    <span>STATE 4</span>
-                    <span className="block text-[10px] text-[var(--rt-text-muted)]">SCORE ≥ 0.80</span>
-                  </div>
-                  <div className="shrink-0 p-1 bg-[var(--rt-surface-base)] border border-[var(--rt-border-subtle)]">
-                    <VerdictGlyph verdict="PROCEED" size={36} />
-                  </div>
-                </div>
-
-                <h3 className="text-xl font-mono font-black text-[var(--rt-text-primary)] group-hover:text-[#0E9F8B] transition-colors flex items-center justify-between">
-                  <span>PROCEED</span>
-                  <span className="text-xs text-[#0E9F8B] font-normal">→</span>
-                </h3>
-                <p className="text-xs text-[var(--rt-text-muted)] leading-relaxed">
-                  Clear execution runway. Basis within parameters, thesis fully falsifiable, risk within account limit.
-                </p>
-              </div>
-              <div className="pt-2 border-t border-[var(--rt-border-subtle)] flex items-center justify-between text-[10px] font-mono text-[var(--rt-text-muted)] uppercase">
-                <span>Gated Policy: Green</span>
-                <span className="font-bold text-[#0E9F8B] group-hover:underline">TEST PROCEED →</span>
-              </div>
-            </div>
-
-            {/* REDUCE Card */}
-            <div 
-              onClick={() => onLaunchDesk("I plan to buy $50,000 rNVDA token with 5x leverage during extended hours. Basis spread elevated at 0.45%.")}
-              className="bg-white border border-[var(--rt-border-subtle)] overflow-hidden shadow-xs relative flex flex-col justify-between p-5 space-y-4 cursor-pointer hover:border-[#C98A14] hover:shadow-md transition-all group"
-            >
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#C98A14]" />
-              <div className="space-y-3 pt-1">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-mono font-bold text-[#C98A14] uppercase tracking-wider">
-                    <span>STATE 3</span>
-                    <span className="block text-[10px] text-[var(--rt-text-muted)]">SCORE ≥ 0.60</span>
-                  </div>
-                  <div className="shrink-0 p-1 bg-[var(--rt-surface-base)] border border-[var(--rt-border-subtle)]">
-                    <VerdictGlyph verdict="REDUCE" size={36} />
-                  </div>
-                </div>
-
-                <h3 className="text-xl font-mono font-black text-[var(--rt-text-primary)] group-hover:text-[#C98A14] transition-colors flex items-center justify-between">
-                  <span>REDUCE</span>
-                  <span className="text-xs text-[#C98A14] font-normal">→</span>
-                </h3>
-                <p className="text-xs text-[var(--rt-text-muted)] leading-relaxed">
-                  Basis risk elevated. Trim notional position size by 40% or hedge crypto contagion drag.
-                </p>
-              </div>
-              <div className="pt-2 border-t border-[var(--rt-border-subtle)] flex items-center justify-between text-[10px] font-mono text-[var(--rt-text-muted)] uppercase">
-                <span>Gated Policy: Warning</span>
-                <span className="font-bold text-[#C98A14] group-hover:underline">TEST REDUCE →</span>
-              </div>
-            </div>
-
-            {/* WAIT Card */}
-            <div 
-              onClick={() => onLaunchDesk("I want to buy $25,000 rNVDA token on Sunday at 02:00 AM ET during 65.5-hour weekend market closure.")}
-              className="bg-white border border-[var(--rt-border-subtle)] overflow-hidden shadow-xs relative flex flex-col justify-between p-5 space-y-4 cursor-pointer hover:border-[#54697E] hover:shadow-md transition-all group"
-            >
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#54697E]" />
-              <div className="space-y-3 pt-1">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-mono font-bold text-[#54697E] uppercase tracking-wider">
-                    <span>STATE 2</span>
-                    <span className="block text-[10px] text-[var(--rt-text-muted)]">SCORE ≥ 0.35</span>
-                  </div>
-                  <div className="shrink-0 p-1 bg-[var(--rt-surface-base)] border border-[var(--rt-border-subtle)]">
-                    <VerdictGlyph verdict="WAIT" size={36} />
-                  </div>
-                </div>
-
-                <h3 className="text-xl font-mono font-black text-[var(--rt-text-primary)] group-hover:text-[#54697E] transition-colors flex items-center justify-between">
-                  <span>WAIT</span>
-                  <span className="text-xs text-[#54697E] font-normal">→</span>
-                </h3>
-                <p className="text-xs text-[var(--rt-text-muted)] leading-relaxed">
-                  Off-hours market close or un-anchored basis drift. Defer execution until cash open at 09:30 ET.
-                </p>
-              </div>
-              <div className="pt-2 border-t border-[var(--rt-border-subtle)] flex items-center justify-between text-[10px] font-mono text-[var(--rt-text-muted)] uppercase">
-                <span>Gated Policy: Deferral</span>
-                <span className="font-bold text-[#54697E] group-hover:underline">TEST WAIT →</span>
-              </div>
-            </div>
-
-            {/* REJECT Card */}
-            <div 
-              onClick={() => onLaunchDesk("Ape $100,000 with max leverage into tokenized equity with no thesis, no stop loss, and liquidation cascade risk.")}
-              className="bg-white border border-[var(--rt-border-subtle)] overflow-hidden shadow-xs relative flex flex-col justify-between p-5 space-y-4 cursor-pointer hover:border-[#C8102E] hover:shadow-md transition-all group"
-            >
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#C8102E]" />
-              <div className="space-y-3 pt-1">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-mono font-bold text-[#C8102E] uppercase tracking-wider">
-                    <span>STATE 1</span>
-                    <span className="block text-[10px] text-[var(--rt-text-muted)]">SCORE &lt; 0.35</span>
-                  </div>
-                  <div className="shrink-0 p-1 bg-[var(--rt-surface-base)] border border-[var(--rt-border-subtle)]">
-                    <VerdictGlyph verdict="REJECT" size={36} />
-                  </div>
-                </div>
-
-                <h3 className="text-xl font-mono font-black text-[var(--rt-text-primary)] group-hover:text-[#C8102E] transition-colors flex items-center justify-between">
-                  <span>REJECT</span>
-                  <span className="text-xs text-[#C8102E] font-normal">→</span>
-                </h3>
-                <p className="text-xs text-[var(--rt-text-muted)] leading-relaxed">
-                  Critical tail risk or unfalsifiable thesis. Position blocked from trade execution.
-                </p>
-              </div>
-              <div className="pt-2 border-t border-[var(--rt-border-subtle)] flex items-center justify-between text-[10px] font-mono text-[var(--rt-text-muted)] uppercase">
-                <span>Gated Policy: Blocked</span>
-                <span className="font-bold text-[#C8102E] group-hover:underline">TEST REJECT →</span>
-              </div>
-            </div>
+          {/* Fault-line device under CTA buttons (using the .rtd-fault CSS class) */}
+          <div className="pt-4 pb-2">
+            <div className="rtd-fault" aria-hidden="true" />
           </div>
         </div>
       </section>
 
-      {/* SECTION 3: Structural Vulnerability */}
-      <Reveal as="section" id="how-it-works" className="border-b border-[var(--rt-border-subtle)] py-20 px-6 bg-[var(--rt-surface-raised)]">
+      {/* ----------------------------------------------------------------------
+          3. FOUR OUTCOMES LIGHT SECTION (matching 05-website.png)
+          "Four outcomes. The mark moves with the risk."
+          4 cards, one per verdict (PROCEED / REDUCE / WAIT / REJECT)
+          Stack to 1 column on mobile, 2 columns on tablet, 4 columns on desktop.
+         ---------------------------------------------------------------------- */}
+      <section id="verdict-scale" className="scroll-mt-24 py-16 sm:py-20 lg:py-24 px-4 sm:px-6 bg-[var(--rtd-proof)] border-b border-[var(--rtd-steel)]/25">
+        <div className="max-w-6xl mx-auto space-y-10">
+          {/* Section Header with Live Calibrated Status */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="space-y-3 max-w-3xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-mono text-xs tracking-[0.2em] text-[var(--rtd-steel)] uppercase font-semibold">
+                  DETERMINISTIC VERDICT SCALE
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] uppercase font-bold flex items-center gap-1.5 shadow-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--rtd-proceed)] animate-pulse" />
+                  LIVE CALIBRATED PROMPTS
+                </span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-mono font-bold tracking-tight text-[var(--rtd-ink)]">
+                Four outcomes. The mark moves with the risk.
+              </h2>
+              <p className="text-sm sm:text-base text-[var(--rtd-steel)] font-sans leading-relaxed">
+                Displacement is a parameter, not a drawing. Each outcome is pre-flight calibrated with a usable prompt tested against deterministic gating thresholds.
+              </p>
+            </div>
+
+            <div className="text-left md:text-right shrink-0 font-mono text-xs text-[var(--rtd-steel)] space-y-1.5 bg-white border border-[var(--rtd-steel)]/25 px-4 py-2.5 shadow-xs">
+              <div className="flex items-center justify-between md:justify-end gap-3">
+                <span className="text-[10px] uppercase tracking-wider text-[var(--rtd-steel)]">CALIBRATION TTL</span>
+                <button
+                  type="button"
+                  onClick={handleManualCycle}
+                  title="Force re-calibration to next asset batch"
+                  className="text-[10px] font-mono font-bold text-[var(--rtd-ink)] hover:text-[var(--rtd-proceed)] underline uppercase cursor-pointer"
+                >
+                  CYCLE ↻
+                </button>
+              </div>
+              <div className="text-base font-bold text-[var(--rtd-ink)] rtd-figure flex items-center md:justify-end gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${isRecalibrating ? "bg-[var(--rtd-reduce)] animate-ping" : "bg-[var(--rtd-proceed)]"}`} />
+                <span>{formatTtl(ttlSeconds)}</span>
+                <span className="text-[11px] font-normal text-[var(--rtd-steel)]">REMAINING</span>
+              </div>
+              <div className="text-[10px] text-[var(--rtd-steel)]">
+                ACTIVE: <span className="font-bold text-[var(--rtd-ink)]">{activeBatch.assetSymbol}</span> • {activeBatch.theme}
+              </div>
+            </div>
+          </div>
+
+          {/* 4 Outcome Cards Grid: 1 col on mobile (<640px), 2 cols on tablet (>=640px), 4 cols on desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            {calibratedPrompts.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white border border-[var(--rtd-steel)]/25 p-5 space-y-5 flex flex-col justify-between hover:border-[var(--rtd-ink)]/50 transition-colors relative overflow-hidden group h-full shadow-xs"
+              >
+                {/* Top colored indicator bar */}
+                <div
+                  className="absolute top-0 left-0 right-0 h-1"
+                  style={{ backgroundColor: VERDICT_COLOR[item.verdict] }}
+                />
+
+                <div className="space-y-4 pt-1">
+                  {/* Card Header matching 05-website.png / image.png: State + Score + Glyph */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-0.5 font-mono">
+                      <div
+                        className="text-xs font-black tracking-wider uppercase"
+                        style={{ color: VERDICT_COLOR[item.verdict] }}
+                      >
+                        {item.stateLabel}
+                      </div>
+                      <div className="text-[11px] text-[var(--rtd-steel)] font-semibold">
+                        {item.scoreLabel}
+                      </div>
+                    </div>
+
+                    <div className="p-1.5 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/20 shrink-0">
+                      <VerdictGlyph verdict={item.verdict} size={36} />
+                    </div>
+                  </div>
+
+                  {/* Title & Description */}
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3
+                        className="text-2xl font-mono font-black tracking-tight"
+                        style={{ color: VERDICT_COLOR[item.verdict] }}
+                      >
+                        {item.verdict}
+                      </h3>
+                      <span
+                        className="font-mono text-lg font-bold"
+                        style={{ color: VERDICT_COLOR[item.verdict] }}
+                      >
+                        →
+                      </span>
+                    </div>
+                    <p className="text-xs font-sans text-[var(--rtd-steel)] mt-1.5 leading-relaxed min-h-[3.6rem] line-clamp-3">
+                      {item.summary}
+                    </p>
+                  </div>
+
+                  {/* Usable Calibrated Prompt Box - Fixed uniform height across all 4 cards */}
+                  <div className="bg-[var(--rtd-proof)] border border-[var(--rtd-steel)]/20 p-3 space-y-2 text-left h-[7.5rem] flex flex-col justify-between">
+                    <div className="flex items-center justify-between text-[10px] font-mono text-[var(--rtd-steel)] uppercase font-semibold">
+                      <span className="tracking-wide">USEABLE PROMPT</span>
+                      <button
+                        type="button"
+                        onClick={(e) => handleCopy(item.id, item.prompt, e)}
+                        className="px-2 py-0.5 border border-[var(--rtd-steel)]/30 hover:bg-white text-[var(--rtd-ink)] font-mono text-[10px] uppercase tracking-wider transition-colors cursor-pointer active:scale-95"
+                      >
+                        {copiedId === item.id ? "COPIED ✓" : "COPY"}
+                      </button>
+                    </div>
+
+                    <p className="text-[11px] font-mono text-[var(--rtd-ink)] leading-relaxed select-all line-clamp-3">
+                      &ldquo;{item.prompt}&rdquo;
+                    </p>
+                  </div>
+                </div>
+
+                {/* Card Bottom: Gated Policy on left, Test action button on right - strictly non-wrapping */}
+                <div className="pt-3 border-t border-[var(--rtd-steel)]/15 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{ backgroundColor: VERDICT_COLOR[item.verdict] }}
+                    />
+                    <span className="text-[10px] font-mono uppercase font-bold text-[var(--rtd-steel)] tracking-wider whitespace-nowrap">
+                      {item.policyGate}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => onLaunchDesk(item.prompt)}
+                    className="min-h-[36px] px-2 py-1 flex items-center gap-1 text-xs font-mono uppercase font-bold tracking-wider hover:brightness-125 transition-all cursor-pointer whitespace-nowrap shrink-0 group-hover:translate-x-0.5"
+                    style={{ color: VERDICT_COLOR[item.verdict] }}
+                  >
+                    <span>TEST {item.verdict} →</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ----------------------------------------------------------------------
+          4. HOW IT WORKS / STRUCTURAL VULNERABILITY (Section #how-it-works)
+         ---------------------------------------------------------------------- */}
+      <Reveal as="section" id="how-it-works" className="scroll-mt-24 border-b border-[var(--rtd-steel)]/25 py-16 sm:py-20 lg:py-24 px-4 sm:px-6 bg-[var(--rtd-paper)]">
         <div className="max-w-6xl mx-auto space-y-10">
           <div className="space-y-2">
-            <span className="text-xs font-mono tracking-[0.2em] text-[var(--rt-text-muted)] uppercase font-semibold">
+            <span className="text-xs font-mono tracking-[0.2em] text-[var(--rtd-steel)] uppercase font-semibold">
               01 • STRUCTURAL VULNERABILITY
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-[var(--rt-text-primary)]">
+            <h2 className="text-3xl sm:text-4xl font-mono font-bold tracking-tight text-[var(--rtd-ink)]">
               Off-hours dislocation on tokenized equities.
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 bg-[var(--rt-surface-base)] border border-[var(--rt-border-subtle)] space-y-3">
-              <div className="text-xs font-mono font-bold text-[var(--rt-verdict-critical)] uppercase">
+            <div className="p-6 bg-white border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
+              <div className="text-xs font-mono font-bold text-[var(--rtd-reject)] uppercase">
                 65.5-Hour Liquidity Void
               </div>
-              <h3 className="text-base font-bold text-[var(--rt-text-primary)]">
+              <h3 className="text-base font-bold text-[var(--rtd-ink)]">
                 Un-Anchored Basis Drift
               </h3>
-              <p className="text-sm text-[var(--rt-text-muted)] leading-relaxed">
+              <p className="text-sm text-[var(--rtd-steel)] leading-relaxed font-sans">
                 When US cash equity markets close from Friday 16:00 ET to Monday 09:30 ET, tokenized equities trade 24/7 on isolated crypto orderbooks without primary market maker arbitrage.
               </p>
             </div>
 
-            <div className="p-6 bg-[var(--rt-surface-base)] border border-[var(--rt-border-subtle)] space-y-3">
-              <div className="text-xs font-mono font-bold text-[var(--rt-verdict-moderate)] uppercase">
+            <div className="p-6 bg-white border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
+              <div className="text-xs font-mono font-bold text-[var(--rtd-reduce)] uppercase">
                 Contagion Spillover
               </div>
-              <h3 className="text-base font-bold text-[var(--rt-text-primary)]">
+              <h3 className="text-base font-bold text-[var(--rtd-ink)]">
                 Crypto Correlation Drag
               </h3>
-              <p className="text-sm text-[var(--rt-text-muted)] leading-relaxed">
+              <p className="text-sm text-[var(--rtd-steel)] leading-relaxed font-sans">
                 Off-hours equity tokens inherit weekend crypto volatility. A Saturday BTC liquidation cascade drags tokenized tech equities downward regardless of underlying corporate health.
               </p>
             </div>
 
-            <div className="p-6 bg-[var(--rt-surface-base)] border border-[var(--rt-border-subtle)] space-y-3">
-              <div className="text-xs font-mono font-bold text-[var(--rt-text-primary)] uppercase">
+            <div className="p-6 bg-white border border-[var(--rtd-steel)]/25 space-y-3 shadow-xs">
+              <div className="text-xs font-mono font-bold text-[var(--rtd-ink)] uppercase">
                 Monday Open Snap
               </div>
-              <h3 className="text-base font-bold text-[var(--rt-text-primary)]">
+              <h3 className="text-base font-bold text-[var(--rtd-ink)]">
                 Basis Premium Collapse
               </h3>
-              <p className="text-sm text-[var(--rt-text-muted)] leading-relaxed">
+              <p className="text-sm text-[var(--rtd-steel)] leading-relaxed font-sans">
                 Traders buying tokens at a +2.5% weekend premium face immediate structural loss when the token realigns violently to the cash equity open price at 09:30 ET.
               </p>
             </div>
@@ -301,109 +452,225 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
         </div>
       </Reveal>
 
-      {/* SECTION 4: Architecture & Seven Verifiable Pipeline Stages */}
-      <Reveal as="section" id="architecture" className="border-b border-[var(--rt-border-subtle)] py-20 px-6">
+      {/* ----------------------------------------------------------------------
+          5. THE 65.5H WINDOW (Section #the-65-5h-window)
+         ---------------------------------------------------------------------- */}
+      <Reveal as="section" id="the-65-5h-window" className="scroll-mt-24 border-b border-[var(--rtd-steel)]/25 py-16 sm:py-20 lg:py-24 px-4 sm:px-6 bg-[var(--rtd-proof)]">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="space-y-2">
+            <span className="text-xs font-mono tracking-[0.2em] text-[var(--rtd-steel)] uppercase font-semibold">
+              02 • THE 65.5-HOUR WINDOW
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-mono font-bold tracking-tight text-[var(--rtd-ink)]">
+              Why the basis decoupling happens.
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+            {/* Left Card: Core Metrics & Explanation */}
+            <div className="p-8 bg-white border border-[var(--rtd-steel)]/25 space-y-6 shadow-xs flex flex-col justify-between">
+              <div className="space-y-6">
+                <div className="grid grid-cols-3 gap-4 pb-6 border-b border-[var(--rtd-steel)]/20 font-mono text-center">
+                  <div className="space-y-1">
+                    <span className="text-2xl sm:text-3xl font-bold text-[var(--rtd-ink)] rtd-figure">65.5h</span>
+                    <p className="text-[10px] sm:text-[11px] text-[var(--rtd-steel)] uppercase tracking-wider">Weekly Cash Closure</p>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-2xl sm:text-3xl font-bold text-[var(--rtd-reduce)] rtd-figure">±3.8%</span>
+                    <p className="text-[10px] sm:text-[11px] text-[var(--rtd-steel)] uppercase tracking-wider">Basis Drift Range</p>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-2xl sm:text-3xl font-bold text-[var(--rtd-proceed)] rtd-figure">0.00s</span>
+                    <p className="text-[10px] sm:text-[11px] text-[var(--rtd-steel)] uppercase tracking-wider">Gate Speed</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 font-sans">
+                  <h3 className="text-base font-bold text-[var(--rtd-ink)] font-mono uppercase tracking-wide">
+                    Institutional Liquidity Halt
+                  </h3>
+                  <p className="text-sm sm:text-base text-[var(--rtd-ink)] leading-relaxed">
+                    Traditional US equities pause on Friday at 16:00 ET. On Bitget and decentralized venues, tokenized wrappers continue trading 24/7 without primary market maker arbitrage.
+                  </p>
+                  <p className="text-xs sm:text-sm text-[var(--rtd-steel)] leading-relaxed">
+                    Retail order flow drives unhedged premiums during the weekend. When cash markets reopen Monday at 09:30 ET, tokens violently snap back to true NAV, triggering abrupt liquidation cascades for off-hours buyers.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-[var(--rtd-steel)]/15 font-mono text-xs text-[var(--rtd-steel)] flex items-center justify-between">
+                <span>REFERENCE ARBITRAGE</span>
+                <span className="font-bold text-[var(--rtd-ink)]">NYSE • NASDAQ • BITGET</span>
+              </div>
+            </div>
+
+            {/* Right Card: Chronological Decoupling Timeline */}
+            <div className="p-8 bg-white border border-[var(--rtd-steel)]/25 space-y-6 shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between pb-4 border-b border-[var(--rtd-steel)]/20">
+                  <span className="text-xs font-mono font-bold tracking-wider text-[var(--rtd-ink)] uppercase">
+                    Off-Hours Decoupling Mechanics
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 bg-[var(--rtd-proof)] text-[var(--rtd-ink)] uppercase font-semibold">
+                    STRUCTURAL RISK
+                  </span>
+                </div>
+
+                <div className="mt-5 space-y-4">
+                  <div className="flex gap-4">
+                    <div className="font-mono text-xs font-bold text-[var(--rtd-steel)] shrink-0 w-24">
+                      FRI 16:00 ET
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-xs font-mono font-bold text-[var(--rtd-ink)]">Cash Market Bell</div>
+                      <p className="text-xs text-[var(--rtd-steel)]">
+                        Primary exchanges halt trading. Institutional designated market makers withdraw quoting algorithms.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="font-mono text-xs font-bold text-[var(--rtd-reduce)] shrink-0 w-24">
+                      SAT • SUN
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-xs font-mono font-bold text-[var(--rtd-reduce)]">65.5h Liquidity Void</div>
+                      <p className="text-xs text-[var(--rtd-steel)]">
+                        Wrappers trade on isolated books. Token inherits crypto beta drag and un-anchored speculative drift.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="font-mono text-xs font-bold text-[var(--rtd-reject)] shrink-0 w-24">
+                      MON 09:30 ET
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-xs font-mono font-bold text-[var(--rtd-reject)]">Cash Open Snap</div>
+                      <p className="text-xs text-[var(--rtd-steel)]">
+                        Token re-pegs violently to underlying equity cash open price, eliminating off-hours basis spreads.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-[var(--rtd-steel)]/15">
+                <div className="p-3 bg-[var(--rtd-proof)] border border-[var(--rtd-steel)]/20 flex items-center justify-between text-xs font-mono">
+                  <span className="font-semibold text-[var(--rtd-ink)]">REDTEAM DESK DEFENSE:</span>
+                  <span className="font-bold text-[var(--rtd-proceed)]">AUTOMATIC SIZE THROTTLING</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* ----------------------------------------------------------------------
+          6. METHOD & PIPELINE (Section #method)
+         ---------------------------------------------------------------------- */}
+      <Reveal as="section" id="method" className="scroll-mt-24 border-b border-[var(--rtd-steel)]/25 py-16 sm:py-20 lg:py-24 px-4 sm:px-6 bg-[var(--rtd-paper)]">
         <div className="max-w-6xl mx-auto space-y-10">
           <div className="space-y-2">
-            <span className="text-xs font-mono tracking-[0.2em] text-[var(--rt-text-muted)] uppercase font-semibold">
-              02 • EXECUTION PIPELINE
+            <span className="text-xs font-mono tracking-[0.2em] text-[var(--rtd-steel)] uppercase font-semibold">
+              03 • EXECUTION METHOD
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-[var(--rt-text-primary)]">
+            <h2 className="text-3xl sm:text-4xl font-mono font-bold tracking-tight text-[var(--rtd-ink)]">
               Seven verifiable pipeline stages.
             </h2>
-            <p className="text-sm text-[var(--rt-text-muted)] max-w-2xl">
+            <p className="text-sm text-[var(--rtd-steel)] max-w-2xl font-sans">
               Each trade idea passes sequentially through deterministic parsers, empirical price feeds, scenario shock engines, and gated decision policies.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
-              <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
-                <span className="font-bold text-[var(--rt-text-primary)]">STAGE 1</span>
+            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+              <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
+                <span className="font-bold text-[var(--rtd-ink)]">STAGE 1</span>
                 <span>S01 / S02</span>
               </div>
-              <h3 className="text-base font-bold text-[var(--rt-text-primary)]">
+              <h3 className="text-base font-mono font-bold text-[var(--rtd-ink)]">
                 Trade Input &amp; Natural Language Parsing
               </h3>
-              <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
+              <p className="text-xs sm:text-sm text-[var(--rtd-steel)] leading-relaxed font-sans">
                 Normalizes free-text trade ideas into structured asset, direction, notional size, and thesis claims via deterministic grammar extractors.
               </p>
             </div>
 
-            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
-              <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
-                <span className="font-bold text-[var(--rt-text-primary)]">STAGE 2</span>
+            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+              <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
+                <span className="font-bold text-[var(--rtd-ink)]">STAGE 2</span>
                 <span>S04 STREAM</span>
               </div>
-              <h3 className="text-base font-bold text-[var(--rt-text-primary)]">
+              <h3 className="text-base font-mono font-bold text-[var(--rtd-ink)]">
                 Live Price &amp; Market State Reconstruction
               </h3>
-              <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
+              <p className="text-xs sm:text-sm text-[var(--rtd-steel)] leading-relaxed font-sans">
                 Queries token orderbook depth, NASDAQ cash reference pricing, basis spread deviation, and active trading session classification.
               </p>
             </div>
 
-            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
-              <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
-                <span className="font-bold text-[var(--rt-text-primary)]">STAGE 3</span>
+            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+              <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
+                <span className="font-bold text-[var(--rtd-ink)]">STAGE 3</span>
                 <span>ARBITRATION</span>
               </div>
-              <h3 className="text-base font-bold text-[var(--rt-text-primary)]">
+              <h3 className="text-base font-mono font-bold text-[var(--rtd-ink)]">
                 Evidence Gathering &amp; Arbitration
               </h3>
-              <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
+              <p className="text-xs sm:text-sm text-[var(--rtd-steel)] leading-relaxed font-sans">
                 Retrieves empirical market observations, corporate fundamentals, and macro indicators, arbitrating conflicts into verifiable fact nodes.
               </p>
             </div>
 
-            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
-              <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
-                <span className="font-bold text-[var(--rt-text-primary)]">STAGE 4</span>
+            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+              <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
+                <span className="font-bold text-[var(--rtd-ink)]">STAGE 4</span>
                 <span>ADVERSARIAL CORE</span>
               </div>
-              <h3 className="text-base font-bold text-[var(--rt-text-primary)]">
+              <h3 className="text-base font-mono font-bold text-[var(--rtd-ink)]">
                 Thesis Deconstruction &amp; Adversarial Challenge
               </h3>
-              <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
-                Attacks vulnerable assumptions, checks invalidation criteria, examines semiconductor macro supply chains, and synthesizes counter-theses.
+              <p className="text-xs sm:text-sm text-[var(--rtd-steel)] leading-relaxed font-sans">
+                Attacks vulnerable assumptions, checks invalidation criteria, examines semiconductor supply chains, and synthesizes counter-theses.
               </p>
             </div>
 
-            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
-              <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
-                <span className="font-bold text-[var(--rt-text-primary)]">STAGE 5</span>
+            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+              <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
+                <span className="font-bold text-[var(--rtd-ink)]">STAGE 5</span>
                 <span>MATHEMATICAL SHOCK</span>
               </div>
-              <h3 className="text-base font-bold text-[var(--rt-text-primary)]">
+              <h3 className="text-base font-mono font-bold text-[var(--rtd-ink)]">
                 Deterministic Quantitative Stress Testing
               </h3>
-              <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
-                Calculates exact dollar P&amp;L impact across 4 stress scenarios: Market Gap (-5%), Crypto Contagion (-8%), Token Illiquidity (+3% spread), and Combined Shock (-12%).
+              <p className="text-xs sm:text-sm text-[var(--rtd-steel)] leading-relaxed font-sans">
+                Calculates exact dollar P&amp;L impact across 4 stress scenarios: Market Gap (-5%), Crypto Contagion (-8%), Token Illiquidity (+3%), and Combined Shock (-12%).
               </p>
             </div>
 
-            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2">
-              <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
-                <span className="font-bold text-[var(--rt-text-primary)]">STAGE 6</span>
+            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs">
+              <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
+                <span className="font-bold text-[var(--rtd-ink)]">STAGE 6</span>
                 <span>POLICY GATING</span>
               </div>
-              <h3 className="text-base font-bold text-[var(--rt-text-primary)]">
+              <h3 className="text-base font-mono font-bold text-[var(--rtd-ink)]">
                 Policy Verdict &amp; Thesis vs. Position Deconstruction
               </h3>
-              <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
+              <p className="text-xs sm:text-sm text-[var(--rtd-steel)] leading-relaxed font-sans">
                 Applies deterministic decision policy rules, mathematically separating thesis validity from execution timing and structural fragility.
               </p>
             </div>
 
-            <div className="p-5 bg-[var(--rt-surface-raised)] border border-[var(--rt-border-subtle)] space-y-2 md:col-span-2">
-              <div className="flex items-center justify-between text-xs font-mono text-[var(--rt-text-muted)]">
-                <span className="font-bold text-[var(--rt-text-primary)]">STAGE 7</span>
-                <span>S06 DECISION READY / S09 AUDIT</span>
+            <div className="p-5 bg-white border border-[var(--rtd-steel)]/25 space-y-2 shadow-xs md:col-span-2">
+              <div className="flex items-center justify-between text-xs font-mono text-[var(--rtd-steel)]">
+                <span className="font-bold text-[var(--rtd-ink)]">STAGE 7</span>
+                <span>DECISION READY &amp; AUDIT</span>
               </div>
-              <h3 className="text-base font-bold text-[var(--rt-text-primary)]">
+              <h3 className="text-base font-mono font-bold text-[var(--rtd-ink)]">
                 Provenance Graph Assembly
               </h3>
-              <p className="text-xs sm:text-sm text-[var(--rt-text-muted)] leading-relaxed">
+              <p className="text-xs sm:text-sm text-[var(--rtd-steel)] leading-relaxed font-sans">
                 Compiles the complete Decision Artifact with interactive audit trails linking claims to observed prices, mathematical formulas, and scenario parameters.
               </p>
             </div>
@@ -411,58 +678,20 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
         </div>
       </Reveal>
 
-      {/* SECTION 5: Target User Specification */}
-      <Reveal as="section" id="target-user" className="border-b border-[var(--rt-border-subtle)] py-20 px-6 bg-[var(--rt-surface-raised)]">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <div className="space-y-2">
-            <span className="text-xs font-mono tracking-[0.2em] text-[var(--rt-text-muted)] uppercase font-semibold">
-              03 • TARGET USER SPECIFICATION
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-[var(--rt-text-primary)]">
-              Engineered for 24/7 tokenized equity traders.
-            </h2>
-          </div>
-
-          <div className="p-8 bg-[var(--rt-surface-base)] border border-[var(--rt-border-subtle)] max-w-4xl space-y-6">
-            <p className="text-base sm:text-lg text-[var(--rt-text-primary)] leading-relaxed">
-              The primary user is a crypto-native retail trader active on Bitget who is beginning to trade tokenized U.S. equities (such as rNVDA) alongside existing crypto exposure in a 24/7 market.
-            </p>
-            <p className="text-sm sm:text-base text-[var(--rt-text-muted)] leading-relaxed">
-              This trader understands basic position sizing and direction, but lacks a disciplined, unified pre-trade system to stress-test basis risk, off-hours liquidity un-anchoring, and thesis invalidation before committing capital.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[var(--rt-border-subtle)]">
-              <div className="space-y-1">
-                <span className="text-xs font-mono font-bold text-[var(--rt-text-primary)] uppercase">Trading Focus</span>
-                <p className="text-xs text-[var(--rt-text-muted)]">Tokenized equities (`rNVDA`, `rTSLA`, `rAAPL`), crypto cross-hedges, and off-hours execution.</p>
-              </div>
-              <div className="space-y-1">
-                <span className="text-xs font-mono font-bold text-[var(--rt-text-primary)] uppercase">Decision Protection</span>
-                <p className="text-xs text-[var(--rt-text-muted)]">Pre-trade adversarial interrogation, deterministic basis checks, and explicit invalidation thresholds.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Reveal>
-
-      {/* SECTION 6: Secondary CTA */}
-      <Reveal as="section" className="py-24 px-6 bg-[var(--rt-surface-raised)]">
+      {/* ----------------------------------------------------------------------
+          7. BOTTOM SECONDARY CTA (matching 05-website.png)
+         ---------------------------------------------------------------------- */}
+      <Reveal as="section" className="py-20 sm:py-24 px-4 sm:px-6 bg-[var(--rtd-proof)]">
         <div className="max-w-6xl mx-auto space-y-8 text-center flex flex-col items-center">
-          <div className="relative w-12 h-12 bg-[var(--rt-surface-void)] flex items-center justify-center">
-            <Image
-              src={BRANDING.LOGOS.MARK}
-              alt="Bitget AI RedTeam Desk Mark"
-              width={28}
-              height={28}
-              className="w-7 h-7 object-contain"
-            />
+          <div className="p-3 bg-[var(--rtd-void)]">
+            <Lockup height={32} reversed />
           </div>
 
           <div className="space-y-3 max-w-2xl">
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-[var(--rt-text-primary)]">
+            <h2 className="text-3xl sm:text-4xl font-mono font-black tracking-tight text-[var(--rtd-ink)]">
               Stress-test your trade before committing capital.
             </h2>
-            <p className="text-sm sm:text-base text-[var(--rt-text-muted)]">
+            <p className="text-sm sm:text-base text-[var(--rtd-steel)] font-sans">
               Enter the RedTeam Desk with the canonical golden-path scenario or input your own tokenized equity trade thesis.
             </p>
           </div>
@@ -471,7 +700,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             <button
               type="button"
               onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
-              className="w-full sm:w-auto px-8 py-4 bg-[#C8102E] text-white text-sm font-mono font-bold tracking-wider uppercase hover:bg-[#b00e28] active:scale-95 transition-all text-center flex items-center justify-center gap-2 shadow-xs"
+              className="w-full sm:w-auto px-8 py-4 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-sm font-mono font-bold tracking-wider uppercase hover:bg-[var(--rtd-void)] active:scale-95 transition-all text-center flex items-center justify-center gap-2 shadow-xs"
             >
               <span>RUN GOLDEN PATH DESK</span>
               <span>→</span>
@@ -479,13 +708,13 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             <button
               type="button"
               onClick={() => onLaunchDesk()}
-              className="w-full sm:w-auto px-8 py-4 bg-[var(--rt-surface-base)] text-[var(--rt-text-primary)] text-sm font-mono font-medium tracking-wider uppercase border border-[var(--rt-border-subtle)] hover:bg-[var(--rt-surface-raised)] transition-colors text-center"
+              className="w-full sm:w-auto px-8 py-4 bg-white text-[var(--rtd-ink)] text-sm font-mono font-medium tracking-wider uppercase border border-[var(--rtd-steel)]/30 hover:bg-[var(--rtd-paper)] transition-colors text-center"
             >
               ENTER CUSTOM THESIS
             </button>
           </div>
 
-          <div className="pt-8 text-xs font-mono text-[var(--rt-text-muted)]">
+          <div className="pt-8 text-xs font-mono text-[var(--rtd-steel)] uppercase tracking-wider">
             BITGET AI REDTEAM DESK • ADVERSARIAL PRE-TRADE FIREWALL
           </div>
         </div>

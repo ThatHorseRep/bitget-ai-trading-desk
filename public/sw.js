@@ -26,7 +26,7 @@ const OFFLINE_PAGE_HTML = `<!DOCTYPE html>
     body {
       background-color: #E7E9E6;
       color: #0E2436;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -35,27 +35,29 @@ const OFFLINE_PAGE_HTML = `<!DOCTYPE html>
     }
     .card {
       background-color: #F7F8F6;
-      border: 1px solid #CFD4CF;
+      border: 1px solid rgba(84, 105, 126, 0.25);
       padding: 32px;
       max-width: 520px;
       width: 100%;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .badge {
       display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: #C8102E;
+      color: #54697E;
       margin-bottom: 12px;
       background: #E7E9E6;
-      border: 1px solid #CFD4CF;
+      border: 1px solid rgba(84, 105, 126, 0.25);
       padding: 3px 8px;
     }
     h1 {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 20px;
       font-weight: 700;
+      color: #0E2436;
       margin-bottom: 12px;
       line-height: 1.3;
     }
@@ -67,11 +69,14 @@ const OFFLINE_PAGE_HTML = `<!DOCTYPE html>
     }
     .btn {
       display: inline-block;
-      background-color: #06121C;
-      color: #FFFFFF;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background-color: #0E2436;
+      color: #F7F8F6;
       text-decoration: none;
-      font-weight: 600;
-      font-size: 13px;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       padding: 12px 20px;
       border: none;
       cursor: pointer;
@@ -80,7 +85,7 @@ const OFFLINE_PAGE_HTML = `<!DOCTYPE html>
       text-align: center;
     }
     .btn:hover {
-      background-color: #0E2436;
+      background-color: #06121C;
     }
   </style>
 </head>

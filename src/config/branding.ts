@@ -1,6 +1,9 @@
 /**
  * Bitget AI RedTeam Desk — brand tokens.
  *
+ * Replaces the previous one-line PRODUCT_NAME stub. Everything the UI needs to
+ * stay on-brand lives here so no component hard-codes a hex value.
+ *
  * Colour discipline: Stamp Red is reserved. It marks the fault in the logo and
  * the REJECT verdict. It is never used for decoration, hover states, links, or
  * emphasis. If red appears on screen, something failed.
@@ -11,7 +14,7 @@ export const BRANDING = {
   SHORT_NAME: "RedTeam Desk",
   ENDORSER: "Bitget AI",
   WORDMARK: "REDTEAM DESK",
-  TAGLINE: "Thesis ≠ Position.",
+  TAGLINE: "Thesis \u2260 Position.",
   DESCRIPTION:
     "Adversarial pre-trade risk workbench for tokenized US equities. " +
     "Deterministic stress testing, basis decoupling analysis, and thesis " +
