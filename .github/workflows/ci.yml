@@ -52,4 +52,19 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Production build
-        run: npm run build
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee build-output.txt
+
+      - name: Report build failure
+        if: failure()
+        run: |
+          if [ -f build-output.txt ]; then
+            echo "## Build failure" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            tail -50 build-output.txt >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            tail -20 build-output.txt | while IFS= read -r line; do
+              echo "::error::$line"
+            done
+          fi
