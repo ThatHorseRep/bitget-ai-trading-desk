@@ -33,9 +33,16 @@ export default function WorkspacePage() {
 
   const handleLaunchFromLanding = (initialPrompt?: string) => {
     setViewMode("desk");
-    if (initialPrompt) {
+    if (initialPrompt && initialPrompt.trim()) {
       setPrompt(initialPrompt);
       handleInitialSubmit(initialPrompt);
+    } else {
+      setPrompt("");
+      setStep("ENTRY");
+      setArtifact(null);
+      setParsedResult(null);
+      setErrorMessage(null);
+      setSelectedProvenance(null);
     }
   };
 

@@ -120,7 +120,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             <ThemeToggle />
             <button
               type="button"
-              onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
+              onClick={() => onLaunchDesk()}
               className="px-5 py-2.5 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold tracking-wider uppercase hover:bg-[var(--rtd-void)] active:scale-95 transition-all shadow-xs cursor-pointer"
             >
               Run a test
@@ -132,7 +132,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             <ThemeToggle compact />
             <button
               type="button"
-              onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
+              onClick={() => onLaunchDesk()}
               className="min-h-[44px] px-3.5 py-2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold tracking-wider uppercase active:scale-95 transition-all flex items-center justify-center cursor-pointer"
             >
               Run test
@@ -183,7 +183,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
                 type="button"
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  onLaunchDesk(GOLDEN_PATH_PROMPT);
+                  onLaunchDesk();
                 }}
                 className="min-h-[44px] w-full py-3 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold tracking-wider uppercase active:scale-95 transition-all text-center flex items-center justify-center cursor-pointer"
               >
@@ -220,7 +220,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
 
           {/* Headline "Thesis ≠ Position." matching 05-website.png */}
           <div className="space-y-6 max-w-4xl">
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-mono font-black tracking-tight text-white leading-[1.05] uppercase">
+            <h1 className="text-4xl sm:6xl md:text-7xl font-mono font-black tracking-tight text-white leading-[1.05] uppercase">
               Thesis{" "}
               {/* The fault-cut Not-Equal glyph (two white horizontal bars with red diagonal shear) */}
               <span className="inline-flex items-center justify-center align-middle mx-1 sm:mx-2 h-[0.75em] w-[0.75em] relative select-none">
@@ -237,12 +237,12 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
           </div>
 
           {/* Two CTA Buttons:
-              1. Primary: "Stress a trade" (stamp red background — authorized use)
-              2. Secondary: "See a sample run" (outlined) */}
+              1. Primary: "Stress a trade" (clean slate input)
+              2. Secondary: "See a sample run" (loads golden path sample) */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
             <button
               type="button"
-              onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
+              onClick={() => onLaunchDesk()}
               className="px-8 py-4 bg-[var(--rtd-stamp)] text-white text-sm font-mono font-bold tracking-wider uppercase hover:brightness-110 active:scale-95 transition-all text-center flex items-center justify-center gap-2 shadow-sm cursor-pointer"
             >
               <span>Stress a trade</span>
@@ -250,7 +250,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             </button>
             <button
               type="button"
-              onClick={() => onLaunchDesk()}
+              onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
               className="px-8 py-4 bg-transparent text-white text-sm font-mono font-medium tracking-wider uppercase border border-white/30 hover:bg-white/10 hover:border-white/60 transition-all text-center cursor-pointer"
             >
               See a sample run

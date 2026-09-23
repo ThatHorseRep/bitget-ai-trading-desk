@@ -115,23 +115,46 @@ const PRESET_SCENARIOS: ScenarioPreset[] = [
   }
 ];
 
+const VERDICT_THEME_COLOR: Record<Verdict, string> = {
+  PROCEED: "var(--rtd-proceed)",
+  REDUCE: "var(--rtd-reduce)",
+  WAIT: "var(--rtd-wait)",
+  REJECT: "var(--rtd-reject)",
+};
+
 export function TradeInputSurface({
   initialPrompt = "",
   onSubmit,
   isLoading
 }: TradeInputSurfaceProps) {
-  const [prompt, setPrompt] = useState(
-    initialPrompt || PRESET_SCENARIOS[0].promptText
+  const [prompt, setPrompt] = useState(initialPrompt);
+  const [activeTab, setActiveTab] = useState<"results" | "input">(
+    initialPrompt ? "results" : "input"
   );
-  const [activeTab, setActiveTab] = useState<"results" | "input">("results");
 
   // Derive active preset or parse inputs from prompt
   const matchedPreset = useMemo(() => {
+    if (!prompt.trim()) return undefined;
     return PRESET_SCENARIOS.find((p) => p.promptText.trim() === prompt.trim());
   }, [prompt]);
 
   // Dynamic parse from prompt text
   const positionInfo = useMemo(() => {
+    if (!prompt.trim()) {
+      return {
+        symbol: "—",
+        direction: "—",
+        size: "—",
+        verdict: "WAIT" as Verdict,
+        summary: "Enter your trade thesis or choose a preset scenario below to stress-test your trade.",
+        expectedShortfall: "—",
+        basisGap: "—",
+        depthVsSession: "—",
+        cryptoBeta: "—",
+        actionText: "Enter trade thesis to evaluate"
+      };
+    }
+
     if (matchedPreset) {
       return {
         symbol: matchedPreset.symbol,
@@ -153,7 +176,7 @@ export function TradeInputSurface({
     const symbol = symbolMatch ? symbolMatch[1].toUpperCase() : "rNVDA";
     const direction = lower.includes("short") || lower.includes("sell") ? "short" : "long";
     const sizeMatch = prompt.match(/\$([0-9,]+)/);
-    const size = sizeMatch ? `$${sizeMatch[1]}` : "$2,400";
+    const size = sizeMatch ? `$${sizeMatch[1]}` : "$2,000";
 
     let verdict: Verdict = "WAIT";
     let summary = "Off-hours basis drift under review. Awaiting deterministic engine.";
@@ -262,7 +285,7 @@ export function TradeInputSurface({
             {/* Subtle top indicator bar */}
             <div
               className="absolute top-0 left-0 right-0 h-1.5"
-              style={{ backgroundColor: VERDICT_COLOR[positionInfo.verdict] }}
+              style={{ backgroundColor: VERDICT_THEME_COLOR[positionInfo.verdict] }}
             />
 
             {/* 1. HEADER: Current Position (symbol · direction · size) */}
@@ -291,7 +314,7 @@ export function TradeInputSurface({
               <div className="space-y-1.5">
                 <div
                   className="text-3xl sm:text-4xl font-mono font-black tracking-widest uppercase"
-                  style={{ color: VERDICT_COLOR[positionInfo.verdict] }}
+                  style={{ color: VERDICT_THEME_COLOR[positionInfo.verdict] }}
                 >
                   {positionInfo.verdict}
                 </div>
@@ -347,15 +370,19 @@ export function TradeInputSurface({
               <button
                 type="button"
                 onClick={() => handleSubmit()}
-                disabled={isLoading}
+                disabled={!prompt.trim() || isLoading}
                 className={`w-full py-4 text-xs sm:text-sm font-mono font-bold tracking-wider uppercase active:scale-[0.98] transition-all text-center flex items-center justify-center gap-2 shadow-md cursor-pointer ${
-                  isReject
+                  !prompt.trim()
+                    ? "bg-[var(--rtd-paper-subtle)] text-[var(--rtd-steel)] border border-[var(--rtd-steel)]/30 opacity-60 cursor-not-allowed"
+                    : isReject
                     ? "bg-[var(--rtd-stamp)] text-white hover:brightness-110"
                     : "bg-[var(--rtd-paper-subtle)] text-[var(--rtd-paper)] border border-[var(--rtd-steel)]/40 hover:bg-[var(--rtd-proof)]"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {isLoading ? (
                   <span>Evaluating Risk Pipeline...</span>
+                ) : !prompt.trim() ? (
+                  <span>Enter trade thesis to evaluate →</span>
                 ) : (
                   <>
                     <span>{positionInfo.actionText}</span>
@@ -426,7 +453,7 @@ export function TradeInputSurface({
                     <div className="flex items-center justify-between">
                       <span
                         className="text-[11px] font-mono font-bold tracking-wider uppercase"
-                        style={{ color: VERDICT_COLOR[preset.verdict] }}
+                        style={{ color: VERDICT_THEME_COLOR[preset.verdict] }}
                       >
                         {preset.verdict}
                       </span>
