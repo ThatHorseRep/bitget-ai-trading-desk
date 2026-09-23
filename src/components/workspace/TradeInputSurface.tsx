@@ -96,49 +96,49 @@ export function TradeInputSurface({
               <button
                 type="button"
                 onClick={() => setPrompt("I plan to buy $10,000 rNVDA token during US cash market hours at 10:15 AM ET with 0.02% basis spread. Data center revenue beat + low crypto correlation.")}
-                className="flex items-center justify-between p-2.5 bg-white border border-[#0E9F8B] hover:bg-[#0E9F8B]/5 transition-all text-left group"
+                className="flex items-center justify-between p-2.5 bg-white border border-[var(--rt-verdict-clear)] hover:bg-[var(--rt-verdict-clear)]/5 transition-all text-left group"
               >
                 <div>
-                  <span className="block text-[10px] font-mono font-bold text-[#0E9F8B]">STATE 4</span>
+                  <span className="block text-[10px] font-mono font-bold text-[var(--rt-verdict-clear)]">STATE 4</span>
                   <span className="text-xs font-mono font-bold text-[var(--rt-text-primary)]">PROCEED</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-[#0E9F8B] group-hover:translate-x-0.5 transition-transform">→</span>
+                <span className="text-xs font-mono font-bold text-[var(--rt-verdict-clear)] group-hover:translate-x-0.5 transition-transform">→</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setPrompt("I plan to buy $50,000 rNVDA token with 5x leverage during extended hours. Basis spread elevated at 0.45%.")}
-                className="flex items-center justify-between p-2.5 bg-white border border-[#C98A14] hover:bg-[#C98A14]/5 transition-all text-left group"
+                className="flex items-center justify-between p-2.5 bg-white border border-[var(--rt-verdict-moderate)] hover:bg-[var(--rt-verdict-moderate)]/5 transition-all text-left group"
               >
                 <div>
-                  <span className="block text-[10px] font-mono font-bold text-[#C98A14]">STATE 3</span>
+                  <span className="block text-[10px] font-mono font-bold text-[var(--rt-verdict-moderate)]">STATE 3</span>
                   <span className="text-xs font-mono font-bold text-[var(--rt-text-primary)]">REDUCE</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-[#C98A14] group-hover:translate-x-0.5 transition-transform">→</span>
+                <span className="text-xs font-mono font-bold text-[var(--rt-verdict-moderate)] group-hover:translate-x-0.5 transition-transform">→</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setPrompt("I want to buy $25,000 rNVDA token on Sunday at 02:00 AM ET during 65.5-hour weekend market closure.")}
-                className="flex items-center justify-between p-2.5 bg-white border border-[#54697E] hover:bg-[#54697E]/5 transition-all text-left group"
+                className="flex items-center justify-between p-2.5 bg-white border border-[var(--rt-verdict-elevated)] hover:bg-[var(--rt-verdict-elevated)]/5 transition-all text-left group"
               >
                 <div>
-                  <span className="block text-[10px] font-mono font-bold text-[#54697E]">STATE 2</span>
+                  <span className="block text-[10px] font-mono font-bold text-[var(--rt-verdict-elevated)]">STATE 2</span>
                   <span className="text-xs font-mono font-bold text-[var(--rt-text-primary)]">WAIT</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-[#54697E] group-hover:translate-x-0.5 transition-transform">→</span>
+                <span className="text-xs font-mono font-bold text-[var(--rt-verdict-elevated)] group-hover:translate-x-0.5 transition-transform">→</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setPrompt("Ape $100,000 with max leverage into tokenized equity with no thesis, no stop loss, and liquidation cascade risk.")}
-                className="flex items-center justify-between p-2.5 bg-white border border-[#C8102E] hover:bg-[#C8102E]/5 transition-all text-left group"
+                className="flex items-center justify-between p-2.5 bg-white border border-[var(--rt-verdict-critical)] hover:bg-[var(--rt-verdict-critical)]/5 transition-all text-left group"
               >
                 <div>
-                  <span className="block text-[10px] font-mono font-bold text-[#C8102E]">STATE 1</span>
+                  <span className="block text-[10px] font-mono font-bold text-[var(--rt-verdict-critical)]">STATE 1</span>
                   <span className="text-xs font-mono font-bold text-[var(--rt-text-primary)]">REJECT</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-[#C8102E] group-hover:translate-x-0.5 transition-transform">→</span>
+                <span className="text-xs font-mono font-bold text-[var(--rt-verdict-critical)] group-hover:translate-x-0.5 transition-transform">→</span>
               </button>
             </div>
           </div>

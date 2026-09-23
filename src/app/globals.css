@@ -42,6 +42,15 @@
   --rt-verdict-moderate: #C98A14;
   --rt-verdict-clear: #0E9F8B;
 
+  /* Inverse (dark) surface family — for deliberate dark sections such as
+     the offline page. Values carried from the identity kit; see
+     docs/IDENTITY_TOKENS.md. */
+  --rt-surface-inverse: #0E2436;
+  --rt-surface-inverse-raised: #142A3C;
+  --rt-border-inverse: #2B4459;
+  --rt-text-inverse: #EDEFEC;
+  --rt-text-inverse-muted: #9DB0BF;
+
   /* Typography Tokens */
   --rt-type-body: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --rt-type-h1: var(--font-geist-mono), ui-monospace, monospace;
