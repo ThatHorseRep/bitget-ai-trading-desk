@@ -241,7 +241,13 @@ export default function WorkspacePage() {
             onViewOverview={() => setViewMode("landing")}
           />
 
-          <main className="px-4 py-6 sm:py-8 sm:px-6 lg:px-8 pb-24 md:pb-12">
+          <main
+            className={`px-4 sm:px-6 lg:px-8 ${
+              step === "ENTRY"
+                ? "py-3 sm:py-4 lg:h-[calc(100dvh-4.25rem)] lg:overflow-hidden flex flex-col justify-center"
+                : "py-6 sm:py-8 pb-24 md:pb-12"
+            }`}
+          >
             {/* S01 / S02: Input State */}
             {step === "ENTRY" && (
               <TradeInputSurface
