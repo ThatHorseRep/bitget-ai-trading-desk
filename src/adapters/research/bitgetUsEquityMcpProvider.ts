@@ -240,7 +240,10 @@ export class BitgetUsEquityMcpProvider implements ResearchProvider {
   private catalogEntries: DiscoveredEntry[] | null = null;
 
   constructor(endpoint?: string) {
-    this.endpoint = endpoint ?? "https://agent.bitget.com/mcp";
+    this.endpoint =
+      endpoint ??
+      process.env.BITGET_US_EQUITY_MCP_ENDPOINT ??
+      "https://agent.bitget.com/mcp";
   }
 
   // -----------------------------------------------------------------------
