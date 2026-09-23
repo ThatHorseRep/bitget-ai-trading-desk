@@ -141,36 +141,43 @@ export function scorePosition(s: PositionSignals): ScoringResult {
   let score = 1.0;
   const reasons: string[] = [];
 
-  const esRatio = Math.min(Math.max(0, s.expectedShortfall) / 0.20, 1);
+  const safeEs = Number.isFinite(s.expectedShortfall) ? Math.max(0, s.expectedShortfall) : 0;
+  const esRatio = Math.min(safeEs / 0.20, 1);
   const esDeduction = esRatio * 0.40;
   score -= esDeduction;
   if (esDeduction > 0) {
-    reasons.push(`Expected shortfall ${(s.expectedShortfall * 100).toFixed(1)}% of notional (-${esDeduction.toFixed(2)})`);
+    reasons.push(`Expected shortfall ${(safeEs * 100).toFixed(1)}% of notional (-${esDeduction.toFixed(2)})`);
   } else {
     reasons.push("Expected shortfall within baseline limits (0.00)");
   }
 
-  const pfRatio = Math.min(Math.max(0, s.positionFraction) / 0.25, 1);
+  const safePf = Number.isFinite(s.positionFraction) ? Math.max(0, s.positionFraction) : 0;
+  const pfRatio = Math.min(safePf / 0.25, 1);
   const pfDeduction = pfRatio * 0.25;
   score -= pfDeduction;
   if (pfDeduction > 0) {
-    reasons.push(`Position size ${(s.positionFraction * 100).toFixed(1)}% of account equity (-${pfDeduction.toFixed(2)})`);
+    reasons.push(`Position size ${(safePf * 100).toFixed(1)}% of account equity (-${pfDeduction.toFixed(2)})`);
   } else {
     reasons.push("Position size negligible relative to account equity (0.00)");
   }
 
-  const gapDeduction = Math.max(0, s.gapExposureFraction) * 0.20;
+  // Bound gapExposureFraction strictly to [0, 1] to prevent runaway deductions or negative values
+  const safeGap = Number.isFinite(s.gapExposureFraction) ? Math.min(1, Math.max(0, s.gapExposureFraction)) : 0;
+  const gapDeduction = safeGap * 0.20;
   score -= gapDeduction;
   if (gapDeduction > 0) {
-    reasons.push(`Gap exposure ${(s.gapExposureFraction * 100).toFixed(1)}% in off-hours (-${gapDeduction.toFixed(2)})`);
+    reasons.push(`Gap exposure ${(safeGap * 100).toFixed(1)}% in off-hours (-${gapDeduction.toFixed(2)})`);
   } else {
     reasons.push("Continuous market session with no off-hours gap exposure (0.00)");
   }
 
-  const hedgeContribution = Math.max(0, s.hedgeCoverageFraction) * 0.15;
+  // Bound hedgeCoverageFraction strictly to [0, 1] to prevent hedge-laundering exploits
+  // (e.g. passing 500% hedge to override ES and position size penalties)
+  const safeHedge = Number.isFinite(s.hedgeCoverageFraction) ? Math.min(1, Math.max(0, s.hedgeCoverageFraction)) : 0;
+  const hedgeContribution = safeHedge * 0.15;
   score += hedgeContribution;
   if (hedgeContribution > 0) {
-    reasons.push(`Hedge coverage ${(s.hedgeCoverageFraction * 100).toFixed(1)}% offset (+${hedgeContribution.toFixed(2)})`);
+    reasons.push(`Hedge coverage ${(safeHedge * 100).toFixed(1)}% offset (+${hedgeContribution.toFixed(2)})`);
   }
 
   // Clamp final result strictly to [0, 1]

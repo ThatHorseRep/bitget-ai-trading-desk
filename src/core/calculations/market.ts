@@ -12,10 +12,25 @@ export function deriveSpreadAndBasis(
   basis: number | null;
   basisPct: number | null;
 }, "spread" | "spreadPct" | "basis" | "basisPct"> {
-  const spread = bid !== null && ask !== null ? calculateSpread(ask, bid) : null;
-  const spreadPct = bid !== null && ask !== null ? calculateSpreadPct(ask, bid) : null;
-  const basis = referencePrice !== null ? roundFinancial(tokenPrice - referencePrice) : null;
-  const basisPct = referencePrice !== null ? roundFinancial((tokenPrice / referencePrice - 1) * 100) : null;
+  let spread: number | null = null;
+  let spreadPct: number | null = null;
+  if (bid !== null && ask !== null && Number.isFinite(bid) && Number.isFinite(ask) && ask >= bid && (ask + bid) > 0) {
+    try {
+      spread = calculateSpread(ask, bid);
+      spreadPct = calculateSpreadPct(ask, bid);
+    } catch {
+      spread = null;
+      spreadPct = null;
+    }
+  }
+
+  const basis = referencePrice !== null && Number.isFinite(referencePrice) && referencePrice > 0 && Number.isFinite(tokenPrice) && tokenPrice > 0
+    ? roundFinancial(tokenPrice - referencePrice)
+    : null;
+  const basisPct = referencePrice !== null && Number.isFinite(referencePrice) && referencePrice > 0 && Number.isFinite(tokenPrice) && tokenPrice > 0
+    ? roundFinancial((tokenPrice / referencePrice - 1) * 100)
+    : null;
+
   return { spread, spreadPct, basis, basisPct };
 }
 

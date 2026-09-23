@@ -35,7 +35,9 @@ export function loadPersistedWorkspaceState(): PersistedWorkspaceState | null {
   try {
     const raw = localStorage.getItem(WORKSPACE_STATE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as PersistedWorkspaceState;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed as PersistedWorkspaceState;
   } catch (e) {
     console.error("Failed to load workspace state from localStorage", e);
     return null;
@@ -74,7 +76,12 @@ export function loadAuditHistory(): AuditHistoryEntry[] {
   try {
     const raw = localStorage.getItem(AUDIT_HISTORY_KEY);
     if (!raw) return [];
-    return JSON.parse(raw) as AuditHistoryEntry[];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (entry): entry is AuditHistoryEntry =>
+        Boolean(entry && typeof entry === "object" && entry.id && entry.asset && entry.artifact?.trade)
+    );
   } catch (e) {
     console.error("Failed to load audit history from localStorage", e);
     return [];

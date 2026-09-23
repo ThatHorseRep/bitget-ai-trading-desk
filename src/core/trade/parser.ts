@@ -201,10 +201,10 @@ export function parseNaturalLanguageTrade(
     requiresClarification = true;
     clarificationField = "entryPrice";
     clarificationQuestion = "The specified entry price is invalid. Please provide a positive number.";
-  } else if (positionSizeUsd === null || positionSizeUsd <= 0) {
+  } else if (positionSizeUsd === null || positionSizeUsd < 0.01) {
     requiresClarification = true;
     clarificationField = "positionSizeUsd";
-    clarificationQuestion = "What position size (in USD) are you proposing to allocate? Please provide a valid positive number.";
+    clarificationQuestion = "What position size (in USD) are you proposing to allocate? Please provide a valid positive amount of at least $0.01 USD.";
   } else if (!thesis || thesis.length < 5) {
     requiresClarification = true;
     clarificationField = "thesis";
