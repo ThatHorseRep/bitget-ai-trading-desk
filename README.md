@@ -15,12 +15,13 @@ For full details on the project, the target user, the core job, and the role of 
 
 ### Prerequisites
 - Node.js 22+ (required: the test script uses `--env-file-if-exists`, available from Node 22)
-- npm
+- [bun](https://bun.sh/) (primary) or npm
 
 ### Installation
 ```bash
-npm install
+bun install
 ```
+> **Note:** `npm install` also works, but the repo ships `bun.lock` (no `package-lock.json`). All `npm run` scripts work with either manager.
 
 ### Configuration
 Copy the example environment file and add your OpenAI-compatible LLM endpoint and key:

@@ -4,6 +4,15 @@ const { McpServer } = require('@modelcontextprotocol/sdk/server/mcp.js');
 const { StreamableHTTPServerTransport } = require('@modelcontextprotocol/sdk/server/streamableHttp.js');
 const { z } = require('zod');
 const http = require('node:http');
+
+// Under full-suite load, the default 2.5s connect timeout can be exceeded
+// due to I/O contention from many concurrent test files. Bump it for tests.
+if (!process.env.BITGET_SIGNAL_CONNECT_TIMEOUT_MS) {
+  process.env.BITGET_SIGNAL_CONNECT_TIMEOUT_MS = '8000';
+}
+if (!process.env.BITGET_SIGNAL_TOOL_TIMEOUT_MS) {
+  process.env.BITGET_SIGNAL_TOOL_TIMEOUT_MS = '8000';
+}
 const {
   BitgetSignalProvider,
   capabilitiesForTopic,

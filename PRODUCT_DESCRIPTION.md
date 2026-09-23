@@ -1,5 +1,6 @@
 # Product Description
 **Bitget AI Base Camp Hackathon S2 Submission**
+> *This is the canonical text pasted into the Google Form's single "Project Description" field. For supplementary judge-facing material (architecture overview, X post draft), see [SUBMISSION.md](./SUBMISSION.md).*
 
 ## 1. Thesis
 **Product:** Bitget AI RedTeam Desk is a pre-trade decision-support product that mathematically stress-tests tokenized U.S. equities and challenges user theses against off-hours structural risks.

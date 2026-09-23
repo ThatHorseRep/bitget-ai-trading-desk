@@ -58,7 +58,7 @@ export type SignalCapability = (typeof SIGNAL_CAPABILITIES)[number];
 // instead of stalling the workflow.
 // ---------------------------------------------------------------------------
 
-const CONNECT_TIMEOUT_MS = 2_500;
+const DEFAULT_CONNECT_TIMEOUT_MS = 2_500;
 const DEFAULT_TOOL_CALL_TIMEOUT_MS = 3_000;
 const MAX_SUMMARY_LENGTH = 300;
 const MAX_ITEMS_PER_CALL = 5;
@@ -336,6 +336,7 @@ export class BitgetSignalProvider implements ResearchProvider {
   readonly providerId = "bitget-signal";
 
   private endpoint: string;
+  private connectTimeoutMs: number;
   private toolCallTimeoutMs: number;
   private discoveredTools: DiscoveredTool[] | null = null;
 
@@ -345,6 +346,11 @@ export class BitgetSignalProvider implements ResearchProvider {
       endpoint ??
       process.env.BITGET_SIGNAL_MCP_ENDPOINT ??
       "https://datahub.noxiaohao.com/mcp";
+    const parsedConnect = Number(process.env.BITGET_SIGNAL_CONNECT_TIMEOUT_MS);
+    this.connectTimeoutMs =
+      Number.isFinite(parsedConnect) && parsedConnect > 0
+        ? parsedConnect
+        : DEFAULT_CONNECT_TIMEOUT_MS;
     const parsedTimeout = Number(process.env.BITGET_SIGNAL_TOOL_TIMEOUT_MS);
     this.toolCallTimeoutMs =
       Number.isFinite(parsedTimeout) && parsedTimeout > 0
@@ -443,7 +449,7 @@ export class BitgetSignalProvider implements ResearchProvider {
       );
       await Promise.race([
         client.connect(transport),
-        rejectAfter(CONNECT_TIMEOUT_MS, "Connection timeout"),
+        rejectAfter(this.connectTimeoutMs, "Connection timeout"),
       ]);
       return { client, transport };
     } catch (err) {
