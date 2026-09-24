@@ -51,13 +51,11 @@ export function WorkspaceHeader({
                 className="inline-flex items-center text-left hover:opacity-85 transition-opacity cursor-pointer focus:outline-hidden shrink min-w-0"
                 title="Return to System Overview"
               >
-                <Lockup height={23} className="sm:hidden" />
-                <Lockup height={28} className="hidden sm:inline-flex" />
+                <Lockup height={26} />
               </button>
             ) : (
               <div className="inline-flex items-center shrink min-w-0">
-                <Lockup height={23} className="sm:hidden" />
-                <Lockup height={28} className="hidden sm:inline-flex" />
+                <Lockup height={26} />
               </div>
             )}
 
