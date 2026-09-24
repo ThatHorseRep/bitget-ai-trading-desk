@@ -78,7 +78,7 @@ export function DecisionArtifactView({
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4 sm:space-y-6 pb-20 md:pb-16">
+    <div className="w-full max-w-5xl mx-auto space-y-4 sm:space-y-6 pb-20 md:pb-16 overflow-x-hidden min-w-0">
       {/* 1. Verdict Band Card (Clean Editorial Style) */}
       <div className="relative overflow-hidden bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-4 sm:p-7 md:p-8 shadow-xs space-y-4 sm:space-y-5">
         {/* Accent top line */}
