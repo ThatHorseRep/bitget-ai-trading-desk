@@ -72,3 +72,16 @@ desktop.ini
 /test-qwen5.cjs
 /test-extractor-llm.cjs
 /test-extractor-llm2.cjs
+
+# Demo Video Recordings & Intermediate Build Artifacts
+demo-out/
+recordings-official-*/
+test-results/
+project-snapshot.txt
+public/demo/*.mp4
+public/demo/*.webm
+public/test_playwright.mp4
+public/debug_*.png
+public/real_*.png
+public/user_frame_*.jpg
+

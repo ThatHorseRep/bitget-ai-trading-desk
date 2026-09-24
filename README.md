@@ -1,62 +1,116 @@
 ![Bitget AI RedTeam Desk](./public/readme-banner.png)
 
 # Bitget AI RedTeam Desk
+### Pre-Trade Adversarial Firewall for Tokenized Equities
 
 [![CI](https://github.com/ThatHorseRep/bitget-ai-trading-desk/actions/workflows/ci.yml/badge.svg)](https://github.com/ThatHorseRep/bitget-ai-trading-desk/actions/workflows/ci.yml)
+[![Track 3: Decision Stress Testing](https://img.shields.io/badge/Bitget%20AI%20Hackathon-Track%203%3A%20Decision%20Stress%20Testing-C8102E.svg)](https://github.com/ThatHorseRep/bitget-ai-trading-desk)
+[![Live Demo](https://img.shields.io/badge/Live%20App-bitget--ai--trading--desk.vercel.app-0E2436.svg)](https://bitget-ai-trading-desk.vercel.app)
 
-Implementation workspace for the **Bitget AI Base Camp Hackathon S2**.
+> **"Thesis ≠ Position. Stress-test before the market does."**
 
-## About the Project
-Bitget AI RedTeam Desk is a pre-trade decision-support product designed specifically for the unique structural risks of tokenized U.S. equities on Bitget. It acts as an adversarial "Red Team" against a user's proposed trade, isolating fundamental market rationale from off-hours execution risk and stressing the position mathematically before capital is deployed.
+Built for the **Bitget AI Base Camp Hackathon S2 — Track 3: Decision Stress Testing**.
 
-For full details on the project, the target user, the core job, and the role of the LLM, please see the [PRODUCT_DESCRIPTION.md](./PRODUCT_DESCRIPTION.md) file.
+---
+
+## Quick Links
+
+- 🌐 **Live Web Application:** [bitget-ai-trading-desk.vercel.app](https://bitget-ai-trading-desk.vercel.app)
+- 🎥 **Product Video Walkthrough:** [public/demo/demo.mp4](./public/demo/demo.mp4) *(Full HD 1080p, 100s walk-through)*
+- 📄 **Official Product Specification:** [PRODUCT_DESCRIPTION.md](./PRODUCT_DESCRIPTION.md)
+- 🏛️ **Architecture & Engineering Specs:** [docs/specs/](./docs/specs/)
+
+---
+
+## What Problem Does This Solve?
+
+Bitget offers **24/7 trading for tokenized U.S. equities** (such as `rTSLA`, `rNVDA`). However, traditional stock exchanges (NYSE/NASDAQ) are closed for **65.5 consecutive hours every weekend** (Friday 16:00 to Monday 09:30 ET).
+
+During this 65.5-hour void:
+1. **Underlying Cash Markets Are Closed:** Real equity price discovery is halted, leaving tokenized wrappers susceptible to severe basis dislocation (un-anchoring from reference assets).
+2. **Microstructure Deterioration:** Orderbook depth thins dramatically and spreads widen.
+3. **Crypto Contagion:** Weekend crypto volatility shocks (e.g. BTC sudden dump) bleed directly into token equity valuations without corporate fundamental changes.
+
+**The Trap:** Retail traders enter high-notional token positions on weekend social sentiment or rumors, only to suffer massive basis crush when the cash market opens on Monday.
+
+**The Solution:** Bitget AI RedTeam Desk acts as an **adversarial pre-trade firewall**. Before a trader commits capital, the desk isolates their market thesis, validates it against live market state, subjects the position to deterministic arithmetic shock scenarios, and issues an authoritative policy decision (`PROCEED`, `REDUCE`, `WAIT`, `REJECT`).
+
+---
+
+## Why Bitget AI RedTeam Desk Wins Track 3
+
+| Hackathon Requirement | How We Deliver |
+| :--- | :--- |
+| **Track Fit: Decision Stress Testing** | We do **NOT** build an unconstrained trading bot or speculative price predictor. We provide defensible pre-trade decision stress testing with explicit stop/proceed gates. |
+| **Zero-Hallucination Math** | All P&L shocks, basis calculations, slippage estimates, and spreads are computed via **100% deterministic TypeScript arithmetic** (`src/core/scenarios/engine.ts`). The LLM is strictly used for qualitative thesis deconstruction and adversarial counter-arguments. |
+| **Full Audit Provenance** | Every single output number links directly back to an **auditable data lineage record** (`OBSERVED_FACT`, `CALCULATED_METRIC`, `SCENARIO_ASSUMPTION`, or `AI_INTERPRETATION`) visible in the interactive Provenance Drawer. |
+| **Resilience & Fallback Engineering** | Triple-redundant evaluation pipeline: **Local Qwen-2.5** (primary) $\rightarrow$ **Google Gemini Flash Lite** (auto-failover circuit breaker) $\rightarrow$ **Deterministic Offline Fixtures** (100% offline availability). |
+
+---
+
+## 4 Deterministic Shock Scenarios
+
+When evaluating any proposed trade, the engine runs 4 rigorous stress scenarios:
+
+1. **Market Risk:** Direct adverse reference asset movement (-5%).
+2. **Crypto Contagion:** BTC falls -8% while token trades at 0.4 beta to crypto sentiment.
+3. **Token Microstructure:** Adverse basis widening by 3 percentage points with 50% orderbook depth reduction.
+4. **Combined Shock:** Simultaneous market drawdown, crypto contagion, and liquidity void.
+
+---
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js 22+ (required: the test script uses `--env-file-if-exists`, available from Node 22)
+- Node.js 22+ (uses native `--env-file-if-exists`)
 - [bun](https://bun.sh/) (primary) or npm
 
 ### Installation
 ```bash
 bun install
+# or
+npm install
 ```
-> **Note:** `npm install` also works, but the repo ships `bun.lock` (no `package-lock.json`). All `npm run` scripts work with either manager.
 
 ### Configuration
-Copy the example environment file and add your OpenAI-compatible LLM endpoint and key:
 ```bash
 cp .env.example .env.local
 ```
-Update `.env.local` with your `LLM_API_KEY` and `LLM_API_BASE_URL`.
+Update `.env.local` with your LLM configuration (OpenAI-compatible endpoint, Gemini API key, or Bitget API keys).
 
-### Running the Application (UI)
-Start the Next.js development server to interact with the UI:
+### Running Locally
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser. 
-To test the Hackathon "Demo Wedge" (Off-Hours Trading), click the **"Official scenario"** button in the UI.
+Open [http://localhost:3000](http://localhost:3000) to access the interactive Risk Workbench.
 
-### Running Tests
-The deterministic engine and LLM integration can be tested using the automated test suite:
+### Running Test Suite
 ```bash
-npm run test
+npm test
+# Full verification check:
+npm run verify-clean
 ```
-*(Note: If you encounter rate limit errors, wait 60 seconds and try again, or test manually via the UI).*
 
-## Implementation Map (Capabilities)
-- **Natural Language Trade Parsing & Thesis Extraction:** Deterministic parsing in src/core/trade/parser.ts; LLM thesis extraction in src/core/thesis/extractor.ts.
-- **Adversarial Challenge (Red Teaming):** Implemented in src/core/thesis/challenger.ts.
-- **Deterministic Scenario Stress Testing (P&L, basis, liquidity):** Implemented in src/core/scenarios/engine.ts.
-- **Thesis vs Position Assessment:** Deterministic position quality in src/core/decision/classifyPosition.ts; LLM thesis-quality synthesis in src/core/thesis/assessment.ts.
-- **Deterministic Decision Policy:** Implemented in src/core/decision/policy.ts.
-- **Transparent Demo Mode (Off-Hours Wedge):** Fixture data in src/fixtures/rnvda-demo.ts; triggered via the header toggle and src/components/workspace/TradeInputSurface.tsx, processed in src/app/api/stress-test/route.ts.
-- **Optional Ecosystem Integrations (enrichment, not dependencies):** The core decision is fully defensible with zero optional integrations enabled. Optional providers/handoffs — Bitget US Equity MCP, Bitget Signal, Chainbase AgentKey (external partner, not a Bitget product), Agent Hub read-only handoff, Agentic Account handoff, and a demo-only paper-trading harness — are documented in [B07_Optional_Bitget_Ecosystem_Integrations.md](./docs/specs/B07_Optional_Bitget_Ecosystem_Integrations.md), including their implemented vs external/agent-host status and safety boundaries. No autonomous trading exists in any configuration.
-- **Portfolio Context/Impact:** Marked as FUTURE/DEFERRED in documentation (not implemented in MVP).
+---
 
-## Architecture & Specifications
-The official product specs and architecture documents (B01-B07) are located in the `docs/specs/` directory. Early research drafts and planning notes have been archived in the `docs/archive/` folder.
+## Architecture & Implementation Map
 
+- **Natural Language Parsing & Grammar:** [`src/core/trade/parser.ts`](./src/core/trade/parser.ts) and [`src/core/thesis/extractor.ts`](./src/core/thesis/extractor.ts)
+- **Adversarial Red Team Engine:** [`src/core/thesis/challenger.ts`](./src/core/thesis/challenger.ts)
+- **Deterministic Scenario Stress Engine:** [`src/core/scenarios/engine.ts`](./src/core/scenarios/engine.ts)
+- **Decision Policy & Gate Rules:** [`src/core/decision/policy.ts`](./src/core/decision/policy.ts)
+- **Live Bitget Market State Reconstructor:** [`src/services/marketStateService.ts`](./src/services/marketStateService.ts)
+- **Provenance & Lineage Tracking:** [`src/core/provenance/tracker.ts`](./src/core/provenance/tracker.ts)
+- **Ecosystem Integration Specs (B01-B07):** Documented in [`docs/specs/`](./docs/specs/)
 
+---
 
+## Submission Checklist
+
+- [x] **Track Selected:** Track 3: Decision Stress Testing
+- [x] **Functional Web Application:** Deployed on Vercel at [bitget-ai-trading-desk.vercel.app](https://bitget-ai-trading-desk.vercel.app)
+- [x] **Demo Video:** 100-second 1080p walkthrough with live Next.js UI (`public/demo/demo.mp4`)
+- [x] **Zero TypeScript Errors:** Passing `npm run typecheck`
+- [x] **Zero Lint Errors:** Passing `npm run lint`
+- [x] **Deterministic Unit Tests:** 100% passing `npm test`
+- [x] **GitHub Repo Cleanliness:** All temporary scratch files purged, large binaries ignored
