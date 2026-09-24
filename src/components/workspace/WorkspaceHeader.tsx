@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { BRANDING } from "@/config/branding";
-import { Lockup, Mark } from "@/components/brand/Logo";
+import { Lockup } from "@/components/brand/Logo";
 import { ThemeToggle } from "../theme/ThemeToggle";
 
 interface WorkspaceHeaderProps {
@@ -43,8 +42,8 @@ export function WorkspaceHeader({
 
       <header className="h-16 border-b border-[var(--rtd-steel)]/25 bg-[var(--rtd-proof)] backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-          {/* Brand Lockup + Context Badge (Desktop only >= md) */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Official Brand Lockup + Context Badge (Mobile & Desktop) */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {onViewOverview ? (
               <button
                 type="button"
@@ -52,10 +51,14 @@ export function WorkspaceHeader({
                 className="flex items-center text-left hover:opacity-85 transition-opacity cursor-pointer focus:outline-hidden"
                 title="Return to System Overview"
               >
-                <Lockup height={28} />
+                <Lockup height={26} className="sm:hidden" />
+                <Lockup height={28} className="hidden sm:inline-flex" />
               </button>
             ) : (
-              <Lockup height={28} />
+              <>
+                <Lockup height={26} className="sm:hidden" />
+                <Lockup height={28} className="hidden sm:inline-flex" />
+              </>
             )}
 
             <div className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 text-[10px] font-mono font-bold uppercase tracking-widest text-[var(--rtd-steel)]">
@@ -149,63 +152,39 @@ export function WorkspaceHeader({
             )}
           </div>
 
-          {/* Mobile Header (< md) */}
-          <div className="flex md:hidden items-center justify-between w-full gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              {onViewOverview ? (
-                <button
-                  type="button"
-                  onClick={onViewOverview}
-                  className="flex items-center gap-1.5 text-left focus:outline-hidden"
-                >
-                  <Mark size={24} />
-                  <span className="font-mono font-bold text-xs tracking-tight text-[var(--rtd-ink)] truncate">
-                    {BRANDING.SHORT_NAME}
-                  </span>
-                </button>
-              ) : (
-                <div className="flex items-center gap-1.5">
-                  <Mark size={24} />
-                  <span className="font-mono font-bold text-xs tracking-tight text-[var(--rtd-ink)] truncate">
-                    {BRANDING.SHORT_NAME}
-                  </span>
-                </div>
-              )}
-            </div>
+          {/* Mobile Controls (< md) */}
+          <div className="flex md:hidden items-center gap-1.5 shrink-0">
+            {/* Compact Mode Toggle */}
+            <button
+              type="button"
+              onClick={() => onToggleFixture(!useFixture)}
+              className="min-h-[38px] px-2.5 text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-[0.98] flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              aria-label={`Toggle data mode (currently ${useFixture ? "Fixture" : "Live"})`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${useFixture ? "bg-[var(--rtd-reduce)]" : "bg-[var(--rtd-proceed)] animate-pulse"}`} />
+              <span>{useFixture ? "FIXTURE" : "LIVE"}</span>
+            </button>
 
-            <div className="flex items-center gap-1.5 shrink-0">
-              {/* Compact Mode Toggle */}
+            {/* Compact Theme Toggle */}
+            <ThemeToggle compact />
+
+            {/* Persisted Audit History Badge Button on Mobile */}
+            {onOpenHistory && (
               <button
                 type="button"
-                onClick={() => onToggleFixture(!useFixture)}
-                className="min-h-[38px] px-2.5 text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-[0.98] flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                aria-label={`Toggle data mode (currently ${useFixture ? "Fixture" : "Live"})`}
+                onClick={onOpenHistory}
+                className="min-h-[38px] px-2.5 text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-[0.98] flex items-center gap-1 cursor-pointer shadow-2xs"
+                title="View persisted audit decisions log"
+                aria-label={`Open audit history (${historyCount} saved)`}
               >
-                <span className={`w-1.5 h-1.5 rounded-full ${useFixture ? "bg-[var(--rtd-reduce)]" : "bg-[var(--rtd-proceed)] animate-pulse"}`} />
-                <span>{useFixture ? "FIXTURE" : "LIVE"}</span>
+                <span className="text-[11px]">📋</span>
+                {historyCount > 0 && (
+                  <span className="px-1 py-0.2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-[9px] font-bold">
+                    {historyCount}
+                  </span>
+                )}
               </button>
-
-              {/* Compact Theme Toggle */}
-              <ThemeToggle compact />
-
-              {/* Persisted Audit History Badge Button on Mobile */}
-              {onOpenHistory && (
-                <button
-                  type="button"
-                  onClick={onOpenHistory}
-                  className="min-h-[38px] px-2.5 text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-[0.98] flex items-center gap-1 cursor-pointer shadow-2xs"
-                  title="View persisted audit decisions log"
-                  aria-label={`Open audit history (${historyCount} saved)`}
-                >
-                  <span className="text-[11px]">📋</span>
-                  {historyCount > 0 && (
-                    <span className="px-1 py-0.2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-[9px] font-bold">
-                      {historyCount}
-                    </span>
-                  )}
-                </button>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </header>
