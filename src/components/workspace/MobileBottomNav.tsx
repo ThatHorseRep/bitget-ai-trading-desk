@@ -38,7 +38,7 @@ export function MobileBottomNav({
             // Scroll to top of desk
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-primary)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-95 transition-all focus-visible:outline-hidden"
+          className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-primary)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-[0.98] transition-all focus-visible:outline-hidden"
           aria-label="Risk Desk View"
         >
           <svg className="w-5 h-5 text-[var(--rt-text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -51,7 +51,7 @@ export function MobileBottomNav({
         <button
           type="button"
           onClick={onViewOverview}
-          className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-muted)] font-mono hover:bg-[var(--rt-surface-base)] hover:text-[var(--rt-text-primary)] active:scale-95 transition-all focus-visible:outline-hidden"
+          className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-muted)] font-mono hover:bg-[var(--rt-surface-base)] hover:text-[var(--rt-text-primary)] active:scale-[0.98] transition-all focus-visible:outline-hidden"
           aria-label="System Overview"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -64,7 +64,7 @@ export function MobileBottomNav({
         <button
           type="button"
           onClick={() => onToggleFixture(!useFixture)}
-          className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 font-mono hover:bg-[var(--rt-surface-base)] active:scale-95 transition-all focus-visible:outline-hidden ${
+          className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 font-mono hover:bg-[var(--rt-surface-base)] active:scale-[0.98] transition-all focus-visible:outline-hidden ${
             useFixture ? "text-[var(--rt-verdict-moderate)] font-bold" : "text-[var(--rt-text-muted)]"
           }`}
           aria-label={`Switch data mode (currently ${useFixture ? "Fixture" : "Live"})`}
@@ -88,7 +88,7 @@ export function MobileBottomNav({
           <button
             type="button"
             onClick={onNewTrade}
-            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-primary)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-95 transition-all focus-visible:outline-hidden"
+            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-primary)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-[0.98] transition-all focus-visible:outline-hidden"
             aria-label="Start new trade stress test"
           >
             <svg className="w-5 h-5 text-[var(--rt-text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -100,7 +100,7 @@ export function MobileBottomNav({
           <button
             type="button"
             onClick={onOpenProvenance}
-            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-primary)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-95 transition-all focus-visible:outline-hidden"
+            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-primary)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-[0.98] transition-all focus-visible:outline-hidden"
             aria-label="Open Audit Provenance"
           >
             <svg className="w-5 h-5 text-[var(--rt-verdict-clear)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -112,7 +112,7 @@ export function MobileBottomNav({
           <button
             type="button"
             onClick={installApp}
-            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-verdict-clear)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-95 transition-all focus-visible:outline-hidden"
+            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-verdict-clear)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-[0.98] transition-all focus-visible:outline-hidden"
             aria-label="Install PWA Application"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,7 +126,7 @@ export function MobileBottomNav({
             onClick={() => {
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-muted)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-95 transition-all focus-visible:outline-hidden"
+            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-muted)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-[0.98] transition-all focus-visible:outline-hidden"
             aria-label="Scroll to top"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

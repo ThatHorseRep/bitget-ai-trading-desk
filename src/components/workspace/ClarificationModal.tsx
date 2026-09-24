@@ -109,7 +109,7 @@ export function ClarificationModal({
               type="button"
               onClick={onEditOriginal}
               disabled={isSubmitting}
-              className="min-h-[40px] px-4 py-2 text-xs font-mono font-bold text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)] border border-[var(--rtd-steel)]/25 hover:bg-[var(--rtd-paper-subtle)] active:scale-95 transition-all cursor-pointer"
+              className="min-h-[40px] px-4 py-2 text-xs font-mono font-bold text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)] border border-[var(--rtd-steel)]/25 hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-all cursor-pointer"
             >
               ← Edit full prompt
             </button>
@@ -117,7 +117,7 @@ export function ClarificationModal({
             <button
               type="submit"
               disabled={!answer.trim() || isSubmitting}
-              className="min-h-[40px] px-5 py-2 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 text-xs font-mono font-bold uppercase tracking-wider active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer border border-transparent dark:border-slate-300"
+              className="min-h-[40px] px-5 py-2 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 text-xs font-mono font-bold uppercase tracking-wider active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer border border-transparent dark:border-slate-300"
             >
               {isSubmitting ? "Processing..." : "Continue →"}
             </button>

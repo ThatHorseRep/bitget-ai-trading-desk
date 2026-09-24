@@ -139,7 +139,7 @@ export function NormalizedReviewCard({
             type="button"
             onClick={onConfirm}
             disabled={isAnalyzing}
-            className="min-h-[44px] px-6 py-2.5 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+            className="min-h-[44px] px-6 py-2.5 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold uppercase tracking-wider hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer"
           >
             {isAnalyzing ? "Executing Risk Pipeline..." : "Execute Stress Test →"}
           </button>

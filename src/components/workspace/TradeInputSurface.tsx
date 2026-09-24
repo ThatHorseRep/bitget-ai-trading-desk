@@ -508,7 +508,7 @@ export function TradeInputSurface({
               <button
                 type="submit"
                 disabled={!prompt.trim() || isLoading}
-                className="min-h-[40px] px-5 py-2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold tracking-wider uppercase hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                className="min-h-[40px] px-5 py-2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold tracking-wider uppercase hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isLoading ? (
                   <span>Stress-testing...</span>

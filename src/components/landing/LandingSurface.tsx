@@ -121,7 +121,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             <button
               type="button"
               onClick={() => onLaunchDesk()}
-              className="px-5 py-2.5 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 text-xs font-mono font-bold tracking-wider uppercase active:scale-95 transition-all shadow-xs cursor-pointer border border-transparent dark:border-slate-300"
+              className="px-5 py-2.5 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 text-xs font-mono font-bold tracking-wider uppercase active:scale-[0.98] transition-all shadow-xs cursor-pointer border border-transparent dark:border-slate-300"
             >
               Run a test
             </button>
@@ -133,7 +133,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             <button
               type="button"
               onClick={() => onLaunchDesk()}
-              className="min-h-[44px] px-3.5 py-2 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 text-xs font-mono font-bold tracking-wider uppercase active:scale-95 transition-all flex items-center justify-center cursor-pointer border border-transparent dark:border-slate-300"
+              className="min-h-[44px] px-3.5 py-2 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 text-xs font-mono font-bold tracking-wider uppercase active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer border border-transparent dark:border-slate-300"
             >
               Run test
             </button>
@@ -185,7 +185,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
                   setMobileMenuOpen(false);
                   onLaunchDesk();
                 }}
-                className="min-h-[44px] w-full py-3 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 text-xs font-mono font-bold tracking-wider uppercase active:scale-95 transition-all text-center flex items-center justify-center cursor-pointer shadow-xs border border-transparent dark:border-slate-300"
+                className="min-h-[44px] w-full py-3 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 text-xs font-mono font-bold tracking-wider uppercase active:scale-[0.98] transition-all text-center flex items-center justify-center cursor-pointer shadow-xs border border-transparent dark:border-slate-300"
               >
                 Run a test →
               </button>
@@ -243,7 +243,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             <button
               type="button"
               onClick={() => onLaunchDesk()}
-              className="px-8 py-4 bg-[var(--rtd-stamp)] text-white text-sm font-mono font-bold tracking-wider uppercase hover:brightness-110 active:scale-95 transition-all text-center flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+              className="px-8 py-4 bg-[var(--rtd-stamp)] text-white text-sm font-mono font-bold tracking-wider uppercase hover:brightness-110 active:scale-[0.98] transition-all text-center flex items-center justify-center gap-2 shadow-sm cursor-pointer"
             >
               <span>Stress a trade</span>
               <span>→</span>
@@ -379,7 +379,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
                       <button
                         type="button"
                         onClick={(e) => handleCopy(item.id, item.prompt, e)}
-                        className="px-2 py-0.5 border border-[var(--rtd-steel)]/30 hover:bg-[var(--rtd-paper)] text-[var(--rtd-ink)] font-mono text-[10px] uppercase tracking-wider transition-colors cursor-pointer active:scale-95"
+                        className="px-2 py-0.5 border border-[var(--rtd-steel)]/30 hover:bg-[var(--rtd-paper)] text-[var(--rtd-ink)] font-mono text-[10px] uppercase tracking-wider transition-colors cursor-pointer active:scale-[0.98]"
                       >
                         {copiedId === item.id ? "COPIED ✓" : "COPY"}
                       </button>
@@ -720,7 +720,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
             <button
               type="button"
               onClick={() => onLaunchDesk(GOLDEN_PATH_PROMPT)}
-              className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 text-sm font-mono font-bold tracking-wider uppercase active:scale-95 transition-all text-center flex items-center justify-center gap-2 shadow-xs cursor-pointer border border-transparent dark:border-slate-300"
+              className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 text-sm font-mono font-bold tracking-wider uppercase active:scale-[0.98] transition-all text-center flex items-center justify-center gap-2 shadow-xs cursor-pointer border border-transparent dark:border-slate-300"
             >
               <span>RUN GOLDEN PATH DESK</span>
               <span>→</span>

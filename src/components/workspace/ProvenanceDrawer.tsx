@@ -69,7 +69,7 @@ export function ProvenanceDrawer({
       />
 
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-xl bg-[var(--rtd-paper)] text-[var(--rtd-ink)] border-l border-[var(--rtd-steel)]/25 shadow-2xl flex flex-col justify-between">
+        <div className="w-screen max-w-xl bg-[var(--rtd-paper)] text-[var(--rtd-ink)] border-l border-[var(--rtd-steel)]/25 shadow-2xl flex flex-col justify-between animate-drawer-slide-in">
           {/* Header */}
           <div className="p-5 sm:p-6 border-b border-[var(--rtd-steel)]/15 flex items-center justify-between">
             <div>
@@ -86,7 +86,7 @@ export function ProvenanceDrawer({
             <button
               type="button"
               onClick={onClose}
-              className="p-2 text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)] border border-[var(--rtd-steel)]/25 hover:bg-[var(--rtd-paper-subtle)] active:scale-95 transition-all cursor-pointer"
+              className="p-2 text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)] border border-[var(--rtd-steel)]/25 hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-all cursor-pointer"
             >
               ✕
             </button>
@@ -174,7 +174,7 @@ export function ProvenanceDrawer({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+              className="px-5 py-2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold uppercase tracking-wider hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
             >
               Close
             </button>

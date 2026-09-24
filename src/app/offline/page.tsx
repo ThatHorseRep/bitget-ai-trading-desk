@@ -38,7 +38,7 @@ export default function OfflinePage() {
                 window.location.reload();
               }
             }}
-            className="w-full sm:w-auto min-h-[44px] px-8 py-3 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold tracking-wider uppercase hover:bg-[var(--rtd-void)] active:scale-95 transition-all flex items-center justify-center cursor-pointer shadow-xs"
+            className="w-full sm:w-auto min-h-[44px] px-8 py-3 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold tracking-wider uppercase hover:bg-[var(--rtd-void)] active:scale-[0.98] transition-all flex items-center justify-center cursor-pointer shadow-xs"
           >
             Reconnect
           </button>

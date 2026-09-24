@@ -79,6 +79,20 @@ interface ThemeToggleProps {
   compact?: boolean;
 }
 
+let themeShiftTimer: ReturnType<typeof setTimeout> | null = null;
+
+function triggerThemeShift() {
+  if (typeof document === "undefined") return;
+  if (themeShiftTimer) {
+    clearTimeout(themeShiftTimer);
+  }
+  document.documentElement.classList.add("rtd-theme-shifting");
+  themeShiftTimer = setTimeout(() => {
+    document.documentElement.classList.remove("rtd-theme-shifting");
+    themeShiftTimer = null;
+  }, 250);
+}
+
 /**
  * Editorial dual-surface Theme Toggle:
  * Switches between "PROOF SHEET" (Light Ground) and "DARK ROOM" (Nocturnal Console).
@@ -86,6 +100,16 @@ interface ThemeToggleProps {
  */
 export function ThemeToggle({ className = "", compact = false }: ThemeToggleProps) {
   const { theme, toggleTheme, setTheme, mounted } = useTheme();
+
+  const handleToggleTheme = () => {
+    triggerThemeShift();
+    toggleTheme();
+  };
+
+  const handleSetTheme = (target: ThemeMode) => {
+    triggerThemeShift();
+    setTheme(target);
+  };
 
   if (!mounted) {
     return (
@@ -105,8 +129,8 @@ export function ThemeToggle({ className = "", compact = false }: ThemeToggleProp
     return (
       <button
         type="button"
-        onClick={toggleTheme}
-        className={`min-h-[40px] min-w-[40px] p-2 border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper-subtle)] active:scale-95 transition-all text-xs font-mono flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${className}`}
+        onClick={handleToggleTheme}
+        className={`min-h-[40px] min-w-[40px] p-2 border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-all text-xs font-mono flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${className}`}
         aria-label={`Current: ${isDark ? "Dark Room" : "Proof Sheet"}. Click to switch theme.`}
         title={`Switch to ${isDark ? "Proof Sheet (Light)" : "Dark Room (Dark)"}`}
       >
@@ -161,7 +185,7 @@ export function ThemeToggle({ className = "", compact = false }: ThemeToggleProp
     >
       <button
         type="button"
-        onClick={() => setTheme("light")}
+        onClick={() => handleSetTheme("light")}
         aria-pressed={!isDark}
         className={`min-h-[34px] px-2.5 py-1 text-[10.5px] font-mono font-bold tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
           !isDark
@@ -192,7 +216,7 @@ export function ThemeToggle({ className = "", compact = false }: ThemeToggleProp
 
       <button
         type="button"
-        onClick={() => setTheme("dark")}
+        onClick={() => handleSetTheme("dark")}
         aria-pressed={isDark}
         className={`min-h-[34px] px-2.5 py-1 text-[10.5px] font-mono font-bold tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
           isDark
