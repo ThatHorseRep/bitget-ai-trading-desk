@@ -48,17 +48,13 @@ export function WorkspaceHeader({
               <button
                 type="button"
                 onClick={onViewOverview}
-                className="flex items-center text-left hover:opacity-85 transition-opacity cursor-pointer focus:outline-hidden"
+                className="inline-flex items-center text-left hover:opacity-85 transition-opacity cursor-pointer focus:outline-hidden"
                 title="Return to System Overview"
               >
-                <Lockup height={26} className="sm:hidden" />
-                <Lockup height={28} className="hidden sm:inline-flex" />
+                <Lockup height={28} />
               </button>
             ) : (
-              <>
-                <Lockup height={26} className="sm:hidden" />
-                <Lockup height={28} className="hidden sm:inline-flex" />
-              </>
+              <Lockup height={28} />
             )}
 
             <div className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 text-[10px] font-mono font-bold uppercase tracking-widest text-[var(--rtd-steel)]">

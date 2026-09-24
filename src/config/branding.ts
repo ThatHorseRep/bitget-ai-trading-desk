@@ -19,7 +19,7 @@ export const BRANDING = {
     "Adversarial pre-trade risk workbench for tokenized US equities. " +
     "Deterministic stress testing, basis decoupling analysis, and thesis " +
     "versus position deconstruction.",
-  URL: "https://redteamdesk.xyz",
+  URL: "https://www.redteamdesk.name.ng",
   LOGOS: {
     MARK: "/icon.svg",
     FAVICON: "/favicon.svg",
