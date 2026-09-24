@@ -130,14 +130,29 @@ export function ThemeToggle({ className = "", compact = false }: ThemeToggleProp
       <button
         type="button"
         onClick={handleToggleTheme}
-        className={`min-h-[40px] min-w-[40px] p-2 border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-all text-xs font-mono flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${className}`}
+        className={`min-h-[38px] min-w-[38px] p-2 border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-colors text-xs font-mono flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${className}`}
         aria-label={`Current: ${isDark ? "Dark Room" : "Proof Sheet"}. Click to switch theme.`}
         title={`Switch to ${isDark ? "Proof Sheet (Light)" : "Dark Room (Dark)"}`}
       >
         {isDark ? (
           <span className="flex items-center gap-1 text-[var(--rtd-ink)]">
             <svg
-              className="w-3.5 h-3.5 text-amber-400"
+              className="w-3.5 h-3.5 text-sky-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+            </svg>
+            <span className="text-[10px] font-bold tracking-widest uppercase">NIGHT</span>
+          </span>
+        ) : (
+          <span className="flex items-center gap-1 text-[var(--rtd-ink)]">
+            <svg
+              className="w-3.5 h-3.5 text-amber-500"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -154,21 +169,6 @@ export function ThemeToggle({ className = "", compact = false }: ThemeToggleProp
               <path d="M20 12h2" />
               <path d="m6.34 17.66-1.41 1.41" />
               <path d="m19.07 4.93-1.41 1.41" />
-            </svg>
-            <span className="text-[10px] font-bold tracking-widest uppercase">NIGHT</span>
-          </span>
-        ) : (
-          <span className="flex items-center gap-1 text-[var(--rtd-ink)]">
-            <svg
-              className="w-3.5 h-3.5 text-[var(--rtd-steel)]"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
             </svg>
             <span className="text-[10px] font-bold tracking-widest uppercase">DAY</span>
           </span>

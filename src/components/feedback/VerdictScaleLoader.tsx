@@ -88,6 +88,15 @@ function AnimatedDisplacementMark() {
   );
 }
 
+const STAGE_SHORT_LABELS: Record<string, string> = {
+  MARKET_STATE: "Market State",
+  EVIDENCE: "External Evidence",
+  SCENARIOS: "Stress Scenarios",
+  THESIS_EXTRACTION: "Thesis Deconstruct",
+  CHALLENGE: "Counter-Thesis",
+  ASSESSMENT: "Risk Evaluation"
+};
+
 export function VerdictScaleLoader({
   stages,
   activeStageIndex = 0,
@@ -198,7 +207,12 @@ export function VerdictScaleLoader({
                     <span className="text-[10px] text-[var(--rtd-steel)]/50">QUEUED</span>
                   )}
                 </div>
-                <div className="font-bold truncate text-[11px]">{stg.label}</div>
+                <div
+                  className="font-bold text-[11px] leading-tight line-clamp-2 min-h-[2.2rem] flex items-center"
+                  title={stg.label}
+                >
+                  {STAGE_SHORT_LABELS[stg.id] ?? stg.label}
+                </div>
               </div>
             );
           })}

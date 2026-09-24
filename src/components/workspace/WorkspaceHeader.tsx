@@ -43,8 +43,8 @@ export function WorkspaceHeader({
 
       <header className="h-16 border-b border-[var(--rtd-steel)]/25 bg-[var(--rtd-proof)] backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-          {/* Brand Lockup + Context Badge */}
-          <div className="flex items-center gap-3">
+          {/* Brand Lockup + Context Badge (Desktop only >= md) */}
+          <div className="hidden md:flex items-center gap-3">
             {onViewOverview ? (
               <button
                 type="button"
@@ -178,36 +178,31 @@ export function WorkspaceHeader({
               <button
                 type="button"
                 onClick={() => onToggleFixture(!useFixture)}
-                className="min-h-[40px] px-2.5 text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-[0.98] flex items-center gap-1 cursor-pointer shadow-2xs"
+                className="min-h-[38px] px-2.5 text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-[0.98] flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 aria-label={`Toggle data mode (currently ${useFixture ? "Fixture" : "Live"})`}
               >
-                <span className={`w-1.5 h-1.5 rounded-full ${useFixture ? "bg-[var(--rtd-wait)]" : "bg-[var(--rtd-proceed)] animate-pulse"}`} />
+                <span className={`w-1.5 h-1.5 rounded-full ${useFixture ? "bg-[var(--rtd-reduce)]" : "bg-[var(--rtd-proceed)] animate-pulse"}`} />
                 <span>{useFixture ? "FIXTURE" : "LIVE"}</span>
               </button>
 
               {/* Compact Theme Toggle */}
               <ThemeToggle compact />
 
-              {/* Back to Overview or Reset on Mobile */}
-              {onViewOverview && (
+              {/* Persisted Audit History Badge Button on Mobile */}
+              {onOpenHistory && (
                 <button
                   type="button"
-                  onClick={onViewOverview}
-                  className="min-h-[40px] px-2.5 text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-[0.98] flex items-center justify-center cursor-pointer shadow-2xs"
-                  title="Return to System Overview"
+                  onClick={onOpenHistory}
+                  className="min-h-[38px] px-2.5 text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-[0.98] flex items-center gap-1 cursor-pointer shadow-2xs"
+                  title="View persisted audit decisions log"
+                  aria-label={`Open audit history (${historyCount} saved)`}
                 >
-                  ← DESK
-                </button>
-              )}
-
-              {canReset && (
-                <button
-                  type="button"
-                  onClick={onNewTrade}
-                  className="min-h-[40px] px-3 text-[10px] font-mono font-bold uppercase tracking-wider bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 active:scale-[0.98] flex items-center justify-center cursor-pointer shadow-xs border border-transparent dark:border-slate-300"
-                  title="Start New Trade Evaluation"
-                >
-                  + NEW
+                  <span className="text-[11px]">📋</span>
+                  {historyCount > 0 && (
+                    <span className="px-1 py-0.2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-[9px] font-bold">
+                      {historyCount}
+                    </span>
+                  )}
                 </button>
               )}
             </div>

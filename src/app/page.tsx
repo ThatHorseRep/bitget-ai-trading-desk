@@ -151,6 +151,17 @@ export default function WorkspacePage() {
 
     abortControllerRef.current = new AbortController();
 
+    // Cadence ticker: smoothly advance through stages if intermediate network proxies (e.g. Vercel)
+    // buffer stream chunks or external LLM inference takes several seconds, keeping the desk active.
+    const progressTimer = setInterval(() => {
+      setActiveStageIndex(prev => {
+        if (prev < PIPELINE_STAGES.length - 2) {
+          return prev + 1;
+        }
+        return prev;
+      });
+    }, 2800);
+
     try {
       const response = await fetch("/api/stress-test", {
         method: "POST",
@@ -186,13 +197,16 @@ export default function WorkspacePage() {
         buffer = lines.pop() || "";
         
         for (const line of lines) {
-          if (!line.trim()) continue;
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith(":")) continue;
+          // Handle both SSE "data: " lines and raw JSON lines
+          const jsonStr = trimmed.startsWith("data: ") ? trimmed.slice(6).trim() : trimmed;
           try {
-            const parsed = JSON.parse(line);
+            const parsed = JSON.parse(jsonStr);
             if (parsed.type === "progress") {
               const matchedIdx = PIPELINE_STAGES.findIndex(s => s.id === parsed.stageId);
               if (matchedIdx >= 0) {
-                setActiveStageIndex(matchedIdx);
+                setActiveStageIndex(prev => Math.max(prev, matchedIdx));
               }
             } else if (parsed.type === "result" || parsed.type === "error") {
               finalData = parsed.data;
@@ -205,14 +219,18 @@ export default function WorkspacePage() {
       }
 
       if (buffer.trim()) {
-        try {
-          const parsed = JSON.parse(buffer.trim());
-          if (parsed.type === "result" || parsed.type === "error") {
-            finalData = parsed.data;
-            finalStatus = parsed.status || 200;
+        const trimmed = buffer.trim();
+        if (!trimmed.startsWith(":")) {
+          const jsonStr = trimmed.startsWith("data: ") ? trimmed.slice(6).trim() : trimmed;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            if (parsed.type === "result" || parsed.type === "error") {
+              finalData = parsed.data;
+              finalStatus = parsed.status || 200;
+            }
+          } catch (e) {
+            console.error("Failed to parse remaining stream buffer:", buffer);
           }
-        } catch (e) {
-          console.error("Failed to parse remaining stream buffer:", buffer);
         }
       }
 
@@ -240,6 +258,7 @@ export default function WorkspacePage() {
       setErrorMessage(err instanceof Error ? err.message : "Network error during stress test.");
       setStep("ERROR");
     } finally {
+      clearInterval(progressTimer);
       setIsAnalyzing(false);
       abortControllerRef.current = null;
     }
@@ -293,10 +312,10 @@ export default function WorkspacePage() {
           />
 
           <main
-            className={`px-4 sm:px-6 lg:px-8 ${
+            className={`px-2.5 sm:px-6 lg:px-8 ${
               step === "ENTRY"
-                ? "py-3 sm:py-4 lg:h-[calc(100dvh-4.25rem)] lg:overflow-hidden flex flex-col justify-center"
-                : "py-6 sm:py-8 pb-24 md:pb-12"
+                ? "py-3 sm:py-4 pb-28 sm:pb-24 lg:pb-4 lg:h-[calc(100dvh-4.25rem)] lg:overflow-hidden flex flex-col justify-center"
+                : "py-5 sm:py-8 pb-28 sm:pb-24 md:pb-12"
             }`}
           >
             {/* S01 / S02: Input State */}

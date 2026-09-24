@@ -78,9 +78,9 @@ export function DecisionArtifactView({
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 pb-20 md:pb-16 pl-safe pr-safe">
+    <div className="mx-auto max-w-5xl space-y-4 sm:space-y-6 pb-20 md:pb-16">
       {/* 1. Verdict Band Card (Clean Editorial Style) */}
-      <div className="relative overflow-hidden bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-5 sm:p-7 md:p-8 shadow-xs space-y-5">
+      <div className="relative overflow-hidden bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-4 sm:p-7 md:p-8 shadow-xs space-y-4 sm:space-y-5">
         {/* Accent top line */}
         <div
           className="absolute top-0 left-0 right-0 h-1.5"
@@ -95,18 +95,18 @@ export function DecisionArtifactView({
             <span>{new Date(artifact.generatedAt).toLocaleTimeString()}</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
               onClick={handleCopyJson}
-              className="inline-flex min-h-[38px] items-center gap-1.5 bg-[var(--rtd-paper-subtle)] px-3.5 py-1.5 text-xs font-mono font-bold text-[var(--rtd-ink)] hover:bg-[var(--rtd-steel)]/15 border border-[var(--rtd-steel)]/25 shadow-2xs active:scale-[0.98] transition-all cursor-pointer"
+              className="inline-flex min-h-[38px] items-center gap-1.5 bg-[var(--rtd-paper-subtle)] px-3.5 py-1.5 text-xs font-mono font-bold text-[var(--rtd-ink)] hover:bg-[var(--rtd-steel)]/15 border border-[var(--rtd-steel)]/25 shadow-2xs active:scale-[0.98] transition-colors cursor-pointer"
             >
               {copied ? "Copied JSON!" : "Export artifact JSON"}
             </button>
             <button
               type="button"
               onClick={onOpenProvenance}
-              className="inline-flex min-h-[38px] items-center gap-1.5 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 px-3.5 py-1.5 text-xs font-mono font-bold shadow-2xs active:scale-[0.98] transition-all cursor-pointer border border-transparent dark:border-slate-300"
+              className="inline-flex min-h-[38px] items-center gap-1.5 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 px-3.5 py-1.5 text-xs font-mono font-bold shadow-2xs active:scale-[0.98] transition-colors cursor-pointer border border-transparent dark:border-slate-300"
             >
               Audit provenance
             </button>

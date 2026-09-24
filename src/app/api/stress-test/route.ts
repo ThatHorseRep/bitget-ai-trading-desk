@@ -57,6 +57,13 @@ export async function POST(request: NextRequest) {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
+        // Send initial flush preamble to defeat intermediate proxy buffering (e.g. Vercel, Cloudflare, Nginx)
+        try {
+          controller.enqueue(encoder.encode(": stream-open\n\n"));
+        } catch {
+          // ignore if closed
+        }
+
         try {
           const result = await deskService.runWorkflow(input, { 
             useFixture, 
@@ -64,7 +71,9 @@ export async function POST(request: NextRequest) {
             onProgress: (stageId, message) => {
               try {
                 if (!request.signal.aborted) {
-                  controller.enqueue(encoder.encode(JSON.stringify({ type: "progress", stageId, message }) + "\n"));
+                  const payload = JSON.stringify({ type: "progress", stageId, message });
+                  // Format as SSE data frame with newline for universal compatibility
+                  controller.enqueue(encoder.encode(`data: ${payload}\n\n`));
                 }
               } catch (e) {
                 // Ignore enqueue errors if the client abruptly disconnected and the controller is closed
@@ -76,12 +85,13 @@ export async function POST(request: NextRequest) {
           if (result.step === "CLARIFICATION") status = 422;
           else if (result.step === "ERROR") status = 502;
           
-          controller.enqueue(encoder.encode(JSON.stringify({ type: "result", status, data: result }) + "\n"));
+          const resultPayload = JSON.stringify({ type: "result", status, data: result });
+          controller.enqueue(encoder.encode(`data: ${resultPayload}\n\n`));
           controller.close();
         } catch (error) {
           console.error("Internal service error during stream:", error);
           try {
-            controller.enqueue(encoder.encode(JSON.stringify({ 
+            const errPayload = JSON.stringify({ 
               type: "error", 
               status: 500,
               data: {
@@ -90,7 +100,8 @@ export async function POST(request: NextRequest) {
                 artifact: null,
                 limitations: ["An internal error occurred while processing your request."],
               }
-            }) + "\n"));
+            });
+            controller.enqueue(encoder.encode(`data: ${errPayload}\n\n`));
             controller.close();
           } catch (e) {
             // Client disconnected mid-stream: enqueue/close on an aborted
@@ -102,8 +113,8 @@ export async function POST(request: NextRequest) {
 
     return new Response(stream, {
       headers: {
-        'Content-Type': 'application/x-ndjson',
-        'Cache-Control': 'no-cache',
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
         'Connection': 'keep-alive',
         'X-Accel-Buffering': 'no'
       }

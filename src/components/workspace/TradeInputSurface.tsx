@@ -206,7 +206,7 @@ export function TradeInputSurface({
   const isReject = positionInfo.verdict === "REJECT";
 
   return (
-    <div className="w-full max-w-6xl mx-auto flex flex-col justify-between h-full space-y-3 lg:space-y-4">
+    <div className="w-full max-w-6xl mx-auto flex flex-col justify-between min-h-full h-auto lg:h-full space-y-3 lg:space-y-4">
       {/* Sleek, Compact Workbench Header Strip (Zero scroll overflow) */}
       <div className="bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 px-4 py-2.5 sm:px-5 sm:py-3 shadow-2xs flex items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
@@ -421,7 +421,6 @@ export function TradeInputSurface({
                     type="button"
                     onClick={() => {
                       setPrompt(preset.promptText);
-                      setActiveTab("results");
                     }}
                     className={`p-2.5 sm:p-3 text-left border transition-all flex flex-col justify-between space-y-1.5 group cursor-pointer ${
                       isSelected

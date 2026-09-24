@@ -19,9 +19,9 @@ export function NormalizedReviewCard({
   isAnalyzing = false
 }: NormalizedReviewCardProps) {
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <div className="border border-[var(--rtd-steel)]/25 bg-[var(--rtd-paper)] p-6 sm:p-8 shadow-xs space-y-6">
-        <div className="flex items-center justify-between border-b border-[var(--rtd-steel)]/15 pb-4">
+    <div className="mx-auto max-w-4xl space-y-4 sm:space-y-6">
+      <div className="border border-[var(--rtd-steel)]/25 bg-[var(--rtd-paper)] p-4 sm:p-7 md:p-8 shadow-xs space-y-5 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--rtd-steel)]/15 pb-4">
           <div>
             <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--rtd-proceed)]">
               Checkpoint S04
@@ -37,7 +37,7 @@ export function NormalizedReviewCard({
             type="button"
             onClick={onEdit}
             disabled={isAnalyzing}
-            className="min-h-[40px] text-xs font-mono font-bold text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)] border border-[var(--rtd-steel)]/25 px-3.5 py-1.5 hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="min-h-[40px] text-xs font-mono font-bold text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)] border border-[var(--rtd-steel)]/25 px-3.5 py-1.5 hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer self-start sm:self-auto"
           >
             Edit trade
           </button>
@@ -134,12 +134,12 @@ export function NormalizedReviewCard({
         </div>
 
         {/* Action Button */}
-        <div className="pt-2 flex justify-end">
+        <div className="pt-2 flex justify-stretch sm:justify-end">
           <button
             type="button"
             onClick={onConfirm}
             disabled={isAnalyzing}
-            className="min-h-[44px] px-6 py-2.5 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold uppercase tracking-wider hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+            className="w-full sm:w-auto min-h-[44px] px-6 py-2.5 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold uppercase tracking-wider hover:opacity-90 active:scale-[0.98] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer flex items-center justify-center gap-2"
           >
             {isAnalyzing ? "Executing Risk Pipeline..." : "Execute Stress Test →"}
           </button>

@@ -28,20 +28,19 @@ export function MobileBottomNav({
     <nav
       id="mobile-bottom-nav"
       aria-label="Mobile workspace navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] pb-safe shadow-lg"
+      className="md:hidden fixed bottom-0 inset-x-0 z-50 border-t border-[var(--rtd-steel)]/25 bg-[var(--rtd-paper)]/95 backdrop-blur-md pb-safe shadow-lg"
     >
-      <div className="grid grid-cols-4 h-14 items-stretch px-1">
+      <div className="grid grid-cols-4 h-14 items-stretch px-1 text-[var(--rtd-ink)]">
         {/* Destination 1: Desk (Always First) */}
         <button
           type="button"
           onClick={() => {
-            // Scroll to top of desk
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-primary)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-[0.98] transition-all focus-visible:outline-hidden"
+          className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rtd-ink)] font-mono hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-colors focus-visible:outline-hidden cursor-pointer"
           aria-label="Risk Desk View"
         >
-          <svg className="w-5 h-5 text-[var(--rt-text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-5 h-5 text-[var(--rtd-ink)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
           <span className="text-[10px] font-bold tracking-tight">Risk Desk</span>
@@ -51,7 +50,7 @@ export function MobileBottomNav({
         <button
           type="button"
           onClick={onViewOverview}
-          className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-muted)] font-mono hover:bg-[var(--rt-surface-base)] hover:text-[var(--rt-text-primary)] active:scale-[0.98] transition-all focus-visible:outline-hidden"
+          className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rtd-steel)] font-mono hover:bg-[var(--rtd-paper-subtle)] hover:text-[var(--rtd-ink)] active:scale-[0.98] transition-colors focus-visible:outline-hidden cursor-pointer"
           aria-label="System Overview"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -64,8 +63,8 @@ export function MobileBottomNav({
         <button
           type="button"
           onClick={() => onToggleFixture(!useFixture)}
-          className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 font-mono hover:bg-[var(--rt-surface-base)] active:scale-[0.98] transition-all focus-visible:outline-hidden ${
-            useFixture ? "text-[var(--rt-verdict-moderate)] font-bold" : "text-[var(--rt-text-muted)]"
+          className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 font-mono hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-colors focus-visible:outline-hidden cursor-pointer ${
+            useFixture ? "text-[var(--rtd-reduce)] font-bold" : "text-[var(--rtd-ink)]"
           }`}
           aria-label={`Switch data mode (currently ${useFixture ? "Fixture" : "Live"})`}
         >
@@ -76,7 +75,7 @@ export function MobileBottomNav({
             </svg>
             <span
               className={`absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full ${
-                useFixture ? "bg-[var(--rt-verdict-moderate)]" : "bg-[var(--rt-verdict-clear)] animate-pulse"
+                useFixture ? "bg-[var(--rtd-reduce)]" : "bg-[var(--rtd-proceed)] animate-pulse"
               }`}
             />
           </div>
@@ -88,22 +87,22 @@ export function MobileBottomNav({
           <button
             type="button"
             onClick={onNewTrade}
-            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-primary)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-[0.98] transition-all focus-visible:outline-hidden"
+            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rtd-ink)] font-mono hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-colors focus-visible:outline-hidden cursor-pointer"
             aria-label="Start new trade stress test"
           >
-            <svg className="w-5 h-5 text-[var(--rt-text-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 text-[var(--rtd-ink)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            <span className="text-[10px] font-bold tracking-tight">New Trade</span>
+            <span className="text-[10px] font-bold tracking-tight">+ New Trade</span>
           </button>
         ) : hasArtifact && onOpenProvenance ? (
           <button
             type="button"
             onClick={onOpenProvenance}
-            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-primary)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-[0.98] transition-all focus-visible:outline-hidden"
+            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rtd-proceed)] font-mono hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-colors focus-visible:outline-hidden cursor-pointer"
             aria-label="Open Audit Provenance"
           >
-            <svg className="w-5 h-5 text-[var(--rt-verdict-clear)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 text-[var(--rtd-proceed)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span className="text-[10px] font-bold tracking-tight">Provenance</span>
@@ -112,7 +111,7 @@ export function MobileBottomNav({
           <button
             type="button"
             onClick={installApp}
-            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-verdict-clear)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-[0.98] transition-all focus-visible:outline-hidden"
+            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rtd-proceed)] font-mono hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-colors focus-visible:outline-hidden cursor-pointer"
             aria-label="Install PWA Application"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,7 +125,7 @@ export function MobileBottomNav({
             onClick={() => {
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rt-text-muted)] font-mono hover:bg-[var(--rt-surface-base)] active:scale-[0.98] transition-all focus-visible:outline-hidden"
+            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rtd-steel)] font-mono hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-colors focus-visible:outline-hidden cursor-pointer"
             aria-label="Scroll to top"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
