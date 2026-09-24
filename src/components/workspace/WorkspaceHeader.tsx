@@ -40,21 +40,25 @@ export function WorkspaceHeader({
         </div>
       )}
 
-      <header className="h-16 border-b border-[var(--rtd-steel)]/25 bg-[var(--rtd-proof)] backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <header className="h-16 border-b border-[var(--rtd-steel)]/25 bg-[var(--rtd-proof)] backdrop-blur-md w-full overflow-hidden">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-3 w-full">
           {/* Official Brand Lockup + Context Badge (Mobile & Desktop) */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink min-w-0">
             {onViewOverview ? (
               <button
                 type="button"
                 onClick={onViewOverview}
-                className="inline-flex items-center text-left hover:opacity-85 transition-opacity cursor-pointer focus:outline-hidden"
+                className="inline-flex items-center text-left hover:opacity-85 transition-opacity cursor-pointer focus:outline-hidden shrink min-w-0"
                 title="Return to System Overview"
               >
-                <Lockup height={28} />
+                <Lockup height={23} className="sm:hidden" />
+                <Lockup height={28} className="hidden sm:inline-flex" />
               </button>
             ) : (
-              <Lockup height={28} />
+              <div className="inline-flex items-center shrink min-w-0">
+                <Lockup height={23} className="sm:hidden" />
+                <Lockup height={28} className="hidden sm:inline-flex" />
+              </div>
             )}
 
             <div className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 bg-[var(--rtd-paper-subtle)] border border-[var(--rtd-steel)]/25 text-[10px] font-mono font-bold uppercase tracking-widest text-[var(--rtd-steel)]">
@@ -149,12 +153,12 @@ export function WorkspaceHeader({
           </div>
 
           {/* Mobile Controls (< md) */}
-          <div className="flex md:hidden items-center gap-1.5 shrink-0">
+          <div className="flex md:hidden items-center gap-1 shrink-0">
             {/* Compact Mode Toggle */}
             <button
               type="button"
               onClick={() => onToggleFixture(!useFixture)}
-              className="min-h-[38px] px-2.5 text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-[0.98] flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className="h-[32px] px-2 text-[9.5px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-[0.98] flex items-center gap-1 cursor-pointer shadow-2xs"
               aria-label={`Toggle data mode (currently ${useFixture ? "Fixture" : "Live"})`}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${useFixture ? "bg-[var(--rtd-reduce)]" : "bg-[var(--rtd-proceed)] animate-pulse"}`} />
@@ -162,14 +166,14 @@ export function WorkspaceHeader({
             </button>
 
             {/* Compact Theme Toggle */}
-            <ThemeToggle compact />
+            <ThemeToggle compact className="h-[32px] min-h-[32px] px-2 py-0" />
 
             {/* Persisted Audit History Badge Button on Mobile */}
             {onOpenHistory && (
               <button
                 type="button"
                 onClick={onOpenHistory}
-                className="min-h-[38px] px-2.5 text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-[0.98] flex items-center gap-1 cursor-pointer shadow-2xs"
+                className="h-[32px] px-2 text-[10px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-[0.98] flex items-center gap-1 cursor-pointer shadow-2xs"
                 title="View persisted audit decisions log"
                 aria-label={`Open audit history (${historyCount} saved)`}
               >

@@ -206,9 +206,9 @@ export function TradeInputSurface({
   const isReject = positionInfo.verdict === "REJECT";
 
   return (
-    <div className="w-full max-w-6xl mx-auto flex flex-col justify-between min-h-full h-auto lg:h-full space-y-3 lg:space-y-4">
+    <div className="w-full max-w-6xl mx-auto flex flex-col justify-between min-h-full h-auto lg:h-full space-y-3 lg:space-y-4 overflow-hidden">
       {/* Sleek, Compact Workbench Header Strip (Zero scroll overflow) */}
-      <div className="bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 px-4 py-2.5 sm:px-5 sm:py-3 shadow-2xs flex items-center justify-between gap-4 shrink-0">
+      <div className="bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 px-3 py-2 sm:px-5 sm:py-3 shadow-2xs flex items-center justify-between gap-2 sm:gap-4 shrink-0 overflow-hidden w-full">
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
           <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-[0.16em] text-[var(--rtd-ink)] shrink-0">
             01 / RISK WORKBENCH
@@ -228,8 +228,8 @@ export function TradeInputSurface({
       </div>
 
       {/* Mobile view tab switcher (< md) */}
-      <div className="flex md:hidden items-center justify-between border-b border-[var(--rtd-steel)]/25 pb-2 shrink-0">
-        <div className="flex items-center gap-1 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-0.5">
+      <div className="flex md:hidden items-center justify-between border-b border-[var(--rtd-steel)]/25 pb-2 shrink-0 w-full overflow-hidden gap-2">
+        <div className="flex items-center gap-1 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-0.5 shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab("input")}
@@ -254,7 +254,7 @@ export function TradeInputSurface({
           </button>
         </div>
 
-        <span className="text-[10.5px] font-mono font-bold text-[var(--rtd-steel)] uppercase">
+        <span className="text-[10.5px] font-mono font-bold text-[var(--rtd-steel)] uppercase truncate">
           {positionInfo.symbol} · {positionInfo.direction}
         </span>
       </div>

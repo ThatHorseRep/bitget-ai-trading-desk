@@ -295,7 +295,7 @@ export default function WorkspacePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--rtd-proof)] text-[var(--rtd-ink)] font-sans selection:bg-[var(--rtd-ink)] selection:text-[var(--rtd-paper)]">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[var(--rtd-proof)] text-[var(--rtd-ink)] font-sans selection:bg-[var(--rtd-ink)] selection:text-[var(--rtd-paper)]">
       {viewMode === "landing" ? (
         <LandingSurface onLaunchDesk={handleLaunchFromLanding} />
       ) : (
@@ -312,7 +312,7 @@ export default function WorkspacePage() {
           />
 
           <main
-            className={`px-2.5 sm:px-6 lg:px-8 ${
+            className={`w-full max-w-full overflow-x-hidden px-2.5 sm:px-6 lg:px-8 ${
               step === "ENTRY"
                 ? "py-3 sm:py-4 pb-28 sm:pb-24 lg:pb-4 lg:h-[calc(100dvh-4.25rem)] lg:overflow-hidden flex flex-col justify-center"
                 : "py-5 sm:py-8 pb-28 sm:pb-24 md:pb-12"
