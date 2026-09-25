@@ -102,6 +102,15 @@ async function simulateTap(page, x, y) {
 
   const realArtifact = JSON.parse(fs.readFileSync(path.join(__dirname, '../demo-out/real-live-artifact.json'), 'utf8'));
 
+  // Mock instant live price for rTSLA to ensure instant normalization
+  await page.route('**/api/market-price*', async route => {
+    await route.fulfill({
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ price: 378.17, timestamp: '2026-09-25T07:23:59Z' })
+    });
+  });
+
   // Calibrate SSE stream to run smoothly:
   // Starts when Execute is clicked at 41.0s, completes at 49.5s (8.5s total progress duration)
   await page.route('**/api/stress-test', async route => {
@@ -207,17 +216,26 @@ async function simulateTap(page, x, y) {
   // Type thesis naturally
   const promptText = "I want to go long $25,000 on rTSLA on Saturday morning after autonomous driving demo rumors, while NASDAQ cash venue is closed and wrapper premium drifts +3.1%.";
   console.log('Typing trade thesis...');
-  await textarea.pressSequentially(promptText, { delay: 28 }); // ~4.5s
+  await textarea.pressSequentially(promptText, { delay: 25 }); // ~4.0s
+  await page.evaluate(val => {
+    const el = document.querySelector('textarea');
+    if (el && el.value !== val) {
+      el.value = val;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }, promptText);
   await waitUntil(26.5);
 
   // Move touch cursor to "Run Adversarial Desk" submit button
   const runBtn = page.locator('form button[type="submit"]:has-text("Run Adversarial Desk")').first();
+  await runBtn.scrollIntoViewIfNeeded();
   const runBox = await runBtn.boundingBox();
   if (runBox) {
-    await inPageTouchMove(page, runBox.x + runBox.width / 2, runBox.y + runBox.height / 2, 600);
+    await inPageTouchMove(page, runBox.x + runBox.width / 2, runBox.y + runBox.height / 2, 500);
     await waitUntil(28.8);
     await simulateTap(page, runBox.x + runBox.width / 2, runBox.y + runBox.height / 2);
-    await runBtn.click();
+    await runBtn.click({ force: true });
   }
 
   await waitUntil(31.5);
@@ -314,24 +332,28 @@ async function simulateTap(page, x, y) {
   await waitUntil(93.5);
 
   console.log('[01:33 - 01:40] Act 8: Mobile Brand Outro & Closing CTA');
-  // Inject clean mobile outro dissolve overlay
+  // Inject clean mobile outro dissolve overlay with official brand mark
   await page.evaluate(() => {
     const outro = document.createElement('div');
-    outro.style = 'position:fixed;inset:0;background:#06121C;z-index:99999999;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity 0.8s ease-in-out;font-family:monospace;padding:24px;text-align:center;';
+    outro.style = 'position:fixed;inset:0;background:#06121C;z-index:99999999;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity 0.7s ease-in-out;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;padding:28px 20px;text-align:center;box-sizing:border-box;';
     outro.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:20px;">
-        <svg viewBox="0 0 100 100" width="56" height="56">
-          <path d="M12 18 L68 18 L68 34 L12 34 Z M32 66 L88 66 L88 82 L32 82 Z" fill="#FFFFFF"/>
-          <path d="M48 6 L56 6 L44 94 L36 94 Z" fill="#C8102E"/>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:16px;margin-bottom:24px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="76" height="76" fill="none" style="filter:drop-shadow(0 4px 16px rgba(200,16,46,0.35));">
+          <path d="M 32.80,4.13 L 84.80,4.13 L 102.80,22.13 L 102.80,37.24 L 14.80,55.95 L 14.80,22.13 Z M 45.80,24.13 L 71.80,24.13 L 82.80,35.13 L 82.80,41.49 L 34.80,51.70 L 34.80,35.13 Z" fill="#FFFFFF" fill-rule="evenodd"/>
+          <path d="M 85.20,44.05 L 85.20,77.87 L 67.20,95.87 L 15.20,95.87 L -2.80,77.87 L -2.80,62.76 Z M 65.20,48.30 L 65.20,64.87 L 54.20,75.87 L 28.20,75.87 L 17.20,64.87 L 17.20,58.51 Z" fill="#FFFFFF" fill-rule="evenodd"/>
+          <path d="M -2.80,62.76 L -1.34,59.38 L 102.80,37.24 L 101.34,40.62 Z" fill="#C8102E"/>
         </svg>
-        <div style="display:flex;flex-direction:column;">
-          <span style="font-size:11px;letter-spacing:3px;font-weight:700;color:#8FA2B5;">BITGET AI</span>
-          <span style="font-size:22px;font-weight:900;letter-spacing:1px;color:#FFFFFF;">REDTEAM DESK</span>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <span style="font-size:11px;letter-spacing:3.5px;font-weight:700;color:#8FA2B5;text-transform:uppercase;">BITGET AI</span>
+          <span style="font-size:24px;font-weight:900;letter-spacing:1.5px;color:#FFFFFF;text-transform:uppercase;">REDTEAM DESK</span>
         </div>
       </div>
-      <div style="font-size:12px;color:#C98A14;font-weight:700;letter-spacing:2px;margin-bottom:12px;">TRACK 3: DECISION STRESS TESTING</div>
-      <div style="font-size:16px;color:#FFFFFF;font-weight:600;letter-spacing:0.5px;margin-bottom:8px;line-height:1.4;">Stress-test before the market does.</div>
-      <div style="font-size:12px;color:#8FA2B5;letter-spacing:0.5px;margin-top:8px;">bitget-ai-trading-desk.vercel.app</div>
+      <div style="display:inline-block;padding:4px 10px;background:rgba(201,138,20,0.12);border:1px solid rgba(201,138,20,0.35);border-radius:4px;font-size:11px;color:#C98A14;font-weight:700;letter-spacing:2px;margin-bottom:18px;">TRACK 3: DECISION STRESS TESTING</div>
+      <div style="font-size:17px;color:#FFFFFF;font-weight:700;letter-spacing:0.5px;margin-bottom:14px;line-height:1.4;">Stress-test before the market does.</div>
+      <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(14,159,139,0.1);border:1px solid rgba(14,159,139,0.3);border-radius:6px;font-size:13px;color:#00F0FF;font-weight:600;letter-spacing:0.8px;">
+        <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#00F0FF;box-shadow:0 0 6px #00F0FF;"></span>
+        redteamdesk.name.ng
+      </div>
     `;
     document.body.appendChild(outro);
     requestAnimationFrame(() => { outro.style.opacity = '1'; });

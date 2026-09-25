@@ -10,55 +10,61 @@ BEATS = [
     {
         "id": 1,
         "start": 0.5,
-        "rate": "+0%",
-        "text": "We all know that crypto never sleeps, but stock exchanges do. Most weekends, people jump into tokenized stocks based off rumors and get wrecked by Monday."
+        "rate": "+8%",
+        "text": "Crypto never sleeps, but traditional exchanges do. On weekends, traders jump into tokenized stocks on rumors and get wrecked by Monday."
     },
     {
         "id": 2,
-        "start": 11.8,
-        "rate": "+2%",
-        "text": "Let's say I'm looking at Tesla on a Saturday morning, and then some autonomous driving demo rumors start to pop off, and I feel like putting twenty-five grand on it. I'd first plug it into Bitget AI RedTeam Desk to tear that thought apart before I touch any money."
+        "start": 12.0,
+        "rate": "+8%",
+        "text": "Say I'm tempted to drop twenty-five grand into Tesla token on a Saturday after demo rumors. Instead of gambling, I plug my thesis straight into the RedTeam Desk to test it first."
     },
     {
         "id": 3,
         "start": 31.5,
-        "rate": "+2%",
-        "text": "It catches my size and direction instantly, checks the off-hours liquidity, and sets up the test. I think everything looks fine, so I'll just hit execute."
+        "rate": "+8%",
+        "text": "Checkpoint S04 catches my size instantly, tracks off-hours liquidity, and sets a live working entry at three seventy-eight seventeen. Looks clean—so I hit execute."
     },
     {
         "id": 4,
         "start": 43.5,
-        "rate": "+6%",
-        "text": "Now what you see is the RedTeam Desk kicking into gear. It doesn't dish out any generic chatbot fluff—it runs through six deterministic checks, pulling live market data, checking actual news evidence, and stress-testing the math behind my thesis."
+        "rate": "+14%",
+        "text": "The desk kicks into gear: six deterministic checks against live market data, stress-testing the math—no chatbot fluff."
     },
     {
         "id": 5,
-        "start": 58.8,
-        "rate": "+4%",
-        "text": "The first red flag it showed me is the price gap. Tesla closed at three-eighty on Friday, but this token is trading around three seventy-seven. That spread is already eating into my position."
+        "start": 52.5,
+        "rate": "+8%",
+        "text": "First verdict: WAIT. The deterministic policy halts the trade due to off-hours basis and liquidity risk."
     },
     {
         "id": 6,
-        "start": 71.8,
-        "rate": "+4%",
-        "text": "Next, it shocks the position. If Bitcoin dumps eight percent over the weekend, I'm looking at losing about twenty-seven hundred bucks just from market contagion."
+        "start": 61.0,
+        "rate": "+8%",
+        "text": "Tesla closed Friday at three-eighty, but the token is trading around three seventy-seven. That negative basis spread is already eating my position before the bell."
     },
     {
         "id": 7,
-        "start": 81.8,
-        "rate": "+9%",
-        "text": "It then tells me to wait until the real stock market opens Monday. When in doubt, I can even open the audit drawer and trace every single fact back to its source."
+        "start": 71.5,
+        "rate": "+8%",
+        "text": "Then it shocks the trade. If Bitcoin dumps eight percent, and token liquidity widens, I'm looking at a twenty-seven hundred dollar hit—over ten percent down."
     },
     {
         "id": 8,
-        "start": 91.8,
-        "rate": "+10%",
-        "text": "The Desk saved me three grand even before I had breakfast."
+        "start": 82.2,
+        "rate": "+8%",
+        "text": "When in doubt, I tap the audit drawer. Every single price quote, exchange benchmark, and news source is fully traceable to its root fact."
     },
     {
         "id": 9,
-        "start": 95.4,
-        "rate": "+12%",
+        "start": 91.4,
+        "rate": "+18%",
+        "text": "Saved me three grand before I even had breakfast."
+    },
+    {
+        "id": 10,
+        "start": 94.6,
+        "rate": "+10%",
         "text": "Bitget AI RedTeam Desk. Stress-test before the market does."
     }
 ]

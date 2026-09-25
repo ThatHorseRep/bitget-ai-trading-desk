@@ -76,6 +76,7 @@ desktop.ini
 # Demo Video Recordings & Intermediate Build Artifacts
 demo-out/
 recordings-official-*/
+recordings-mobile/
 test-results/
 project-snapshot.txt
 public/demo/*.mp4
