@@ -15,7 +15,7 @@ Bitget AI RedTeam Desk is a pre-trade decision-support desk for crypto-native Bi
 
 The trader states a proposed trade in plain language. The desk deterministically reconstructs the trade, shows the actual market state (session status, basis, spread, liquidity) with every source and timestamp, retrieves external evidence with provenance, adversarially challenges the thesis, stress-tests the position with fully deterministic scenario math (P&L, basis widening, contagion shocks), and returns a structured decision artifact: verdict (PROCEED / WAIT / REDUCE / REJECT), reasons, and change conditions. The trader — never the system — makes the final call.
 
-One canonical demo works any time, market open or closed: the built-in Deterministic Fixture mode replays a weekend off-hours scenario (labeled "DEMO MODE: Simulating Weekend Off-Hours Session" in the UI), so no lucky market moment is required.
+One canonical demo works any time, market open or closed: the built-in Deterministic Fixture mode replays a weekend off-hours scenario (labeled "DEMO MODE: Simulating Weekend Off-Hours Session" in the UI), so no lucky market moment is required. Furthermore, judges and traders can immediately interact with the decision output via the **What-If Counterfactual Sandbox** to test position sizing toggles (100%/50%/25%) and execution timing with instant zero-latency capital-preservation recalculations. All stress scenarios are empirically calibrated against tail risk distributions and validated across 3 historical case studies documenting **$4,515+ in preserved capital** (`docs/RETROSPECTIVE_CASE_STUDIES.md`).
 
 ## Target User
 

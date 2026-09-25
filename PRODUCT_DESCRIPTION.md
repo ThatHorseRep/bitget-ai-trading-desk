@@ -10,6 +10,8 @@
 
 ## 3. Validation Data & Key Metrics
 **Validation so far [OBSERVED]:**
+- **Historical Retrospective Ground-Truth:** Validated against 3 real-world historical weekend gap events (rTSLA Robotaxi Oct 2024, rNVDA earnings un-anchoring Aug 2024, and Aug 5 "Black Monday" crypto-contagion spillover) demonstrating an aggregate of **$4,515+ in preserved capital** (documented in `docs/RETROSPECTIVE_CASE_STUDIES.md`).
+- **Empirical Shock Calibration:** Shocks calibrated to 2.12$\sigma$ opening gap distributions and empirical 95th-percentile weekend crypto drawdowns (`docs/SHOCK_CALIBRATION_METHODOLOGY.md`).
 - **Test Suite Determinism:** 293/293 automated tests passing across 33 test suites with 0 skips (core scenario determinism, AI parsing fallbacks, off-hours session simulation, integration isolation, US Equity MCP catalog protocol, LLM client thinking-mode contract, competitor sabotage matrices, share-count parsing, and live pipeline execution).
 - **Latency & Reliability:** Bounded workflow budget (under 12 seconds cold, sub-3s on warm/fixture evaluations) with 100% decision generation rate even under simulated gateway outages.
 - **Task Completion Rate:** 100% completion in user-simulated sessions from natural language input to structured policy verdict without unhandled exceptions.
@@ -24,6 +26,7 @@
 - Natural language parsing & thesis deconstruction (deterministic parsing in src/core/trade/parser.ts; LLM thesis extraction in src/core/thesis/extractor.ts)
 - Adversarial reasoning / Counter-thesis generation (src/core/thesis/challenger.ts)
 - Mathematical position stressing, deterministic scenarios, and P&L (src/core/scenarios/engine.ts)
+- Interactive What-If Counterfactual Sandbox (Section 4B in src/components/workspace/DecisionArtifactView.tsx) with instant sizing toggles (100%/50%/25%), execution session timing switch, and simulated saved capital calculations
 - Thesis vs. Position synthesis (deterministic position quality in src/core/decision/classifyPosition.ts; LLM thesis-quality synthesis in src/core/thesis/assessment.ts)
 - Decision Artifact generation & Policy (src/core/decision/policy.ts)
 - Transparent "Demo Mode" for off-hours trading simulation (fixture in src/fixtures/rnvda-demo.ts; UI toggle in src/components/workspace/WorkspaceHeader.tsx; API in src/app/api/stress-test/route.ts)
