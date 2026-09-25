@@ -264,8 +264,14 @@ export function DecisionArtifactView({
         {/* Responsive Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <div className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5">
-            <div className="text-[10.5px] font-mono font-bold text-[var(--rtd-steel)] uppercase tracking-wider">
-              Bitget token
+            <div className="flex items-center justify-between">
+              <div className="text-[10.5px] font-mono font-bold text-[var(--rtd-steel)] uppercase tracking-wider">
+                Bitget token
+              </div>
+              <span className="inline-flex items-center gap-1 text-[8.5px] font-mono font-bold text-emerald-600 bg-emerald-500/10 px-1 py-0.2 border border-emerald-500/20 uppercase">
+                <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                <span>LIVE</span>
+              </span>
             </div>
             <div className="text-base font-bold text-[var(--rtd-ink)] font-mono rtd-figure">
               ${marketState.instrumentPrice.toFixed(2)}

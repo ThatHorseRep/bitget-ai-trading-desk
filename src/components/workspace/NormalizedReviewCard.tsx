@@ -118,8 +118,12 @@ export function NormalizedReviewCard({
 
               <div className="flex justify-between items-center py-1 border-b border-[var(--rtd-steel)]/15">
                 <span className="text-xs text-[var(--rtd-steel)] font-mono">Working Entry:</span>
-                <span className="font-mono font-bold text-[var(--rtd-ink)] rtd-figure">
-                  ${normalizedTrade.entryPrice.toFixed(2)}
+                <span className="font-mono font-bold text-[var(--rtd-ink)] rtd-figure flex items-center gap-1.5">
+                  <span>${normalizedTrade.entryPrice.toFixed(2)}</span>
+                  <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-emerald-600 bg-emerald-500/10 px-1 py-0.2 border border-emerald-500/20 uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>LIVE</span>
+                  </span>
                 </span>
               </div>
 
