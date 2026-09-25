@@ -19,6 +19,8 @@ Built for the **Bitget AI Base Camp Hackathon S2 — Track 3: Decision Stress Te
 - 🖥️ **Desktop Video Walkthrough (1080p):** [`public/demo/desktop-demo.mp4`](./public/demo/desktop-demo.mp4) *(Full HD 1080p, 6.35 MB, 100s walk-through with live market data)*
 - 📱 **Mobile Video Walkthrough (Portrait):** [`public/demo/mobile-demo.mp4`](./public/demo/mobile-demo.mp4) *(412×914, 4.15 MB, 100s mobile workflow with centered shocks & audio)*
 - 📄 **Official Product Specification:** [PRODUCT_DESCRIPTION.md](./PRODUCT_DESCRIPTION.md)
+- 📊 **Empirical Shock Calibration Methodology:** [docs/SHOCK_CALIBRATION_METHODOLOGY.md](./docs/SHOCK_CALIBRATION_METHODOLOGY.md)
+- 📜 **Historical Retrospective Case Studies:** [docs/RETROSPECTIVE_CASE_STUDIES.md](./docs/RETROSPECTIVE_CASE_STUDIES.md)
 - 🏛️ **Architecture & Engineering Specs:** [docs/specs/](./docs/specs/)
 
 ---
@@ -99,7 +101,10 @@ npm run verify-clean
 - **Natural Language Parsing & Grammar:** [`src/core/trade/parser.ts`](./src/core/trade/parser.ts) and [`src/core/thesis/extractor.ts`](./src/core/thesis/extractor.ts)
 - **Adversarial Red Team Engine:** [`src/core/thesis/challenger.ts`](./src/core/thesis/challenger.ts)
 - **Deterministic Scenario Stress Engine:** [`src/core/scenarios/engine.ts`](./src/core/scenarios/engine.ts)
+- **Empirical Shock Calibration:** [`docs/SHOCK_CALIBRATION_METHODOLOGY.md`](./docs/SHOCK_CALIBRATION_METHODOLOGY.md)
 - **Decision Policy & Gate Rules:** [`src/core/decision/policy.ts`](./src/core/decision/policy.ts)
+- **Interactive What-If Sandbox:** [`src/components/workspace/DecisionArtifactView.tsx`](./src/components/workspace/DecisionArtifactView.tsx)
+- **Historical Ground-Truth Validation:** [`docs/RETROSPECTIVE_CASE_STUDIES.md`](./docs/RETROSPECTIVE_CASE_STUDIES.md)
 - **Live Bitget Market State Reconstructor:** [`src/services/marketStateService.ts`](./src/services/marketStateService.ts)
 - **Provenance & Lineage Tracking:** [`src/core/provenance/tracker.ts`](./src/core/provenance/tracker.ts)
 - **Ecosystem Integration Specs (B01-B07):** Documented in [`docs/specs/`](./docs/specs/)
