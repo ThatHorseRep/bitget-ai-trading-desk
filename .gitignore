@@ -79,7 +79,6 @@ recordings-official-*/
 recordings-mobile/
 test-results/
 project-snapshot.txt
-public/demo/*.mp4
 public/demo/*.webm
 public/test_playwright.mp4
 public/debug_*.png
