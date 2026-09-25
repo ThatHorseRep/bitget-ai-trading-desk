@@ -5,7 +5,7 @@
 
 [![CI](https://github.com/ThatHorseRep/bitget-ai-trading-desk/actions/workflows/ci.yml/badge.svg)](https://github.com/ThatHorseRep/bitget-ai-trading-desk/actions/workflows/ci.yml)
 [![Track 3: Decision Stress Testing](https://img.shields.io/badge/Bitget%20AI%20Hackathon-Track%203%3A%20Decision%20Stress%20Testing-C8102E.svg)](https://github.com/ThatHorseRep/bitget-ai-trading-desk)
-[![Live Demo](https://img.shields.io/badge/Live%20App-bitget--ai--trading--desk.vercel.app-0E2436.svg)](https://bitget-ai-trading-desk.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20App-redteamdesk.name.ng-0E2436.svg)](https://redteamdesk.name.ng)
 
 > **"Thesis ≠ Position. Stress-test before the market does."**
 
@@ -15,8 +15,9 @@ Built for the **Bitget AI Base Camp Hackathon S2 — Track 3: Decision Stress Te
 
 ## Quick Links
 
-- 🌐 **Live Web Application:** [bitget-ai-trading-desk.vercel.app](https://bitget-ai-trading-desk.vercel.app)
-- 🎥 **Product Video Walkthrough:** [public/demo/demo.mp4](./public/demo/demo.mp4) *(Full HD 1080p, 100s walk-through)*
+- 🌐 **Live Web Application:** [redteamdesk.name.ng](https://redteamdesk.name.ng) *(Mirror: [bitget-ai-trading-desk.vercel.app](https://bitget-ai-trading-desk.vercel.app))*
+- 🖥️ **Desktop Video Walkthrough (1080p):** [`public/demo/desktop-demo.mp4`](./public/demo/desktop-demo.mp4) *(Full HD 1080p, 6.35 MB, 100s walk-through with live market data)*
+- 📱 **Mobile Video Walkthrough (Portrait):** [`public/demo/mobile-demo.mp4`](./public/demo/mobile-demo.mp4) *(412×914, 4.15 MB, 100s mobile workflow with centered shocks & audio)*
 - 📄 **Official Product Specification:** [PRODUCT_DESCRIPTION.md](./PRODUCT_DESCRIPTION.md)
 - 🏛️ **Architecture & Engineering Specs:** [docs/specs/](./docs/specs/)
 
@@ -108,8 +109,9 @@ npm run verify-clean
 ## Submission Checklist
 
 - [x] **Track Selected:** Track 3: Decision Stress Testing
-- [x] **Functional Web Application:** Deployed on Vercel at [bitget-ai-trading-desk.vercel.app](https://bitget-ai-trading-desk.vercel.app)
-- [x] **Demo Video:** 100-second 1080p walkthrough with live Next.js UI (`public/demo/demo.mp4`)
+- [x] **Functional Web Application:** Deployed at [redteamdesk.name.ng](https://redteamdesk.name.ng) (Mirror: [bitget-ai-trading-desk.vercel.app](https://bitget-ai-trading-desk.vercel.app))
+- [x] **Desktop Demo Video:** 100-second 1080p Full HD walkthrough (`public/demo/desktop-demo.mp4`, 6.35 MB)
+- [x] **Mobile Demo Video:** 100-second mobile walkthrough with centered shocks & audio (`public/demo/mobile-demo.mp4`, 4.15 MB)
 - [x] **Zero TypeScript Errors:** Passing `npm run typecheck`
 - [x] **Zero Lint Errors:** Passing `npm run lint`
 - [x] **Deterministic Unit Tests:** 100% passing `npm test`

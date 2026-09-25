@@ -48,7 +48,7 @@
 **Links:**
 - **Source code link:** https://github.com/ThatHorseRep/bitget-ai-trading-desk
 - **Live demo link:** https://www.redteamdesk.name.ng
-- **Demo video link:** Recorded via canonical off-hours scenario demo mode (`src/fixtures/rnvda-demo.ts`)
+- **Demo video links:** Desktop Full HD 1080p (`public/demo/desktop-demo.mp4`, 6.35 MB) & Mobile Portrait (`public/demo/mobile-demo.mp4`, 4.15 MB) showcasing live market rTSLA stress testing, deterministic shocks, and audit lineage.
 
 ## 6. My Take on AI Trading
 I believe LLMs are currently dangerous when used for quantitative position sizing, mathematical shock calculation, or autonomous execution without guardrails. However, they are exceptionally good at qualitative reasoning, adversarial challenge, and extracting assumptions from natural language. By pairing a deterministic risk engine with an adversarial AI "Red Team", we can give retail traders institutional-grade pre-trade stress testing without the hallucination risks of generic AI agents.

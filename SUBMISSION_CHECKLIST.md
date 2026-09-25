@@ -23,5 +23,5 @@ Do **not** tell judges the API is "faulty" or that the app "aborts after 15 seco
 - [ ] Vercel production env vars current (LLM gateway + key)?
 - [ ] Redeployed after the latest `main`?
 - [x] Live URL answers: `https://www.redteamdesk.name.ng` (health: `/api/stress-test` GET)?
-- [ ] Demo video recorded — fixture mode for the guaranteed path, one live run to show graceful degradation?
+- [x] Demo videos recorded & optimized — desktop (1080p, 6.35 MB) and mobile (portrait, 4.15 MB) in `public/demo/`?
 - [ ] `SUBMISSION.md`, X post text (in `SUBMISSION.md`), and `#BitgetHackathon @Bitget_AI` post published and linked in the form?

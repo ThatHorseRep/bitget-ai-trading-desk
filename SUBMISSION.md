@@ -5,6 +5,10 @@
 
 **Live deployment:** https://www.redteamdesk.name.ng (Vercel). Repository: https://github.com/ThatHorseRep/bitget-ai-trading-desk
 
+**Video Walkthroughs:**
+- Desktop 1080p Full HD (`public/demo/desktop-demo.mp4`, 6.35 MB)
+- Mobile Portrait (`public/demo/mobile-demo.mp4`, 4.15 MB)
+
 ## Project Description
 
 Bitget AI RedTeam Desk is a pre-trade decision-support desk for crypto-native Bitget traders who trade tokenized U.S. equities (rNVDA and other rTokens) that stay tradable 24/7 while NYSE/Nasdaq are closed. Those off-hours sessions carry structural risks a normal chart does not show: basis un-anchoring between token and underlying, crypto-contagion spillover when BTC moves over a weekend, and thin top-of-book liquidity.
