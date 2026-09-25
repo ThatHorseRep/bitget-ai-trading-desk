@@ -554,11 +554,24 @@ export function DecisionArtifactView({
 
         {/* Counterfactual Outcome Banner */}
         {(() => {
-          const rawCombined = scenarios.find((s) => s.id === "COMBINED_SHOCK")?.estimatedPnlUsd ?? -2703.94;
-          const rawMarket = scenarios.find((s) => s.id === "MARKET_RISK")?.estimatedPnlUsd ?? -1250.00;
+          const combinedScenario = scenarios.find((s) => s.id === "COMBINED_SHOCK");
+          const marketScenario = scenarios.find((s) => s.id === "MARKET_RISK");
+          const rawCombined = combinedScenario?.estimatedPnlUsd ?? -2703.94;
+          const rawMarket = marketScenario?.estimatedPnlUsd ?? -1250.00;
+          const combinedPct = combinedScenario?.estimatedPnlPct != null ? `${combinedScenario.estimatedPnlPct.toFixed(2)}%` : "-10.82%";
+          const marketPct = marketScenario?.estimatedPnlPct != null ? `${marketScenario.estimatedPnlPct.toFixed(2)}%` : "-5.00%";
+
           const simulatedPnl = timingMode === "MONDAY_OPEN" ? rawMarket * sizeMultiplier : rawCombined * sizeMultiplier;
           const deltaSavings = rawCombined - simulatedPnl;
           const isReduced = sizeMultiplier < 1.0 || timingMode === "MONDAY_OPEN";
+          const symbol = trade.canonicalSymbol || trade.asset || "token";
+          const refSymbol = trade.referenceAsset || "underlying equity";
+          const refBenchmark = marketState.referencePrice ? `$${marketState.referencePrice.toFixed(2)}` : "reference benchmark";
+          const currentSize = trade.positionSizeUsd;
+          const halvedSize = currentSize * 0.5;
+          const currentSizeFormatted = currentSize.toLocaleString(undefined, { maximumFractionDigits: 0 });
+          const halvedSizeFormatted = halvedSize.toLocaleString(undefined, { maximumFractionDigits: 0 });
+          const basisText = marketState.basisPct != null ? `${marketState.basisPct.toFixed(2)}%` : (marketState.basis ? `${(marketState.basis / marketState.instrumentPrice * 100).toFixed(2)}%` : "-0.61%");
 
           return (
             <div className="border border-[var(--rtd-steel)]/25 bg-[var(--rtd-paper-subtle)] p-4 space-y-3">
@@ -572,7 +585,7 @@ export function DecisionArtifactView({
                       ${simulatedPnl.toFixed(2)} USD
                     </span>
                     <span className="text-xs font-mono text-[var(--rtd-steel)]">
-                      ({timingMode === "MONDAY_OPEN" ? "-5.00% cash market gap" : "-10.82% combined tail"})
+                      ({timingMode === "MONDAY_OPEN" ? `${marketPct} cash market gap` : `${combinedPct} combined tail`})
                     </span>
                   </div>
                 </div>
@@ -589,15 +602,15 @@ export function DecisionArtifactView({
               <div className="text-xs font-mono bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/20 p-3 text-[var(--rtd-ink)] leading-relaxed">
                 {timingMode === "MONDAY_OPEN" ? (
                   <>
-                    <strong className="text-[var(--rtd-proceed)]">RE-ANCHORING ADVANTAGE:</strong> Waiting for Monday cash open eliminates both weekend basis uncoupling and thin off-hours orderbook slippage. Your simulated loss in a tail event drops from <strong>${rawCombined.toFixed(2)}</strong> to <strong>${simulatedPnl.toFixed(2)}</strong>. Recommended conditional order: Place limit order at Friday cash close benchmark ($380.12).
+                    <strong className="text-[var(--rtd-proceed)]">RE-ANCHORING ADVANTAGE:</strong> Waiting for Monday cash open eliminates both weekend basis uncoupling and thin off-hours orderbook slippage. Your simulated loss in a tail event drops from <strong>${rawCombined.toFixed(2)}</strong> to <strong>${simulatedPnl.toFixed(2)}</strong>. Recommended conditional order: Place limit order at Friday cash close benchmark ({refBenchmark}).
                   </>
                 ) : sizeMultiplier < 1.0 ? (
                   <>
-                    <strong className="text-[var(--rtd-reduce)]">POSITION RISK REDUCED:</strong> Sizing down to ${(trade.positionSizeUsd * sizeMultiplier).toFixed(0)} maintains exposure to your directional thesis while capping worst-case weekend drawdown to <strong>${simulatedPnl.toFixed(2)}</strong>. Shifts risk profile from Critical to Moderate.
+                    <strong className="text-[var(--rtd-reduce)]">POSITION RISK REDUCED:</strong> Sizing down to ${(currentSize * sizeMultiplier).toLocaleString(undefined, { maximumFractionDigits: 0 })} USD maintains exposure to your directional thesis while capping worst-case weekend drawdown to <strong>${simulatedPnl.toFixed(2)}</strong>. Shifts risk profile from Critical to Moderate.
                   </>
                 ) : (
                   <>
-                    <strong>BASELINE PROPOSED SIZING:</strong> Full $25,000 exposure during off-hours exposes your capital to unanchored weekend basis drag (-0.61%) and thin top-of-book slippage under the <strong>WAIT</strong> verdict.
+                    <strong>BASELINE PROPOSED SIZING:</strong> Full ${currentSizeFormatted} USD exposure during off-hours exposes your capital to unanchored weekend basis drag ({basisText}) and thin top-of-book slippage under the <strong className="font-mono text-[var(--rtd-wait)]">{decision.verdict}</strong> verdict.
                   </>
                 )}
               </div>
@@ -606,51 +619,65 @@ export function DecisionArtifactView({
         })()}
 
         {/* Interactive Drilldown / "Ask Red Team Why" */}
-        <div className="space-y-2 pt-1 border-t border-[var(--rtd-steel)]/15">
-          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--rtd-steel)]">
-            Adversarial Inquiry &bull; Frequently Challenged Assumptions
-          </span>
-          <div className="space-y-1.5">
-            {[
-              {
-                q: "Why does off-hours basis matter if my thesis is based on robotaxi rumors?",
-                a: "Because market makers cannot hedge with real underlying Tesla shares while NASDAQ is closed. Buying tokenized equities at a spread or negative basis means you are taking on structural wrapper risk, which often snaps back violently at Monday cash open regardless of social sentiment."
-              },
-              {
-                q: "What if I size down to $12,500 and hold through the weekend?",
-                a: "Halving your size cuts your tail dollar drawdown from -$2,703.94 down to -$1,351.97. That brings the worst-case scenario within normal retail portfolio tolerances (<5.5% capital), reducing liquidity impact from THIN to manageable."
-              },
-              {
-                q: "What specific market signal invalidates the WAIT verdict?",
-                a: "Two conditions: 1) The Monday 09:30 ET cash market opening bell ringing, which re-establishes underlying liquidity anchors, or 2) The tokenized basis spread narrowing to within ±0.25% with verified orderbook depth exceeding $25,000."
-              }
-            ].map((faq, idx) => (
-              <div
-                key={idx}
-                className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] text-xs font-mono"
-              >
-                <button
-                  type="button"
-                  onClick={() => setActiveDrilldown(activeDrilldown === idx ? null : idx)}
-                  className="w-full flex items-center justify-between p-2.5 text-left font-bold text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper)] transition-colors cursor-pointer"
-                >
-                  <span>Q: {faq.q}</span>
-                  <span className="text-sm font-mono text-[var(--rtd-steel)] ml-2">
-                    {activeDrilldown === idx ? "▲" : "▼"}
-                  </span>
-                </button>
-                {activeDrilldown === idx && (
-                  <div className="p-3 pt-0 text-[11.5px] font-sans text-[var(--rtd-steel)] leading-relaxed border-t border-[var(--rtd-steel)]/10 bg-[var(--rtd-paper)]">
-                    <span className="font-bold text-[var(--rtd-ink)] font-mono block mb-1">
-                      Desk Analysis:
-                    </span>
-                    {faq.a}
+        {(() => {
+          const combinedScenario = scenarios.find((s) => s.id === "COMBINED_SHOCK");
+          const rawCombinedAbs = Math.abs(combinedScenario?.estimatedPnlUsd ?? -2703.94);
+          const symbol = trade.canonicalSymbol || trade.asset || "token";
+          const refSymbol = trade.referenceAsset || "underlying equity";
+          const currentSizeFormatted = trade.positionSizeUsd.toLocaleString(undefined, { maximumFractionDigits: 0 });
+          const halvedSizeFormatted = (trade.positionSizeUsd * 0.5).toLocaleString(undefined, { maximumFractionDigits: 0 });
+          const halvedDrawdownFormatted = (rawCombinedAbs * 0.5).toFixed(2);
+
+          const faqs = [
+            {
+              q: `Why does off-hours basis matter for ${symbol} if my thesis is directional?`,
+              a: `Because market makers cannot hedge with real underlying ${refSymbol} shares while the U.S. cash equity market is closed. Entering ${symbol} during off-hours sessions leaves you exposed to structural wrapper un-anchoring that can erase paper gains at Monday cash open, regardless of market sentiment.`
+            },
+            {
+              q: `What if I size down to $${halvedSizeFormatted} and hold through the weekend?`,
+              a: `Halving your size cuts your tail dollar drawdown from -$${rawCombinedAbs.toFixed(2)} down to -$${halvedDrawdownFormatted}. That brings the worst-case scenario within normal retail portfolio tolerances (<5.5% capital), reducing liquidity impact from THIN to manageable.`
+            },
+            {
+              q: `What specific market signal invalidates the ${decision.verdict} verdict?`,
+              a: `Two conditions: 1) The Monday 09:30 ET cash market opening bell ringing, which re-establishes underlying liquidity anchors, or 2) The tokenized basis spread for ${symbol} narrowing to within ±0.25% with verified orderbook depth exceeding $${currentSizeFormatted}.`
+            }
+          ];
+
+          return (
+            <div className="space-y-2 pt-1 border-t border-[var(--rtd-steel)]/15">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--rtd-steel)]">
+                Adversarial Inquiry &bull; Frequently Challenged Assumptions
+              </span>
+              <div className="space-y-1.5">
+                {faqs.map((faq, idx) => (
+                  <div
+                    key={idx}
+                    className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] text-xs font-mono"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setActiveDrilldown(activeDrilldown === idx ? null : idx)}
+                      className="w-full flex items-center justify-between p-2.5 text-left font-bold text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper)] transition-colors cursor-pointer"
+                    >
+                      <span>Q: {faq.q}</span>
+                      <span className="text-sm font-mono text-[var(--rtd-steel)] ml-2">
+                        {activeDrilldown === idx ? "▲" : "▼"}
+                      </span>
+                    </button>
+                    {activeDrilldown === idx && (
+                      <div className="p-3 pt-0 text-[11.5px] font-sans text-[var(--rtd-steel)] leading-relaxed border-t border-[var(--rtd-steel)]/10 bg-[var(--rtd-paper)]">
+                        <span className="font-bold text-[var(--rtd-ink)] font-mono block mb-1">
+                          Desk Analysis:
+                        </span>
+                        {faq.a}
+                      </div>
+                    )}
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+          );
+        })()}
       </section>
 
       {/* 5. Thesis Quality vs Position Quality Deconstruction */}
