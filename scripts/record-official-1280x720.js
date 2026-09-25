@@ -253,7 +253,7 @@ async function smoothScroll(page, startY, endY, durationMs) {
       </div>
       <div style="font-size:14px;color:#C98A14;font-weight:700;letter-spacing:2px;margin-bottom:14px;">TRACK 3: DECISION STRESS TESTING</div>
       <div style="font-size:18px;color:#FFFFFF;font-weight:600;letter-spacing:0.5px;margin-bottom:8px;">Stress-test before the market does.</div>
-      <div style="font-size:13px;color:#8FA2B5;letter-spacing:0.5px;">bitget-ai-trading-desk.vercel.app</div>
+      <div style="font-size:13px;color:#8FA2B5;letter-spacing:0.5px;">redteamdesk.name.ng</div>
     `;
     document.body.appendChild(outro);
     requestAnimationFrame(() => { outro.style.opacity = '1'; });

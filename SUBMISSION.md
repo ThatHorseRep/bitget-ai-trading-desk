@@ -47,12 +47,25 @@ The LLM is **never** used for market parsing, price selection, scenario math, P&
 6. **Upstream MCP Outages & Latency Bounds:** Unstable or slow third-party research MCPs (e.g., Bitget Signal / US Equity) are bounded to 2.5–3.0s parallel timeouts with upstream failure payload filters, preserving pipeline execution under strict serverless budgets.
 7. **Zero-Custody Execution Safety:** Preventing unsafe automated trading bots or server-side API key storage by enforcing an advisory-only decision artifact model with human-in-the-loop OAuth handoffs (`HUMAN_CONFIRMATION_REQUIRED`).
 
-## Suggested X (Twitter) Post Text
+## Mandatory X (Twitter) Promotional Post (Rule Requirement)
+
+> [!IMPORTANT]
+> **Hackathon Rule Requirement:** Submission **must** include at least 1 X post link that **Quote-Tweets (retweets with comment)** the official announcement:
+> **Target Tweet to Quote:** [`https://x.com/Bitget_AI/status/2100519318824055159?s=20`](https://x.com/Bitget_AI/status/2100519318824055159?s=20)
+> Must include: `#BitgetHackathon` and `@Bitget_AI`. Without this compliant quote-tweet, the Google Form submission is marked incomplete!
+
+### Ready-to-Publish Post Copy:
 
 > Most traders judge a tokenized stock by its chart. Nobody stress-tests the *structure* underneath it.
 >
-> We built the Bitget AI RedTeam Desk: state your trade in plain English — it reconstructs the off-hours market state, adversarially attacks your thesis, and stress-tests the position with fully deterministic math. Verdict + reasons + what would change it. You stay the decision-maker.
+> When NYSE/NASDAQ close for 65.5 hours every weekend, 24/7 tokenized stocks like rTSLA and rNVDA suffer basis decoupling, crypto contagion shocks, and thin orderbook liquidity.
 >
-> rNVDA on a Sunday? That's exactly the case it was built for. 🧵👇
+> We built @Bitget_AI RedTeam Desk: state your trade in plain English — it reconstructs the off-hours market state, adversarially attacks your thesis, and stress-tests the position with 100% deterministic math. 
+> 
+> Verdict (PROCEED / WAIT / REDUCE / REJECT) + auditable fact lineage. You stay the decision-maker.
 >
-> #BitgetHackathon @Bitget_AI
+> 🌐 Live App: https://redteamdesk.name.ng
+> 🖥️ Demo Video: https://redteamdesk.name.ng/demo/desktop-demo.mp4
+> 📦 GitHub: https://github.com/ThatHorseRep/bitget-ai-trading-desk
+>
+> Built for the Bitget AI Base Camp Hackathon S2 (Track 3: AI Trading Desk). #BitgetHackathon @Bitget_AI

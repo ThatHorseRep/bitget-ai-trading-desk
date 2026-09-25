@@ -15,7 +15,7 @@ Built for the **Bitget AI Base Camp Hackathon S2 — Track 3: Decision Stress Te
 
 ## Quick Links
 
-- 🌐 **Live Web Application:** [redteamdesk.name.ng](https://redteamdesk.name.ng) *(Mirror: [bitget-ai-trading-desk.vercel.app](https://bitget-ai-trading-desk.vercel.app))*
+- 🌐 **Live Web Application:** [redteamdesk.name.ng](https://redteamdesk.name.ng) *(Mirror: [bitget-ai-redteam-desk.vercel.app](https://bitget-ai-redteam-desk.vercel.app))*
 - 🖥️ **Desktop Video Walkthrough (1080p):** [`public/demo/desktop-demo.mp4`](./public/demo/desktop-demo.mp4) *(Full HD 1080p, 6.35 MB, 100s walk-through with live market data)*
 - 📱 **Mobile Video Walkthrough (Portrait):** [`public/demo/mobile-demo.mp4`](./public/demo/mobile-demo.mp4) *(412×914, 4.15 MB, 100s mobile workflow with centered shocks & audio)*
 - 📄 **Official Product Specification:** [PRODUCT_DESCRIPTION.md](./PRODUCT_DESCRIPTION.md)
@@ -109,7 +109,7 @@ npm run verify-clean
 ## Submission Checklist
 
 - [x] **Track Selected:** Track 3: Decision Stress Testing
-- [x] **Functional Web Application:** Deployed at [redteamdesk.name.ng](https://redteamdesk.name.ng) (Mirror: [bitget-ai-trading-desk.vercel.app](https://bitget-ai-trading-desk.vercel.app))
+- [x] **Functional Web Application:** Deployed at [redteamdesk.name.ng](https://redteamdesk.name.ng) (Mirror: [bitget-ai-redteam-desk.vercel.app](https://bitget-ai-redteam-desk.vercel.app))
 - [x] **Desktop Demo Video:** 100-second 1080p Full HD walkthrough (`public/demo/desktop-demo.mp4`, 6.35 MB)
 - [x] **Mobile Demo Video:** 100-second mobile walkthrough with centered shocks & audio (`public/demo/mobile-demo.mp4`, 4.15 MB)
 - [x] **Zero TypeScript Errors:** Passing `npm run typecheck`
