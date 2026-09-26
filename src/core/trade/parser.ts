@@ -96,11 +96,17 @@ export function parseNaturalLanguageTrade(
   if (sharesMatch) {
     const shareCount = parseFloat(sharesMatch[1].replace(/,/g, ""));
     if (Number.isFinite(shareCount) && shareCount > 0) {
-      const effectivePrice = explicitPrice ?? (workingPrice > 0 ? workingPrice : 140);
-      positionSizeUsd = Math.round(shareCount * effectivePrice * 100) / 100;
-      if (positionSizeUsd > 0) {
+      if (explicitPrice !== null && explicitPrice > 0) {
+        positionSizeUsd = Math.round(shareCount * explicitPrice * 100) / 100;
         userProvided.push("positionSizeUsd");
-        derived.push("positionSizeUsd (derived from share count and working price)");
+        derived.push("positionSizeUsd (derived from share count and explicit price)");
+      } else if (workingPrice > 0) {
+        positionSizeUsd = Math.round(shareCount * workingPrice * 100) / 100;
+        userProvided.push("positionSizeUsd");
+        derived.push("positionSizeUsd (derived from share count and working market price)");
+      } else {
+        // Without an explicit price or a known live market price, share counts cannot guess USD notional
+        priceClarificationRequired = true;
       }
     }
   } else if (grandMatch) {
@@ -178,10 +184,14 @@ export function parseNaturalLanguageTrade(
          const parsed = parseFloat(amountMatch.replace(/,/g, ""));
          if (Number.isFinite(parsed) && parsed > 0) {
            val = parsed * (multMatch?.toLowerCase() === "m" ? 1000000 : (multMatch?.toLowerCase() === "k" ? 1000 : 1));
+           userProvided.push("relevantExposureAmount");
          }
+       } else {
+         inferred.push("relevantExposureAmount (unstated in prompt)");
        }
     } else if (exposureMatch[1]) {
        expAsset = exposureMatch[1].toUpperCase();
+       inferred.push("relevantExposureAmount (unstated in prompt)");
     }
 
     const commonWords = ["A", "THE", "SOME", "THIS", "THAT", "LONG", "SHORT", "POSITION", "TRADE", "MONEY", "CASH", "USD", "USDT"];

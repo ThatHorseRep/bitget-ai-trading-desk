@@ -119,11 +119,21 @@ export function NormalizedReviewCard({
               <div className="flex justify-between items-center py-1 border-b border-[var(--rtd-steel)]/15">
                 <span className="text-xs text-[var(--rtd-steel)] font-mono">Working Entry:</span>
                 <span className="font-mono font-bold text-[var(--rtd-ink)] rtd-figure flex items-center gap-1.5">
-                  <span>${normalizedTrade.entryPrice.toFixed(2)}</span>
-                  <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-emerald-600 bg-emerald-500/10 px-1 py-0.2 border border-emerald-500/20 uppercase tracking-wider">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>LIVE</span>
-                  </span>
+                  <span>${normalizedTrade.entryPrice > 0 ? normalizedTrade.entryPrice.toFixed(2) : "0.00"}</span>
+                  {normalizedTrade.entryPriceSource === "USER_PROVIDED" ? (
+                    <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-[var(--rtd-steel)] bg-[var(--rtd-paper-subtle)] px-1 py-0.2 border border-[var(--rtd-steel)]/20 uppercase tracking-wider">
+                      USER
+                    </span>
+                  ) : normalizedTrade.entryPrice > 0 ? (
+                    <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-emerald-600 bg-emerald-500/10 px-1 py-0.2 border border-emerald-500/20 uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span>LIVE</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-amber-600 bg-amber-500/10 px-1 py-0.2 border border-amber-500/20 uppercase tracking-wider">
+                      <span>FETCH AT RUN</span>
+                    </span>
+                  )}
                 </span>
               </div>
 
