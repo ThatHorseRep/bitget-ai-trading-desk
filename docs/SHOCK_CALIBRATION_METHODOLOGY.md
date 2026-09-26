@@ -1,70 +1,54 @@
-# Empirical Shock Calibration Methodology
+# Shock Parameter Specification & Calibration Status
 
-## Executive Summary
-In institutional risk management, stress-testing models are evaluated by their **defensibility** and **calibration rigor**. The Bitget AI RedTeam Desk replaces arbitrary or speculative risk guesses with four deterministic stress scenarios calibrated to the **empirical 95th-percentile tail events** observed across tokenized U.S. equities during weekend and off-hours sessions.
-
----
-
-## 1. Scenario 1: Reference Market Risk (-5.0%)
-
-### Empirical Basis
-- **Definition:** Direct adverse gap movement in the underlying reference asset when U.S. cash equity markets open Monday at 09:30 ET.
-- **Historical Calibration:** 
-  - Over a 24-month rolling lookback across mega-cap equities (`TSLA`, `NVDA`, `AAPL`, `MSFT`), the 95th-percentile Monday open gap versus Friday close is **4.82%** (absolute magnitude).
-  - Standard deviation ($\sigma$) of weekend gap returns is approximately **2.35%**. A -5.0% shock corresponds to an approximate **2.12-sigma adverse tail shock**.
-- **Desk Formula:**
-  $$\text{Price}_{\text{shocked}} = \text{Price}_{\text{token}} \times (1 + \text{Shock}_{\text{market}})$$
-  Where $\text{Shock}_{\text{market}} = -5.0\%$ for long positions and $+5.0\%$ for short positions.
+> **Read this first — what "calibrated" means here.**
+> Bitget's tokenized-equity (Reality / rToken) platform launched in **May 2026**. There is no multi-year rToken price history from which to fit 95th-percentile distributions, and we will not pretend otherwise. The parameters below are **fixed, conservative, a-priori choices** — desk assumptions and policy decisions, documented openly — not statistically fitted calibrations. Where a parameter is informed by publicly observable market history (e.g., Bitcoin's repeatedly documented weekend drawdowns), we say so qualitatively and name the class of events; we do not claim a fitted percentile we cannot reproduce.
+>
+> **Executable source of truth:** the values below live in `src/core/scenarios/config.ts` (`SCENARIO_CONFIG`, `ASSET_RISK_PROFILES`) and are consumed by `src/core/scenarios/engine.ts`. If this document and the code ever disagree, the code is authoritative — it is what runs in production and in the demo.
 
 ---
 
-## 2. Scenario 2: Crypto Contagion (-8.0% BTC Shock $\times$ Asset Beta)
+## Parameter Table (status-labeled)
 
-### Empirical Basis
-- **The Phenomenon:** Tokenized U.S. equities trade on crypto infrastructure against stablecoin liquidity (`USDT`). Over weekends, crypto market shocks (e.g., sudden BTC selloffs) trigger margin liquidations, collateral rebalancing, and risk-off sentiment that spill directly into tokenized equity pricing even though underlying corporate fundamentals are unchanged.
-- **BTC Shock Magnitude (-8.0%):**
-  - Historical analysis of Saturday 00:00 UTC to Monday 08:00 UTC Bitcoin spot volatility shows the 95th-percentile weekend drawdown is **-7.85%**. We calibrate the benchmark BTC shock to **-8.0%**.
-- **Asset Beta to BTC ($\beta_{\text{BTC}}$):**
-  - Not all tokenized assets exhibit identical correlation to crypto. The desk applies tailored beta sensitivities:
-    - `rMSTR`: **$\beta = 0.85$** (direct corporate treasury exposure to Bitcoin).
-    - `rCOIN`: **$\beta = 0.75$** (exchange revenue highly tied to crypto transaction volumes).
-    - `rTSLA`: **$\beta = 0.35$** (retail cross-asset sentiment & historical corporate holdings).
-    - `rNVDA`: **$\beta = 0.20$** (AI compute infrastructure proxy).
-    - `rAAPL` / `DEFAULT`: **$\beta = 0.15 - 0.40$**.
-- **Desk Formula:**
-  $$\Delta_{\text{token}} = \text{Shock}_{\text{BTC}} \times \beta_{\text{asset}} = -8.0\% \times \beta_{\text{asset}}$$
+| # | Parameter | Value | Status | Rationale & Source |
+|---|-----------|-------|--------|--------------------|
+| 1 | Reference market gap shock | **-5.0%** (long) / +5.0% (short) | **ASSUMPTION** | Conservative round number for an adverse Monday opening gap in a mega-cap equity. Public market history contains many single-session gaps of this magnitude for high-beta names around binary events; we choose a fixed -5% rather than claiming a fitted percentile we cannot reproduce from a named public distribution. |
+| 2 | BTC benchmark shock | **-8.0%** | **ASSUMPTION**, informed by public history | Weekend BTC drawdowns of ~8% or more have occurred repeatedly in publicly observable crypto history (e.g., the May 2021 deleveraging, the August 2024 yen-carry unwind, and subsequent liquidation cascades). The specific "-8%" is our chosen benchmark, not a computed percentile. |
+| 3 | Direct token contagion shock | **-4.0%** (token, independent of β path) | **ASSUMPTION** | Captures crypto-venue risk-off flowing into tokenized wrappers through flows other than the β channel (stablecoin liquidity, venue-level de-risking). Chosen conservatively; no fitted basis. |
+| 4 | Basis widening shock | **+300 bps** (adverse) | **ASSUMPTION** | Weekend un-anchoring of a token from its underlying is the core structural risk the desk models. 3 percentage points is a deliberately severe-but-plausible widening; the platform is too young for a fitted distribution of weekend basis dislocations. |
+| 5 | Liquidity depth reduction | **-50%** | **ASSUMPTION** | Off-hours top-of-book thinning is a well-known microstructure effect; the specific 50% haircut is a conservative modeling choice, not a measured median. |
+| 6 | Asset β to BTC (per asset) | see table below | **ASSUMPTION** (sensitivity weights) | Used to scale the BTC shock per asset. These are judgment-based sensitivity weights reflecting each underlying's business linkage to crypto — **not** regression-fitted betas. |
+| 7 | Verdict gating threshold | combined-shock drawdown vs. desk risk policy bands | **POLICY DECISION** | The boundary between WAIT / REDUCE / REJECT outcomes is a risk-policy choice, documented in `src/lib/verdict/scoring.ts` and `src/core/decision/policy.ts`. It is not derived from any distribution. |
 
 ---
 
-## 3. Scenario 3: Token Microstructure & Basis Widening (+300 bps / 3.0 pp)
+## Asset β to BTC (assumption weights, mirrored from `ASSET_RISK_PROFILES`)
 
-### Empirical Basis
-- **The Structural Flaw:** Traditional market makers hedge tokenized equities by shorting or buying the underlying shares on NASDAQ/NYSE. When U.S. exchanges are closed (65.5 consecutive hours from Friday 16:00 to Monday 09:30 ET), market makers must carry directional gap risk or withdraw liquidity entirely.
-- **Basis Widening (300 bps):**
-  - Under normal market hours, basis tracking error between token and stock is tightly bounded within **$\pm 15$ to $35$ bps**.
-  - During weekend off-hours, tracking error widens significantly. The historical 95th-percentile basis dislocation is **295 bps (2.95 percentage points)**. The desk benchmarks a **300 bps adverse basis widening**.
-- **Liquidity Depth Haircut (50%):**
-  - Off-hours orderbook depth collapses by **45% to 65%** compared to regular trading hours, exacerbating slippage on positions over $10,000. The engine applies an immediate **50% liquidity depth haircut**.
+| Asset | β to BTC | Assumption basis (business logic, not fitting) |
+|-------|----------|------------------------------------------------|
+| `rMSTR` | 0.85 | Corporate treasury is substantially Bitcoin; strongest mechanical linkage. |
+| `rCOIN` | 0.75 | Exchange revenue is highly tied to crypto transaction volumes. |
+| `rTSLA` | 0.40 | Retail cross-asset sentiment overlap; historical corporate Bitcoin holdings (since divested) keep the weight elevated. |
+| `rNVDA` | 0.20 | AI-infrastructure proxy; weaker direct crypto linkage. |
+| `rAAPL` | 0.25 | General mega-cap risk-asset sensitivity. |
+| `rAMZN` | 0.30 | General mega-cap risk-asset sensitivity. |
+| `DEFAULT` | 0.40 | Fallback for unlisted assets; conservative. |
 
----
-
-## 4. Scenario 4: Combined Worst-Case Tail Shock
-
-### Empirical Basis
-- **Definition:** The simultaneous intersection of reference market adverse movement, crypto market contagion spillover, and off-hours liquidity void.
-- **Rationale:** Correlated tail events rarely happen in isolation; when global crypto liquidations occur over a weekend, basis spreads simultaneously blow out while cash market futures gap downward.
-- **Formulation:**
-  $$\text{P\&L}_{\text{combined}} = \text{P\&L}_{\text{market}} + \text{P\&L}_{\text{contagion}} + \text{P\&L}_{\text{microstructure}}$$
-- On a standard $25,000 rTSLA long position, this combined shock projects a **-$2,703.94 (-10.82%)** drawdown, which triggers an authoritative **`WAIT`** verdict under desk risk policy rules.
+> Note: earlier versions of this document listed `rTSLA` β = 0.35; the engine uses **0.40**. The code is authoritative.
 
 ---
 
-## Summary of Parameter Standards
+## Scenario Formulas (deterministic, in `engine.ts`)
 
-| Parameter | Calibrated Value | Statistical Significance |
-| :--- | :--- | :--- |
-| **Market Gap Shock** | **-5.00%** | ~2.12$\sigma$ Monday opening gap |
-| **BTC Benchmark Shock** | **-8.00%** | 95th-percentile weekend crypto drawdown |
-| **Basis Dislocation Shock** | **+300 bps (3.0 pp)** | 95th-percentile off-hours basis divergence |
-| **Liquidity Depth Reduction** | **50%** | Typical off-hours orderbook thinning |
-| **Decision Gating Threshold** | **Combined shock > -10.0%** | Authoritative gate to prevent retail liquidations |
+1. **Market Risk:** `Price_shocked = Price_token × (1 + Shock_market)`, with `Shock_market = -5.0%` for longs, `+5.0%` for shorts.
+2. **Crypto Contagion:** the BTC shock propagates through the asset β weight; a direct token contagion shock (-4%) is also applied. `Δ_token = f(Shock_BTC × β_asset, Shock_direct)`.
+3. **Token Microstructure:** basis shifts adversely by +300 bps (directional: widening against the position) and visible depth is cut by 50%; the stressed book is re-classified against liquidity thresholds.
+4. **Combined Shock:** the simultaneous composition of 1–3. For reference: a $25,000 `rTSLA` long entered at a +3.81% weekend premium (assumed state; see the walkthroughs in [`RETROSPECTIVE_CASE_STUDIES.md`](./RETROSPECTIVE_CASE_STUDIES.md)) produces a combined-shock P&L of **-$2,674.38 (-10.70%)** — engine-executed, reproducible, and illustrative of the gating threshold in action.
+
+---
+
+## How a Skeptical Reader Should Treat These Numbers
+
+- **Every shock value is an assumption or policy choice.** The desk's honesty claim is not "our percentiles are fitted" — it is "our parameters are fixed, documented, and applied identically to every evaluation, and every output number traces to them."
+- **The determinism is the verifiable part.** Same inputs → same shocks → same P&L → same verdict band, every run, byte-for-byte. That property is tested (`tests/scenarios.test.cjs`) and is the substance of the audit story.
+- **Directional risk is well-evidenced even where magnitudes are chosen.** Weekend basis un-anchoring, off-hours liquidity thinning, and crypto-contagion spillover into tokenized wrappers are structural, publicly observable phenomena; the magnitudes we assign them are conservative desk choices.
+- **We label, you judge.** Nothing in this document should be read as an audited backtest, a fitted VaR model, or a claim about realized trader outcomes. The illustrative walkthroughs are engine arithmetic under stated assumptions — nothing more.

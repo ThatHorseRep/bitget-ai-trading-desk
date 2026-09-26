@@ -10,8 +10,8 @@
 
 ## 3. Validation Data & Key Metrics
 **Validation so far [OBSERVED]:**
-- **Historical Retrospective Ground-Truth:** Validated against 3 real-world historical weekend gap events (rTSLA Robotaxi Oct 2024, rNVDA earnings un-anchoring Aug 2024, and Aug 5 "Black Monday" crypto-contagion spillover) demonstrating an aggregate of **$4,515+ in preserved capital** (documented in `docs/RETROSPECTIVE_CASE_STUDIES.md`).
-- **Empirical Shock Calibration:** Shocks calibrated to 2.12$\sigma$ opening gap distributions and empirical 95th-percentile weekend crypto drawdowns (`docs/SHOCK_CALIBRATION_METHODOLOGY.md`).
+- **Illustrative Scenario Walkthroughs [ILLUSTRATIVE]:** Three reproducible walkthroughs (weekend basis-premium, pre-earnings premium, crypto-contagion spillover) run through the production stress engine (`src/core/scenarios/engine.ts`); the dollar outcomes are engine-computed arithmetic under stated assumptions — deliberately **not** presented as historical trades, because Bitget's Reality/rToken platform launched in May 2026 and no audited 2024 rToken history exists (`docs/RETROSPECTIVE_CASE_STUDIES.md`).
+- **Documented Shock Parameters [ASSUMPTION, documented]:** The deterministic shock set (market -5%, BTC -8%, basis +300 bps, depth -50%) is fixed a priori; each parameter's derivation intent and assumption status is documented line by line in `docs/SHOCK_CALIBRATION_METHODOLOGY.md`.
 - **Test Suite Determinism:** 293/293 automated tests passing across 33 test suites with 0 skips (core scenario determinism, AI parsing fallbacks, off-hours session simulation, integration isolation, US Equity MCP catalog protocol, LLM client thinking-mode contract, competitor sabotage matrices, share-count parsing, and live pipeline execution).
 - **Latency & Reliability:** Bounded workflow budget (under 12 seconds cold, sub-3s on warm/fixture evaluations) with 100% decision generation rate even under simulated gateway outages.
 - **Task Completion Rate:** 100% completion in user-simulated sessions from natural language input to structured policy verdict without unhandled exceptions.

@@ -18,8 +18,8 @@ Built for the **Bitget AI Base Camp Hackathon S2 — Track 3: Decision Stress Te
 - 🌐 **Live Web Application:** [redteamdesk.name.ng](https://redteamdesk.name.ng) *(Mirror: [bitget-ai-redteam-desk.vercel.app](https://bitget-ai-redteam-desk.vercel.app))*
 - 🖥️ **Embedded Walkthrough & Video Demos:** Interactive terminal player with chapter cues on the landing page ([#demo-walkthrough](https://redteamdesk.name.ng/#demo-walkthrough)), plus standalone downloads in [`public/demo/desktop-demo.mp4`](./public/demo/desktop-demo.mp4) (Full HD 1080p, 6.35 MB) and [`public/demo/mobile-demo.mp4`](./public/demo/mobile-demo.mp4) (Portrait, 4.15 MB)
 - 📄 **Official Product Specification:** [PRODUCT_DESCRIPTION.md](./PRODUCT_DESCRIPTION.md)
-- 📊 **Empirical Shock Calibration Methodology:** [docs/SHOCK_CALIBRATION_METHODOLOGY.md](./docs/SHOCK_CALIBRATION_METHODOLOGY.md)
-- 📜 **Historical Retrospective Case Studies:** [docs/RETROSPECTIVE_CASE_STUDIES.md](./docs/RETROSPECTIVE_CASE_STUDIES.md)
+- 📊 **Shock Calibration Methodology:** [docs/SHOCK_CALIBRATION_METHODOLOGY.md](./docs/SHOCK_CALIBRATION_METHODOLOGY.md)
+- 📜 **Illustrative Scenario Walkthroughs (engine-executed):** [docs/RETROSPECTIVE_CASE_STUDIES.md](./docs/RETROSPECTIVE_CASE_STUDIES.md)
 - 🏛️ **Architecture & Engineering Specs:** [docs/specs/](./docs/specs/)
 
 ---
@@ -39,7 +39,7 @@ During this 65.5-hour void:
 
 ---
 
-## Why Bitget AI RedTeam Desk Wins Track 3
+## Track Fit: Decision Stress Testing
 
 | Hackathon Requirement | How We Deliver |
 | :--- | :--- |
@@ -103,7 +103,7 @@ npm run verify-clean
 - **Empirical Shock Calibration:** [`docs/SHOCK_CALIBRATION_METHODOLOGY.md`](./docs/SHOCK_CALIBRATION_METHODOLOGY.md)
 - **Decision Policy & Gate Rules:** [`src/core/decision/policy.ts`](./src/core/decision/policy.ts)
 - **Interactive What-If Sandbox:** [`src/components/workspace/DecisionArtifactView.tsx`](./src/components/workspace/DecisionArtifactView.tsx)
-- **Historical Ground-Truth Validation:** [`docs/RETROSPECTIVE_CASE_STUDIES.md`](./docs/RETROSPECTIVE_CASE_STUDIES.md)
+- **Illustrative Scenario Walkthroughs (engine-executed):** [`docs/RETROSPECTIVE_CASE_STUDIES.md`](./docs/RETROSPECTIVE_CASE_STUDIES.md)
 - **Live Bitget Market State Reconstructor:** [`src/services/marketStateService.ts`](./src/services/marketStateService.ts)
 - **Provenance & Lineage Tracking:** [`src/core/provenance/tracker.ts`](./src/core/provenance/tracker.ts)
 - **Ecosystem Integration Specs (B01-B07):** Documented in [`docs/specs/`](./docs/specs/)
@@ -120,3 +120,13 @@ npm run verify-clean
 - [x] **Zero Lint Errors:** Passing `npm run lint`
 - [x] **Deterministic Unit Tests:** 100% passing `npm test`
 - [x] **GitHub Repo Cleanliness:** All temporary scratch files purged, large binaries ignored
+
+---
+
+## Award Eligibility (per hackathon rules)
+
+Awards are **mutually exclusive**, not stackable:
+
+- **University Special Prize (FUTMINNA):** entered by filling the form's University Name field. If the entry wins a main-track prize (Grand Prize, Theme, or Open Theme), it is **no longer eligible** for the University Special Prize — and vice versa, a University Special Prize win excludes main-track prizes.
+- **Best Spread Award** is likewise mutually exclusive with main-track prizes (Grand/Theme/Open).
+- The entry competes for **Track 3 (AI Trading Desk) — Decision Stress Testing**; which award it ultimately holds depends on judge outcomes, and the submission does not assume simultaneous stacking.
