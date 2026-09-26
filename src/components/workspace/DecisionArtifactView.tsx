@@ -51,6 +51,14 @@ const VERDICT_CONFIG: Record<
   }
 };
 
+function formatUsd(val: number, forcePlusSign: boolean = false): string {
+  if (val >= 0) {
+    return `${forcePlusSign ? "+" : ""}$${val.toFixed(2)}`;
+  } else {
+    return `-$${Math.abs(val).toFixed(2)}`;
+  }
+}
+
 export function DecisionArtifactView({
   artifact,
   onOpenProvenance,
@@ -330,7 +338,7 @@ export function DecisionArtifactView({
               }`}
             >
               {marketState.basis !== null
-                ? `${marketState.basis >= 0 ? "+" : ""}$${marketState.basis.toFixed(2)}`
+                ? formatUsd(marketState.basis, true)
                 : "N/A"}
             </div>
             <div className="text-[10px] text-[var(--rtd-steel)] font-mono">
@@ -345,7 +353,7 @@ export function DecisionArtifactView({
               Orderbook spread
             </div>
             <div className="text-base font-bold text-[var(--rtd-ink)] font-mono rtd-figure">
-              ${marketState.spread !== null ? marketState.spread.toFixed(2) : "N/A"}
+              {marketState.spread !== null ? formatUsd(marketState.spread) : "N/A"}
             </div>
             <div className="text-[10px] text-[var(--rtd-steel)] font-mono">
               {marketState.spreadPct !== null ? `${marketState.spreadPct.toFixed(2)}%` : "N/A"}
@@ -435,7 +443,7 @@ export function DecisionArtifactView({
                     <div className="flex justify-between items-baseline">
                       <dt className="text-[10.5px] text-[var(--rtd-steel)]">Shocked price:</dt>
                       <dd className="text-xs font-bold text-[var(--rtd-ink)] rtd-figure">
-                        ${sc.shockedTokenPrice ? sc.shockedTokenPrice.toFixed(2) : "N/A"}
+                        {sc.shockedTokenPrice ? formatUsd(sc.shockedTokenPrice) : "N/A"}
                       </dd>
                     </div>
 
@@ -447,7 +455,7 @@ export function DecisionArtifactView({
                         }`}
                       >
                         {sc.estimatedPnlUsd !== null
-                          ? `${sc.estimatedPnlUsd >= 0 ? "+" : ""}$${sc.estimatedPnlUsd.toFixed(2)}`
+                          ? formatUsd(sc.estimatedPnlUsd, true)
                           : "N/A"}
                       </dd>
                     </div>
@@ -515,7 +523,7 @@ export function DecisionArtifactView({
                   onClick={() => setSizeMultiplier(btn.mult)}
                   className={`py-2 px-1 text-xs font-mono font-bold border transition-colors cursor-pointer ${
                     sizeMultiplier === btn.mult
-                      ? "bg-[var(--rtd-ink)] text-white border-[var(--rtd-ink)]"
+                      ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)] border-[var(--rtd-ink)]"
                       : "bg-[var(--rtd-paper)] text-[var(--rtd-ink)] border-[var(--rtd-steel)]/25 hover:border-[var(--rtd-ink)]"
                   }`}
                 >
@@ -544,7 +552,7 @@ export function DecisionArtifactView({
                 onClick={() => setTimingMode("OFF_HOURS")}
                 className={`py-2 px-2 text-xs font-mono font-bold border transition-colors cursor-pointer ${
                   timingMode === "OFF_HOURS"
-                    ? "bg-[var(--rtd-ink)] text-white border-[var(--rtd-ink)]"
+                    ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)] border-[var(--rtd-ink)]"
                     : "bg-[var(--rtd-paper)] text-[var(--rtd-ink)] border-[var(--rtd-steel)]/25 hover:border-[var(--rtd-ink)]"
                 }`}
               >
@@ -555,7 +563,7 @@ export function DecisionArtifactView({
                 onClick={() => setTimingMode("MONDAY_OPEN")}
                 className={`py-2 px-2 text-xs font-mono font-bold border transition-colors cursor-pointer ${
                   timingMode === "MONDAY_OPEN"
-                    ? "bg-[var(--rtd-ink)] text-white border-[var(--rtd-ink)]"
+                    ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)] border-[var(--rtd-ink)]"
                     : "bg-[var(--rtd-paper)] text-[var(--rtd-ink)] border-[var(--rtd-steel)]/25 hover:border-[var(--rtd-ink)]"
                 }`}
               >
@@ -598,7 +606,7 @@ export function DecisionArtifactView({
                   </span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-xl sm:text-2xl font-bold font-mono text-[var(--rtd-reject)] rtd-figure">
-                      ${simulatedPnl.toFixed(2)} USD
+                      {formatUsd(simulatedPnl)} USD
                     </span>
                     <span className="text-xs font-mono text-[var(--rtd-steel)]">
                       ({timingMode === "MONDAY_OPEN" ? `${marketPct} cash market gap` : `${combinedPct} combined tail`})
@@ -609,7 +617,7 @@ export function DecisionArtifactView({
                 {isReduced && deltaSavings > 0 && (
                   <div className="bg-[var(--rtd-proceed)]/10 border border-[var(--rtd-proceed)]/30 px-3 py-1.5 rounded-sm">
                     <span className="text-xs font-mono font-bold text-[var(--rtd-proceed)]">
-                      +${deltaSavings.toFixed(2)} Capital Protected
+                      +{formatUsd(deltaSavings)} Capital Protected
                     </span>
                   </div>
                 )}
@@ -618,11 +626,11 @@ export function DecisionArtifactView({
               <div className="text-xs font-mono bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/20 p-3 text-[var(--rtd-ink)] leading-relaxed">
                 {timingMode === "MONDAY_OPEN" ? (
                   <>
-                    <strong className="text-[var(--rtd-proceed)]">RE-ANCHORING ADVANTAGE:</strong> Waiting for Monday cash open eliminates both weekend basis uncoupling and thin off-hours orderbook slippage. Your simulated loss in a tail event drops from <strong>${rawCombined.toFixed(2)}</strong> to <strong>${simulatedPnl.toFixed(2)}</strong>. Recommended conditional order: Place limit order at Friday cash close benchmark ({refBenchmark}).
+                    <strong className="text-[var(--rtd-proceed)]">RE-ANCHORING ADVANTAGE:</strong> Waiting for Monday cash open eliminates both weekend basis uncoupling and thin off-hours orderbook slippage. Your simulated loss in a tail event drops from <strong>{formatUsd(rawCombined)}</strong> to <strong>{formatUsd(simulatedPnl)}</strong>. Recommended conditional order: Place limit order at Friday cash close benchmark ({refBenchmark}).
                   </>
                 ) : sizeMultiplier < 1.0 ? (
                   <>
-                    <strong className="text-[var(--rtd-reduce)]">POSITION RISK REDUCED:</strong> Sizing down to ${(currentSize * sizeMultiplier).toLocaleString(undefined, { maximumFractionDigits: 0 })} USD maintains exposure to your directional thesis while capping worst-case weekend drawdown to <strong>${simulatedPnl.toFixed(2)}</strong>. Shifts risk profile from Critical to Moderate.
+                    <strong className="text-[var(--rtd-reduce)]">POSITION RISK REDUCED:</strong> Sizing down to ${(currentSize * sizeMultiplier).toLocaleString(undefined, { maximumFractionDigits: 0 })} USD maintains exposure to your directional thesis while capping worst-case weekend drawdown to <strong>{formatUsd(simulatedPnl)}</strong>. Shifts risk profile from Critical to Moderate.
                   </>
                 ) : (
                   <>
