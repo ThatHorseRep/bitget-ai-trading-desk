@@ -180,22 +180,26 @@ code, kbd, samp, pre {
 
 /* Elegant, slim scrollbar for desktop matching brand steel & proof colors */
 @media (min-width: 1025px) {
-  * {
+  html, body {
     scrollbar-width: thin;
     scrollbar-color: color-mix(in srgb, var(--rtd-steel) 45%, transparent) var(--rtd-proof);
   }
-  ::-webkit-scrollbar {
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
-  ::-webkit-scrollbar-track {
+  html::-webkit-scrollbar-track,
+  body::-webkit-scrollbar-track {
     background: var(--rtd-proof);
   }
-  ::-webkit-scrollbar-thumb {
+  html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-thumb {
     background: color-mix(in srgb, var(--rtd-steel) 40%, transparent);
     border-radius: 4px;
   }
-  ::-webkit-scrollbar-thumb:hover {
+  html::-webkit-scrollbar-thumb:hover,
+  body::-webkit-scrollbar-thumb:hover {
     background: var(--rtd-steel);
   }
 }
