@@ -87,7 +87,7 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
           1. TOP NAVIGATION BAR (matching 05-website.png)
           Height explicitly set to 4rem (h-16) to ensure viewport math is exact.
          ---------------------------------------------------------------------- */}
-      <header className="h-16 border-b border-[var(--rtd-steel)]/25 bg-[var(--rtd-proof)] sticky top-0 z-40 backdrop-blur-md">
+      <header className="h-16 border-b border-[var(--rtd-steel)]/25 bg-[var(--rtd-proof)] sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Brand lockup left */}
           <div className="flex items-center gap-3">

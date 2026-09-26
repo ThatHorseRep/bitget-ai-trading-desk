@@ -7,8 +7,6 @@ import {
   Volume2,
   VolumeX,
   RotateCcw,
-  Monitor,
-  Smartphone,
   Check
 } from "lucide-react";
 import { Reveal } from "@/components/motion/Reveal";
@@ -36,8 +34,8 @@ const CHAPTERS: Chapter[] = [
 ];
 
 export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const targetSeekTimeRef = useRef<number | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -45,12 +43,9 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(100);
   const [activeChapterId, setActiveChapterId] = useState<string>("input");
-  
-  // Screen size detection & device mode
   const [isMobileScreen, setIsMobileScreen] = useState(false);
-  const [forcedDeviceMode, setForcedDeviceMode] = useState<"AUTO" | "DESKTOP" | "MOBILE">("AUTO");
 
-  // Track client screen width
+  // Auto-detect screen width to serve the matching responsive video recording
   useEffect(() => {
     const handleResize = () => {
       setIsMobileScreen(window.innerWidth < 768);
@@ -60,55 +55,72 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Compute active effective display mode: DESKTOP or MOBILE
-  const effectiveMode: "DESKTOP" | "MOBILE" =
-    forcedDeviceMode === "AUTO"
-      ? isMobileScreen
-        ? "MOBILE"
-        : "DESKTOP"
-      : forcedDeviceMode;
+  const currentVideoSrc = isMobileScreen ? "/demo/mobile-demo.mp4" : "/demo/desktop-demo.mp4";
 
-  const currentVideoSrc =
-    effectiveMode === "MOBILE" ? "/demo/mobile-demo.mp4" : "/demo/desktop-demo.mp4";
-
-  // Initial autoplay attempt on mount
+  // IntersectionObserver: Automatically play when in view, pause when scrolled past
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    const container = containerRef.current;
+    if (!container || typeof window === "undefined" || !("IntersectionObserver" in window)) return;
 
-    video.muted = isMuted;
-    video.playbackRate = playbackSpeed;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        const video = videoRef.current;
+        if (!video) return;
 
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          setIsPlaying(true);
-        })
-        .catch(() => {
-          // Autoplay was blocked by browser policy without user gesture
-          setIsPlaying(false);
-        });
-    }
-  }, [isMuted, playbackSpeed]);
+        if (entry.isIntersecting) {
+          // Play automatically when visible in viewport
+          video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+        } else {
+          // Pause when user scrolls away to save resources and battery
+          if (!video.paused) {
+            video.pause();
+            setIsPlaying(false);
+          }
+        }
+      },
+      {
+        threshold: 0.25,
+      }
+    );
 
-  // Video event handlers
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  // Video event handlers with 200ms throttle to prevent main-thread scroll jank
+  const lastTimeUpdateRef = useRef<number>(0);
+  const activeChapterRef = useRef<string>("input");
+
   const handleTimeUpdate = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
 
     const t = video.currentTime;
-    setCurrentTime(t);
-
-    if (video.duration && !isNaN(video.duration) && video.duration > 0) {
-      setDuration(video.duration);
-    }
+    const now = performance.now();
 
     // Determine current chapter
+    let newChapterId = CHAPTERS[0].id;
     for (let i = CHAPTERS.length - 1; i >= 0; i--) {
       if (t >= CHAPTERS[i].timeSec) {
-        setActiveChapterId(CHAPTERS[i].id);
+        newChapterId = CHAPTERS[i].id;
         break;
+      }
+    }
+
+    const chapterChanged = newChapterId !== activeChapterRef.current;
+    if (chapterChanged) {
+      activeChapterRef.current = newChapterId;
+      setActiveChapterId(newChapterId);
+    }
+
+    // Throttle React state updates to 200ms intervals unless chapter boundary changed
+    if (chapterChanged || now - lastTimeUpdateRef.current >= 200) {
+      lastTimeUpdateRef.current = now;
+      setCurrentTime(t);
+
+      if (video.duration && !isNaN(video.duration) && video.duration > 0) {
+        setDuration(video.duration);
       }
     }
   }, []);
@@ -120,16 +132,7 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
     }
     video.playbackRate = playbackSpeed;
     video.muted = isMuted;
-
-    if (targetSeekTimeRef.current !== null) {
-      video.currentTime = targetSeekTimeRef.current;
-      targetSeekTimeRef.current = null;
-    }
-
-    if (isPlaying) {
-      video.play().catch(() => setIsPlaying(false));
-    }
-  }, [playbackSpeed, isMuted, isPlaying]);
+  }, [playbackSpeed, isMuted]);
 
   const handleDurationChange = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget;
@@ -178,13 +181,6 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
     if (video) {
       video.playbackRate = speed;
     }
-  }, []);
-
-  const handleDeviceModeChange = useCallback((mode: "AUTO" | "DESKTOP" | "MOBILE") => {
-    if (videoRef.current) {
-      targetSeekTimeRef.current = videoRef.current.currentTime;
-    }
-    setForcedDeviceMode(mode);
   }, []);
 
   const handleSeekChapter = useCallback((chapterTime: number) => {
@@ -236,67 +232,25 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
 
   return (
     <Reveal as="section" id="demo-walkthrough" className="scroll-mt-24 border-b border-[var(--rtd-steel)]/25 py-16 sm:py-20 px-4 sm:px-6 bg-[var(--rtd-proof)]">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div ref={containerRef} className="max-w-6xl mx-auto space-y-8">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="space-y-2 max-w-3xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-xs tracking-[0.2em] text-[var(--rtd-steel)] uppercase font-semibold">
-                00 • PRODUCT WALKTHROUGH
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 bg-[var(--rtd-void)] text-white uppercase font-bold flex items-center gap-1.5 shadow-xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                VERIFIABLE END-TO-END DEMO
-              </span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-mono font-bold tracking-tight text-[var(--rtd-ink)]">
-              See the adversarial engine in action.
-            </h2>
-            <p className="text-sm sm:text-base text-[var(--rtd-steel)] font-sans leading-relaxed">
-              Watch a trader enter a natural language trade during the 65.5-hour weekend window, survive adversarial Red Teaming, and receive deterministic scenario stress results.
-            </p>
+        <div className="space-y-2 max-w-3xl">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-xs tracking-[0.2em] text-[var(--rtd-steel)] uppercase font-semibold">
+              00 • PRODUCT WALKTHROUGH
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 bg-[var(--rtd-void)] text-white uppercase font-bold flex items-center gap-1.5 shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              AUTO-PLAY IN VIEW
+            </span>
           </div>
-
-          {/* Desktop/Mobile Device Mode Switcher */}
-          <div className="flex items-center gap-1 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-1 font-mono text-xs shrink-0 self-start md:self-end shadow-xs">
-            <span className="text-[10px] uppercase font-bold text-[var(--rtd-steel)] px-2">VIEWPORT:</span>
-            <button
-              type="button"
-              onClick={() => handleDeviceModeChange("AUTO")}
-              className={`px-2.5 py-1 text-[11px] font-bold uppercase transition-colors cursor-pointer ${
-                forcedDeviceMode === "AUTO"
-                  ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)]"
-                  : "text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)]"
-              }`}
-            >
-              AUTO
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDeviceModeChange("DESKTOP")}
-              className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold uppercase transition-colors cursor-pointer ${
-                forcedDeviceMode === "DESKTOP"
-                  ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)]"
-                  : "text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)]"
-              }`}
-            >
-              <Monitor className="w-3.5 h-3.5" />
-              DESKTOP (16:9)
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDeviceModeChange("MOBILE")}
-              className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold uppercase transition-colors cursor-pointer ${
-                forcedDeviceMode === "MOBILE"
-                  ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)]"
-                  : "text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)]"
-              }`}
-            >
-              <Smartphone className="w-3.5 h-3.5" />
-              MOBILE (9:16)
-            </button>
-          </div>
+          <h2 className="text-3xl sm:text-4xl font-mono font-bold tracking-tight text-[var(--rtd-ink)]">
+            See the adversarial engine in action.
+          </h2>
+          <p className="text-sm sm:text-base text-[var(--rtd-steel)] font-sans leading-relaxed">
+            Watch a trader enter a natural language trade during the 65.5-hour weekend window, survive adversarial Red Teaming, and receive deterministic scenario stress results.
+          </p>
         </div>
 
         {/* Video Player Display Container */}
@@ -311,16 +265,16 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
               </div>
               <span className="text-slate-300 font-semibold tracking-wider text-[11px] uppercase">
-                BITGET REDTEAM DESK // CANONICAL RUN ({effectiveMode === "MOBILE" ? "MOBILE PORTRAIT" : "DESKTOP 1080P"})
+                BITGET REDTEAM DESK // CANONICAL RUN ({isMobileScreen ? "MOBILE PORTRAIT" : "DESKTOP 1080P"})
               </span>
             </div>
             <div className="flex items-center gap-3 text-[11px] text-slate-400">
               <span className="px-1.5 py-0.5 bg-slate-800 text-slate-200 border border-slate-700 text-[10px] font-bold">
-                {effectiveMode === "MOBILE" ? "PORTRAIT" : "1080P HD"}
+                {isMobileScreen ? "PORTRAIT" : "1080P HD"}
               </span>
               <span className="text-emerald-400 font-bold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                LIVE SYNC
+                <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
+                {isPlaying ? "PLAYING" : "PAUSED"}
               </span>
             </div>
           </div>
@@ -331,14 +285,14 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
             {/* Unified Video Wrapper */}
             <div
               className={
-                effectiveMode === "MOBILE"
+                isMobileScreen
                   ? "py-4 px-2 flex justify-center items-center w-full"
                   : "w-full h-full aspect-video flex items-center justify-center"
               }
             >
               <div
                 className={
-                  effectiveMode === "MOBILE"
+                  isMobileScreen
                     ? "relative w-[280px] sm:w-[320px] aspect-[412/915] border-4 border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-black"
                     : "w-full h-full aspect-video"
                 }
@@ -347,12 +301,11 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
                   ref={videoRef}
                   key={currentVideoSrc}
                   src={currentVideoSrc}
-                  autoPlay
                   playsInline
                   muted={isMuted}
                   loop
                   className={
-                    effectiveMode === "MOBILE"
+                    isMobileScreen
                       ? "w-full h-full object-cover cursor-pointer"
                       : "w-full h-full object-contain cursor-pointer"
                   }

@@ -40,7 +40,7 @@ export function WorkspaceHeader({
         </div>
       )}
 
-      <header className="h-16 border-b border-[var(--rtd-steel)]/25 bg-[var(--rtd-proof)] backdrop-blur-md w-full overflow-hidden">
+      <header className="h-16 border-b border-[var(--rtd-steel)]/25 bg-[var(--rtd-proof)] w-full overflow-hidden">
         <div className="max-w-6xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-3 w-full">
           {/* Official Brand Lockup + Context Badge (Mobile & Desktop) */}
           <div className="flex items-center gap-2 sm:gap-3 shrink min-w-0">
