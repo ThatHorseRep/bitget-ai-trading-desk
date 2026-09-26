@@ -6,6 +6,7 @@
 **Live deployment:** https://www.redteamdesk.name.ng (Vercel). Repository: https://github.com/ThatHorseRep/bitget-ai-trading-desk
 
 **Video Walkthroughs:**
+- Embedded directly on the Landing Page (`#demo-walkthrough`) with chapter seeking, speed toggles, and responsive Desktop/Mobile device frame switching.
 - Desktop 1080p Full HD (`public/demo/desktop-demo.mp4`, 6.35 MB)
 - Mobile Portrait (`public/demo/mobile-demo.mp4`, 4.15 MB)
 

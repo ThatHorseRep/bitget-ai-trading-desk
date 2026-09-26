@@ -27,6 +27,7 @@
 - Adversarial reasoning / Counter-thesis generation (src/core/thesis/challenger.ts)
 - Mathematical position stressing, deterministic scenarios, and P&L (src/core/scenarios/engine.ts)
 - Interactive What-If Counterfactual Sandbox (Section 4B in src/components/workspace/DecisionArtifactView.tsx) with instant sizing toggles (100%/50%/25%), execution session timing switch, and simulated saved capital calculations
+- Branded Interactive Demo Player Showcase (Section 00 on landing page in src/components/landing/BrandedDemoPlayer.tsx) with responsive Desktop 16:9 / Mobile 9:16 switching, chapter timeline seeking, speed controls, and direct live run launch
 - Thesis vs. Position synthesis (deterministic position quality in src/core/decision/classifyPosition.ts; LLM thesis-quality synthesis in src/core/thesis/assessment.ts)
 - Decision Artifact generation & Policy (src/core/decision/policy.ts)
 - Transparent "Demo Mode" for off-hours trading simulation (fixture in src/fixtures/rnvda-demo.ts; UI toggle in src/components/workspace/WorkspaceHeader.tsx; API in src/app/api/stress-test/route.ts)

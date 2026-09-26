@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Play,
   Pause,
@@ -9,8 +9,7 @@ import {
   RotateCcw,
   Monitor,
   Smartphone,
-  Check,
-  FastForward
+  Check
 } from "lucide-react";
 import { Reveal } from "@/components/motion/Reveal";
 
@@ -37,87 +36,157 @@ const CHAPTERS: Chapter[] = [
 ];
 
 export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
-  const desktopVideoRef = useRef<HTMLVideoElement | null>(null);
-  const mobileVideoRef = useRef<HTMLVideoElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(100);
-  const [forcedDeviceMode, setForcedDeviceMode] = useState<"AUTO" | "DESKTOP" | "MOBILE">("AUTO");
   const [activeChapterId, setActiveChapterId] = useState<string>("input");
+  
+  // Screen size detection & device mode
+  const [isMobileScreen, setIsMobileScreen] = useState(false);
+  const [forcedDeviceMode, setForcedDeviceMode] = useState<"AUTO" | "DESKTOP" | "MOBILE">("AUTO");
 
-  // Get active video element based on viewport or forced override
-  const getActiveVideo = () => {
-    if (forcedDeviceMode === "DESKTOP") return desktopVideoRef.current;
-    if (forcedDeviceMode === "MOBILE") return mobileVideoRef.current;
-    // Auto: inspect window width if client
-    if (typeof window !== "undefined" && window.innerWidth < 768) {
-      return mobileVideoRef.current || desktopVideoRef.current;
+  // Track client screen width
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileScreen(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Compute active effective display mode: DESKTOP or MOBILE
+  const effectiveMode: "DESKTOP" | "MOBILE" =
+    forcedDeviceMode === "AUTO"
+      ? isMobileScreen
+        ? "MOBILE"
+        : "DESKTOP"
+      : forcedDeviceMode;
+
+  const currentVideoSrc =
+    effectiveMode === "MOBILE" ? "/demo/mobile-demo.mp4" : "/demo/desktop-demo.mp4";
+
+  // Keep video element synced when src changes without losing position
+  const prevSrcRef = useRef(currentVideoSrc);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (prevSrcRef.current !== currentVideoSrc) {
+      const preservedTime = currentTime;
+      const wasPlaying = isPlaying;
+      prevSrcRef.current = currentVideoSrc;
+
+      video.src = currentVideoSrc;
+      video.load();
+      video.currentTime = preservedTime;
+      video.playbackRate = playbackSpeed;
+      video.muted = isMuted;
+
+      if (wasPlaying) {
+        video.play().catch(() => {
+          setIsPlaying(false);
+        });
+      }
     }
-    return desktopVideoRef.current || mobileVideoRef.current;
-  };
+  }, [currentVideoSrc, currentTime, isPlaying, playbackSpeed, isMuted]);
 
-  const syncTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    const v = e.currentTarget;
-    setCurrentTime(v.currentTime);
-    if (v.duration && !isNaN(v.duration) && v.duration > 0) {
-      setDuration(v.duration);
+  // Video event handlers
+  const handleTimeUpdate = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const t = video.currentTime;
+    setCurrentTime(t);
+
+    if (video.duration && !isNaN(video.duration) && video.duration > 0) {
+      setDuration(video.duration);
     }
 
-    // Determine current active chapter
-    const t = v.currentTime;
+    // Determine current chapter
     for (let i = CHAPTERS.length - 1; i >= 0; i--) {
       if (t >= CHAPTERS[i].timeSec) {
         setActiveChapterId(CHAPTERS[i].id);
         break;
       }
     }
-  };
+  }, []);
 
-  const handlePlayPause = () => {
-    const v = getActiveVideo();
-    if (!v) return;
-    if (v.paused) {
-      v.play().catch(() => {});
-      setIsPlaying(true);
+  const handleLoadedMetadata = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.duration && !isNaN(video.duration) && video.duration > 0) {
+      setDuration(video.duration);
+    }
+    video.playbackRate = playbackSpeed;
+    video.muted = isMuted;
+  }, [playbackSpeed, isMuted]);
+
+  const handlePlay = useCallback(() => {
+    setIsPlaying(true);
+  }, []);
+
+  const handlePause = useCallback(() => {
+    setIsPlaying(false);
+  }, []);
+
+  const handleTogglePlay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
     } else {
-      v.pause();
+      video.pause();
       setIsPlaying(false);
     }
-  };
+  }, []);
 
-  const handleToggleMute = () => {
+  const handleToggleMute = useCallback(() => {
+    const video = videoRef.current;
     const nextMuted = !isMuted;
     setIsMuted(nextMuted);
-    if (desktopVideoRef.current) desktopVideoRef.current.muted = nextMuted;
-    if (mobileVideoRef.current) mobileVideoRef.current.muted = nextMuted;
-  };
+    if (video) {
+      video.muted = nextMuted;
+    }
+  }, [isMuted]);
 
-  const handleSpeedChange = (speed: number) => {
+  const handleSpeedChange = useCallback((speed: number) => {
     setPlaybackSpeed(speed);
-    if (desktopVideoRef.current) desktopVideoRef.current.playbackRate = speed;
-    if (mobileVideoRef.current) mobileVideoRef.current.playbackRate = speed;
-  };
-
-  const handleSeekChapter = (chapterTime: number) => {
-    if (desktopVideoRef.current) {
-      desktopVideoRef.current.currentTime = chapterTime;
-      if (desktopVideoRef.current.paused) desktopVideoRef.current.play().catch(() => {});
+    const video = videoRef.current;
+    if (video) {
+      video.playbackRate = speed;
     }
-    if (mobileVideoRef.current) {
-      mobileVideoRef.current.currentTime = chapterTime;
-      if (mobileVideoRef.current.paused) mobileVideoRef.current.play().catch(() => {});
-    }
-    setIsPlaying(true);
-  };
+  }, []);
 
-  const handleRestart = () => {
+  const handleSeekChapter = useCallback((chapterTime: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = Math.max(0, Math.min(video.duration || duration, chapterTime));
+    if (video.paused) {
+      video.play().then(() => setIsPlaying(true)).catch(() => {});
+    }
+  }, [duration]);
+
+  const handleRestart = useCallback(() => {
     handleSeekChapter(0);
-  };
+  }, [handleSeekChapter]);
+
+  const handleProgressBarClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const video = videoRef.current;
+    if (!video) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+    const targetTime = ratio * (video.duration || duration);
+    video.currentTime = targetTime;
+  }, [duration]);
 
   const formatTime = (sec: number) => {
+    if (isNaN(sec) || sec < 0) return "00:00";
     const mins = Math.floor(sec / 60);
     const secs = Math.floor(sec % 60);
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
@@ -150,7 +219,7 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
           </div>
 
           {/* Desktop/Mobile Device Mode Switcher */}
-          <div className="flex items-center gap-1 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-1 font-mono text-xs shrink-0 self-start md:self-end">
+          <div className="flex items-center gap-1 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-1 font-mono text-xs shrink-0 self-start md:self-end shadow-xs">
             <span className="text-[10px] uppercase font-bold text-[var(--rtd-steel)] px-2">VIEWPORT:</span>
             <button
               type="button"
@@ -190,7 +259,7 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
           </div>
         </div>
 
-        {/* Video Player Display Card */}
+        {/* Video Player Display Container */}
         <div className="bg-[var(--rtd-void)] text-white border border-[var(--rtd-steel)]/30 shadow-xl overflow-hidden">
           
           {/* Top Terminal Bar */}
@@ -201,81 +270,68 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
               </div>
-              <span className="text-slate-400 font-semibold tracking-wider text-[11px] uppercase">
-                BITGET REDTEAM DESK // CANONICAL WEEKEND RUN (rNVDA $2,000 LONG)
+              <span className="text-slate-300 font-semibold tracking-wider text-[11px] uppercase">
+                BITGET REDTEAM DESK // CANONICAL RUN ({effectiveMode === "MOBILE" ? "MOBILE PORTRAIT" : "DESKTOP 1080P"})
               </span>
             </div>
             <div className="flex items-center gap-3 text-[11px] text-slate-400">
               <span className="px-1.5 py-0.5 bg-slate-800 text-slate-200 border border-slate-700 text-[10px] font-bold">
-                1080P HD
+                {effectiveMode === "MOBILE" ? "PORTRAIT" : "1080P HD"}
               </span>
               <span className="text-emerald-400 font-bold flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                DETERMINISTIC PLAYBACK
+                LIVE SYNC
               </span>
             </div>
           </div>
 
-          {/* Main Video Screen Area */}
-          <div className="relative bg-black flex items-center justify-center min-h-[300px] sm:min-h-[420px] md:min-h-[500px]">
+          {/* Main Video View Area */}
+          <div className="relative bg-black flex items-center justify-center min-h-[280px] sm:min-h-[400px] md:min-h-[500px]">
             
-            {/* Desktop Video View (Shown by default on >= md or when forced) */}
-            <div
-              className={`w-full h-full aspect-video ${
-                forcedDeviceMode === "DESKTOP"
-                  ? "block"
-                  : forcedDeviceMode === "MOBILE"
-                  ? "hidden"
-                  : "hidden md:block"
-              }`}
-            >
-              <video
-                ref={desktopVideoRef}
-                src="/demo/desktop-demo.mp4"
-                className="w-full h-full object-contain cursor-pointer"
-                autoPlay
-                muted={isMuted}
-                loop
-                playsInline
-                onClick={handlePlayPause}
-                onTimeUpdate={syncTimeUpdate}
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
-              />
-            </div>
-
-            {/* Mobile Video View (Shown on < md or when forced) */}
-            <div
-              className={`py-4 px-2 flex justify-center items-center w-full ${
-                forcedDeviceMode === "MOBILE"
-                  ? "block"
-                  : forcedDeviceMode === "DESKTOP"
-                  ? "hidden"
-                  : "block md:hidden"
-              }`}
-            >
-              <div className="relative w-[280px] sm:w-[320px] aspect-[412/915] border-4 border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-black">
+            {/* Single Controlled Responsive Video Frame */}
+            {effectiveMode === "DESKTOP" ? (
+              <div className="w-full h-full aspect-video flex items-center justify-center">
                 <video
-                  ref={mobileVideoRef}
-                  src="/demo/mobile-demo.mp4"
-                  className="w-full h-full object-cover cursor-pointer"
+                  ref={videoRef}
+                  src={currentVideoSrc}
+                  className="w-full h-full object-contain cursor-pointer"
                   autoPlay
                   muted={isMuted}
                   loop
                   playsInline
-                  onClick={handlePlayPause}
-                  onTimeUpdate={syncTimeUpdate}
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
+                  onClick={handleTogglePlay}
+                  onTimeUpdate={handleTimeUpdate}
+                  onLoadedMetadata={handleLoadedMetadata}
+                  onPlay={handlePlay}
+                  onPause={handlePause}
                 />
               </div>
-            </div>
+            ) : (
+              <div className="py-4 px-2 flex justify-center items-center w-full">
+                <div className="relative w-[280px] sm:w-[320px] aspect-[412/915] border-4 border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-black">
+                  <video
+                    ref={videoRef}
+                    src={currentVideoSrc}
+                    className="w-full h-full object-cover cursor-pointer"
+                    autoPlay
+                    muted={isMuted}
+                    loop
+                    playsInline
+                    onClick={handleTogglePlay}
+                    onTimeUpdate={handleTimeUpdate}
+                    onLoadedMetadata={handleLoadedMetadata}
+                    onPlay={handlePlay}
+                    onPause={handlePause}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Play/Pause Overlay Indicator when paused */}
             {!isPlaying && (
               <button
                 type="button"
-                onClick={handlePlayPause}
+                onClick={handleTogglePlay}
                 aria-label="Play video"
                 className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-[var(--rtd-stamp)]/90 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl cursor-pointer"
               >
@@ -284,21 +340,17 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
             )}
           </div>
 
-          {/* Timeline Progress Bar */}
+          {/* Interactive Timeline Progress Bar */}
           <div
-            className="w-full h-2 bg-slate-800 cursor-pointer relative group"
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const clickX = e.clientX - rect.left;
-              const ratio = Math.max(0, Math.min(1, clickX / rect.width));
-              handleSeekChapter(ratio * duration);
-            }}
+            className="w-full h-2.5 bg-slate-800 cursor-pointer relative group"
+            onClick={handleProgressBarClick}
+            title="Click to seek"
           >
             <div
               className="h-full bg-[var(--rtd-stamp)] transition-all duration-75 relative"
               style={{ width: `${progressPercent}%` }}
             >
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white shadow opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           </div>
 
@@ -308,8 +360,8 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={handlePlayPause}
-                className="p-2 bg-slate-800 hover:bg-slate-700 text-white transition-colors cursor-pointer"
+                onClick={handleTogglePlay}
+                className="p-2 bg-slate-800 hover:bg-slate-700 text-white transition-colors cursor-pointer rounded-xs"
                 title={isPlaying ? "Pause" : "Play"}
               >
                 {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-white" />}
@@ -318,8 +370,8 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
               <button
                 type="button"
                 onClick={handleRestart}
-                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
-                title="Restart from beginning"
+                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer rounded-xs"
+                title="Restart from 00:00"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
@@ -331,7 +383,7 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
               </div>
             </div>
 
-            {/* Center: Chapter Tag Indicator */}
+            {/* Center: Active Stage Pill */}
             <div className="hidden lg:flex items-center gap-2 text-[11px] bg-slate-900 border border-slate-800 px-3 py-1 text-slate-300">
               <span className="text-[10px] text-slate-500 uppercase">ACTIVE STAGE:</span>
               <span className="text-[var(--rtd-proceed)] font-bold">
@@ -368,7 +420,7 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
                     ? "bg-slate-900 border-slate-800 text-slate-400 hover:text-white"
                     : "bg-emerald-950/60 border-emerald-500/50 text-emerald-300"
                 }`}
-                title={isMuted ? "Unmute narration" : "Mute audio"}
+                title={isMuted ? "Unmute audio" : "Mute audio"}
               >
                 {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
                 <span className="text-[10px] font-bold uppercase">{isMuted ? "MUTE" : "AUDIO ON"}</span>
