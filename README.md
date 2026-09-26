@@ -16,8 +16,7 @@ Built for the **Bitget AI Base Camp Hackathon S2 — Track 3: Decision Stress Te
 ## Quick Links
 
 - 🌐 **Live Web Application:** [redteamdesk.name.ng](https://redteamdesk.name.ng) *(Mirror: [bitget-ai-redteam-desk.vercel.app](https://bitget-ai-redteam-desk.vercel.app))*
-- 🖥️ **Desktop Video Walkthrough (1080p):** [`public/demo/desktop-demo.mp4`](./public/demo/desktop-demo.mp4) *(Full HD 1080p, 6.35 MB, 100s walk-through with live market data)*
-- 📱 **Mobile Video Walkthrough (Portrait):** [`public/demo/mobile-demo.mp4`](./public/demo/mobile-demo.mp4) *(412×914, 4.15 MB, 100s mobile workflow with centered shocks & audio)*
+- 🖥️ **Embedded Walkthrough & Video Demos:** Interactive terminal player with chapter cues on the landing page ([#demo-walkthrough](https://redteamdesk.name.ng/#demo-walkthrough)), plus standalone downloads in [`public/demo/desktop-demo.mp4`](./public/demo/desktop-demo.mp4) (Full HD 1080p, 6.35 MB) and [`public/demo/mobile-demo.mp4`](./public/demo/mobile-demo.mp4) (Portrait, 4.15 MB)
 - 📄 **Official Product Specification:** [PRODUCT_DESCRIPTION.md](./PRODUCT_DESCRIPTION.md)
 - 📊 **Empirical Shock Calibration Methodology:** [docs/SHOCK_CALIBRATION_METHODOLOGY.md](./docs/SHOCK_CALIBRATION_METHODOLOGY.md)
 - 📜 **Historical Retrospective Case Studies:** [docs/RETROSPECTIVE_CASE_STUDIES.md](./docs/RETROSPECTIVE_CASE_STUDIES.md)

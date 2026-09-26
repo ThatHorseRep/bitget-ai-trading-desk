@@ -37,8 +37,9 @@ const CHAPTERS: Chapter[] = [
 
 export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const targetSeekTimeRef = useRef<number | null>(null);
 
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
   const [currentTime, setCurrentTime] = useState<number>(0);
@@ -70,30 +71,26 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
   const currentVideoSrc =
     effectiveMode === "MOBILE" ? "/demo/mobile-demo.mp4" : "/demo/desktop-demo.mp4";
 
-  // Keep video element synced when src changes without losing position
-  const prevSrcRef = useRef(currentVideoSrc);
+  // Initial autoplay attempt on mount
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    if (prevSrcRef.current !== currentVideoSrc) {
-      const preservedTime = currentTime;
-      const wasPlaying = isPlaying;
-      prevSrcRef.current = currentVideoSrc;
+    video.muted = isMuted;
+    video.playbackRate = playbackSpeed;
 
-      video.src = currentVideoSrc;
-      video.load();
-      video.currentTime = preservedTime;
-      video.playbackRate = playbackSpeed;
-      video.muted = isMuted;
-
-      if (wasPlaying) {
-        video.play().catch(() => {
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setIsPlaying(true);
+        })
+        .catch(() => {
+          // Autoplay was blocked by browser policy without user gesture
           setIsPlaying(false);
         });
-      }
     }
-  }, [currentVideoSrc, currentTime, isPlaying, playbackSpeed, isMuted]);
+  }, [isMuted, playbackSpeed]);
 
   // Video event handlers
   const handleTimeUpdate = useCallback(() => {
@@ -116,15 +113,30 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
     }
   }, []);
 
-  const handleLoadedMetadata = useCallback(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  const handleLoadedMetadata = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
     if (video.duration && !isNaN(video.duration) && video.duration > 0) {
       setDuration(video.duration);
     }
     video.playbackRate = playbackSpeed;
     video.muted = isMuted;
-  }, [playbackSpeed, isMuted]);
+
+    if (targetSeekTimeRef.current !== null) {
+      video.currentTime = targetSeekTimeRef.current;
+      targetSeekTimeRef.current = null;
+    }
+
+    if (isPlaying) {
+      video.play().catch(() => setIsPlaying(false));
+    }
+  }, [playbackSpeed, isMuted, isPlaying]);
+
+  const handleDurationChange = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    if (video.duration && !isNaN(video.duration) && video.duration > 0) {
+      setDuration(video.duration);
+    }
+  }, []);
 
   const handlePlay = useCallback(() => {
     setIsPlaying(true);
@@ -138,7 +150,10 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
     const video = videoRef.current;
     if (!video) return;
     if (video.paused) {
-      video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+      video
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => setIsPlaying(false));
     } else {
       video.pause();
       setIsPlaying(false);
@@ -151,6 +166,9 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
     setIsMuted(nextMuted);
     if (video) {
       video.muted = nextMuted;
+      if (!nextMuted && video.paused) {
+        video.play().then(() => setIsPlaying(true)).catch(() => {});
+      }
     }
   }, [isMuted]);
 
@@ -162,13 +180,21 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
     }
   }, []);
 
+  const handleDeviceModeChange = useCallback((mode: "AUTO" | "DESKTOP" | "MOBILE") => {
+    if (videoRef.current) {
+      targetSeekTimeRef.current = videoRef.current.currentTime;
+    }
+    setForcedDeviceMode(mode);
+  }, []);
+
   const handleSeekChapter = useCallback((chapterTime: number) => {
     const video = videoRef.current;
     if (!video) return;
-    video.currentTime = Math.max(0, Math.min(video.duration || duration, chapterTime));
-    if (video.paused) {
-      video.play().then(() => setIsPlaying(true)).catch(() => {});
-    }
+    const totalDuration = video.duration && !isNaN(video.duration) && video.duration > 0 ? video.duration : duration;
+    const targetTime = Math.max(0, Math.min(totalDuration, chapterTime));
+    video.currentTime = targetTime;
+    setCurrentTime(targetTime);
+    video.play().then(() => setIsPlaying(true)).catch(() => {});
   }, [duration]);
 
   const handleRestart = useCallback(() => {
@@ -181,8 +207,22 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const ratio = Math.max(0, Math.min(1, clickX / rect.width));
-    const targetTime = ratio * (video.duration || duration);
+    const totalDuration = video.duration && !isNaN(video.duration) && video.duration > 0 ? video.duration : duration;
+    const targetTime = ratio * totalDuration;
     video.currentTime = targetTime;
+    setCurrentTime(targetTime);
+  }, [duration]);
+
+  const handleProgressTouch = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    const video = videoRef.current;
+    if (!video || !e.touches[0]) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const touchX = e.touches[0].clientX - rect.left;
+    const ratio = Math.max(0, Math.min(1, touchX / rect.width));
+    const totalDuration = video.duration && !isNaN(video.duration) && video.duration > 0 ? video.duration : duration;
+    const targetTime = ratio * totalDuration;
+    video.currentTime = targetTime;
+    setCurrentTime(targetTime);
   }, [duration]);
 
   const formatTime = (sec: number) => {
@@ -223,7 +263,7 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
             <span className="text-[10px] uppercase font-bold text-[var(--rtd-steel)] px-2">VIEWPORT:</span>
             <button
               type="button"
-              onClick={() => setForcedDeviceMode("AUTO")}
+              onClick={() => handleDeviceModeChange("AUTO")}
               className={`px-2.5 py-1 text-[11px] font-bold uppercase transition-colors cursor-pointer ${
                 forcedDeviceMode === "AUTO"
                   ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)]"
@@ -234,7 +274,7 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
             </button>
             <button
               type="button"
-              onClick={() => setForcedDeviceMode("DESKTOP")}
+              onClick={() => handleDeviceModeChange("DESKTOP")}
               className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold uppercase transition-colors cursor-pointer ${
                 forcedDeviceMode === "DESKTOP"
                   ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)]"
@@ -246,7 +286,7 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
             </button>
             <button
               type="button"
-              onClick={() => setForcedDeviceMode("MOBILE")}
+              onClick={() => handleDeviceModeChange("MOBILE")}
               className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold uppercase transition-colors cursor-pointer ${
                 forcedDeviceMode === "MOBILE"
                   ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)]"
@@ -288,52 +328,51 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
           {/* Main Video View Area */}
           <div className="relative bg-black flex items-center justify-center min-h-[280px] sm:min-h-[400px] md:min-h-[500px]">
             
-            {/* Single Controlled Responsive Video Frame */}
-            {effectiveMode === "DESKTOP" ? (
-              <div className="w-full h-full aspect-video flex items-center justify-center">
+            {/* Unified Video Wrapper */}
+            <div
+              className={
+                effectiveMode === "MOBILE"
+                  ? "py-4 px-2 flex justify-center items-center w-full"
+                  : "w-full h-full aspect-video flex items-center justify-center"
+              }
+            >
+              <div
+                className={
+                  effectiveMode === "MOBILE"
+                    ? "relative w-[280px] sm:w-[320px] aspect-[412/915] border-4 border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-black"
+                    : "w-full h-full aspect-video"
+                }
+              >
                 <video
                   ref={videoRef}
+                  key={currentVideoSrc}
                   src={currentVideoSrc}
-                  className="w-full h-full object-contain cursor-pointer"
                   autoPlay
+                  playsInline
                   muted={isMuted}
                   loop
-                  playsInline
+                  className={
+                    effectiveMode === "MOBILE"
+                      ? "w-full h-full object-cover cursor-pointer"
+                      : "w-full h-full object-contain cursor-pointer"
+                  }
                   onClick={handleTogglePlay}
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
+                  onDurationChange={handleDurationChange}
                   onPlay={handlePlay}
                   onPause={handlePause}
                 />
               </div>
-            ) : (
-              <div className="py-4 px-2 flex justify-center items-center w-full">
-                <div className="relative w-[280px] sm:w-[320px] aspect-[412/915] border-4 border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-black">
-                  <video
-                    ref={videoRef}
-                    src={currentVideoSrc}
-                    className="w-full h-full object-cover cursor-pointer"
-                    autoPlay
-                    muted={isMuted}
-                    loop
-                    playsInline
-                    onClick={handleTogglePlay}
-                    onTimeUpdate={handleTimeUpdate}
-                    onLoadedMetadata={handleLoadedMetadata}
-                    onPlay={handlePlay}
-                    onPause={handlePause}
-                  />
-                </div>
-              </div>
-            )}
+            </div>
 
-            {/* Play/Pause Overlay Indicator when paused */}
+            {/* Big Center Play Overlay Button when paused */}
             {!isPlaying && (
               <button
                 type="button"
                 onClick={handleTogglePlay}
                 aria-label="Play video"
-                className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-[var(--rtd-stamp)]/90 text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl cursor-pointer"
+                className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-[var(--rtd-stamp)]/90 hover:bg-[var(--rtd-stamp)] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-2xl cursor-pointer z-20"
               >
                 <Play className="w-8 h-8 translate-x-0.5 fill-white" />
               </button>
@@ -342,12 +381,14 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
 
           {/* Interactive Timeline Progress Bar */}
           <div
-            className="w-full h-2.5 bg-slate-800 cursor-pointer relative group"
+            className="w-full h-3 bg-slate-800 cursor-pointer relative group touch-none"
             onClick={handleProgressBarClick}
-            title="Click to seek"
+            onTouchStart={handleProgressTouch}
+            onTouchMove={handleProgressTouch}
+            title="Click or drag to seek"
           >
             <div
-              className="h-full bg-[var(--rtd-stamp)] transition-all duration-75 relative"
+              className="h-full bg-[var(--rtd-stamp)] transition-all duration-75 relative pointer-events-none"
               style={{ width: `${progressPercent}%` }}
             >
               <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity" />
