@@ -7,6 +7,7 @@ import { Reveal } from "@/components/motion/Reveal";
 import { Lockup } from "@/components/brand/Logo";
 import { VerdictGlyph } from "@/components/brand/VerdictGlyph";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { BrandedDemoPlayer } from "@/components/landing/BrandedDemoPlayer";
 import {
   getCalibratedBatch,
   getEpochRemainingSeconds,
@@ -96,6 +97,13 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
           {/* Desktop Nav Links center-right */}
           <nav className="hidden md:flex items-center gap-8 text-xs font-mono font-bold text-[var(--rtd-steel)] uppercase tracking-wider">
             <a
+              href="#demo-walkthrough"
+              className="hover:text-[var(--rtd-ink)] transition-colors py-2 flex items-center gap-1.5"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Demo
+            </a>
+            <a
               href="#how-it-works"
               className="hover:text-[var(--rtd-ink)] transition-colors py-2"
             >
@@ -151,6 +159,15 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
         {/* Mobile dropdown menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-[var(--rtd-steel)]/25 bg-[var(--rtd-proof)] px-4 sm:px-6 py-4 space-y-2 font-mono text-xs font-bold uppercase tracking-wider text-[var(--rtd-steel)] shadow-lg">
+            <div>
+              <a
+                href="#demo-walkthrough"
+                onClick={() => setMobileMenuOpen(false)}
+                className="min-h-[44px] flex items-center py-2 hover:text-[var(--rtd-ink)] active:bg-[var(--rtd-steel)]/10 px-2 text-[var(--rtd-proceed)]"
+              >
+                ▶ Demo Walkthrough
+              </a>
+            </div>
             <div>
               <a
                 href="#how-it-works"
@@ -417,6 +434,11 @@ export function LandingSurface({ onLaunchDesk }: LandingSurfaceProps) {
           </div>
         </div>
       </section>
+
+      {/* ----------------------------------------------------------------------
+          3B. BRANDED DEMO PLAYER (Section #demo-walkthrough)
+         ---------------------------------------------------------------------- */}
+      <BrandedDemoPlayer onLaunchDesk={onLaunchDesk} />
 
       {/* ----------------------------------------------------------------------
           4. HOW IT WORKS / STRUCTURAL VULNERABILITY (Section #how-it-works)
