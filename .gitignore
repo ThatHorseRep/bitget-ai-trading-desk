@@ -47,8 +47,7 @@ local-extras.zip
 local-test-render.png
 artifact_output.json
 .backup/
-.freebuff/preview-*.log
-.freebuff/preview-*.log.err
+.freebuff/
 
 # OS noise
 .DS_Store
