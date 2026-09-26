@@ -18,6 +18,26 @@ export function NormalizedReviewCard({
   onEdit,
   isAnalyzing = false
 }: NormalizedReviewCardProps) {
+  const [isOnline, setIsOnline] = React.useState(() => {
+    if (typeof window !== "undefined") {
+      return navigator.onLine;
+    }
+    return true;
+  });
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const handleOnline = () => setIsOnline(true);
+      const handleOffline = () => setIsOnline(false);
+      window.addEventListener("online", handleOnline);
+      window.addEventListener("offline", handleOffline);
+      return () => {
+        window.removeEventListener("online", handleOnline);
+        window.removeEventListener("offline", handleOffline);
+      };
+    }
+  }, []);
+
   return (
     <div className="mx-auto max-w-4xl space-y-4 sm:space-y-6">
       <div className="border border-[var(--rtd-steel)]/25 bg-[var(--rtd-paper)] p-4 sm:p-7 md:p-8 shadow-xs space-y-5 sm:space-y-6">
@@ -123,6 +143,10 @@ export function NormalizedReviewCard({
                   {normalizedTrade.entryPriceSource === "USER_PROVIDED" ? (
                     <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-[var(--rtd-steel)] bg-[var(--rtd-paper-subtle)] px-1 py-0.2 border border-[var(--rtd-steel)]/20 uppercase tracking-wider">
                       USER
+                    </span>
+                  ) : !isOnline ? (
+                    <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-amber-600 bg-amber-500/10 px-1 py-0.2 border border-amber-500/20 uppercase tracking-wider" title="Browser is offline. Live market price query is unavailable.">
+                      <span>ESTIMATED / CACHED</span>
                     </span>
                   ) : normalizedTrade.entryPrice > 0 ? (
                     <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-emerald-600 bg-emerald-500/10 px-1 py-0.2 border border-emerald-500/20 uppercase tracking-wider">

@@ -80,13 +80,13 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
         }
       },
       {
-        threshold: 0.25,
+        threshold: 0.15,
       }
     );
 
     observer.observe(container);
     return () => observer.disconnect();
-  }, []);
+  }, [currentVideoSrc]);
 
   // Video event handlers with 200ms throttle to prevent main-thread scroll jank
   const lastTimeUpdateRef = useRef<number>(0);

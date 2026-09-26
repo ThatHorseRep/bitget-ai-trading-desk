@@ -12,6 +12,7 @@ interface WorkspaceHeaderProps {
   onViewOverview?: () => void;
   onOpenHistory?: () => void;
   historyCount?: number;
+  isFallback?: boolean;
 }
 
 /**
@@ -28,8 +29,55 @@ export function WorkspaceHeader({
   canReset,
   onViewOverview,
   onOpenHistory,
-  historyCount = 0
+  historyCount = 0,
+  isFallback = false
 }: WorkspaceHeaderProps) {
+  const [isOnline, setIsOnline] = React.useState(() => {
+    if (typeof window !== "undefined") {
+      return navigator.onLine;
+    }
+    return true;
+  });
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const handleOnline = () => setIsOnline(true);
+      const handleOffline = () => setIsOnline(false);
+      window.addEventListener("online", handleOnline);
+      window.addEventListener("offline", handleOffline);
+      return () => {
+        window.removeEventListener("online", handleOnline);
+        window.removeEventListener("offline", handleOffline);
+      };
+    }
+  }, []);
+
+  const getLiveStatusInfo = () => {
+    if (!isOnline) {
+      return {
+        dotClass: "bg-[var(--rtd-reduce)] animate-pulse",
+        text: "Bitget [OFFLINE]",
+        title: "Browser is offline. Live market queries will use cached demo backups.",
+        isCleanLive: false
+      };
+    }
+    if (isFallback) {
+      return {
+        dotClass: "bg-[var(--rtd-reduce)] animate-pulse",
+        text: "Bitget [FALLBACK]",
+        title: "The Bitget API was unreachable in the last run. Showing cached weekend demo data.",
+        isCleanLive: false
+      };
+    }
+    return {
+      dotClass: "bg-[var(--rtd-proceed)] animate-pulse",
+      text: "Live Bitget",
+      title: "Query live orderbook and real-time prices from Bitget",
+      isCleanLive: true
+    };
+  };
+
+  const statusInfo = getLiveStatusInfo();
   return (
     <div className="sticky top-0 z-40 flex flex-col pt-safe bg-[var(--rtd-proof)]">
       {/* Off-hours simulation banner if Fixture mode is active */}
@@ -112,10 +160,10 @@ export function WorkspaceHeader({
                     ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)] shadow-xs"
                     : "text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper-subtle)]"
                 }`}
-                title="Query live orderbook and real-time prices from Bitget"
+                title={statusInfo.title}
               >
-                <span className={`w-1.5 h-1.5 rounded-full ${!useFixture ? "bg-[var(--rtd-proceed)] animate-pulse" : "bg-[var(--rtd-steel)]/40"}`} />
-                <span>Live Bitget</span>
+                <span className={`w-1.5 h-1.5 rounded-full ${!useFixture ? statusInfo.dotClass : "bg-[var(--rtd-steel)]/40"}`} />
+                <span>{statusInfo.text}</span>
               </button>
 
               <button
@@ -159,8 +207,8 @@ export function WorkspaceHeader({
               className="h-[32px] px-2 text-[9.5px] font-mono font-bold uppercase tracking-wider border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] active:scale-[0.98] flex items-center gap-1 cursor-pointer shadow-2xs"
               aria-label={`Toggle data mode (currently ${useFixture ? "Fixture" : "Live"})`}
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${useFixture ? "bg-[var(--rtd-reduce)]" : "bg-[var(--rtd-proceed)] animate-pulse"}`} />
-              <span>{useFixture ? "FIXTURE" : "LIVE"}</span>
+              <span className={`w-1.5 h-1.5 rounded-full ${useFixture ? "bg-[var(--rtd-reduce)]" : statusInfo.dotClass}`} />
+              <span>{useFixture ? "FIXTURE" : statusInfo.isCleanLive ? "LIVE" : isOnline ? "FALLBACK" : "OFFLINE"}</span>
             </button>
 
             {/* Compact Theme Toggle */}

@@ -309,6 +309,7 @@ export default function WorkspacePage() {
             onViewOverview={() => setViewMode("landing")}
             onOpenHistory={() => setIsHistoryOpen(true)}
             historyCount={auditHistory.length}
+            isFallback={artifact?.isFallbackDemo || false}
           />
 
           <main

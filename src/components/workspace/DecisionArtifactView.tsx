@@ -190,12 +190,14 @@ export function DecisionArtifactView({
         {(artifact.dataSource === "fixture" ||
           artifact.isFallbackDemo ||
           artifact.marketState?.isSynthetic) && (
-          <div className="border border-[var(--rtd-steel)]/25 bg-[var(--rtd-paper-subtle)] p-3 text-xs text-[var(--rtd-ink)] flex items-start gap-2">
-            <span className="font-mono font-bold text-[var(--rtd-wait)] shrink-0">
-              SNAPSHOT DATA:
+          <div className="border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-[var(--rtd-ink)] flex items-start gap-2">
+            <span className="font-mono font-bold text-[var(--rtd-reduce)] shrink-0 uppercase">
+              {artifact.isFallbackDemo && artifact.dataSource === "live" ? "OFFLINE FALLBACK:" : "SNAPSHOT DATA:"}
             </span>
             <span className="font-sans text-[var(--rtd-steel)]">
-              Operating in deterministic fixture mode. Observations derive from captured test fixtures.
+              {artifact.isFallbackDemo && artifact.dataSource === "live"
+                ? `The live Bitget API was unreachable. Switched to offline fallback: ${artifact.fallbackReason || "showing cached weekend basis demo data."}`
+                : "Operating in deterministic fixture mode. Observations derive from captured test fixtures."}
             </span>
           </div>
         )}
