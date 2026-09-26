@@ -43,9 +43,9 @@ export function Mark({
       className={className}
     >
       {blocks.map((b, i) => (
-        <path key={i} d={`${b.outer} ${b.inner}`} fill={body} fillRule="evenodd" />
+        <path key={i} d={`${b.outer} ${b.inner}`} fill={body} style={{ fill: body }} fillRule="evenodd" />
       ))}
-      <path d={seam} fill={fault} />
+      <path d={seam} fill={fault} style={{ fill: fault }} />
     </svg>
   );
 }

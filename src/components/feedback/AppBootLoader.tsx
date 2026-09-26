@@ -2,6 +2,7 @@
 
 import React from "react";
 import { BRANDING } from "@/config/branding";
+import { Mark } from "@/components/brand/Logo";
 
 interface AppBootLoaderProps {
   statusText?: string;
@@ -19,13 +20,12 @@ export function AppBootLoader({
       <div className="w-full max-w-md border border-[var(--rt-border-subtle)] bg-[var(--rt-surface-raised)] p-8 shadow-xs space-y-6">
         {/* Header Branding */}
         <div className="flex items-center gap-3 border-b border-[var(--rt-border-subtle)] pb-4">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/icon.svg"
-            alt={BRANDING.PRODUCT_NAME}
-            width={40}
-            height={40}
-            className="h-10 w-10 shrink-0 object-contain"
+          <Mark
+            size={40}
+            body="var(--rt-text-primary)"
+            fault="var(--rt-verdict-critical)"
+            title={BRANDING.PRODUCT_NAME}
+            className="h-10 w-10 shrink-0"
           />
           <div>
             <h1 className="text-base font-mono font-bold text-[var(--rt-text-primary)]">

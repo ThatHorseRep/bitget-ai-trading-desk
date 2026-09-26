@@ -68,8 +68,8 @@ function AnimatedDisplacementMark() {
       <div className="p-3 bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 shadow-xs">
         <Mark
           size={56}
-          body={COLOR.ink}
-          fault={COLOR.stamp}
+          body="var(--rtd-ink)"
+          fault="var(--rtd-stamp)"
           offset={displayOffset}
           title="Stress test displacement in progress"
         />

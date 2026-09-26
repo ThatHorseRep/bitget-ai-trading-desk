@@ -13,8 +13,8 @@ export default function OfflinePage() {
         <div className="flex justify-center" aria-hidden="true">
           <Mark
             size={32}
-            body={COLOR.ink}
-            fault={COLOR.steel}
+            body="var(--rtd-ink)"
+            fault="var(--rtd-steel)"
             title={BRANDING.SHORT_NAME}
           />
         </div>
