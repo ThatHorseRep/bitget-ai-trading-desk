@@ -1,5 +1,35 @@
 import type { ExistingExposure, NormalizedTrade, TradeDirection, TradeIdea } from "../../domain/trade/types";
 import { calculatePositionQuantity } from "../calculations/financial";
+import { ASSET_RISK_PROFILES } from "../scenarios/config";
+
+// The supported-asset source of truth is ASSET_RISK_PROFILES (every asset the
+// deterministic stress engine can actually model). A parsed asset outside this
+// set would dead-end at the market-state step, so the parser clarifies instead
+// of accepting it silently. "DEFAULT" is a config fallback key, not an asset.
+const KNOWN_R_TOKENS: string[] = Object.keys(ASSET_RISK_PROFILES).filter((a) => a !== "DEFAULT");
+
+// Direction-contradiction detection: opposing directional language appearing
+// alongside the resolved direction in the same input. Exact word matches keep
+// this deterministic and reviewable; hedged phrasing that lacks an opposing
+// keyword ("AI demand is weak", "could pull back") is thesis content, not a
+// direction contradiction, and is left to the thesis/LLM layers.
+const LONG_ONLY_WORDS = ["crash", "dump", "plunge", "plummet", "tank", "collapse", "bearish"];
+const SHORT_ONLY_WORDS = ["moon", "moonshot", "surge", "rally", "rip", "pump", "bullish", "long"];
+
+// "short squeeze" / "short interest" are bullish trading vocabulary, not a
+// SHORT direction signal — excluded via negative lookahead (case-insensitive,
+// whitespace allowed between the words). Bare "short" still matches.
+const SHORT_OPPOSITE_RE = /\bshort(?!\s*(?:squeeze|interest))\b/;
+
+function detectDirectionContradiction(text: string, resolved: TradeDirection): string[] {
+  const lower = text.toLowerCase();
+  if (resolved === "LONG") {
+    const words = LONG_ONLY_WORDS.filter((w) => new RegExp(`\\b${w}\\b`).test(lower));
+    if (SHORT_OPPOSITE_RE.test(lower)) words.push("short");
+    return words;
+  }
+  return SHORT_ONLY_WORDS.filter((w) => new RegExp(`\\b${w}\\b`).test(lower));
+}
 
 export interface ParsedTradeResult {
   tradeIdea: TradeIdea;
@@ -35,6 +65,7 @@ export function parseNaturalLanguageTrade(
   // 2. Asset extraction
   let asset: string | null = null;
   let assetClarificationRequired = false;
+  let unsupportedAssetQuestion: string | null = null;
 
   // Case matters: real r-tokens are camelCase (rNVDA, rAAPL) — a case-
   // insensitive r[A-Za-z]+ rule would swallow ordinary words like "risk"
@@ -81,8 +112,7 @@ export function parseNaturalLanguageTrade(
   // Correct it to the closest known r-token (edit distance <= 2) and surface
   // the correction as an inferred field so the UI shows what changed.
   if (asset) {
-    const knownRTokens = ["rNVDA", "rTSLA", "rMSTR", "rCOIN", "rAAPL", "rAMZN"];
-    if (!knownRTokens.includes(asset)) {
+    if (!KNOWN_R_TOKENS.includes(asset)) {
       const editDistance = (a: string, b: string): number => {
         const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
         for (let j = 0; j <= b.length; j++) dp[0][j] = j;
@@ -98,7 +128,7 @@ export function parseNaturalLanguageTrade(
         return dp[a.length][b.length];
       };
       let best: { token: string; dist: number } | null = null;
-      for (const token of knownRTokens) {
+      for (const token of KNOWN_R_TOKENS) {
         const dist = editDistance(asset, token);
         if (dist <= 2 && (best === null || dist < best.dist)) {
           best = { token, dist };
@@ -107,6 +137,14 @@ export function parseNaturalLanguageTrade(
       if (best) {
         inferred.push(`asset (corrected from "${asset}")`);
         asset = best.token;
+      } else {
+        // Unsupported asset (e.g. an invented r-token like "rQXYZ"): never
+        // accepted silently — it cannot reach the market-state step. Ask for
+        // a clarification listing the assets the desk actually supports.
+        assetClarificationRequired = true;
+        unsupportedAssetQuestion = `${asset} isn't a supported asset — did you mean one of: ${KNOWN_R_TOKENS.join(", ")}?`;
+        userProvided.pop(); // the generic r-token match is not a real asset mention
+        asset = null;
       }
     }
   }
@@ -269,7 +307,9 @@ export function parseNaturalLanguageTrade(
   if (assetClarificationRequired || !asset) {
     requiresClarification = true;
     clarificationField = "asset";
-    clarificationQuestion = assetClarificationRequired 
+    clarificationQuestion = unsupportedAssetQuestion
+      ? unsupportedAssetQuestion
+      : assetClarificationRequired 
       ? "Did you mean rNVDA (the tokenized NVIDIA asset available on Bitget)?" 
       : "Which asset are you planning to trade? (e.g., rNVDA, rAAPL, rTSLA).";
   } else if (!direction) {
@@ -288,6 +328,21 @@ export function parseNaturalLanguageTrade(
     requiresClarification = true;
     clarificationField = "thesis";
     clarificationQuestion = "What is your underlying thesis or catalyst for entering this trade?";
+  }
+
+  // Direction contradiction: opposing directional language in the same input
+  // as the resolved direction (e.g. "long but I think it'll crash"). Surfaced
+  // as an inferred field plus a clarification request — same ambiguity channel
+  // the parser already uses — rather than a silently resolved position. Bullish
+  // "short squeeze"/"short interest" vocabulary is not a contradiction.
+  const directionContradictions = direction ? detectDirectionContradiction(text, direction) : [];
+  if (!requiresClarification && directionContradictions.length > 0) {
+    inferred.push(
+      `direction-contradiction (resolved ${direction}, but input also contains opposing language: ${directionContradictions.join(", ")})`
+    );
+    requiresClarification = true;
+    clarificationField = "direction";
+    clarificationQuestion = `Your input reads ${direction} but also contains opposing language ("${directionContradictions.join(", ")}"). Do you want to go LONG or SHORT?`;
   }
 
   const tradeIdea: TradeIdea = {

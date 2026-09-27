@@ -148,6 +148,59 @@ test("Competitor Sabotage Suite - Tier 2: Parser & Prompt Injection Attacks", as
     assert.ok(parsed.clarificationQuestion.includes("Did you mean rNVDA"));
   });
 
+  await t.test("unsupported invented r-token triggers asset clarification (evidence dump ADV2)", () => {
+    const parsed = parseNaturalLanguageTrade("buy $2,000 of rQXYZ because moon");
+    assert.equal(parsed.requiresClarification, true);
+    assert.equal(parsed.clarificationField, "asset");
+    assert.equal(parsed.normalizedTrade, null);
+    assert.ok(parsed.clarificationQuestion.includes("rQXYZ isn't a supported asset"));
+    assert.ok(parsed.clarificationQuestion.includes("rNVDA"));
+  });
+
+  await t.test("direction contradiction in thesis triggers direction clarification (evidence dump ADV4)", () => {
+    const parsed = parseNaturalLanguageTrade("long but I think it'll crash, $3,000 rNVDA");
+    assert.equal(parsed.requiresClarification, true);
+    assert.equal(parsed.clarificationField, "direction");
+    assert.equal(parsed.normalizedTrade, null);
+    assert.ok(parsed.tradeIdea.thesis.includes("crash"));
+  });
+
+  await t.test("bullish 'short squeeze' vocabulary does NOT trigger direction contradiction on LONG", () => {
+    const squeezeInput = "buy $2,000 of rTSLA because a short squeeze will send it flying";
+    const squeezeParsed = parseNaturalLanguageTrade(squeezeInput);
+    assert.equal(squeezeParsed.tradeIdea.direction, "LONG");
+    assert.equal(squeezeParsed.requiresClarification, false);
+    assert.notEqual(squeezeParsed.clarificationField, "direction");
+    assert.ok(squeezeParsed.normalizedTrade);
+    const interestInput = "go long $4,000 of rCOIN because short interest is at record highs";
+    const interestParsed = parseNaturalLanguageTrade(interestInput);
+    assert.equal(interestParsed.tradeIdea.direction, "LONG");
+    assert.equal(interestParsed.requiresClarification, false);
+    assert.notEqual(interestParsed.clarificationField, "direction");
+    assert.ok(interestParsed.normalizedTrade);
+  });
+
+  await t.test("bare 'short' still triggers direction contradiction on LONG", () => {
+    const parsed = parseNaturalLanguageTrade("buy $2,000 of rTSLA but honestly I want to short this instead");
+    assert.equal(parsed.requiresClarification, true);
+    assert.equal(parsed.clarificationField, "direction");
+  });
+
+  await t.test("'long' inside ordinary words does NOT false-positive on SHORT inputs", () => {
+    const belongInput = "short $2,000 of rNVDA because the thesis no longer belongs to the bulls";
+    const belongParsed = parseNaturalLanguageTrade(belongInput);
+    assert.equal(belongParsed.tradeIdea.direction, "SHORT");
+    assert.equal(belongParsed.requiresClarification, false);
+    assert.notEqual(belongParsed.clarificationField, "direction");
+    assert.ok(belongParsed.normalizedTrade);
+    const longerInput = "short $3,000 of rCOIN because exchange volumes will flatline over a longer horizon";
+    const longerParsed = parseNaturalLanguageTrade(longerInput);
+    assert.equal(longerParsed.tradeIdea.direction, "SHORT");
+    assert.equal(longerParsed.requiresClarification, false);
+    assert.notEqual(longerParsed.clarificationField, "direction");
+    assert.ok(longerParsed.normalizedTrade);
+  });
+
   await t.test("generic r-tokens (rAAPL, rTSLA) are properly parsed", () => {
     const rAapl = "buy $1500 of rAAPL because earnings beat";
     const parsed = parseNaturalLanguageTrade(rAapl);
