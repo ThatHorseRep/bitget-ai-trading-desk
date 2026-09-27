@@ -91,3 +91,13 @@
 | Fixture fallback honesty | **PASS — rNVDA-only, flagged** | Fallback fires only for rNVDA requests and is flagged (`isFallbackDemo`, `fallbackReason`, `dataSource: "fixture"`); `/api/market-price` returns 503 rather than serve demo data as a real price. |
 
 **Conclusion for judges:** the desk's primary path is live Bitget market data (proven above on the deployed app), with research providers as bounded, honestly-degrading enrichment and the fixture as an explicitly-labeled convenience for off-hours demos — never presented as live.
+
+### Addendum 2 — Deployment-Network Verification (2026-09-26, post provider-visibility fix)
+
+| Check | Result |
+|---|---|
+| US Equity MCP from the **deployment** (Vercel) | **Contributes real evidence in production** — a live workflow run returned 7 evidence items (5 legacy + US Equity MCP), with **no** UNAVAILABLE row for `bitget-us-equity-mcp`. `agent.bitget.com` is DNS-blocked from the dev machine's network but reachable from Vercel's. |
+| Provider visibility on the deployed artifact | Limitations now name attempted-but-unproductive providers explicitly (e.g. "Research provider 'bitget-signal' was reachable but returned no observations for this asset/topic.") instead of omitting them silently. |
+| Measured latency (deployment, full live run) | **16.8–17.7s** end-to-end with LLM + bounded research; **0.8s** in fixture mode; hard 45s serverless budget with deterministic fallback. |
+
+**Guidance for the demo:** expect provider rows in the artifact's limitations when upstreams are slow or empty — this is the desk working as designed (honest degradation, visible provenance), not a failure. From a demo venue's network, re-check `agent.bitget.com` and `datahub.noxiaohao.com` reachability before presenting.

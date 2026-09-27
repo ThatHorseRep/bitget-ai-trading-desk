@@ -63,7 +63,7 @@ The LLM is **never** used for market parsing, price selection, scenario math, P&
 >
 > We built @Bitget_AI RedTeam Desk: state your trade in plain English — it reconstructs the off-hours market state, adversarially attacks your thesis, and stress-tests the position with 100% deterministic math. 
 > 
-> Verdict (PROCEED / WAIT / REDUCE / REJECT) + auditable fact lineage. You stay the decision-maker.
+> Verdict (PROCEED / WAIT / REDUCE / REJECT) + auditable fact lineage. You stay the decision-maker. Pick your risk tolerance — LOW / MED / HIGH — and watch it move the verdict.
 >
 > 🌐 Live App: https://redteamdesk.name.ng
 > 🖥️ Demo Video: https://redteamdesk.name.ng/demo/desktop-demo.mp4
