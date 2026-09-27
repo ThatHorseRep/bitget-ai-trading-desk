@@ -51,8 +51,64 @@ export function parseNaturalLanguageTrade(
     const ticker = genericRTokenMatch[1];
     asset = ticker.toUpperCase() === "NVDA" ? "rNVDA" : "r" + ticker;
     userProvided.push("asset");
-  } else if (/\bnvda\b/i.test(text)) {
-    assetClarificationRequired = true;
+  } else {
+    // Full company names count as asset mentions ("I believe NVIDIA is...").
+    // Bare tickers ("nvda") get a confirming clarification instead of a
+    // silent mapping, since they may refer to the underlying, not the token.
+    const companyAliases: Record<string, string> = {
+      nvidia: "rNVDA",
+      tesla: "rTSLA",
+      microstrategy: "rMSTR",
+      coinbase: "rCOIN",
+      apple: "rAAPL",
+      amazon: "rAMZN"
+    };
+    const lower = text.toLowerCase();
+    for (const [name, token] of Object.entries(companyAliases)) {
+      if (new RegExp(`\\b${name}\\b`).test(lower)) {
+        asset = token;
+        userProvided.push("asset");
+        break;
+      }
+    }
+    if (!asset && /\b(nvda|tsla|aapl|coin|mstr|amzn)\b/i.test(text)) {
+      assetClarificationRequired = true;
+    }
+  }
+
+  // Typo tolerance: a near-miss r-token like "rNVDDA" would otherwise be
+  // accepted as a fabricated asset and dead-end at the market-state step.
+  // Correct it to the closest known r-token (edit distance <= 2) and surface
+  // the correction as an inferred field so the UI shows what changed.
+  if (asset) {
+    const knownRTokens = ["rNVDA", "rTSLA", "rMSTR", "rCOIN", "rAAPL", "rAMZN"];
+    if (!knownRTokens.includes(asset)) {
+      const editDistance = (a: string, b: string): number => {
+        const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+        for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+        for (let i = 1; i <= a.length; i++) {
+          for (let j = 1; j <= b.length; j++) {
+            dp[i][j] = Math.min(
+              dp[i - 1][j] + 1,
+              dp[i][j - 1] + 1,
+              dp[i - 1][j - 1] + (a[i - 1].toLowerCase() === b[j - 1].toLowerCase() ? 0 : 1)
+            );
+          }
+        }
+        return dp[a.length][b.length];
+      };
+      let best: { token: string; dist: number } | null = null;
+      for (const token of knownRTokens) {
+        const dist = editDistance(asset, token);
+        if (dist <= 2 && (best === null || dist < best.dist)) {
+          best = { token, dist };
+        }
+      }
+      if (best) {
+        inferred.push(`asset (corrected from "${asset}")`);
+        asset = best.token;
+      }
+    }
   }
 
   // 3. Price extraction (must strictly distinguish prices from execution times like 'at 11:30 ET' and percentages like 'at 0.03%')
