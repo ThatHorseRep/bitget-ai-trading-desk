@@ -36,6 +36,45 @@ export interface VerdictGateResult {
   reasons: string[];
 }
 
+/**
+ * Trader risk tolerance. The desk's default persona is a moderate-risk,
+ * crypto-native retail trader ($1,000–$50,000 capital). This lever ties that
+ * persona to the decision logic: it shifts the computed risk band one step,
+ * which moves WAIT/REDUCE/PROCEED thresholds. Hard blockers (invalid trade,
+ * insufficient thesis, critical data) are never relaxed by tolerance.
+ */
+export type RiskTolerance = "CONSERVATIVE" | "MODERATE" | "AGGRESSIVE";
+
+export interface RiskAdjustedBand {
+  band: QualityBand;
+  shifted: boolean;
+  originalBand: QualityBand;
+  /** Human-readable note when the band moved; null when unshifted. */
+  note: string | null;
+}
+
+/**
+ * Shift a computed risk band per the trader's risk tolerance.
+ * CONSERVATIVE shifts one step worse (toward stricter verdicts),
+ * AGGRESSIVE one step better. "critical" and "clear" are terminal bands
+ * and never shift past the ends. Pure function; deterministic.
+ */
+export function applyRiskToleranceToBand(band: QualityBand, tolerance: RiskTolerance): RiskAdjustedBand {
+  if (tolerance === "MODERATE") {
+    return { band, shifted: false, originalBand: band, note: null };
+  }
+  const rank = BAND_RANKS[band];
+  const shiftedRank = tolerance === "CONSERVATIVE" ? Math.max(0, rank - 1) : Math.min(3, rank + 1);
+  const shiftedBand = (Object.keys(BAND_RANKS) as QualityBand[]).find((b) => BAND_RANKS[b] === shiftedRank) ?? band;
+  const direction = tolerance === "CONSERVATIVE" ? "worse" : "better";
+  return {
+    band: shiftedBand,
+    shifted: shiftedBand !== band,
+    originalBand: band,
+    note: `Risk tolerance ${tolerance}: risk band adjusted one step ${direction} (${band} → ${shiftedBand}).`,
+  };
+}
+
 const BAND_RANKS: Record<QualityBand, number> = {
   critical: 0,
   elevated: 1,

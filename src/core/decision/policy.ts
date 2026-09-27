@@ -1,9 +1,11 @@
 import type { Decision, DecisionInputs, DecisionPolicyConfig } from "../../domain/decision/types";
 import {
   gateVerdict,
+  applyRiskToleranceToBand,
   type ThesisSignals,
   type PositionSignals,
-  type VerdictGateResult
+  type VerdictGateResult,
+  type RiskAdjustedBand
 } from "../../lib/verdict/scoring";
 
 export const DECISION_POLICY_CONFIG: DecisionPolicyConfig = {
@@ -154,10 +156,18 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
   // Check explicit gated verdict scoring if attached
   if (inputs.positionAssessment?.gatedVerdictResult) {
     const gated = inputs.positionAssessment.gatedVerdictResult;
-    if (gated.band === "critical") {
+    // Persona lever: the trader's risk tolerance shifts the computed risk
+    // band one step (CONSERVATIVE stricter / AGGRESSIVE looser). Applied
+    // ONLY to the gated-band path — hard blockers (invalid trade,
+    // insufficient thesis, critical data) above are never relaxed.
+    const tolerance = inputs.riskTolerance ?? "MODERATE";
+    const adjusted: RiskAdjustedBand = applyRiskToleranceToBand(gated.band, tolerance);
+    const gatedReasons = gated.reasons;
+    const shiftedReasons = adjusted.note ? [...gatedReasons, adjusted.note] : gatedReasons;
+    if (adjusted.band === "critical") {
       return {
         verdict: "REJECT",
-        reasons: gated.reasons.map((r: string) => ({
+        reasons: shiftedReasons.map((r: string) => ({
           code: "SEVERE_POSITION_RISK" as const,
           message: r
         })),
@@ -165,11 +175,11 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
         changeConditions: ["Articulate a specific, falsifiable thesis or catalyst.", ...thesisConditions]
       };
     }
-    if (gated.band === "elevated") {
+    if (adjusted.band === "elevated") {
       if (isWeekendOrOffHours) {
         return {
           verdict: "WAIT",
-          reasons: gated.reasons.map((r: string) => ({
+          reasons: shiftedReasons.map((r: string) => ({
             code: "OFF_HOURS_WAIT" as const,
             message: r
           })),
@@ -179,7 +189,7 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
       }
       return {
         verdict: "REDUCE",
-        reasons: gated.reasons.map((r: string) => ({
+        reasons: shiftedReasons.map((r: string) => ({
           code: "REDUCE_POSITION_SIZE" as const,
           message: r
         })),

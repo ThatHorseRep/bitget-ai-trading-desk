@@ -9,6 +9,7 @@ import { checkRateLimit, rateLimitExceededResponse } from "../../../lib/rateLimi
 const requestSchema = z.object({
   input: z.string().min(1).max(2000, "Input is too long"),
   useFixture: z.boolean().optional().default(false),
+  riskTolerance: z.enum(["CONSERVATIVE", "MODERATE", "AGGRESSIVE"]).optional().default("MODERATE"),
 }).strict();
 
 const MAX_REQUESTS_PER_WINDOW = 10;
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { input, useFixture } = parseResult.data;
+    const { input, useFixture, riskTolerance } = parseResult.data;
     const deskService = new DecisionDeskService();
     
     const encoder = new TextEncoder();
@@ -67,6 +68,7 @@ export async function POST(request: NextRequest) {
         try {
           const result = await deskService.runWorkflow(input, { 
             useFixture, 
+            riskTolerance,
             signal: request.signal,
             onProgress: (stageId, message) => {
               try {

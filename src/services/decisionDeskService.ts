@@ -31,6 +31,11 @@ export interface DecisionDeskOptions {
   now?: Date;
   signal?: AbortSignal;
   onProgress?: (stageId: string, message: string) => void;
+  /**
+   * Persona lever: trader risk tolerance. Default MODERATE preserves the
+   * historical verdict thresholds exactly.
+   */
+  riskTolerance?: "CONSERVATIVE" | "MODERATE" | "AGGRESSIVE";
 }
 
 export interface DecisionWorkflowResult {
@@ -312,7 +317,8 @@ export class DecisionDeskService {
       scenarios,
       dataQuality: marketState.dataQuality,
       criticalBlockers: [],
-      materialUncertainty: thesis ? thesis.unresolvedAmbiguities.length > 0 : false
+      materialUncertainty: thesis ? thesis.unresolvedAmbiguities.length > 0 : false,
+      riskTolerance: options.riskTolerance ?? "MODERATE"
     });
 
     // 9. Provenance Compilation (Facts, Calculations, Assumptions, Interpretations)
@@ -409,7 +415,10 @@ export class DecisionDeskService {
       limitations,
       dataSource: (options.useFixture || marketState.isSynthetic || marketState.isFallbackDemo) ? "fixture" : "live",
       isFallbackDemo: options.useFixture || marketState.isFallbackDemo || false,
-      fallbackReason: marketState.fallbackReason || (options.useFixture ? "Showing curated rNVDA weekend basis demo" : undefined)
+      fallbackReason: marketState.fallbackReason || (options.useFixture ? "Showing curated rNVDA weekend basis demo" : undefined),
+      riskToleranceApplied: (options.riskTolerance && options.riskTolerance !== "MODERATE")
+        ? { tolerance: options.riskTolerance, bandShiftNote: decision.reasons.find((r) => r.message.includes("Risk tolerance"))?.message ?? null }
+        : undefined
     };
 
     return {

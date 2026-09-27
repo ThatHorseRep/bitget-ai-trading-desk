@@ -13,6 +13,8 @@ interface WorkspaceHeaderProps {
   onOpenHistory?: () => void;
   historyCount?: number;
   isFallback?: boolean;
+  riskTolerance?: "CONSERVATIVE" | "MODERATE" | "AGGRESSIVE";
+  onToggleRiskTolerance?: (value: "CONSERVATIVE" | "MODERATE" | "AGGRESSIVE") => void;
 }
 
 /**
@@ -30,7 +32,9 @@ export function WorkspaceHeader({
   onViewOverview,
   onOpenHistory,
   historyCount = 0,
-  isFallback = false
+  isFallback = false,
+  riskTolerance = "MODERATE",
+  onToggleRiskTolerance
 }: WorkspaceHeaderProps) {
   const [isOnline, setIsOnline] = React.useState(() => {
     if (typeof window !== "undefined") {
@@ -182,6 +186,42 @@ export function WorkspaceHeader({
               </button>
             </div>
 
+            {/* Risk Tolerance Selector (persona lever: shifts WAIT/REDUCE/PROCEED thresholds) */}
+            {onToggleRiskTolerance && (
+              <div
+                role="group"
+                aria-label="Risk Tolerance Selector"
+                className="inline-flex items-center border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] p-0.5 shadow-2xs"
+              >
+                {(["CONSERVATIVE", "MODERATE", "AGGRESSIVE"] as const).map((level) => (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => onToggleRiskTolerance(level)}
+                    aria-pressed={riskTolerance === level}
+                    className={`h-[34px] px-2.5 text-[10px] font-mono font-bold tracking-wider uppercase transition-all cursor-pointer ${
+                      riskTolerance === level
+                        ? level === "CONSERVATIVE"
+                          ? "bg-[var(--rtd-wait)] text-[var(--rtd-paper)] shadow-xs"
+                          : level === "AGGRESSIVE"
+                            ? "bg-[var(--rtd-reduce)] text-[var(--rtd-paper)] shadow-xs"
+                            : "bg-[var(--rtd-ink)] text-[var(--rtd-paper)] shadow-xs"
+                        : "text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper-subtle)]"
+                    }`}
+                    title={
+                      level === "CONSERVATIVE"
+                        ? "Shift risk bands one step stricter (smaller WAIT/REDUCE/PROCEED allowances)"
+                        : level === "AGGRESSIVE"
+                          ? "Shift risk bands one step looser (larger WAIT/REDUCE/PROCEED allowances)"
+                          : "Default desk persona: crypto-native retail, moderate risk"
+                    }
+                  >
+                    {level === "CONSERVATIVE" ? "LOW" : level === "AGGRESSIVE" ? "HIGH" : "MED"}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Theme Toggle (Day / Night) */}
             <ThemeToggle />
 
@@ -210,6 +250,29 @@ export function WorkspaceHeader({
               <span className={`w-1.5 h-1.5 rounded-full ${useFixture ? "bg-[var(--rtd-reduce)]" : statusInfo.dotClass}`} />
               <span>{useFixture ? "FIXTURE" : statusInfo.isCleanLive ? "LIVE" : isOnline ? "FALLBACK" : "OFFLINE"}</span>
             </button>
+
+            {/* Compact Risk Tolerance Toggle */}
+            {onToggleRiskTolerance && (
+              <button
+                type="button"
+                onClick={() =>
+                  onToggleRiskTolerance(
+                    riskTolerance === "CONSERVATIVE" ? "MODERATE" : riskTolerance === "MODERATE" ? "AGGRESSIVE" : "CONSERVATIVE"
+                  )
+                }
+                className={`h-[32px] px-2 text-[9.5px] font-mono font-bold uppercase tracking-wider border active:scale-[0.98] flex items-center gap-1 cursor-pointer shadow-2xs ${
+                  riskTolerance === "MODERATE"
+                    ? "border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)]"
+                    : riskTolerance === "CONSERVATIVE"
+                      ? "border-[var(--rtd-wait)] bg-[var(--rtd-wait)] text-[var(--rtd-paper)]"
+                      : "border-[var(--rtd-reduce)] bg-[var(--rtd-reduce)] text-[var(--rtd-paper)]"
+                }`}
+                aria-label={`Risk tolerance: ${riskTolerance}. Click to cycle.`}
+                title="Risk tolerance shifts the desk's WAIT/REDUCE/PROCEED thresholds"
+              >
+                <span>RISK:{riskTolerance === "CONSERVATIVE" ? "LOW" : riskTolerance === "AGGRESSIVE" ? "HIGH" : "MED"}</span>
+              </button>
+            )}
 
             {/* Compact Theme Toggle */}
             <ThemeToggle compact className="h-[32px] min-h-[32px] px-2 py-0" />

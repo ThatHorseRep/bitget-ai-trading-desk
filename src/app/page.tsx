@@ -38,6 +38,13 @@ export default function WorkspacePage() {
   });
   const [prompt, setPrompt] = useState(() => persistedInitial?.prompt ?? "");
   const [useFixture, setUseFixture] = useState(() => Boolean(persistedInitial?.useFixture));
+  // Persona lever: ties the target-user persona (crypto-native retail,
+  // $1,000–$50,000, moderate risk) to the decision logic. MODERATE preserves
+  // the historical thresholds exactly.
+  const [riskTolerance, setRiskTolerance] = useState<"CONSERVATIVE" | "MODERATE" | "AGGRESSIVE">(() => {
+    const persisted = (persistedInitial as { riskTolerance?: string } | null)?.riskTolerance;
+    return persisted === "CONSERVATIVE" || persisted === "AGGRESSIVE" ? persisted : "MODERATE";
+  });
   const [parsedResult, setParsedResult] = useState<ParsedTradeResult | null>(() => persistedInitial?.parsedResult ?? null);
   const [artifact, setArtifact] = useState<DecisionArtifact | null>(() => persistedInitial?.artifact ?? null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -166,7 +173,7 @@ export default function WorkspacePage() {
       const response = await fetch("/api/stress-test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: prompt, useFixture }),
+        body: JSON.stringify({ input: prompt, useFixture, riskTolerance }),
         signal: abortControllerRef.current.signal
       });
 
@@ -310,6 +317,8 @@ export default function WorkspacePage() {
             onOpenHistory={() => setIsHistoryOpen(true)}
             historyCount={auditHistory.length}
             isFallback={artifact?.isFallbackDemo || false}
+            riskTolerance={riskTolerance}
+            onToggleRiskTolerance={setRiskTolerance}
           />
 
           <main

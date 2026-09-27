@@ -3,6 +3,7 @@ import type { ThesisQuality, ThesisPositionAssessment } from "../thesis/types";
 import type { StressScenario } from "../scenarios/types";
 import type { MarketState } from "../market/types";
 import type { NormalizedTrade } from "../trade/types";
+import type { RiskTolerance } from "../../lib/verdict/scoring";
 
 export type DecisionVerdict = "PROCEED" | "WAIT" | "REDUCE" | "REJECT";
 export type DecisionReasonCode = 
@@ -31,6 +32,12 @@ export interface DecisionInputs {
   dataQuality: DataQualityStatus;
   criticalBlockers?: string[];
   materialUncertainty?: boolean;
+  /**
+   * Persona lever tying the desk's target-user model (crypto-native retail,
+   * $1,000–$50,000, moderate risk) to the decision logic. Default MODERATE
+   * preserves the historical thresholds exactly.
+   */
+  riskTolerance?: RiskTolerance;
 }
 
 export interface Decision {
@@ -83,6 +90,12 @@ export interface DecisionArtifact {
   dataSource?: "live" | "fixture";
   isFallbackDemo?: boolean;
   fallbackReason?: string;
+  /**
+   * The risk tolerance that was in effect for this decision, and the
+   * risk-band shift it applied (absent for the default MODERATE).
+   * Surfaced so the artifact's audit trail shows the persona lever's effect.
+   */
+  riskToleranceApplied?: { tolerance: RiskTolerance; bandShiftNote: string | null };
   /**
    * PRE24-10: Optional paper-trading companion state for GetAgent Studio workflow.
    * Absent by default; added only when user explicitly enables paper trading.
