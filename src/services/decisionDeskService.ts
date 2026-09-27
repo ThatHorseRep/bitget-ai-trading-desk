@@ -198,7 +198,7 @@ export class DecisionDeskService {
     } else {
       try {
         const registryToUse = options.researchRegistry ?? this.researchRegistry;
-        const observations = await registryToUse.gatherObservations(trade.asset, trade.thesis);
+        const { observations, outcomes } = await registryToUse.gatherObservationsDetailed(trade.asset, trade.thesis);
         
         // PRE24-04: Source arbitration at the Evidence layer.
         // The arbitrator preserves all material source identities, timestamps,
@@ -209,6 +209,23 @@ export class DecisionDeskService {
         const arbitration = arbitrator.arbitrate(observations, { now });
         evidence = arbitration.evidence;
         limitations.push(...arbitration.limitations);
+
+        // Ecosystem visibility: a research provider that was attempted but
+        // contributed nothing is stated plainly in the limitations instead of
+        // being silently absent from the artifact. Judges and traders can see
+        // exactly which integrations were reachable in THIS evaluation.
+        for (const outcome of outcomes) {
+          if (outcome.status === "OBSERVATIONS") continue;
+          if (outcome.status === "UNAVAILABLE") {
+            limitations.push(`Research provider '${outcome.providerId}' is currently unavailable upstream and contributed no evidence to this evaluation.`);
+          } else if (outcome.status === "TIMEOUT") {
+            limitations.push(`Research provider '${outcome.providerId}' timed out within the bounded research budget and contributed no evidence to this evaluation.`);
+          } else if (outcome.status === "ERROR") {
+            limitations.push(`Research provider '${outcome.providerId}' failed (${outcome.detail ?? "unknown error"}) and contributed no evidence to this evaluation.`);
+          } else if (outcome.status === "EMPTY") {
+            limitations.push(`Research provider '${outcome.providerId}' was reachable but returned no observations for this asset/topic.`);
+          }
+        }
       } catch (err) {
         limitations.push(humanizeLimitation("Evidence Retrieval", err));
       }

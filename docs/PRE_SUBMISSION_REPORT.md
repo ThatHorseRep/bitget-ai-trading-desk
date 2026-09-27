@@ -1,7 +1,7 @@
 # Pre-Submission Report — Bitget AI RedTeam Desk
 **Bitget AI Base Camp Hackathon S2 · Track 3 (AI Trading Desk) · Sub-theme: Decision Stress Testing**
 **Deadline: Sept 27, UTC+8 · Live app: redteamdesk.name.ng · University: FUTMINNA**
-**Prepared: 2026-09-26 · All repo changes pushed to GitHub `main` @ `b0937de`**
+**Prepared: 2026-09-26 · All repo changes pushed to GitHub `main` (see commit log for current head)**
 
 ---
 
@@ -106,3 +106,16 @@ Everything repo-side that can be prepared, verified, and pushed **has been**. Th
 ## 4. Honest Closing — What a Difficult Judge Would Still Ding
 
 A tough judge will notice that the strongest claim in this project — "deterministic, auditable, honest" — is proven most convincingly in the repository, not in the two minutes of demo they will actually watch. The demo videos predate today's risk-tolerance lever, so a judge comparing Part 4's claims against the video will see a feature the demo doesn't show; run it live instead, or re-record. They may also push on the research quality axis: the "research" is a well-constructed methodology narrative plus engine-executed walkthroughs, not empirical trader data — the platform is four months old, and the doc now says so honestly, but "no real users yet" remains a visible soft spot against the [TARGET] distribution plan, which is aspiration, not evidence. The Signal MCP's tool-timeouts and the US Equity MCP's DNS failure from this network are documented as graceful degradation, but a judge probing integrations at demo time could see "UNAVAILABLE" provenance rows and ask why the ecosystem depth is thinner live than in the README — the honest answer is upstream availability, and you should volunteer it before they ask. Finally, Track 3 is subjective: the desk's deliberate slowness-to-PROCEED (its whole point) can read as conservative dullness to a judge expecting a flashy trading agent; the counter is to demo the risk-tolerance lever first and let them feel the persona shift move a verdict live — that is the most judge-legible thirty seconds this product has.
+
+---
+
+## 5. Second-Pass Addendum — Section 4 Items Closed in Code/Docs (2026-09-26)
+
+Re-reading section 4 as open tasks, these were fixable without a human and are now fixed:
+
+1. **Falsified latency claim corrected.** Direct measurement of the deployed app returned **16.8–17.7s** for a full live evaluation — the previous "under 12 seconds cold" [OBSERVED] claim was false and has been replaced in PRODUCT_DESCRIPTION Part 3 with the measured 16.8–17.7s (LLM + bounded research in the loop), the verified 0.8s fixture path, and the hard 45s serverless budget with deterministic fallback.
+2. **"Thinner live than README" fixed in code.** The deployment run showed MCP providers contributed zero evidence rows *silently*. The research registry now reports per-provider outcomes (OBSERVATIONS / EMPTY / UNAVAILABLE / ERROR / TIMEOUT), and the artifact's limitations name every attempted provider and its exact failure mode — proven locally (3 provider rows surfaced) and re-verified on the deployment after this commit.
+3. **Research depth strengthened without overclaiming.** The previously-generic "competitor sabotage matrices" line is now quantified [OBSERVED] evidence: a 5-tier sabotage matrix (28 adversarial subtests) + 10-case adversarial LLM suite (injection neutralization, hallucinated-evidence rejection, 429/5xx/timeout failover, deterministic-verdict invariance) — all named from the actual test files, nothing invented.
+4. **Test-count drift corrected.** "33 test suites" → **32 test files** (verified by file count); the 293/293 figure remains exact.
+
+**Still open and requiring a human (unchanged, do not simulate):** the demo videos predate the risk-tolerance lever — either re-record or demo the lever live; the cold incognito run; the X post publication; the Google Form entry; one outside-eyes read-back. All upstream MCP reachability must be re-checked from the demo network on demo day — provider status is now visible in every artifact, so expect and explain UNAVAILABLE/TIMEOUT rows rather than being surprised by them.
