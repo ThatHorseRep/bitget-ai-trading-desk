@@ -9,6 +9,31 @@ if (!fs.existsSync(binDir)) {
 const nm = path.join(__dirname, "..", "node_modules");
 if (!fs.existsSync(nm)) process.exit(0);
 
+// --- Native binary staging for Windows dev machines ---
+// npm bug (npm/cli#4828) can skip platform-optional deps installed from a
+// lockfile produced on another OS, and bundlers (Turbopack) cannot statically
+// resolve the native loaders' fallback require chains. Copied binaries in the
+// exact relative paths the loaders try FIRST make builds deterministic.
+const nativeStaging = [
+  {
+    from: path.join(nm, "@tailwindcss", "oxide-win32-x64-msvc", "tailwindcss-oxide.win32-x64-msvc.node"),
+    to: path.join(nm, "@tailwindcss", "oxide", "tailwindcss-oxide.win32-x64-msvc.node"),
+  },
+  {
+    from: path.join(nm, "lightningcss-win32-x64-msvc", "lightningcss.win32-x64-msvc.node"),
+    to: path.join(nm, "@tailwindcss", "node", "node_modules", "lightningcss", "lightningcss.win32-x64-msvc.node"),
+  },
+];
+for (const { from, to } of nativeStaging) {
+  try {
+    if (fs.existsSync(from) && !fs.existsSync(to)) {
+      fs.copyFileSync(from, to);
+    }
+  } catch (e) {
+    // best-effort; dev machines without these packages must not break install
+  }
+}
+
 const dirs = fs.readdirSync(nm);
 for (const d of dirs) {
   if (d.startsWith("@")) {

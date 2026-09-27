@@ -74,3 +74,20 @@
 - **Latency**: 349ms (126 bytes)
 - **Health**: Reachable and responding.
 
+
+---
+
+## Addendum — Pre-Submission Re-verification (2026-09-26)
+
+**Machine:** Windows 11 dev workstation, Node v22.23.2 · **Scope:** live-path proof with Demo Mode OFF, plus optional-ecosystem provider status.
+
+| Check | Result | Evidence |
+|---|---|---|
+| MarketStateService live path (no fixture) | **PASS — real data** | `getMarketState("rNVDA")` returned instrumentPrice **224.04** (Bitget rToken ticker), btcPrice **84,361.64** (Bitget BTC/USDT), referencePrice **225.07** (Yahoo), `dataQuality: COMPLETE`, `isFallbackDemo: false`, 3 observed sources with timestamps. Fixture value ($120) would prove fallback; observed value matches deployment exactly. |
+| Deployed app `/api/market-price?asset=rNVDA` | **PASS — real data** | `{"price":224.04,"timestamp":"2026-09-26T23:16:24.126Z"}` from https://redteamdesk.name.ng (308 → www). Matches local live-path run to the cent. |
+| Deployed app full workflow `/api/stress-test` (POST, `useFixture:false`) | **PASS — live end-to-end** | All 8 stages emitted; artifact: `dataSource: "live"`, verdict **REJECT** (deterministic, band critical), scenarios computed on live state (COMBINED_SHOCK −9.34%), 5 research-provider evidence items, honest material-uncertainty limitations. |
+| Bitget Signal MCP (`datahub.noxiaohao.com/mcp`) | **PARTIAL — handshake OK, tools timing out today** | `getStatus(): AVAILABLE` (MCP initialize succeeded); individual tool calls (`news_feed`, `crypto_market`) hit their bounded 2.5–3.0 s timeouts and degrade to `UNAVAILABLE` provenance without blocking the workflow. |
+| Bitget US Equity MCP (`agent.bitget.com/mcp`) | **UNAVAILABLE from this machine today** | DNS resolution failure (`ENOTFOUND agent.bitget.com`); provider degrades honestly to `UNAVAILABLE` with `[]` observations. This host was previously live-verified 2026-09-21 (see table above); the failure is in this network's reachability, not the integration. |
+| Fixture fallback honesty | **PASS — rNVDA-only, flagged** | Fallback fires only for rNVDA requests and is flagged (`isFallbackDemo`, `fallbackReason`, `dataSource: "fixture"`); `/api/market-price` returns 503 rather than serve demo data as a real price. |
+
+**Conclusion for judges:** the desk's primary path is live Bitget market data (proven above on the deployed app), with research providers as bounded, honestly-degrading enrichment and the fixture as an explicitly-labeled convenience for off-hours demos — never presented as live.
