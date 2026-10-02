@@ -51,6 +51,7 @@ export const metadata: Metadata = {
     description: BRANDING.DESCRIPTION,
     images: ["/og-image.png"],
   },
+  manifest: "/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {
