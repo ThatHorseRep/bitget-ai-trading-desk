@@ -36,8 +36,12 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    // 1. Register Service Worker after load
-    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+    // 1. Register Service Worker after load — production only.
+    // The SW caches /_next/static/* cache-first, which is safe for hashed
+    // production chunks but poisons dev, where Turbopack reuses unhashed
+    // chunk URLs across rebuilds (browser then replays stale modules —
+    // see docs/PROBLEMS_AND_SOLUTIONS.md §2.4).
+    if (process.env.NODE_ENV === "production" && typeof window !== "undefined" && "serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker
           .register("/sw.js")
