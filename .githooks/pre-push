@@ -1,0 +1,25 @@
+#!/bin/sh
+# Pre-push hook: Reject any push containing Codebuff trailers
+while read local_ref local_oid remote_ref remote_oid
+do
+    if [ "$local_oid" = "0000000000000000000000000000000000000000" ]; then
+        continue
+    fi
+    
+    if [ "$remote_oid" = "0000000000000000000000000000000000000000" ]; then
+        range="$local_oid"
+    else
+        range="$remote_oid..$local_oid"
+    fi
+    
+    offenders=$(git log "$range" --grep="codebuff" -i --oneline)
+    if [ -n "$offenders" ]; then
+        echo "=========================================================="
+        echo "[ERROR] PUSH REJECTED: Found Codebuff trailers in commit(s):"
+        echo "$offenders"
+        echo "Please remove the trailer before pushing to remote."
+        echo "=========================================================="
+        exit 1
+    fi
+done
+exit 0

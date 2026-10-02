@@ -1,0 +1,18 @@
+#!/bin/sh
+python -c '
+import sys, re
+
+commit_msg_file = sys.argv[1]
+try:
+    with open(commit_msg_file, "r", encoding="utf-8") as f:
+        msg = f.read()
+
+    # Automatically strip robot emoji and Co-Authored-By: Codebuff
+    cleaned = re.sub(r"(?m)^\s*(?:🤖\s*Generated with Codebuff|Co-Authored-By:\s*Codebuff.*)\r?\n?", "", msg)
+    cleaned = cleaned.rstrip() + "\n"
+
+    with open(commit_msg_file, "w", encoding="utf-8") as f:
+        f.write(cleaned)
+except Exception:
+    pass
+' "$1"
