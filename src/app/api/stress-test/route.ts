@@ -88,8 +88,14 @@ export async function POST(request: NextRequest) {
           else if (result.step === "ERROR") status = 502;
           
           const resultPayload = JSON.stringify({ type: "result", status, data: result });
-          controller.enqueue(encoder.encode(`data: ${resultPayload}\n\n`));
-          controller.close();
+          // Client may have aborted during a long stream (same guard as the
+          // progress path) — enqueue on a closed controller throws.
+          try {
+            controller.enqueue(encoder.encode(`data: ${resultPayload}\n\n`));
+            controller.close();
+          } catch {
+            // Client disconnected; nothing further to deliver.
+          }
         } catch (error) {
           console.error("Internal service error during stream:", error);
           try {
