@@ -25,12 +25,14 @@ interface Chapter {
   tag: string;
 }
 
+import { getBrandCutForViewport, MOBILE_BREAKPOINT_PX } from "@/lib/demo/brandCuts";
+
 const CHAPTERS: Chapter[] = [
   { id: "input", timeSec: 0, label: "00:00 Trade Intake", tag: "Natural Language" },
-  { id: "market", timeSec: 25, label: "00:25 Market Reconstruct", tag: "65.5h Basis Gap" },
-  { id: "redteam", timeSec: 48, label: "00:48 Adversarial Red Team", tag: "Thesis Attack" },
-  { id: "shocks", timeSec: 68, label: "01:08 Deterministic Shocks", tag: "4 Tail Scenarios" },
-  { id: "verdict", timeSec: 88, label: "01:28 Gated Policy & Sandbox", tag: "Audit Provenance" },
+  { id: "market", timeSec: 44, label: "00:44 Market Reconstruct", tag: "65.5h Basis Gap" },
+  { id: "shocks", timeSec: 50, label: "00:50 Deterministic Shocks", tag: "4 Tail Scenarios" },
+  { id: "redteam", timeSec: 57, label: "00:57 Adversarial Red Team", tag: "Thesis Attack" },
+  { id: "verdict", timeSec: 98, label: "01:38 Gated Policy & Sandbox", tag: "Audit Provenance" },
 ];
 
 export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
@@ -55,7 +57,9 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const currentVideoSrc = isMobileScreen ? "/demo/mobile-demo.mp4" : "/demo/desktop-demo.mp4";
+  const currentCut = getBrandCutForViewport(isMobileScreen ? MOBILE_BREAKPOINT_PX - 1 : MOBILE_BREAKPOINT_PX);
+  const currentVideoSrc = currentCut.videoSrc;
+  const currentPosterSrc = currentCut.posterSrc;
 
   // IntersectionObserver: Automatically play when in view, pause when scrolled past
   useEffect(() => {
@@ -301,6 +305,7 @@ export function BrandedDemoPlayer({ onLaunchDesk }: BrandedDemoPlayerProps) {
                   ref={videoRef}
                   key={currentVideoSrc}
                   src={currentVideoSrc}
+                  poster={currentPosterSrc}
                   playsInline
                   muted={isMuted}
                   loop
