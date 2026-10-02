@@ -7,8 +7,8 @@
 
 **Video Walkthroughs:**
 - Embedded directly on the Landing Page (`#demo-walkthrough`) with automated in-view playback/pause, chapter seeking, speed toggles, and responsive Desktop/Mobile framing.
-- Desktop 1080p Full HD (`public/demo/desktop-demo.mp4`, 6.35 MB)
-- Mobile Portrait (`public/demo/mobile-demo.mp4`, 4.15 MB)
+- Desktop 1280×720 (`public/demo/brand-desktop-demo.mp4`, 6.8 MB) — 100% live-data brand cut
+- Mobile Portrait (`public/demo/brand-mobile-demo.mp4`, 14.3 MB) — 100% live-data brand cut (SRT: `public/demo/brand-mobile.srt`; Act 6 re-rendered 2026-10-01 to engine-true tolerance verdicts)
 
 ## Project Description
 
@@ -36,7 +36,7 @@ The LLM is **never** used for market parsing, price selection, scenario math, P&
 
 - No trade execution exists in any code path; there is no autonomous trading in any configuration.
 - Publication and execution boundaries require explicit human confirmation; the paper-trading harness is a developer-side, human-confirmed external tool against Bitget Demo Trading — the desk itself never places orders, paper or live.
-- Optional ecosystem integrations (Bitget US Equity MCP, Bitget Signal, Agent Hub read-only handoff, Agentic Account handoff, Chainbase AgentKey — an external partner, not a Bitget product) are enrichment only: the core decision is fully defensible with every one of them disabled (see `docs/specs/B07_Optional_Bitget_Ecosystem_Integrations.md`).
+- Optional ecosystem integrations (Bitget US Equity MCP, Bitget Signal, Agent Hub read-only handoff, Agentic Account handoff, Chainbase AgentKey — an external partner, not a Bitget product) are enrichment only: the core decision is fully defensible with every one of them disabled (see `ARCHITECTURE_AND_LIMITATIONS.md`).
 
 ## External Forces & Engineering Resilience Surmounted
 
@@ -66,7 +66,7 @@ The LLM is **never** used for market parsing, price selection, scenario math, P&
 > Verdict (PROCEED / WAIT / REDUCE / REJECT) + auditable fact lineage. You stay the decision-maker. Pick your risk tolerance — LOW / MED / HIGH — and watch it move the verdict.
 >
 > 🌐 Live App: https://redteamdesk.name.ng
-> 🖥️ Demo Video: https://redteamdesk.name.ng/demo/desktop-demo.mp4
+> 🖥️ Demo Video: https://redteamdesk.name.ng/demo/brand-desktop-demo.mp4
 > 📦 GitHub: https://github.com/ThatHorseRep/bitget-ai-trading-desk
 >
 > Built for the Bitget AI Base Camp Hackathon S2 (Track 3: AI Trading Desk). #BitgetHackathon @Bitget_AI

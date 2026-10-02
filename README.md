@@ -16,11 +16,14 @@ Built for the **Bitget AI Base Camp Hackathon S2 — Track 3: Decision Stress Te
 ## Quick Links
 
 - 🌐 **Live Web Application:** [redteamdesk.name.ng](https://redteamdesk.name.ng) *(Mirror: [bitget-ai-redteam-desk.vercel.app](https://bitget-ai-redteam-desk.vercel.app))*
-- 🖥️ **Embedded Walkthrough & Video Demos:** Interactive terminal player with chapter cues on the landing page ([#demo-walkthrough](https://redteamdesk.name.ng/#demo-walkthrough)), plus standalone downloads in [`public/demo/desktop-demo.mp4`](./public/demo/desktop-demo.mp4) (Full HD 1080p, 6.35 MB) and [`public/demo/mobile-demo.mp4`](./public/demo/mobile-demo.mp4) (Portrait, 4.15 MB)
+- 🖥️ **Embedded Walkthrough & Video Demos:** Interactive terminal player with chapter cues on the landing page ([#demo-walkthrough](https://redteamdesk.name.ng/#demo-walkthrough)), plus standalone downloads in [`public/demo/brand-desktop-demo.mp4`](./public/demo/brand-desktop-demo.mp4) (Desktop brand cut, 1280×720, 6.8 MB) and [`public/demo/brand-mobile-demo.mp4`](./public/demo/brand-mobile-demo.mp4) (Portrait brand cut, 1080×1920, 14.3 MB)
 - 📄 **Official Product Specification:** [PRODUCT_DESCRIPTION.md](./PRODUCT_DESCRIPTION.md)
+- 🧾 **Problems Faced & Solved (Engineering Log):** [docs/PROBLEMS_AND_SOLUTIONS.md](./docs/PROBLEMS_AND_SOLUTIONS.md) — every problem → root cause → fix → verification, with commits and test proof
+- 📚 **Full Documentation Index:** [docs/README.md](./docs/README.md) — every doc in the repo, organized by audience
+- ✅ **Submission Sign-Off (2026-09-30):** [docs/SUBMISSION_SIGNOFF.md](./docs/SUBMISSION_SIGNOFF.md) — audit scorecard, proof table (every claim → observable), remaining human items
 - 📊 **Shock Calibration Methodology:** [docs/SHOCK_CALIBRATION_METHODOLOGY.md](./docs/SHOCK_CALIBRATION_METHODOLOGY.md)
 - 📜 **Illustrative Scenario Walkthroughs (engine-executed):** [docs/RETROSPECTIVE_CASE_STUDIES.md](./docs/RETROSPECTIVE_CASE_STUDIES.md)
-- 🏛️ **Architecture & Engineering Specs:** [docs/specs/](./docs/specs/)
+- 🏛️ **Engineering Docs:** [docs/README.md](./docs/README.md)
 
 ---
 
@@ -50,14 +53,17 @@ During this 65.5-hour void:
 
 ---
 
-## 4 Deterministic Shock Scenarios
+## Deterministic Shock Scenarios
 
-When evaluating any proposed trade, the engine runs 4 rigorous stress scenarios:
+When evaluating any proposed trade, the engine runs four quantitative stress scenarios plus one qualitative check ([`src/core/scenarios/engine.ts`](./src/core/scenarios/engine.ts)):
 
 1. **Market Risk:** Direct adverse reference asset movement (-5%).
-2. **Crypto Contagion:** BTC falls -8% while token trades at 0.4 beta to crypto sentiment.
+2. **Crypto Contagion:** BTC falls -8% while the token moves at its asset-calibrated beta (rNVDA 0.2, rTSLA 0.4, rMSTR 0.85 — `ASSET_RISK_PROFILES`).
 3. **Token Microstructure:** Adverse basis widening by 3 percentage points with 50% orderbook depth reduction.
 4. **Combined Shock:** Simultaneous market drawdown, crypto contagion, and liquidity void.
+5. **Thesis Failure (qualitative):** The stated catalyst or key dependency fails — judged against the extracted thesis, never mapped to an invented price shock.
+
+Every parameter's derivation and assumption status is documented in [`docs/SHOCK_CALIBRATION_METHODOLOGY.md`](./docs/SHOCK_CALIBRATION_METHODOLOGY.md).
 
 ---
 
@@ -68,6 +74,8 @@ When evaluating any proposed trade, the engine runs 4 rigorous stress scenarios:
 - [bun](https://bun.sh/) (primary) or npm
 
 ### Installation
+
+> Contribution setup, test conventions, and the repo's integrity rules: [CONTRIBUTING.md](CONTRIBUTING.md).
 ```bash
 bun install
 # or
@@ -101,12 +109,14 @@ npm run verify-clean
 - **Adversarial Red Team Engine:** [`src/core/thesis/challenger.ts`](./src/core/thesis/challenger.ts)
 - **Deterministic Scenario Stress Engine:** [`src/core/scenarios/engine.ts`](./src/core/scenarios/engine.ts)
 - **Empirical Shock Calibration:** [`docs/SHOCK_CALIBRATION_METHODOLOGY.md`](./docs/SHOCK_CALIBRATION_METHODOLOGY.md)
+- **Problems Faced & Solved (Engineering Log):** [`docs/PROBLEMS_AND_SOLUTIONS.md`](./docs/PROBLEMS_AND_SOLUTIONS.md)
+- **Documentation Index:** [`docs/README.md`](./docs/README.md)
 - **Decision Policy & Gate Rules:** [`src/core/decision/policy.ts`](./src/core/decision/policy.ts)
 - **Interactive What-If Sandbox:** [`src/components/workspace/DecisionArtifactView.tsx`](./src/components/workspace/DecisionArtifactView.tsx)
 - **Illustrative Scenario Walkthroughs (engine-executed):** [`docs/RETROSPECTIVE_CASE_STUDIES.md`](./docs/RETROSPECTIVE_CASE_STUDIES.md)
 - **Live Bitget Market State Reconstructor:** [`src/services/marketStateService.ts`](./src/services/marketStateService.ts)
 - **Provenance & Lineage Tracking:** [`src/core/provenance/tracker.ts`](./src/core/provenance/tracker.ts)
-- **Ecosystem Integration Specs (B01-B07):** Documented in [`docs/specs/`](./docs/specs/)
+- **Optional Ecosystem Integrations:** enrichment only, fully classified in [`ARCHITECTURE_AND_LIMITATIONS.md`](./ARCHITECTURE_AND_LIMITATIONS.md)
 
 ---
 
@@ -114,8 +124,8 @@ npm run verify-clean
 
 - [x] **Track Selected:** Track 3: Decision Stress Testing
 - [x] **Functional Web Application:** Deployed at [redteamdesk.name.ng](https://redteamdesk.name.ng) (Mirror: [bitget-ai-redteam-desk.vercel.app](https://bitget-ai-redteam-desk.vercel.app))
-- [x] **Desktop Demo Video:** 100-second 1080p Full HD walkthrough (`public/demo/desktop-demo.mp4`, 6.35 MB)
-- [x] **Mobile Demo Video:** 100-second mobile walkthrough with centered shocks & audio (`public/demo/mobile-demo.mp4`, 4.15 MB)
+- [x] **Desktop Demo Video:** Brand-cut 1280×720 walkthrough, 100% live data (`public/demo/brand-desktop-demo.mp4`, 6.8 MB)
+- [x] **Mobile Demo Video:** Brand-cut portrait walkthrough with live audio (`public/demo/brand-mobile-demo.mp4`, 14.3 MB) — Act 6 re-rendered 2026-10-01 to the engine-true tolerance verdicts; ships at the full 136.5s capture length
 - [x] **Zero TypeScript Errors:** Passing `npm run typecheck`
 - [x] **Zero Lint Errors:** Passing `npm run lint`
 - [x] **Deterministic Unit Tests:** 100% passing `npm test`
@@ -130,3 +140,7 @@ Awards are **mutually exclusive**, not stackable:
 - **University Special Prize (FUTMINNA):** entered by filling the form's University Name field. If the entry wins a main-track prize (Grand Prize, Theme, or Open Theme), it is **no longer eligible** for the University Special Prize — and vice versa, a University Special Prize win excludes main-track prizes.
 - **Best Spread Award** is likewise mutually exclusive with main-track prizes (Grand/Theme/Open).
 - The entry competes for **Track 3 (AI Trading Desk) — Decision Stress Testing**; which award it ultimately holds depends on judge outcomes, and the submission does not assume simultaneous stacking.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
