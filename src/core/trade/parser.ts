@@ -288,7 +288,7 @@ export function parseNaturalLanguageTrade(
        inferred.push("relevantExposureAmount (unstated in prompt)");
     }
 
-    const commonWords = ["A", "THE", "SOME", "THIS", "THAT", "LONG", "SHORT", "POSITION", "TRADE", "MONEY", "CASH", "USD", "USDT"];
+    const commonWords = ["A", "THE", "SOME", "THIS", "THAT", "LONG", "SHORT", "POSITION", "TRADE", "MONEY", "CASH", "USD", "USDT", "BEEN", "HAD", "DONE", "SEEN", "GONE"];
     if (!commonWords.includes(expAsset) && expAsset !== asset?.toUpperCase()) {
       relevantExposure.push({
         asset: expAsset,

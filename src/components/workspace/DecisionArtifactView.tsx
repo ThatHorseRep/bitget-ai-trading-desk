@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import type { DecisionArtifact, DecisionVerdict } from "../../domain/decision/types";
+import { evaluateDecision } from "../../core/decision/policy";
+import { classifyPositionQuality } from "../../core/decision/classifyPosition";
 import { Reveal } from "../motion/Reveal";
 import { VerdictGlyph, VerdictBadge } from "../brand/VerdictGlyph";
 
@@ -9,6 +11,8 @@ interface DecisionArtifactViewProps {
   artifact: DecisionArtifact;
   onOpenProvenance: () => void;
   onNewTrade: () => void;
+  /** Current persona-lever state from the workspace header (page state, not artifact). */
+  riskTolerance?: "CONSERVATIVE" | "MODERATE" | "AGGRESSIVE";
 }
 
 const VERDICT_CONFIG: Record<
@@ -62,7 +66,8 @@ function formatUsd(val: number, forcePlusSign: boolean = false): string {
 export function DecisionArtifactView({
   artifact,
   onOpenProvenance,
-  onNewTrade
+  onNewTrade,
+  riskTolerance = "MODERATE"
 }: DecisionArtifactViewProps) {
   const [copied, setCopied] = useState(false);
   const [sizeMultiplier, setSizeMultiplier] = useState<number>(1.0);
@@ -70,7 +75,7 @@ export function DecisionArtifactView({
   const [activeDrilldown, setActiveDrilldown] = useState<number | null>(null);
   const {
     trade,
-    decision,
+    decision: storedDecision,
     marketState,
     thesis,
     challenge,
@@ -79,6 +84,36 @@ export function DecisionArtifactView({
     changeConditions,
     limitations
   } = artifact;
+
+  // Persona lever: when the trader changes risk tolerance after the artifact
+  // landed, the verdict is recomputed by the SAME pure policy engine used by
+  // the server (evaluateDecision on the artifact's own inputs), so what the
+  // screen paints is the real engine output — never a UI-side override. The
+  // stored artifact (audit record) keeps the MODERATE decision it was
+  // generated with; riskToleranceApplied on the artifact records what the
+  // server ran.
+  const displayDecision = React.useMemo(() => {
+    if (!riskTolerance || riskTolerance === "MODERATE") return storedDecision;
+    try {
+      const positionQuality = classifyPositionQuality(scenarios, marketState, trade);
+      const recompute = evaluateDecision({
+        marketState,
+        thesis,
+        thesisQuality: thesisPosition?.thesisQuality ?? null,
+        positionQuality,
+        positionAssessment: thesisPosition,
+        scenarios,
+        dataQuality: marketState.dataQuality,
+        materialUncertainty: Boolean(thesis?.unresolvedAmbiguities?.length),
+        riskTolerance
+      });
+      return recompute;
+    } catch {
+      return storedDecision;
+    }
+  }, [riskTolerance, storedDecision, marketState, thesis, scenarios, trade, thesisPosition]);
+
+  const decision = displayDecision;
 
   const verdictInfo = VERDICT_CONFIG[decision.verdict];
 

@@ -251,27 +251,40 @@ export function WorkspaceHeader({
               <span>{useFixture ? "FIXTURE" : statusInfo.isCleanLive ? "LIVE" : isOnline ? "FALLBACK" : "OFFLINE"}</span>
             </button>
 
-            {/* Compact Risk Tolerance Toggle */}
+            {/* Mobile Risk Tolerance Selector (LOW / MED / HIGH) */}
             {onToggleRiskTolerance && (
-              <button
-                type="button"
-                onClick={() =>
-                  onToggleRiskTolerance(
-                    riskTolerance === "CONSERVATIVE" ? "MODERATE" : riskTolerance === "MODERATE" ? "AGGRESSIVE" : "CONSERVATIVE"
-                  )
-                }
-                className={`h-[32px] px-2 text-[9.5px] font-mono font-bold uppercase tracking-wider border active:scale-[0.98] flex items-center gap-1 cursor-pointer shadow-2xs ${
-                  riskTolerance === "MODERATE"
-                    ? "border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)]"
-                    : riskTolerance === "CONSERVATIVE"
-                      ? "border-[var(--rtd-wait)] bg-[var(--rtd-wait)] text-[var(--rtd-paper)]"
-                      : "border-[var(--rtd-reduce)] bg-[var(--rtd-reduce)] text-[var(--rtd-paper)]"
-                }`}
-                aria-label={`Risk tolerance: ${riskTolerance}. Click to cycle.`}
-                title="Risk tolerance shifts the desk's WAIT/REDUCE/PROCEED thresholds"
+              <div
+                role="group"
+                aria-label="Risk Tolerance Selector"
+                className="inline-flex items-center border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] p-0.5 shadow-2xs"
               >
-                <span>RISK:{riskTolerance === "CONSERVATIVE" ? "LOW" : riskTolerance === "AGGRESSIVE" ? "HIGH" : "MED"}</span>
-              </button>
+                {(["CONSERVATIVE", "MODERATE", "AGGRESSIVE"] as const).map((level) => (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => onToggleRiskTolerance(level)}
+                    aria-pressed={riskTolerance === level}
+                    className={`h-[28px] px-1.5 text-[9.5px] font-mono font-bold tracking-wider uppercase transition-all cursor-pointer ${
+                      riskTolerance === level
+                        ? level === "CONSERVATIVE"
+                          ? "bg-[var(--rtd-wait)] text-[var(--rtd-paper)] shadow-xs"
+                          : level === "AGGRESSIVE"
+                            ? "bg-[var(--rtd-reduce)] text-[var(--rtd-paper)] shadow-xs"
+                            : "bg-[var(--rtd-ink)] text-[var(--rtd-paper)] shadow-xs"
+                        : "text-[var(--rtd-steel)] hover:text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper-subtle)]"
+                    }`}
+                    title={
+                      level === "CONSERVATIVE"
+                        ? "Shift risk bands one step stricter (smaller allowances)"
+                        : level === "AGGRESSIVE"
+                          ? "Shift risk bands one step looser (larger allowances)"
+                          : "Default desk persona: moderate risk"
+                    }
+                  >
+                    {level === "CONSERVATIVE" ? "LOW" : level === "AGGRESSIVE" ? "HIGH" : "MED"}
+                  </button>
+                ))}
+              </div>
             )}
 
             {/* Compact Theme Toggle */}

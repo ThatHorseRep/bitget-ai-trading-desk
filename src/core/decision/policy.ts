@@ -55,8 +55,8 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     };
   }
 
-  // Contradicted thesis + weak position structure -> Hard REJECT
-  if (inputs.thesisQuality === "WEAKER" && inputs.positionQuality.quality === "WEAKER") {
+  // Contradicted thesis + weak position structure -> Hard REJECT (fallback when gated scoring not present)
+  if (!inputs.positionAssessment?.gatedVerdictResult && inputs.thesisQuality === "WEAKER" && inputs.positionQuality.quality === "WEAKER") {
     return {
       verdict: "REJECT",
       reasons: [
@@ -79,11 +79,49 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
   }
 
   if (inputs.materialUncertainty) {
+    // Persona lever under material uncertainty. A rumor thesis always leaves
+    // real unresolved ambiguities, so the plain uncertainty verdict would
+    // otherwise mask the tolerance lever entirely. Instead the trader's
+    // tolerance shifts the gated risk band (CONSERVATIVE stricter,
+    // AGGRESSIVE looser) using the same applyRiskToleranceToBand mapping as
+    // the gated path below. MODERATE (the default) keeps the historical
+    // threshold byte-for-byte; the uncertainty reasons are always retained.
+    const tolerance = inputs.riskTolerance ?? "MODERATE";
+    const gated = inputs.positionAssessment?.gatedVerdictResult;
+    if (gated && tolerance !== "MODERATE") {
+      const adjusted = applyRiskToleranceToBand(gated.band, tolerance);
+      const uncertaintyReasons = [{
+        code: "CRITICAL_DATA_BLOCKER" as const,
+        message: "Material uncertainty remains in the available decision inputs."
+      }];
+      if (adjusted.band === "critical") {
+        return {
+          verdict: "REJECT",
+          reasons: [...uncertaintyReasons, ...gated.reasons.map((r: string) => ({
+            code: "THESIS_CONTRADICTED" as const,
+            message: r
+          })), ...(adjusted.note ? [{ code: "THESIS_CONTRADICTED" as const, message: adjusted.note }] : [])],
+          blockers: ["Risk tolerance CONSERVATIVE raised the gated risk band to critical"],
+          changeConditions: ["Resolve or refresh the material uncertainty before acting.", ...thesisConditions]
+        };
+      }
+      if (adjusted.band === "moderate") {
+        return {
+          verdict: "PROCEED",
+          reasons: [...uncertaintyReasons, ...gated.reasons.map((r: string) => ({
+            code: "PROCEED_OK" as const,
+            message: r
+          })), ...(adjusted.note ? [{ code: "PROCEED_OK" as const, message: adjusted.note }] : [])],
+          blockers: [],
+          changeConditions: ["Monitor the unresolved ambiguities — AGGRESSIVE tolerance accepts the elevated-basis risk.", ...thesisConditions]
+        };
+      }
+    }
     return {
       verdict: config.materialUncertaintyVerdict,
       reasons: [{
         code: "CRITICAL_DATA_BLOCKER",
-        message: "Material uncertainty remains in the available decision inputs."
+        message: "Material-uncertainty tolerance shift." + (tolerance !== "MODERATE" ? " Tolerance " + tolerance + " leaves the band unchanged (" + (gated ? gated.band : "ungated") + ")." : "")
       }],
       blockers: [],
       changeConditions: ["Resolve or refresh the material uncertainty before acting.", ...thesisConditions]
@@ -92,7 +130,7 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
 
   const isWeekendOrOffHours = inputs.marketState.sessionStatus === "WEEKEND" || inputs.marketState.sessionStatus === "OFF_HOURS";
 
-  if (isWeekendOrOffHours && inputs.positionQuality.quality === "WEAKER") {
+  if (!inputs.positionAssessment?.gatedVerdictResult && isWeekendOrOffHours && inputs.positionQuality.quality === "WEAKER") {
     const reasons = [
       {
         code: "OFF_HOURS_WAIT" as const,
@@ -124,7 +162,7 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     };
   }
 
-  if (inputs.positionQuality.quality === "WEAKER") {
+  if (!inputs.positionAssessment?.gatedVerdictResult && inputs.positionQuality.quality === "WEAKER") {
     const reasons = [];
     if (inputs.positionAssessment?.keyMismatch) {
       reasons.push({
@@ -162,9 +200,22 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     // insufficient thesis, critical data) above are never relaxed.
     const tolerance = inputs.riskTolerance ?? "MODERATE";
     const adjusted: RiskAdjustedBand = applyRiskToleranceToBand(gated.band, tolerance);
+    // Liquidity floor: the gated score never sees execution microstructure.
+    // A position graded WEAKER by the deterministic scenario engine may be
+    // downgraded further (stricter) by the band/tolerance, but never upgraded
+    // (loosened) past REDUCE/WAIT — scenario grading stays authoritative on
+    // the downside.
+    const effectiveBand: RiskAdjustedBand =
+      inputs.positionQuality.quality === "WEAKER" && adjusted.band === "clear"
+        ? {
+            ...adjusted,
+            band: "elevated",
+            note: "Liquidity floor: deterministic stress scenarios graded this position WEAKER; verdict capped at REDUCE/WAIT regardless of gated score."
+          }
+        : adjusted;
     const gatedReasons = gated.reasons;
-    const shiftedReasons = adjusted.note ? [...gatedReasons, adjusted.note] : gatedReasons;
-    if (adjusted.band === "critical") {
+    const shiftedReasons = effectiveBand.note ? [...gatedReasons, effectiveBand.note] : gatedReasons;
+    if (effectiveBand.band === "critical") {
       return {
         verdict: "REJECT",
         reasons: shiftedReasons.map((r: string) => ({
@@ -175,7 +226,7 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
         changeConditions: ["Articulate a specific, falsifiable thesis or catalyst.", ...thesisConditions]
       };
     }
-    if (adjusted.band === "elevated") {
+    if (effectiveBand.band === "elevated") {
       if (isWeekendOrOffHours) {
         return {
           verdict: "WAIT",

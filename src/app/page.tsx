@@ -370,6 +370,7 @@ export default function WorkspacePage() {
                 artifact={artifact}
                 onOpenProvenance={() => setIsDrawerOpen(true)}
                 onNewTrade={handleReset}
+                riskTolerance={riskTolerance}
               />
             )}
 

@@ -123,7 +123,13 @@ Rules:
   "dependencies": [{"text": "string", "origin": "USER_STATED" | "AI_INFERRED"}],
   "invalidationConditions": [{"text": "string", "origin": "AI_INFERRED"}],
   "supportingEvidenceRefs": ["string"],
-  "unresolvedAmbiguities": ["string"]
+  "unresolvedAmbiguities": ["string"],
+  "signals": {
+    "hasInvalidationLevel": boolean,
+    "hasStatedHorizon": boolean,
+    "hasNamedCatalyst": boolean,
+    "hasDirectionalClaim": boolean
+  }
 }`;
 
   const evidenceText = evidence.length > 0 ? JSON.stringify(evidence, null, 2) : "NO EVIDENCE AVAILABLE";
@@ -237,6 +243,22 @@ ${evidenceText}
     origin: "AI_INFERRED"
   }));
 
+  function deriveFallbackSignals(text: string, t: NormalizedTrade): ThesisSignals {
+    const lower = text.toLowerCase();
+    const hasDirectional = Boolean(t.direction || /buy|sell|long|short|bull|bear/i.test(lower));
+    const hasCatalyst = /because|due to|catalyst|earnings|ai|news|partnership|growth|listing|volume|wave/i.test(lower);
+    const hasHorizon = Boolean(t.timeHorizon || /day|week|month|year|intraday|swing|hours|holding|target|open|monday/i.test(lower));
+    const hasInvalidation = /stop|invalidation|below|above|break|loss|under/i.test(lower);
+
+    return {
+      hasInvalidationLevel: hasInvalidation,
+      hasStatedHorizon: hasHorizon,
+      hasNamedCatalyst: hasCatalyst,
+      hasDirectionalClaim: hasDirectional,
+      precedentCount: 0
+    };
+  }
+
   let signals: ThesisSignals;
   let signalsParseFailed = false;
 
@@ -248,24 +270,10 @@ ${evidenceText}
         precedentCount: 0
       };
     } else {
-      signalsParseFailed = true;
-      signals = {
-        hasInvalidationLevel: false,
-        hasStatedHorizon: false,
-        hasNamedCatalyst: false,
-        hasDirectionalClaim: false,
-        precedentCount: 0
-      };
+      signals = deriveFallbackSignals(statement, trade);
     }
   } else {
-    signalsParseFailed = true;
-    signals = {
-      hasInvalidationLevel: false,
-      hasStatedHorizon: false,
-      hasNamedCatalyst: false,
-      hasDirectionalClaim: false,
-      precedentCount: 0
-    };
+    signals = deriveFallbackSignals(statement, trade);
   }
 
   return {

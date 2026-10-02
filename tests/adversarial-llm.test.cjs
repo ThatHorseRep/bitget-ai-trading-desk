@@ -312,8 +312,11 @@ test("Adversarial LLM Tests", async (t) => {
 
     const result = await service.runWorkflow("buy $1000 of rNVDA because of AI", { useFixture: false });
     assert.equal(result.step, "DECISION_READY");
-    // Assessor should fall back to INSUFFICIENT
-    assert.equal(result.artifact.thesisPosition.thesisQuality, "INSUFFICIENT");
+    // Assessor failure → thesis quality is derived from structural text
+    // signals (deterministic fallback scoring, not the old blanket
+    // INSUFFICIENT): directional claim + named catalyst but no invalidation
+    // level or stated horizon → score 0.45 → elevated band → mapped WEAKER.
+    assert.equal(result.artifact.thesisPosition.thesisQuality, "WEAKER");
     assert.ok(result.artifact.thesisPosition.explanation.length > 0);
   });
 
@@ -387,5 +390,12 @@ test("Adversarial LLM Tests", async (t) => {
     // Even though LLM said "STRONGER", deterministic layer rejected it due to spread
     assert.equal(result.artifact.decision.verdict, "REDUCE");
     assert.equal(result.artifact.decision.reasons[0].code, "REDUCE_POSITION_SIZE");
+    // Liquidity-floor regression: the gated score never sees execution
+    // microstructure, so a WEAKER position must stay capped at REDUCE/WAIT
+    // even when the gated band grades the risk clear.
+    assert.ok(
+      result.artifact.decision.reasons.some(r => r.message.includes("Liquidity floor")),
+      "liquidity-floor cap reason must be recorded on the decision"
+    );
   });
 });

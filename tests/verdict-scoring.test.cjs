@@ -203,3 +203,56 @@ test("Verdict Scoring (CJS) - Clamping test for extreme values", () => {
   assert.equal(fullResult.score, 1.0);
   assert.equal(fullResult.band, "clear");
 });
+// ---------------------------------------------------------------------------
+// applyRiskToleranceToBand - direct unit contract for the persona lever.
+// These tests pin the pure band-shift primitive itself (the policy-level
+// behavior is pinned separately by tests/tolerances.test.cjs).
+// ---------------------------------------------------------------------------
+const {
+  applyRiskToleranceToBand,
+} = require("../dist-core/src/lib/verdict/scoring.js");
+
+test("Risk Tolerance (CJS) - applyRiskToleranceToBand direct contract", async (t) => {
+  await t.test("MODERATE is the identity: same band, shifted=false, note=null", () => {
+    for (const band of ["critical", "elevated", "moderate", "clear"]) {
+      const res = applyRiskToleranceToBand(band, "MODERATE");
+      assert.deepEqual(res, { band, shifted: false, originalBand: band, note: null });
+    }
+  });
+
+  await t.test("CONSERVATIVE shifts every band one step worse", () => {
+    assert.equal(applyRiskToleranceToBand("elevated", "CONSERVATIVE").band, "critical");
+    assert.equal(applyRiskToleranceToBand("moderate", "CONSERVATIVE").band, "elevated");
+    assert.equal(applyRiskToleranceToBand("clear", "CONSERVATIVE").band, "moderate");
+  });
+
+  await t.test("AGGRESSIVE shifts every band one step better", () => {
+    assert.equal(applyRiskToleranceToBand("critical", "AGGRESSIVE").band, "elevated");
+    assert.equal(applyRiskToleranceToBand("elevated", "AGGRESSIVE").band, "moderate");
+    assert.equal(applyRiskToleranceToBand("moderate", "AGGRESSIVE").band, "clear");
+  });
+
+  await t.test("terminal bands never shift past the ends", () => {
+    const crit = applyRiskToleranceToBand("critical", "CONSERVATIVE");
+    assert.equal(crit.band, "critical");
+    assert.equal(crit.shifted, false);
+    const clrd = applyRiskToleranceToBand("clear", "AGGRESSIVE");
+    assert.equal(clrd.band, "clear");
+    assert.equal(clrd.shifted, false);
+  });
+
+  await t.test("disclosure note is verbatim and preserves the original band", () => {
+    const res = applyRiskToleranceToBand("elevated", "AGGRESSIVE");
+    assert.equal(res.originalBand, "elevated");
+    assert.match(res.note, /Risk tolerance AGGRESSIVE: risk band adjusted one step better \(elevated → moderate\)\./);
+    const worse = applyRiskToleranceToBand("moderate", "CONSERVATIVE");
+    assert.match(worse.note, /one step worse \(moderate → elevated\)\./);
+  });
+
+  await t.test("determinism: 100 identical calls return identical results", () => {
+    const baseline = applyRiskToleranceToBand("elevated", "AGGRESSIVE");
+    for (let i = 0; i < 100; i++) {
+      assert.deepEqual(applyRiskToleranceToBand("elevated", "AGGRESSIVE"), baseline);
+    }
+  });
+});

@@ -21,6 +21,7 @@ import type { EvidenceProvider } from "../adapters/evidence/types";
 import { ResearchProviderRegistry } from "../adapters/research/registry";
 import { createDefaultResearchRegistry } from "../adapters/research/defaultRegistry";
 import { validateNormalizedTrade } from "../core/validation/runtime";
+import { gateVerdict } from "../lib/verdict/scoring";
 import { rnvdaDemoThesis, rnvdaDemoChallenge, rnvdaDemoThesisPosition, rnvdaDemoEvidence } from "../fixtures/rnvda-demo";
 
 export interface DecisionDeskOptions {
@@ -315,11 +316,37 @@ export class DecisionDeskService {
         : Boolean(trade.thesis && trade.thesis.length > 20);
       const fallbackThesisQuality = isStrongThesis ? "STRONGER" : (thesis ? "MIXED" : "INSUFFICIENT");
 
+      const applicableScenarios = scenarios.filter(s => s.applicable && s.estimatedPnlPct !== null);
+      const scenarioLosses = applicableScenarios.map(s => Math.max(0, -s.estimatedPnlPct! / 100));
+      const expectedShortfall = scenarioLosses.length > 0
+        ? scenarioLosses.reduce((sum, l) => sum + l, 0) / scenarioLosses.length
+        : (trade.positionSizeUsd > 10000 ? 0.15 : 0.05);
+
+      const isWeekendOrOffHours = marketState.sessionStatus === "WEEKEND" || marketState.sessionStatus === "OFF_HOURS";
+      const positionSignals = {
+        expectedShortfall,
+        valueAtRisk: scenarioLosses.length > 0 ? Math.max(...scenarioLosses) : expectedShortfall,
+        positionFraction: Math.min(1, trade.positionSizeUsd / 50000),
+        gapExposureFraction: isWeekendOrOffHours ? 0.75 : 0.0,
+        hedgeCoverageFraction: 0.0
+      };
+
+      const thesisSignals = signals ?? {
+        hasInvalidationLevel: false,
+        hasStatedHorizon: false,
+        hasNamedCatalyst: false,
+        hasDirectionalClaim: false,
+        precedentCount: 0
+      };
+
+      const gatedVerdictResult = gateVerdict(thesisSignals, positionSignals);
+
       thesisPosition = {
         thesisQuality: fallbackThesisQuality,
         positionQuality: positionQuality,
         keyMismatch: isStrongThesis ? null : "Thesis lacks explicit catalyst or invalidation level.",
-        explanation: `Deterministic qualitative synthesis derived from structural thesis signals (${isStrongThesis ? "Strong directional and invalidation parameters" : "Standard parameters"}).`
+        explanation: `Deterministic qualitative synthesis derived from structural thesis signals (${isStrongThesis ? "Strong directional and invalidation parameters" : "Standard parameters"}).`,
+        gatedVerdictResult
       };
     }
 
