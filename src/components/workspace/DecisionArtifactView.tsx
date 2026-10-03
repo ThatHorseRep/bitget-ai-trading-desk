@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import type { DecisionArtifact, DecisionVerdict } from "../../domain/decision/types";
 import { evaluateDecision } from "../../core/decision/policy";
 import { classifyPositionQuality } from "../../core/decision/classifyPosition";
+import { sectionSevenHeading } from "../../lib/verdict/changeConditionHeading";
 import { Reveal } from "../motion/Reveal";
 import { VerdictGlyph, VerdictBadge } from "../brand/VerdictGlyph";
 
@@ -114,6 +115,14 @@ export function DecisionArtifactView({
   }, [riskTolerance, storedDecision, marketState, thesis, scenarios, trade, thesisPosition]);
 
   const decision = displayDecision;
+
+  // Section 7 header. The from-X-to-Y transition is rendered only when the
+  // change conditions actually name a different verdict, so a PROCEED
+  // artifact no longer reads "from PROCEED to PROCEED".
+  const sectionSeven = React.useMemo(
+    () => sectionSevenHeading(decision.verdict, changeConditions),
+    [decision.verdict, changeConditions]
+  );
 
   const verdictInfo = VERDICT_CONFIG[decision.verdict];
 
@@ -920,9 +929,15 @@ export function DecisionArtifactView({
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--rtd-steel)] font-sans">
-          <span>The observable triggers that would materially change the verdict from</span>
+          <span>{sectionSeven.lead}</span>
           <VerdictBadge verdict={decision.verdict} />
-          <span>to PROCEED:</span>
+          {sectionSeven.targetVerdict ? (
+            <>
+              <span>to</span>
+              <VerdictBadge verdict={sectionSeven.targetVerdict} />
+            </>
+          ) : null}
+          <span>:</span>
         </div>
 
         <div className="space-y-2">
