@@ -130,3 +130,63 @@ test("matrix 18: token quantity phrasing with units", () => {
   assert.equal(result.tradeIdea.asset, "rNVDA");
 });
 
+test("matrix 19: clock time after 'at' is not an entry price", () => {
+  // Regression: greedy [\d,]+ under a trailing-only guard backtracked
+  // to "1" out of "10:15", so the time became a $1 entry price and quantity 10,000.
+  const result = parseNaturalLanguageTrade(
+    "I plan to buy $10,000 rNVDA token during US cash market hours at 10:15 AM ET with 0.02% basis spread.",
+    219.22
+  );
+  assert.ok(!result.userProvidedFields.includes("entryPrice"), "a clock time must not be captured as a price");
+  assert.equal(result.normalizedTrade.entryPriceSource, "SYSTEM_DERIVED");
+  assert.equal(result.normalizedTrade.entryPrice, 219.22);
+});
+
+test("matrix 20: percentage after 'at' is not an entry price", () => {
+  // Regression: "elevated at 0.45%" backtracked to "0.4" and produced a $0.40 entry
+  // price, which inflated quantity to 125,000 on a $50,000 position.
+  const result = parseNaturalLanguageTrade(
+    "I plan to buy $50,000 rNVDA token with 5x leverage during extended hours. Basis spread elevated at 0.45%.",
+    219.22
+  );
+  assert.ok(!result.userProvidedFields.includes("entryPrice"), "a basis percentage must not be captured as a price");
+  assert.equal(result.normalizedTrade.entryPrice, 219.22);
+});
+
+test("matrix 21: 12-hour clock times and bps are not entry prices", () => {
+  for (const text of [
+    "buy $2,000 rNVDA at 12:00 pm because AI demand is strong.",
+    "buy $2,000 rNVDA at 100 bps because AI demand is strong.",
+    "buy $2,000 rNVDA at 130.5% because AI demand is strong."
+  ]) {
+    const result = parseNaturalLanguageTrade(text, 219.22);
+    assert.ok(
+      !result.userProvidedFields.includes("entryPrice"),
+      "time/percent/bps must not be captured as a price: " + text
+    );
+    assert.equal(result.normalizedTrade.entryPrice, 219.22);
+  }
+});
+
+test("matrix 22: legitimate price forms survive the tightened matcher", () => {
+  const cases = [
+    ["buy $2,000 rNVDA at 130.50 because AI demand is strong.", 130.50],
+    ["buy $2,000 rNVDA at 1,250 because AI demand is strong.", 1250],
+    ["buy $2,000 rNVDA at 9.35 usd because AI demand is strong.", 9.35],
+    ["buy $2,000 rNVDA at 2,500.50 because AI demand is strong.", 2500.50],
+    ["buy $2,000 rNVDA at 120. because AI demand is strong.", 120],
+    ["long 10 tokens of rNVDA at price of 44 because datacenter revenues are accelerating.", 44]
+  ];
+  for (const [text, expected] of cases) {
+    const result = parseNaturalLanguageTrade(text, 219.22);
+    assert.ok(result.userProvidedFields.includes("entryPrice"), "explicit price must be preserved: " + text);
+    assert.equal(result.normalizedTrade.entryPrice, expected);
+    assert.equal(result.normalizedTrade.entryPriceSource, "USER_PROVIDED");
+  }
+});
+
+test("matrix 23: negative explicit price still requests entryPrice clarification", () => {
+  const result = parseNaturalLanguageTrade("buy $2,000 rNVDA at -50 because AI demand is strong.");
+  assert.equal(result.requiresClarification, true);
+  assert.equal(result.clarificationField, "entryPrice");
+});

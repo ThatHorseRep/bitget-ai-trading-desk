@@ -160,7 +160,13 @@ export function parseNaturalLanguageTrade(
   // 3. Explicit "entry price X" or "at price X" without %, without timestamp colon
   const priceKeywordMatch = text.match(/(?:entry\s*price|at\s*price|price\s*of)\s*(?:is|at|@)?\s*([\d,]+(?:\.\d+)?)(?!\s*(?:%|percent|bps|:\d))/i);
   // 4. Plain numeric at/price: at 130.50, @ -50 (excluding times like 11:30 and percentages like 0.03%)
-  const plainAtMatch = text.match(/(?:at|@)\s*(-?[\d,]+(?:\.\d+)?)(?!\s*(?:%|percent|bps|:\d|\s*(?:am|pm|et|est|edt|utc|gmt)\b))/i);
+  // Greedy `[\d,]+` under a trailing-only guard left a backtracking hole: on
+  // "at 10:15 AM ET" the engine shrank the match to "1" until the `:\d` guard
+  // passed, so a clock time became a $1 entry price (quantity 10,000, a +11,300%
+  // MARKET_RISK figure that then read as "within the STRONGER threshold"). The same
+  // path turned "elevated at 0.45%" into a $0.40 entry price. The
+  // lookbehind rejects a match starting mid-number; the lookaheads reject truncation.
+  const plainAtMatch = text.match(/(?:at|@)\s*(?<![\d.,])(-?\d[\d,]*(?:\.\d+)?)(?!\d)(?!\.\d)(?!\s*(?:%|percent|bps|:\d|\s*(?:am|pm|et|est|edt|utc|gmt)\b))/i);
 
   const matchedPriceStr = explicitDollarMatch?.[1] ?? explicitCurrencyMatch?.[1] ?? priceKeywordMatch?.[1] ?? plainAtMatch?.[1];
 
