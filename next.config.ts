@@ -10,12 +10,19 @@ import type { NextConfig } from "next";
 // post-submission. The policy still blocks all remote script/style/font
 // sources, so external-host injection is refused; the app itself is fully
 // same-origin (relative /api/* fetches, local fonts, local media).
+//
+// Development additionally allows 'unsafe-eval' because React Refresh and
+// hydration need eval() there; production never does. The conditional is
+// evaluated where NODE_ENV is already defined (dev server / build), and the
+// production response header is probed in the submission sign-off.
 const securityHeaders = [
   {
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      process.env.NODE_ENV === "development"
+        ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+        : "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self'",
@@ -48,6 +55,11 @@ const nextConfig: NextConfig = {
   // Keeping it external loads it from node_modules at runtime instead.
   serverExternalPackages: ["@tailwindcss/postcss"],
   reactStrictMode: true,
+  // Next 16 blocks dev-only resources (HMR socket, dev fonts) when the page is
+  // opened by IP instead of localhost. Allow the loopback IP so `npm run dev`
+  // hydrates whether the developer types localhost:3000 or 127.0.0.1:3000.
+  // Development-only behavior; production serving is unaffected.
+  allowedDevOrigins: ["127.0.0.1"],
   output: "standalone",
   // Stop leaking framework fingerprint on every response.
   poweredByHeader: false,

@@ -13,7 +13,7 @@ import { AuditHistoryModal } from "../components/workspace/AuditHistoryModal";
 import { LandingSurface } from "../components/landing/LandingSurface";
 import type { AnalysisStage, WorkspaceStep } from "../components/workspace/types";
 import type { DecisionWorkflowResult } from "../services/decisionDeskService";
-import type { DecisionArtifact, ProvenanceRecord } from "../domain/decision/types";
+import type { DecisionArtifact } from "../domain/decision/types";
 import type { ParsedTradeResult } from "../core/trade/parser";
 import { parseNaturalLanguageTrade } from "../core/trade/parser";
 import {
@@ -25,6 +25,7 @@ import {
   clearAuditHistory,
   type AuditHistoryEntry
 } from "../lib/deskStorage";
+import { parseStressTestFailure } from "../lib/stressTestFailure";
 
 export default function WorkspacePage() {
   const [persistedInitial] = useState(() => loadPersistedWorkspaceState());
@@ -42,7 +43,7 @@ export default function WorkspacePage() {
   // $1,000–$50,000, moderate risk) to the decision logic. MODERATE preserves
   // the historical thresholds exactly.
   const [riskTolerance, setRiskTolerance] = useState<"CONSERVATIVE" | "MODERATE" | "AGGRESSIVE">(() => {
-    const persisted = (persistedInitial as { riskTolerance?: string } | null)?.riskTolerance;
+    const persisted = persistedInitial?.riskTolerance;
     return persisted === "CONSERVATIVE" || persisted === "AGGRESSIVE" ? persisted : "MODERATE";
   });
   const [parsedResult, setParsedResult] = useState<ParsedTradeResult | null>(() => persistedInitial?.parsedResult ?? null);
@@ -51,7 +52,7 @@ export default function WorkspacePage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [auditHistory, setAuditHistory] = useState<AuditHistoryEntry[]>(() => loadAuditHistory());
-  const [selectedProvenance, setSelectedProvenance] = useState<ProvenanceRecord | null>(null);
+  const [selectedProvenance, setSelectedProvenance] = useState<{ id: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -64,11 +65,12 @@ export default function WorkspacePage() {
       step,
       prompt,
       useFixture,
+      riskTolerance,
       parsedResult,
       artifact,
       timestamp: Date.now()
     });
-  }, [viewMode, step, prompt, useFixture, parsedResult, artifact]);
+  }, [viewMode, step, prompt, useFixture, riskTolerance, parsedResult, artifact]);
 
   const handleLaunchFromLanding = (initialPrompt?: string) => {
     setViewMode("desk");
@@ -158,16 +160,11 @@ export default function WorkspacePage() {
 
     abortControllerRef.current = new AbortController();
 
-    // Cadence ticker: smoothly advance through stages if intermediate network proxies (e.g. Vercel)
-    // buffer stream chunks or external LLM inference takes several seconds, keeping the desk active.
-    const progressTimer = setInterval(() => {
-      setActiveStageIndex(prev => {
-        if (prev < PIPELINE_STAGES.length - 2) {
-          return prev + 1;
-        }
-        return prev;
-      });
-    }, 2800);
+    // Progress stages advance ONLY on the engine's own SSE progress frames.
+    // The old 2.8s cadence ticker that auto-advanced unconfirmed stage labels
+    // was removed: it could show "Generating Adversarial Counter-Thesis" while
+    // the pipeline was still on market state. AnalysisProgressView reports
+    // honest elapsed time on the confirmed stage instead.
 
     try {
       const response = await fetch("/api/stress-test", {
@@ -177,14 +174,18 @@ export default function WorkspacePage() {
         signal: abortControllerRef.current.signal
       });
 
-      if (!response.ok && !response.body) {
-        if (response.status === 429) {
-          throw new Error("Rate limit reached: the desk accepts up to 10 stress tests per minute. Please wait about a minute and try again.");
+      if (!response.ok) {
+        // A JSON error response always has a body, so the old
+        // `!response.ok && !response.body` guard never fired: every failure
+        // fell through to the misleading timeout message. Read the real
+        // failure body and map it to what actually went wrong.
+        let failureBody: unknown = null;
+        try {
+          failureBody = await response.json();
+        } catch {
+          failureBody = null; // tolerate non-JSON error bodies (proxy HTML, empty)
         }
-        if (response.status === 413) {
-          throw new Error("The trade statement is too large to analyze. Please shorten it and try again.");
-        }
-        throw new Error(`Analysis request rejected (HTTP ${response.status}).`);
+        throw new Error(parseStressTestFailure(response.status, failureBody));
       }
 
       const reader = response.body?.getReader();
@@ -265,7 +266,6 @@ export default function WorkspacePage() {
       setErrorMessage(err instanceof Error ? err.message : "Network error during stress test.");
       setStep("ERROR");
     } finally {
-      clearInterval(progressTimer);
       setIsAnalyzing(false);
       abortControllerRef.current = null;
     }
@@ -369,6 +369,10 @@ export default function WorkspacePage() {
               <DecisionArtifactView
                 artifact={artifact}
                 onOpenProvenance={() => setIsDrawerOpen(true)}
+                onSelectProvenance={(recordId) => {
+                  setIsDrawerOpen(true);
+                  setSelectedProvenance((current) => current?.id === recordId ? null : { id: recordId });
+                }}
                 onNewTrade={handleReset}
                 riskTolerance={riskTolerance}
               />

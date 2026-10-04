@@ -4,101 +4,13 @@ import React, { useState, useMemo } from "react";
 import type { Verdict } from "@/config/branding";
 import { VerdictGlyph } from "@/components/brand/VerdictGlyph";
 import { parseNaturalLanguageTrade } from "@/core/trade/parser";
+import { PRESET_SCENARIOS } from "@/lib/presetScenarios";
 
 interface TradeInputSurfaceProps {
   initialPrompt?: string;
   onSubmit: (prompt: string) => void;
   isLoading: boolean;
 }
-
-interface ScenarioPreset {
-  id: string;
-  label: string;
-  badge: string;
-  symbol: string;
-  direction: "LONG" | "SHORT";
-  size: string;
-  verdict: Verdict;
-  summary: string;
-  expectedShortfall: string;
-  basisGap: string;
-  depthVsSession: string;
-  cryptoBeta: string;
-  actionText: string;
-  promptText: string;
-}
-
-// Exactly 4 calibrated canonical scenarios matching the 4 desk verdicts (Symmetrical 2x2 grid)
-const PRESET_SCENARIOS: ScenarioPreset[] = [
-  {
-    id: "proceed",
-    label: "Cash Hours Confirmed Arbitrage",
-    badge: "Execution Runway",
-    symbol: "rNVDA",
-    direction: "LONG",
-    size: "$10,000",
-    verdict: "PROCEED",
-    summary: "US cash market open. Tight 0.02% spread with confirmed arbitrage depth.",
-    expectedShortfall: "-2.1%",
-    basisGap: "+0.02%",
-    depthVsSession: "0.12x",
-    cryptoBeta: "0.15",
-    actionText: "Execute Trade Runway",
-    promptText:
-      "I plan to buy $10,000 rNVDA token during US cash market hours at 10:15 AM ET with 0.02% basis spread. Data center revenue beat + low crypto correlation."
-  },
-  {
-    id: "reduce",
-    label: "High Leverage Extended Hours",
-    badge: "Leverage Bound",
-    symbol: "rNVDA",
-    direction: "LONG",
-    size: "$50,000",
-    verdict: "REDUCE",
-    summary: "Notional size overwhelms thin off-hours orderbook depth. Resize required.",
-    expectedShortfall: "-15.2%",
-    basisGap: "+0.45%",
-    depthVsSession: "1.85x",
-    cryptoBeta: "0.45",
-    actionText: "Resize to Recommended Limit",
-    promptText:
-      "I plan to buy $50,000 rNVDA token with 5x leverage during extended hours. Basis spread elevated at 0.45%."
-  },
-  {
-    id: "wait",
-    label: "Weekend 65.5h Liquidity Void",
-    badge: "Off-Hours Drift",
-    symbol: "rNVDA",
-    direction: "LONG",
-    size: "$2,000",
-    verdict: "WAIT",
-    summary: "65.5h off-hours basis drift (+2.56%) exceeds cash volatility buffer.",
-    expectedShortfall: "-8.4%",
-    basisGap: "+2.56%",
-    depthVsSession: "0.35x",
-    cryptoBeta: "0.20",
-    actionText: "Defer to Monday Open",
-    promptText:
-      "I'm thinking about buying $2,000 of rNVDA because AI infrastructure demand still looks strong. BTC has been weakening all weekend. Stress-test it."
-  },
-  {
-    id: "reject",
-    label: "Unhedged Weekend Cascade",
-    badge: "Tail Risk",
-    symbol: "rNVDA",
-    direction: "LONG",
-    size: "$100,000",
-    verdict: "REJECT",
-    summary: "Dislocation exceeds threshold. Structural failure before Monday open.",
-    expectedShortfall: "-42.5%",
-    basisGap: "+5.80%",
-    depthVsSession: "4.50x",
-    cryptoBeta: "0.85",
-    actionText: "Reject Capital Allocation",
-    promptText:
-      "Ape $100,000 with max leverage into tokenized equity with no thesis, no stop loss, and liquidation cascade risk."
-  }
-];
 
 const VERDICT_THEME_COLOR: Record<Verdict, string> = {
   PROCEED: "var(--rtd-proceed)",
@@ -154,8 +66,8 @@ export function TradeInputSurface({
         symbol: matchedPreset.symbol,
         direction: matchedPreset.direction.toLowerCase(),
         size: matchedPreset.size,
-        verdict: matchedPreset.verdict,
-        verdictTitle: matchedPreset.verdict,
+        verdict: matchedPreset.result.kind === "verdict" ? matchedPreset.result.verdict : null,
+        verdictTitle: matchedPreset.result.kind === "verdict" ? matchedPreset.result.verdict : "CLARIFICATION",
         summary: matchedPreset.summary,
         expectedShortfall: matchedPreset.expectedShortfall,
         basisGap: matchedPreset.basisGap,
@@ -301,11 +213,13 @@ export function TradeInputSurface({
             {/* 2. Center Verdict Display */}
             <div className="py-1 flex flex-col items-center text-center space-y-2.5 my-auto">
               <div className="p-2.5 bg-white/5 border border-white/15 rounded-xl shadow-inner">
-                <VerdictGlyph
-                  verdict={positionInfo.verdict ?? "WAIT"}
-                  size={58}
-                  reversed
-                />
+                {positionInfo.verdict ? (
+                  <VerdictGlyph verdict={positionInfo.verdict} size={58} reversed />
+                ) : (
+                  <div className="w-[58px] h-[58px] flex items-center justify-center text-slate-400 font-mono text-xs font-bold uppercase">
+                    ?
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1">
@@ -405,16 +319,22 @@ export function TradeInputSurface({
           <div className="bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 p-3.5 sm:p-4 shadow-2xs space-y-2 shrink-0">
             <div className="flex items-center justify-between">
               <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[var(--rtd-ink)]">
-                Calibrated Policy Scenarios:
+                Trade shapes (engine decides verdict):
               </span>
               <span className="text-[9.5px] font-mono text-[var(--rtd-steel)] uppercase">
-                4 PRESETS (1-CLICK LOAD)
+                4 SHAPES (1-CLICK LOAD)
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
               {PRESET_SCENARIOS.map((preset) => {
                 const isSelected = prompt.trim() === preset.promptText.trim();
+                const resultLabel =
+                  preset.result.kind === "verdict" ? preset.result.verdict : "CLARIFICATION";
+                const resultColor =
+                  preset.result.kind === "verdict"
+                    ? VERDICT_THEME_COLOR[preset.result.verdict]
+                    : "var(--rtd-steel)";
                 return (
                   <button
                     key={preset.id}
@@ -428,12 +348,12 @@ export function TradeInputSurface({
                         : "bg-[var(--rtd-paper)] border-[var(--rtd-steel)]/25 hover:border-[var(--rtd-steel)]"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-3">
                       <span
                         className="text-[10px] font-mono font-bold tracking-wider uppercase"
-                        style={{ color: VERDICT_THEME_COLOR[preset.verdict] }}
+                        style={{ color: resultColor }}
                       >
-                        {preset.verdict}
+                        {resultLabel}
                       </span>
                       <span className="text-[9px] font-mono text-[var(--rtd-steel)] uppercase">
                         {preset.badge}
@@ -452,6 +372,10 @@ export function TradeInputSurface({
                 );
               })}
             </div>
+
+            <p className="text-[9.5px] font-mono text-[var(--rtd-steel)] uppercase tracking-wider">
+              Recorded demo-fixture results; live runs depend on live market state.
+            </p>
           </div>
 
           {/* Natural Language Input Form */}

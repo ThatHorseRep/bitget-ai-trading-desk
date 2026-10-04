@@ -78,9 +78,9 @@ I'm thinking about buying $2,000 of rNVDA because AI infrastructure demand still
 - **Policy Code**: `WAIT_BASIS_DEVIATION` / `WAIT_OFF_HOURS_WEEKEND`
 - **Recommended Action**: Hold execution until US equity market open to eliminate un-anchored weekend basis risk.
 
-### Wall-Clock Execution Time
-- **Deterministic Fixture Mode**: ~1.2 to 2.5 seconds
-- **Live Bitget + Reference Streaming Mode**: ~4.0 to 7.5 seconds
+### Wall-Clock Execution Time (measured, updated 2026-10-04)
+- **Deterministic Fixture Mode**: **0.51s** (single measured run, 2026-09-27).
+- **Live Bitget + Reference Streaming Mode**: **11.75s–50.62s** across 6 live evaluations on the Gemini failover path (the shared Qwen gateway was unavailable in all 6; the 50.62s outlier is included, not rounded away). The workflow carries a 45s internal LLM-stage deadline and a 60s hard function ceiling — the slowest run exceeded the former while still completing inside the latter. Full context: `PRODUCT_DESCRIPTION.md` Part 3.
 
 ---
 

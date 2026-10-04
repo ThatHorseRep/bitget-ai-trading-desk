@@ -10,6 +10,9 @@ export interface PersistedWorkspaceState {
   step: WorkspaceStep;
   prompt: string;
   useFixture: boolean;
+  /** Persona lever (LOW/MED/HIGH selector); optional so payloads persisted
+   * before this field existed still load. */
+  riskTolerance?: "CONSERVATIVE" | "MODERATE" | "AGGRESSIVE";
   parsedResult: ParsedTradeResult | null;
   artifact: DecisionArtifact | null;
   timestamp: number;

@@ -42,7 +42,7 @@
 - **Problem.** After a rebuild, a dev session kept executing pre-rebuild modules; the code on screen lagged the code on disk and errors pointed at lines that no longer existed.
 - **Root cause.** `PwaProvider` registered the service worker in every environment. The SW caches `/_next/static/*` cache-first — correct for hashed production chunks, wrong for dev, where Turbopack reuses unhashed chunk URLs across rebuilds.
 - **Fix.** Registration is now production-only (`process.env.NODE_ENV === "production"` guard in `src/components/pwa/PwaManager.tsx`).
-- **Verification.** The guard is structural (dev installs no SW; production registration unchanged); suite 331/331 and `npx tsc --noEmit` 0 after the change.
+- **Verification.** The guard is structural (dev installs no SW; production registration unchanged); suite 331/331 at the time and `npx tsc --noEmit` 0 after the change (the count has since re-baselined to **366/366 across 38 files** — see §4A.7).
 
 ## 3. Session of 2026-09-27 — evidence dump → parser hardening → latency honesty
 
@@ -115,14 +115,69 @@ The session ran in two passes, per the methodology in the raw evidence ledger (l
 
 ---
 
+## 4A. Wrap-up pass (2026-10-03): parser P0, provenance wiring, mobile control sizing
+
+### 4A.1 Parser read a clock time as an entry price (P0)
+
+- **Problem.** "I plan to buy $10,000 rNVDA ... at 10:15 AM ET" parsed to `entryPrice: 1`, `quantity: 10000`, `MARKET_RISK estimatedPnlPct: +11300%`, and the artifact emitted the reason "Worst-case scenario loss (10789.49%) is within the STRONGER threshold (>= -5.00%)" — an absurd number passing a safety gate. The same path turned "elevated at 0.45%" into a $0.40 entry price (quantity 125,000 on a $50,000 position).
+- **Root cause.** `plainAtMatch` used a greedy `[\d,]+` under a trailing-only guard. The guard rejects the *full* match, so on backtracking the engine shrank "10:15" to "1" and satisfied the guard. Both preset prompts hit it.
+- **Fix.** "/(?:at|@\s*(?<![\d.,])(-?\d[\d,]*(?:\.\d+)?)(?!\d)(?!\.\d)/" — lookbehind rejects a mid-number start, the lookaheads reject truncation.
+- **Verification.** 39-case before/after corpus diff: **7 behavioral changes, all correct** (the two reported bugs, plus `at 12:00 pm`, `at 11:30 ET`, `at 100 bps`, `at 130.5%`, `at 0.5%` now correctly not treated as prices). Every legitimate form (`at 130.50`, `at 1,250`, `at 9.35 usd`, `at 2,500.50`, `at $350`, `@ -50`) byte-identical. Matrix cases 19–23 pin it. End-to-end via `DecisionDeskService`: `COMBINED_SHOCK` went from `+10789%` to `-9.25%`.
+
+### 4A.2 Provenance lineage was declared but never wired
+
+- **Problem.** `provenanceIdFor` was imported by nothing but its own test, and `onSelectProvenance` sat on `DecisionArtifactViewProps` without a single call site — the prop was threaded from `page.tsx` into a component that ignored it, so no headline number was clickable while the README advertised the affordance.
+- **Fix.** Four market-state tiles and four scenario cards now call `onSelectProvenance(provenanceIdFor(...))`. The market-state id derives from `marketState.sources[0]?.id` rather than a hardcoded string, so the link resolves in fixture mode (`prov-source-fixture-bitget`) and live mode alike. Removed the `{ id: recordId } as any` cast in `page.tsx` by typing the drawer selection `{ id: string } | null` — the drawer only ever read `.id`.
+- **Verification.** `tsc` clean; `eslint` clean. Caught a real regression during this pass: converting the scenario card from `div` to `button` dropped `key={sc.id}` and `eslint` surfaced it as `react/jsx-key` — restored.
+
+### 4A.3 Mobile header controls resized on every state change
+
+- **Problem.** Every mobile control sized to its own label, so the bar reflowed as state changed: the mode toggle swung between `LIVE` (4 chars) and `FALLBACK` (8) — roughly 2x its width; the risk lever shifted 6px (`MED` 29px → `HIGH` 35px) for one extra character; the audit badge grew when its count pill appeared. All were below the 44px touch minimum (`29x28`, `35x28`).
+- **Root cause.** `padding + auto width` with no fixed slot, so character count set the geometry.
+- **Fix.** One rule across the mobile header: every control gets a fixed slot, and state is carried by **color and icon, never text length**. Mode `w-[92px]` with a two-letter code (`FX`/`LIVE`/`FB`/`OFF`); risk lever `w-[72px]` cycling `LOW`→`MED`→`HIGH` with a fixed 34px label slot; theme `w-[44px]`; audit badge `w-[44px]` with the count pinned as an absolute overlay (clamped to `9+`). Full words remain in `title`/`aria-label`. The theme button's `DAY`/`NIGHT` text was removed per request — glyph only, names kept in `aria-label`/`title`. Desktop keeps its segmented group and `THEME` label.
+- **Verification.** Playwright against a production build: 8 state transitions (2 mode toggles, 3 risk levels, 2 theme toggles) at 360px and 390px, re-measuring `getBoundingClientRect()` after every click. **Every control held a byte-identical size in all 8 samples** (mode `92x44`, risk `72x44`, theme `44x44`, audit `44x44`); no horizontal page scroll; zero page errors.
+
+### 4A.4 Dev server cannot hydrate — browser verification must use a production build
+
+- **Problem.** Under `next dev`, React fails with "eval() is not supported in this environment" and **no button responds**. Two verification passes were silently blocked before the cause was found.
+- **Root cause.** `next.config.ts` sets `script-src 'self' 'unsafe-inline'` with no `'unsafe-eval'`; React needs eval in development mode.
+- **Fixed (2026-10-04).** Two causes, not one. (1) `script-src` now appends `'unsafe-eval'` **only** when `NODE_ENV === "development"`; production stays `'self' 'unsafe-inline'` (probed on a production build header — no eval). (2) Next 16 blocks dev-only resources (HMR socket, dev fonts) when the page is opened by IP instead of `localhost`; `allowedDevOrigins: ["127.0.0.1"]` was added to `next.config.ts` (development-only; production serving unaffected). Verified with Playwright on both `127.0.0.1:3000` and `localhost:3000`: React mounts (219 hydrated fibers), a preset click fills the thesis textarea, the risk lever cycles, and there are zero WebSocket/CSP/eval errors. UI release verification still uses `npm run build` + `next start`.
+
+### 4A.5 Launcher presets advertised verdicts the engine never returned
+
+- **Problem.** The four preset cards were labeled `PROCEED` / `REDUCE` / `WAIT` / `REJECT` under a "Calibrated Policy Scenarios" header and a "4 PRESETS" count, implying a 2x2 calibration. The `verdict` field was decorative: it was rendered but never compared against the engine result.
+- **Root cause.** The deterministic fixture is a single hardcoded `WEEKEND` market state (`src/fixtures/rnvda-demo.ts`). Weekend gating fires on every fixture run, so position size and thesis cannot move the verdict. The 2x2 could not be reproduced from any threshold.
+- **Fix.** Relabelled each card to the verdict it actually returns, and changed the grid copy to "Trade shapes (engine decides verdict)" / "4 SHAPES" so the four cards are presented as four *inputs*, not four guaranteed outcomes. Thresholds were **not** tuned to manufacture distinct verdicts.
+- **Verification — recorded fixture runs (deterministic):**
+  - `cash-hours $10k` -> **WAIT**, worst `COMBINED_SHOCK -9.25%`
+  - `leverage $50k` -> **WAIT**, worst `COMBINED_SHOCK -9.25%`
+  - `weekend $2k` -> **WAIT**, worst `COMBINED_SHOCK -9.25%`
+  - `unhedged $100k` -> **CLARIFICATION** (`asset`: the prompt names no ticker, so the desk refuses to guess)
+- **Verification — live sample (NOT a regression signal):** one run of the $2k weekend prompt returned **REJECT** at 30.6s with `dataSource: live`, basis `+0.32%`, spread `0.034%`, worst `COMBINED_SHOCK -9.32%`. Note the live verdict differs from the fixture verdict on the same input — live basis is ~8x smaller than the fixture's +2.56%, which is enough to cross a policy threshold. Live runs land on the Gemini failover path (Qwen circuit open) and are nondeterministic; treat this as a **sample of one**, not a calibration.
+- **Consequence.** Preset cards now show fixture-mode expectations. A trader who runs one on live data may see a different verdict, which is the engine working correctly, not a broken preset.
+
+### 4A.6 Mobile header: crushed lockup at 360px and a state border that never rendered
+
+- **Problem.** At 360px the four fixed mobile controls (264px total) plus the brand lockup exceeded the header width, so the brand button shrank 94px -> 64px and the lockup collapsed; the risk lever's state border computed at `border-width: 0px` (a border colour class with no width), so LOW/HIGH never showed the intended frame; and `bg-[var(--rtd-reduce)] text-[var(--rtd-paper)]` produced low-contrast ink on amber in light mode.
+- **Fix.** Compact the fixed slots (mode 92 -> 70px, risk 72 -> 64px), collapse the duplicate nested `md:hidden` wrappers, add a real 1px state border and a visible `RISK` micro-label to the lever, and use `text-[var(--rtd-void)]` on amber fills (dark in both themes).
+- **Verification.** Production build at 360px and 390px: lockup at its natural 94px, controls 70x44 / 64x44 / 44x44 / 44x44 with byte-identical sizes across 8 state transitions (`pw-stable.cjs` PASS), no clipping, no page scroll; HIGH-chip contrast measured ~5.9:1 in light mode and high in dark.
+
+### 4A.7 Test-count re-baseline, preset drift pin, and case-study re-verification
+
+- **Test count.** Suite re-baselined **331/331 across 35 files -> 366/366 across 38 files** (2026-10-04) after parser matrix cases 19-23, the error contract, and the preset drift pin. Judge-facing docs state the current number; earlier ledger entries keep their dated values with a pointer here.
+- **Preset drift pin.** `tests/preset-cards.test.cjs` replays all four launcher prompts through the deterministic fixture workflow and asserts the card labels equal engine output (WAIT x3 with worst `COMBINED_SHOCK -9.25%`; the unhedged card stops at `CLARIFICATION`). A policy change that moves a verdict now fails the suite instead of shipping a card that lies.
+- **Case studies.** All three `RETROSPECTIVE_CASE_STUDIES.md` walkthroughs re-executed against the current engine (states reconstructed from their documented assumptions): **every displayed shocked price and percentage reproduces exactly**; dollar P&Ls reproduce to within **$0.05** (the engine rounds internally at 8 decimals while the docs display 2-decimal assumptions). Case 3's `"at 04:00 AM ET"` input no longer parses a clock time as a price.
+
 ## 5. Open items (tracked, not solved)
 
 1. **Qwen primary-path recovery.** All 6 latency measurements ran on the Gemini failover path. When the shared gateway recovers, re-measure and update the latency range in PRODUCT_DESCRIPTION Part 3 / CONNECTIVITY_REPORT (expected to tighten).
 2. **Latency outliers vs. internal deadline.** The 50.62s run exceeded the 45s internal LLM-stage deadline (inside the 60s ceiling). Candidate engineering follow-up: lower per-stage budgets so worst-case wall clock stays under 45s even with a dead primary.
-3. **`next-env.d.ts` churn.** The file alternates between dev/build import paths depending on which ran last; commit the build-time variant (or accept the churn) so `git status` stays clean.
+3. **`next-env.d.ts` churn — RESOLVED 2026-10-03.** The build-time variant is committed (`bff13de`); `git status` stays clean.
 4. **Evidence-dump reruns.** The raw ledger (`docs/archive/EVIDENCE_DUMP.md`, local-only) is a point-in-time artifact; `scripts/build-evidence-dump.cjs` rebuilds it from fresh captures when the session's methodology is repeated.
 5. **Dev-generated type corruption.** `.next/dev/types/routes.d.ts` was observed mid-session with stray closing braces (TS1128) after source files were reverted under the watching dev server, failing `tsc --noEmit` with no source-file errors. `npx next typegen` regenerates clean types. If typecheck fails only inside `.next/dev/types/`, regenerate before touching source. (Same class as the `next-env.d.ts` churn in item 3.)
 6. **Hydration console observation + nonce CSP.** During the CSP-enabled browser audit one React #418 hydration exception appeared with zero CSP "Refused to" violations — cause not isolated and not attributable to blocked resources; re-check in a clean incognito profile during the cold rehearsal. A nonce-based CSP via middleware is the post-submission hardening step; `script-src 'unsafe-inline'` is the honest current scope.
+
+7. **Post-submission debt: split the large workspace components.** `DecisionArtifactView.tsx` is ~1007 lines mixing provenance wiring, the counterfactual sandbox, and export; `TradeInputSurface.tsx` is 543 lines. Deferred out of the submission pass deliberately — a pre-submission extraction is churn with no judge-visible benefit. Split them behind the existing test suite after submission.
 
 ---
 

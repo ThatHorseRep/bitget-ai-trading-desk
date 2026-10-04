@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import type { DecisionArtifact, ProvenanceRecord, ProvenanceType } from "../../domain/decision/types";
+import type { DecisionArtifact, ProvenanceType } from "../../domain/decision/types";
 
 interface ProvenanceDrawerProps {
   artifact: DecisionArtifact;
   isOpen: boolean;
   onClose: () => void;
-  selectedRecord: ProvenanceRecord | null;
+  /** Selection is by record id only; the record itself is read from the artifact. */
+    selectedRecord: { id: string } | null;
 }
 
 const CATEGORY_CONFIG: Record<

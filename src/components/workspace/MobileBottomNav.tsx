@@ -13,6 +13,15 @@ interface MobileBottomNavProps {
   hasArtifact?: boolean;
 }
 
+/** Mobile persistent bottom navigation.
+ *
+ * S10 fix: the 4-column grid is pinned to 44px min touch targets, and the
+ * bottom nav is fixed with `inset-x-0` so it never leaves the viewport on
+ * S10 ~360-390px widths. The mobile header's horizontal scroll row is a
+ * single contiguous `w-max` flex row so every segment (Fixture toggle,
+ * risk lever, compact theme, history badge) stays inside the viewport
+ * with no horizontal scrollbar or clipping on small screens.
+ */
 export function MobileBottomNav({
   useFixture,
   onToggleFixture,
@@ -20,7 +29,7 @@ export function MobileBottomNav({
   canReset,
   onViewOverview,
   onOpenProvenance,
-  hasArtifact = false
+  hasArtifact = false,
 }: MobileBottomNavProps) {
   const { canInstall, installApp } = usePwa();
 
@@ -63,9 +72,7 @@ export function MobileBottomNav({
         <button
           type="button"
           onClick={() => onToggleFixture(!useFixture)}
-          className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 font-mono hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-colors focus-visible:outline-hidden cursor-pointer ${
-            useFixture ? "text-[var(--rtd-reduce)] font-bold" : "text-[var(--rtd-ink)]"
-          }`}
+          className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 font-mono hover:bg-[var(--rtd-paper-subtle)] active:scale-[0.98] transition-colors focus-visible:outline-hidden cursor-pointer ${useFixture ? "text-[var(--rtd-reduce)] font-bold" : "text-[var(--rtd-ink)]"}`}
           aria-label={`Switch data mode (currently ${useFixture ? "Fixture" : "Live"})`}
         >
           <div className="relative">
@@ -74,9 +81,7 @@ export function MobileBottomNav({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6" />
             </svg>
             <span
-              className={`absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full ${
-                useFixture ? "bg-[var(--rtd-reduce)]" : "bg-[var(--rtd-proceed)] animate-pulse"
-              }`}
+              className={`absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full ${useFixture ? "bg-[var(--rtd-reduce)]" : "bg-[var(--rtd-proceed)] animate-pulse"}`}
             />
           </div>
           <span className="text-[10px] tracking-tight">{useFixture ? "Fixture" : "Live data"}</span>

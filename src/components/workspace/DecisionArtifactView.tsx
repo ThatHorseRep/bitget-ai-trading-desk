@@ -5,12 +5,17 @@ import type { DecisionArtifact, DecisionVerdict } from "../../domain/decision/ty
 import { evaluateDecision } from "../../core/decision/policy";
 import { classifyPositionQuality } from "../../core/decision/classifyPosition";
 import { sectionSevenHeading } from "../../lib/verdict/changeConditionHeading";
+import { provenanceIdFor } from "../../lib/stressTestFailure";
 import { Reveal } from "../motion/Reveal";
 import { VerdictGlyph, VerdictBadge } from "../brand/VerdictGlyph";
 
 interface DecisionArtifactViewProps {
   artifact: DecisionArtifact;
   onOpenProvenance: () => void;
+  /** Select a provenance record (e.g. a headline number) in the drawer;
+   * the caller scrolls/highlights it and keeps the active record.
+   */
+  onSelectProvenance: (recordId: string) => void;
   onNewTrade: () => void;
   /** Current persona-lever state from the workspace header (page state, not artifact). */
   riskTolerance?: "CONSERVATIVE" | "MODERATE" | "AGGRESSIVE";
@@ -67,6 +72,7 @@ function formatUsd(val: number, forcePlusSign: boolean = false): string {
 export function DecisionArtifactView({
   artifact,
   onOpenProvenance,
+  onSelectProvenance,
   onNewTrade,
   riskTolerance = "MODERATE"
 }: DecisionArtifactViewProps) {
@@ -85,6 +91,18 @@ export function DecisionArtifactView({
     changeConditions,
     limitations
   } = artifact;
+
+  // Headline figures link to their provenance record. The market-state record id
+  // is derived from this artifact's own source list rather than hardcoded, so the
+  // link resolves to a real record in fixture mode and live mode alike.
+  const marketStateSourceId = marketState.sources[0]?.id ?? null;
+  const selectMarketState = () => {
+    if (marketStateSourceId) {
+      onSelectProvenance(provenanceIdFor("market-state", marketStateSourceId));
+    } else {
+      onOpenProvenance();
+    }
+  };
 
   // Persona lever: when the trader changes risk tolerance after the artifact
   // landed, the verdict is recomputed by the SAME pure policy engine used by
@@ -127,7 +145,13 @@ export function DecisionArtifactView({
   const verdictInfo = VERDICT_CONFIG[decision.verdict];
 
   const handleCopyJson = () => {
-    navigator.clipboard.writeText(JSON.stringify(artifact, null, 2));
+    // PRE24-10: disclose the persona lever baked into this JSON export.
+    const displayedDecision = {
+      ...artifact,
+      displayedDecision: decision,
+      exportedAt: new Date().toISOString(),
+    };
+    navigator.clipboard.writeText(JSON.stringify(displayedDecision, null, 2));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -327,7 +351,7 @@ export function DecisionArtifactView({
 
         {/* Responsive Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <div className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5">
+          <button type="button" onClick={selectMarketState} className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5 w-full text-left cursor-pointer hover:bg-[var(--rtd-paper)] focus-visible:outline-2 focus-visible:outline-[var(--rtd-ink)] rounded-sm" aria-label="Show provenance for market state">
             <div className="flex items-center justify-between">
               <div className="text-[10.5px] font-mono font-bold text-[var(--rtd-steel)] uppercase tracking-wider">
                 Bitget token
@@ -353,9 +377,9 @@ export function DecisionArtifactView({
             >
               {trade.canonicalSymbol || trade.asset}
             </div>
-          </div>
+          </button>
 
-          <div className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5">
+          <button type="button" onClick={selectMarketState} className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5 w-full text-left cursor-pointer hover:bg-[var(--rtd-paper)] focus-visible:outline-2 focus-visible:outline-[var(--rtd-ink)] rounded-sm" aria-label="Show provenance for market state">
             <div className="text-[10.5px] font-mono font-bold text-[var(--rtd-steel)] uppercase tracking-wider">
               Underlying equity
             </div>
@@ -368,9 +392,9 @@ export function DecisionArtifactView({
             >
               {trade.referenceAsset || "Underlying"}
             </div>
-          </div>
+          </button>
 
-          <div className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5">
+          <button type="button" onClick={selectMarketState} className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5 w-full text-left cursor-pointer hover:bg-[var(--rtd-paper)] focus-visible:outline-2 focus-visible:outline-[var(--rtd-ink)] rounded-sm" aria-label="Show provenance for market state">
             <div className="text-[10.5px] font-mono font-bold text-[var(--rtd-steel)] uppercase tracking-wider">
               Basis premium
             </div>
@@ -390,9 +414,9 @@ export function DecisionArtifactView({
                 ? `${marketState.basisPct >= 0 ? "+" : ""}${marketState.basisPct.toFixed(2)}%`
                 : "0.00%"}
             </div>
-          </div>
+          </button>
 
-          <div className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5">
+          <button type="button" onClick={selectMarketState} className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5 w-full text-left cursor-pointer hover:bg-[var(--rtd-paper)] focus-visible:outline-2 focus-visible:outline-[var(--rtd-ink)] rounded-sm" aria-label="Show provenance for market state">
             <div className="text-[10.5px] font-mono font-bold text-[var(--rtd-steel)] uppercase tracking-wider">
               Orderbook spread
             </div>
@@ -402,7 +426,7 @@ export function DecisionArtifactView({
             <div className="text-[10px] text-[var(--rtd-steel)] font-mono">
               {marketState.spreadPct !== null ? `${marketState.spreadPct.toFixed(2)}%` : "N/A"}
             </div>
-          </div>
+          </button>
 
           <div className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5">
             <div className="text-[10.5px] font-mono font-bold text-[var(--rtd-steel)] uppercase tracking-wider">
@@ -462,9 +486,12 @@ export function DecisionArtifactView({
             .map((sc) => {
               const isSevere = sc.estimatedPnlPct !== null && sc.estimatedPnlPct <= -10;
               return (
-                <div
+                <button
                   key={sc.id}
-                  className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3.5 sm:p-4 flex flex-col justify-between"
+                  type="button"
+                  onClick={() => onSelectProvenance(provenanceIdFor("scenario", sc.id))}
+                  aria-label={"Show provenance for the " + sc.id + " stress scenario"}
+                  className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3.5 sm:p-4 flex flex-col justify-between text-left cursor-pointer hover:border-[var(--rtd-ink)] focus-visible:outline-2 focus-visible:outline-[var(--rtd-ink)]"
                 >
                   <div className="space-y-1.5 mb-3">
                     <div className="flex items-center justify-between">
@@ -517,7 +544,7 @@ export function DecisionArtifactView({
                       </dd>
                     </div>
                   </dl>
-                </div>
+                </button>
               );
             })}
         </div>

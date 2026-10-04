@@ -115,7 +115,7 @@ npm run verify-clean
 - **Interactive What-If Sandbox:** [`src/components/workspace/DecisionArtifactView.tsx`](./src/components/workspace/DecisionArtifactView.tsx)
 - **Illustrative Scenario Walkthroughs (engine-executed):** [`docs/RETROSPECTIVE_CASE_STUDIES.md`](./docs/RETROSPECTIVE_CASE_STUDIES.md)
 - **Live Bitget Market State Reconstructor:** [`src/services/marketStateService.ts`](./src/services/marketStateService.ts)
-- **Provenance & Lineage Tracking:** [`src/core/provenance/tracker.ts`](./src/core/provenance/tracker.ts)
+- **Provenance & Lineage Tracking:** inline in `src/services/decisionDeskService.ts` (`DecisionDeskService.runWorkflow` compiles the artifact's provenance array); the pure ID mapping lives in `src/lib/stressTestFailure.ts` (`provenanceIdFor(...)`); the drawer renders each `prov-source-*`, `prov-calc-*`, `prov-assumption-*`, `prov-ai-*` record with scroll/highlight support.
 - **Optional Ecosystem Integrations:** enrichment only, fully classified in [`ARCHITECTURE_AND_LIMITATIONS.md`](./ARCHITECTURE_AND_LIMITATIONS.md)
 
 ---

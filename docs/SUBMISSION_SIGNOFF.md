@@ -8,13 +8,13 @@
 
 ## 1. Verdict
 
-**The repository is submission-ready from the repo side.** All machine-verifiable gates pass: **331/331 tests**, typecheck clean, eslint clean, every demo asset HTTP 200, every spoken number in the mobile brand cut traceable to the recorded live artifact (14/14). The human items in §7 remain the owner's.
+**The repository is submission-ready from the repo side.** All machine-verifiable gates pass: **366/366 tests** (re-baselined 2026-10-04), typecheck clean, eslint clean, every demo asset HTTP 200, every spoken number in the mobile brand cut traceable to the recorded live artifact (14/14). The human items in §7 remain the owner's.
 
 ## 2. Audit scorecard (four dimensions)
 
 | Dimension | Score | Evidence |
 |---|---|---|
-| **Code quality** | Strong | Deterministic core (`src/core`) pure, config-driven, tested from compiled output (now **331/331 across 35 test files**, `npm test`); hot spots mapped, not hidden — [architecture map](../scratch/signoff/architecture-map.html) (local): `DecisionArtifactView.tsx` 946 L, two research providers ~900 L each, scripts/ reduced 56→34 files this pass |
+| **Code quality** | Strong | Deterministic core (`src/core`) pure, config-driven, tested from compiled output (now **366/366 across 38 test files**, `npm test`); hot spots mapped, not hidden — architecture map (local-only, not tracked): `DecisionArtifactView.tsx` 1007 L, two research providers ~900 L each, scripts/ now 18 files (2026-10-03 prune) |
 | **Spec compliance** | Strong | Every repo-side claim in README / SUBMISSION / PRODUCT_DESCRIPTION / PRE_SUBMISSION_REPORT maps to an artifact (§4 proof table); deliverables line in PRODUCT_DESCRIPTION updated to the brand cuts (was still promising retired 6.35 MB videos) |
 | **Integrity & honesty** | Strong | Zero invented prices in any live path — an uncommitted fake-price fallback in `src/adapters/reference/yahoo.ts` was identified and reverted before it could ship; verdict has a **single source of truth** (policy engine) after a UI paint-override was reverted; every Video 4 number traces to `demo-out/brand-live-recorded-artifact.json` (14/14, §4). **Update 2026-09-30: Video 3 rebuilt on the same zero-mock pipeline** — desktop numbers of record in `demo-out/brand-desktop-live-recorded-artifact.json` (trace 17/17); the mocked-pipeline gap is closed on both brand cuts |
 | **Resilience & ops** | Strong | Failover circuit covered by suite; rate-limited API; honest per-provider degradation; graceful-degradation limitations visible in every artifact; sitemap/robots/manifest now served (§5) |
@@ -31,11 +31,11 @@
 |---|---|---|---|---|---|
 | 1 | API live & framed | `POST /api/stress-test` | curl, underspecified trade | HTTP 200, SSE `data:` event, honest 422 CLARIFICATION (entry price requested) | PASS |
 | 2 | Full workflow | `POST /api/stress-test` (fixture) | curl, complete trade | HTTP 200, `DECISION_READY`, verdict WAIT, 30 KB stream | PASS |
-| 3 | Responsive player, desktop | `#demo-walkthrough` @1366px | headless Playwright ([probe](../scratch/signoff/probe-player.cjs)) | exactly 1 `<video>`, `brand-desktop-demo.mp4` + matching poster, 0 console errors | PASS |
+| 3 | Responsive player, desktop | `#demo-walkthrough` @1366px | headless Playwright (local probe) | exactly 1 `<video>`, `brand-desktop-demo.mp4` + matching poster, 0 console errors | PASS |
 | 4 | Responsive player, mobile | `#demo-walkthrough` @390px | same probe | exactly 1 `<video>`, `brand-mobile-demo.mp4` + matching poster, 0 console errors | PASS |
 | 5 | Assets served | `public/demo/*` | curl ×11 | all brand-cut files (mp4/poster/srt/ass/voice/mix ×2) HTTP 200 | PASS |
-| 6 | Numbers of record | recorded artifact + timeline | [trace-artifact.cjs](../scratch/signoff/trace-artifact.cjs) | **14/14**: WAIT · qty 70.07904917 · entry 356.74 · ref 357.45 (prevClose 372.11) · combined −2701.07267207 · protected = \|pnl\|/2 = 1350.536336035 (exact derivation; not artifact-verbatim by design) · `dataSource: live` | PASS |
-| 7 | Verdict math invariance | TAP suite | `npm test` | tolerance behavior pinned by the 15-test contract in `tests/tolerances.test.cjs` (LOW→REJECT / HIGH→PROCEED on gated uncertainty, MODERATE preserves history, hard blockers never relaxed, liquidity floor); **331/331** (298 original incl. full yahoo rejection suite + 6 brand-cut pins + 15 tolerance tests + 7 direct band-shift contract tests + others) | PASS |
+| 6 | Numbers of record | recorded artifact + timeline | trace-artifact.cjs (local) | **14/14**: WAIT · qty 70.07904917 · entry 356.74 · ref 357.45 (prevClose 372.11) · combined −2701.07267207 · protected = \|pnl\|/2 = 1350.536336035 (exact derivation; not artifact-verbatim by design) · `dataSource: live` | PASS |
+| 7 | Verdict math invariance | TAP suite | `npm test` | tolerance behavior pinned by the 15-test contract in `tests/tolerances.test.cjs` (LOW→REJECT / HIGH→PROCEED on gated uncertainty, MODERATE preserves history, hard blockers never relaxed, liquidity floor); **366/366** (re-baselined 2026-10-04: 331 + parser matrix cases 19–23 + preset-card fixture drift pin + error contract) | PASS |
 | 8 | Responsive switch pinned forever | new unit seam | [tests/brand-cuts.test.cjs](../tests/brand-cuts.test.cjs) (written red-first) | 6/6 — breakpoint 768 exact, file-pairing convention, no legacy cuts reachable | PASS |
 
 **Provenance note (kept honest):** `$1,350.54` (protected size) is spoken audio derived from the artifact-verbatim `−$2,701.07267207` by exact halving; it does not appear verbatim in the artifact JSON. The trace standard therefore distinguishes artifact-verbatim numbers (7/7) from exact-arithmetic derivations (1/1). Nothing else in the narration needed derivation.
@@ -63,12 +63,12 @@ Nothing was destroyed. Pruned items moved to gitignored `scratch/signoff/pruned/
 
 ## 7½. Video 4 mobile cut — Act 6 re-render + timing fix (2026-10-01 addendum)
 
-Phase 1 trust-gate tasks 3–4 found two issues in the shipped mobile brand cut; both were user-approved and fixed the same day, with the same zero-mock standard as the original take. Full evidence: [scratch/signoff/video4-act6-rerender.md](../scratch/signoff/video4-act6-rerender.md) (local).
+Phase 1 trust-gate tasks 3–4 found two issues in the shipped mobile brand cut; both were user-approved and fixed the same day, with the same zero-mock standard as the original take. Full evidence: scratch/signoff/video4-act6-rerender.md (local-only).
 
 1. **Stale "Aggressive — REDUCE" line:** today's engine returns PROCEED on the video's exact recorded artifact (elevated → moderate, band-shift note disclosed). The Act 6 segment was re-rendered against the recorded artifact via the app's own persistence seam — no interception, no injected data, taps re-aligned to the original SFX cues — and the narration changed by one word (REDUCE → PROCEED, same voice/rate). This now matches the desktop cut ("Aggressive — PROCEED.") and the 15-test tolerance contract in `tests/tolerances.test.cjs`.
 2. **Timing glitch (same class as desktop):** shipped mp4 was 2.280s shorter than the real capture (`-shortest` mux trim; file ended 1.55s before recording stopped). Re-muxed at full capture length: **136.520s shipped = 136.520s captured, 0.000s cut**; narration tail intact; splice seam verified by PSNR to reproduce the original take's own motion (15.35 dB vs original's 15.61 dB across the same instant; natural motion ≈ 37 dB).
 3. Gates re-run after the re-render: tsc 0 · eslint 0 (touched scripts) · **npm test 324/324** · captions cue 19 engine-true (real TTS sentence-boundary timing); all other 25 cues byte-identical.
-4. Same-day follow-up (2026-10-01, later): audit finding closed — the dead `src/lib/verdict/scoring.test.ts` twin (excluded from every build and runner; its CJS sibling is the executed suite) was removed from the judged tree, and a 7-test direct `applyRiskToleranceToBand` contract was added to `tests/verdict-scoring.test.cjs` (identity, both shift directions, terminal-band stops, verbatim disclosure note, determinism). Suite now **331/331**.
+4. Same-day follow-up (2026-10-01, later): audit finding closed — the dead `src/lib/verdict/scoring.test.ts` twin (excluded from every build and runner; its CJS sibling is the executed suite) was removed from the judged tree, and a 7-test direct `applyRiskToleranceToBand` contract was added to `tests/verdict-scoring.test.cjs` (identity, both shift directions, terminal-band stops, verbatim disclosure note, determinism). Suite then **331/331** (re-baselined to **366/366** on 2026-10-04 — see §9).
 
 ## 7. Remaining human items (unchanged, explicit)
 
@@ -84,9 +84,26 @@ Phase 1 trust-gate tasks 3–4 found two issues in the shipped mobile brand cut;
 |---|---|
 | typecheck (`tsc --noEmit`) | ✅ clean (after `next typegen` regenerated a corrupt dev-generated `routes.d.ts` — same class as the known `next-env.d.ts` churn; added to [PROBLEMS_AND_SOLUTIONS §3](./PROBLEMS_AND_SOLUTIONS.md)) |
 | lint (eslint, touched files) | ✅ clean |
-| tests (`npm test`) | ✅ **331/331** |
+| tests (`npm test`) | ✅ **366/366** (2026-10-04) |
 | `npm run verify-clean` (npm ci + build) | ⏸ deferred to the pre-commit gate: `npm ci` re-installs node_modules and `next build` contends with the running dev server's `.next`; run when the dev server can be stopped |
-| commit ladder → deploy → cold incognito | ⏸ awaiting owner go-ahead (staged plan in scratch/signoff/) |
+| commit ladder | ✅ two commits landed 2026-10-04 (parser+tests; UI/provenance/docs) — no push |
+| deploy → cold incognito | ⏸ awaiting owner push + cold run |
+
+---
+
+## 9. Wrap-up addendum (2026-10-04)
+
+Finalization pass before submission. The wrap-up handoff document is removed from the tree (its durable record is §4A of the ledger and this addendum); no working artifacts are tracked.
+
+| Item | State |
+|---|---|
+| Dev server | `'unsafe-eval'` is now development-only (production header probed — no eval), and Next 16's IP-origin block on dev resources is cleared via `allowedDevOrigins: ["127.0.0.1"]`. Verified hydrated on both `127.0.0.1:3000` and `localhost:3000`. |
+| Preset cards | Relabelled to recorded fixture results (WAIT ×3, CLARIFICATION) with a fixture disclaimer; `tests/preset-cards.test.cjs` replays every prompt through the engine so labels cannot drift. |
+| Mobile header | Fixed slots compacted (mode 70×44, risk 64×44, theme/audit 44×44) so the 94px lockup is never crushed at 360px; risk lever gained a visible `RISK` label and a real 1px state border; amber fills use dark void ink for light-mode contrast. |
+| Case studies | All three walkthroughs re-executed against the current engine: every displayed price and percentage reproduces exactly; dollar P&Ls within $0.05 (8-decimal internal rounding vs 2-decimal displayed assumptions). |
+| Docs | Test count re-baselined to **366/366 across 38 files**; GOLDEN_PATH latency replaced with the measured 0.51s fixture / 11.75–50.62s live range; references to gitignored local evidence are no longer clickable links. |
+| Gates | `test:core` 366/366 · `tsc --noEmit` 0 · `eslint .` 0 · `npm run build` 0 (2026-10-04). |
+| Commits | Two commits on `main`, not pushed. Push + redeploy remains the owner's step. |
 
 ---
 
