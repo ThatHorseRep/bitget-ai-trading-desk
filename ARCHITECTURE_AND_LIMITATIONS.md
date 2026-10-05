@@ -32,6 +32,11 @@ This document outlines the current MVP architecture, known technical constraints
 * **Current State (MVP)**: Due to constraints with the current LLM's streaming capabilities, the system uses synchronous JSON payload extraction. If the LLM returns slightly malformed data, the system automatically intercepts the failure and initiates a retry loop.
 * **Production Roadmap**: Migrate to a provider with native Structured Outputs (JSON Schema enforcement) and reliable Server-Sent Events (SSE) streaming to reduce latency and eliminate the need for multi-second retry loops.
 
+### 5. LLM Gateway Configuration (Hackathon Deployment)
+* **Endpoint**: the production deployment (Vercel) and local `.env.local` point at the provided hackathon gateway: `LLM_API_BASE_URL=https://hackathon.bitgetops.com/v1`, `LLM_MODEL=qwen3.8-max`, `LLM_API_KEY=<hackathon-provided key>`.
+* **Hidden reasoning off by default**: the app sends `enable_thinking: false` by default (measured: raw model latency with hidden reasoning blew the workflow budget); set `LLM_ENABLE_THINKING=1` to opt back in.
+* **Degradation story (a feature, not an apology)**: the workflow runs under a hard wall-clock budget anchored at request start (45s internal LLM-stage deadline, 60s hard function ceiling). If the LLM gateway is slow, the affected stage is skipped with an explicit limitation line ("Skipped adversarial challenge: workflow time budget exhausted…") and the deterministic stress math + policy still return a complete verdict. The serverless function is never killed mid-stream, and the UI never shows a silent "Analysis failed". The accurate framing: *the desk always returns a decision, degraded with honest limitations when a dependency underperforms.*
+
 ## Optional Ecosystem Integrations (PRE24 series)
 
 Beyond the core pipeline, the app optionally enriches its evidence with ecosystem providers, assembled at a single composition root (`src/adapters/research/defaultRegistry.ts`, PRE24-01). Every slot is optional at the type level; absent providers are a supported runtime state, and provenance records distinguish every source. Classification, status, and safety boundaries per integration:

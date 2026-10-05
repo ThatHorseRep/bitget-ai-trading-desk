@@ -14,7 +14,6 @@
 | [`SUBMISSION_SIGNOFF.md`](./SUBMISSION_SIGNOFF.md) | **Final sign-off:** audit scorecard, proof table (every claim → observable), video provenance, remaining human items |
 | [`../ARCHITECTURE_AND_LIMITATIONS.md`](../ARCHITECTURE_AND_LIMITATIONS.md) | MVP architecture, known limitations (L1 vs L2 data, static risk profiles, reference pricing, LLM stability), optional-integration boundaries |
 | [`PROBLEMS_AND_SOLUTIONS.md`](./PROBLEMS_AND_SOLUTIONS.md) | Problem → root cause → fix → verification ledger, with test proof |
-| [`../SUBMISSION_CHECKLIST.md`](../SUBMISSION_CHECKLIST.md) | Pre-submission operational checklist (LLM gateway config, degradation story, deployment verification) |
 
 ## How the desk decides (policy & methodology)
 

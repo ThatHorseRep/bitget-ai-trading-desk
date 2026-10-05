@@ -110,7 +110,7 @@ The session ran in two passes, per the methodology in the raw evidence ledger (l
 | Parser regex failed on exposure amounts without trailing preposition | Regex assumed \"of/between \"$N\" phrasing | Regex fix (`4a87a5c`) | sabotage Tier-2 subtests |
 | CI lockfile drift (`lucide-react`) | Dependency added to `package.json` without syncing lockfile | Lockfile re-synchronized (`691a1f4`, `e7e6902`) | green CI on `main` |
 | UI fake progress + hardcoded assumptions | Workbench showed canned progress not tied to pipeline stages | Stage-bound SSE progress wired to the real pipeline (`7865fd3`) | live SSE captures (8 stages) |
-| Hidden-reasoning LLM latency blowing the workflow budget | Hackathon Qwen model ran with thinking enabled by default | `enable_thinking: false` by default, opt-in via `LLM_ENABLE_THINKING=1` | [`SUBMISSION_CHECKLIST.md`](../SUBMISSION_CHECKLIST.md) §1 |
+| Hidden-reasoning LLM latency blowing the workflow budget | Hackathon Qwen model ran with thinking enabled by default | `enable_thinking: false` by default, opt-in via `LLM_ENABLE_THINKING=1` | [`ARCHITECTURE_AND_LIMITATIONS.md`](../ARCHITECTURE_AND_LIMITATIONS.md) §5 |
 | No security headers on any response (submission audit finding) | Next.js defaults: responses carried only the `X-Powered-By` fingerprint and zero hardening | CSP (same-origin; `'unsafe-inline'` script tradeoff documented in-file), `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, host-only HSTS, `Permissions-Policy`; `poweredByHeader: false` | curl on a production build: all six headers on `/`, POST `/api/stress-test`, media, and 404; browser pass under CSP; commit 9 of the Phase 4 ladder |
 
 ---

@@ -120,16 +120,16 @@ npm run verify-clean
 
 ---
 
-## Submission Checklist
+## Submission Status
 
-- [x] **Track Selected:** Track 3: Decision Stress Testing
-- [x] **Functional Web Application:** Deployed at [redteamdesk.name.ng](https://redteamdesk.name.ng) (Mirror: [bitget-ai-redteam-desk.vercel.app](https://bitget-ai-redteam-desk.vercel.app))
-- [x] **Desktop Demo Video:** Brand-cut 1280×720 walkthrough, 100% live data (`public/demo/brand-desktop-demo.mp4`, 6.8 MB)
-- [x] **Mobile Demo Video:** Brand-cut portrait walkthrough with live audio (`public/demo/brand-mobile-demo.mp4`, 14.3 MB) — Act 6 re-rendered 2026-10-01 to the engine-true tolerance verdicts; ships at the full 136.5s capture length
-- [x] **Zero TypeScript Errors:** Passing `npm run typecheck`
-- [x] **Zero Lint Errors:** Passing `npm run lint`
-- [x] **Deterministic Unit Tests:** 100% passing `npm test`
-- [x] **GitHub Repo Cleanliness:** All temporary scratch files purged, large binaries ignored
+- **Track Selected:** Track 3: Decision Stress Testing
+- **Functional Web Application:** Deployed at [redteamdesk.name.ng](https://redteamdesk.name.ng) (Mirror: [bitget-ai-redteam-desk.vercel.app](https://bitget-ai-redteam-desk.vercel.app))
+- **Desktop Demo Video:** Brand-cut 1280×720 walkthrough, 100% live data (`public/demo/brand-desktop-demo.mp4`, 6.8 MB)
+- **Mobile Demo Video:** Brand-cut portrait walkthrough with live audio (`public/demo/brand-mobile-demo.mp4`, 14.3 MB) — Act 6 re-rendered 2026-10-01 to the engine-true tolerance verdicts; ships at the full 136.5s capture length
+- **Zero TypeScript Errors:** Passing `npm run typecheck`
+- **Zero Lint Errors:** Passing `npm run lint`
+- **Deterministic Unit Tests:** 100% passing `npm test`
+- **GitHub Repo Cleanliness:** All temporary scratch files purged, large binaries ignored
 
 ---
 
