@@ -27,4 +27,13 @@ declare module "lucide-react" {
   export const Terminal: LucideIcon;
   export const Activity: LucideIcon;
   export const AlertTriangle: LucideIcon;
+  export const ClipboardList: LucideIcon;
+  export const Moon: LucideIcon;
+  export const Sun: LucideIcon;
+  export const LayoutDashboard: LucideIcon;
+  export const Database: LucideIcon;
+  export const CirclePlus: LucideIcon;
+  export const FileArchive: LucideIcon;
+  export const Download: LucideIcon;
+  export const ArrowUp: LucideIcon;
 }

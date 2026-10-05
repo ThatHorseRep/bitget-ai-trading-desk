@@ -3,6 +3,7 @@
 import React from "react";
 import { Lockup } from "@/components/brand/Logo";
 import { ThemeToggle } from "../theme/ThemeToggle";
+import { ClipboardList } from "lucide-react";
 
 interface WorkspaceHeaderProps {
   useFixture: boolean;
@@ -139,7 +140,7 @@ export function WorkspaceHeader({
                 className="h-[36px] px-3 border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper-subtle)] hover:border-[var(--rtd-steel)] active:scale-[0.98] transition-all text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 title="View persisted audit decisions log"
               >
-                <span className="text-[11px]">📋</span>
+                <ClipboardList className="w-[11px] h-[11px]" />
                 <span>History</span>
                 {historyCount > 0 && (
                   <span className="px-1.5 py-0.2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-[10px] font-bold">
@@ -340,7 +341,7 @@ export function WorkspaceHeader({
                 title="View persisted audit decisions log"
                 aria-label={`Open audit history (${historyCount} saved)`}
               >
-                <span className="text-[11px]">📋</span>
+                <ClipboardList className="w-[11px] h-[11px]" />
                 {historyCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 flex items-center justify-center bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-[9px] font-bold rounded-full">
                     {historyCount > 9 ? "9+" : historyCount}

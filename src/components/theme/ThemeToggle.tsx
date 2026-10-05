@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useCallback, useSyncExternalStore } from "react";
+import { Moon, Sun } from "lucide-react";
 
 export type ThemeMode = "light" | "dark";
 
@@ -136,39 +137,11 @@ export function ThemeToggle({ className = "", compact = false }: ThemeToggleProp
       >
         {isDark ? (
           <span className="flex items-center justify-center text-[var(--rtd-ink)]">
-            <svg
-              className="w-3.5 h-3.5 text-sky-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-            </svg>
+            <Moon className="w-3.5 h-3.5 text-sky-400" />
           </span>
         ) : (
           <span className="flex items-center justify-center text-[var(--rtd-ink)]">
-            <svg
-              className="w-3.5 h-3.5 text-amber-500"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="4" />
-              <path d="M12 2v2" />
-              <path d="M12 20v2" />
-              <path d="m4.93 4.93 1.41 1.41" />
-              <path d="m17.66 17.66 1.41 1.41" />
-              <path d="M2 12h2" />
-              <path d="M20 12h2" />
-              <path d="m6.34 17.66-1.41 1.41" />
-              <path d="m19.07 4.93-1.41 1.41" />
-            </svg>
+            <Sun className="w-3.5 h-3.5 text-amber-500" />
           </span>
         )}
       </button>
@@ -197,18 +170,7 @@ export function ThemeToggle({ className = "", compact = false }: ThemeToggleProp
             !isDark ? "bg-[var(--rtd-proceed)]" : "bg-transparent border border-[var(--rtd-steel)]/50"
           }`}
         />
-        <svg
-          className="w-3 h-3 shrink-0"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-        </svg>
+        <Sun className="w-3 h-3 shrink-0" />
         <span>DAY</span>
       </button>
 
@@ -228,17 +190,7 @@ export function ThemeToggle({ className = "", compact = false }: ThemeToggleProp
             isDark ? "bg-[var(--rtd-proceed)]" : "bg-transparent border border-[var(--rtd-steel)]/50"
           }`}
         />
-        <svg
-          className="w-3 h-3 shrink-0"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-        </svg>
+        <Moon className="w-3 h-3 shrink-0" />
         <span>NIGHT</span>
       </button>
     </div>

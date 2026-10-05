@@ -8,6 +8,7 @@ import { sectionSevenHeading } from "../../lib/verdict/changeConditionHeading";
 import { provenanceIdFor } from "../../lib/stressTestFailure";
 import { Reveal } from "../motion/Reveal";
 import { VerdictGlyph, VerdictBadge } from "../brand/VerdictGlyph";
+import { AlertTriangle } from "lucide-react";
 
 interface DecisionArtifactViewProps {
   artifact: DecisionArtifact;
@@ -379,8 +380,8 @@ export function DecisionArtifactView({
         </div>
 
         {marketState.isFallbackDemo && (
-          <div className="p-3 bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs font-mono flex items-start gap-2">
-            <span className="font-bold shrink-0">⚠️ OFFLINE DEMO MODE:</span>
+          <div className="p-3 bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs font-mono flex items-start gap-2">              <AlertTriangle className="shrink-0 text-[var(--rtd-reduce)]" />
+              <span className="font-bold shrink-0">OFFLINE DEMO MODE:</span>
             <span>{marketState.fallbackReason || "Bitget live market API was unreachable. Replaying calibrated off-hours weekend dataset."}</span>
           </div>
         )}
