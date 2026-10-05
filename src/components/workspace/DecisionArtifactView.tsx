@@ -142,6 +142,12 @@ export function DecisionArtifactView({
   const toleranceLabel =
     riskTolerance === "CONSERVATIVE" ? "LOW" : riskTolerance === "AGGRESSIVE" ? "HIGH" : "MED";
   const toleranceMoved = decision.verdict !== storedDecision.verdict;
+  // The floor cap announces itself in the recomputed reasons; when it is
+  // the immunity cause, the disclosure must name it instead of the weekend
+  // gate or hard blockers, which are different tolerance-immune paths.
+  const liquidityFloored = decision.reasons.some((reason) =>
+    reason.message.startsWith("Liquidity floor")
+  );
 
   // Section 7 header. The from-X-to-Y transition is rendered only when the
   // change conditions actually name a different verdict, so a PROCEED
@@ -216,8 +222,9 @@ export function DecisionArtifactView({
             <span>
               {toleranceMoved
                 ? `Risk tolerance ${toleranceLabel} recomputed the verdict from ${storedDecision.verdict} to ${decision.verdict} via the same deterministic policy.`
-                : `Risk tolerance ${toleranceLabel} is active but the verdict is unchanged — the decisive rules on this artifact (weekend gate / hard blockers) are tolerance-immune by policy.`}
-            </span>
+                : liquidityFloored
+                  ? `Risk tolerance ${toleranceLabel} is active but the verdict is unchanged — the WEAKER-position liquidity floor caps this artifact at REDUCE/WAIT regardless of tolerance; only fresher scenario grading can move it.`
+                  : `Risk tolerance ${toleranceLabel} is active but the verdict is unchanged — the decisive rules on this artifact (hard blockers, the off-hours gate, or a band already at its limit) are tolerance-immune by policy.`}            </span>
           </div>
         )}
 

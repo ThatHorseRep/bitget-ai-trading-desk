@@ -75,16 +75,18 @@ const FORBIDDEN = [
 // docs/PROBLEMS_AND_SOLUTIONS.md) deliberately quote these values as the
 // "Before" column of the purge record, so they are excluded by design.
 const FORBIDDEN_DOCS = [
-  'README.md',
+  'ARCHITECTURE_AND_LIMITATIONS.md',
   'PRODUCT_DESCRIPTION.md',
+  'README.md',
   'SUBMISSION.md',
+  'docs/CONNECTIVITY_REPORT.md',
   'docs/GOLDEN_PATH.md',
+  'docs/README.md',
   'docs/RETROSPECTIVE_CASE_STUDIES.md',
   'docs/SHOCK_CALIBRATION_METHODOLOGY.md',
-  'docs/VERDICT_GATING.md',
   'docs/SUBMISSION_SIGNOFF.md',
+  'docs/VERDICT_GATING.md',
 ];
-
 const failures = [];
 function fail(msg) {
   failures.push(msg);
