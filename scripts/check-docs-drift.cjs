@@ -59,6 +59,32 @@ const EXPECT = {
   assetToleranceMB: 0.1,
 };
 
+// ---------------------------------------------------------------------------
+// Fabricated-figure ban. These dollar values were once invented by hand and
+// presented as historical outcomes (purged in the integrity pass, see
+// docs/PRE_SUBMISSION_REPORT.md Part 1). They must never reappear in any
+// tracked doc. Scanned set = every tracked *.md via `git ls-files`, so
+// gitignored scratch/ and the local-only docs/archive/ are excluded by design.
+// ---------------------------------------------------------------------------
+const FORBIDDEN = [
+  /\$4,515(\.00)?/, /\$1,420(\.00)?/, /\$1,185(\.00)?/, /\$1,910(\.00)?/,
+  /\$862\.45/, /\$1,112\.75/, /\$2,500\+/, /\$2,689\.50/, /\$2,703\.94/,
+];
+// Judge-facing substance docs that must never carry the fabricated figures.
+// The two integrity ledgers (docs/PRE_SUBMISSION_REPORT.md,
+// docs/PROBLEMS_AND_SOLUTIONS.md) deliberately quote these values as the
+// "Before" column of the purge record, so they are excluded by design.
+const FORBIDDEN_DOCS = [
+  'README.md',
+  'PRODUCT_DESCRIPTION.md',
+  'SUBMISSION.md',
+  'docs/GOLDEN_PATH.md',
+  'docs/RETROSPECTIVE_CASE_STUDIES.md',
+  'docs/SHOCK_CALIBRATION_METHODOLOGY.md',
+  'docs/VERDICT_GATING.md',
+  'docs/SUBMISSION_SIGNOFF.md',
+];
+
 const failures = [];
 function fail(msg) {
   failures.push(msg);
@@ -185,10 +211,36 @@ function checkAssets() {
   }
 }
 
+function checkForbidden() {
+  let hits = 0;
+  for (const rel of FORBIDDEN_DOCS) {
+    const abs = path.join(ROOT, rel);
+    if (!fs.existsSync(abs)) {
+      fail(`banned-figure scan: doc missing: ${rel}`);
+      continue;
+    }
+    let text;
+    try {
+      text = fs.readFileSync(abs, 'utf8').replace(/[\u2013\u2014]/g, '-');
+    } catch (err) {
+      fail(`could not read tracked doc ${rel}: ${err.message}`);
+      continue;
+    }
+    for (const pattern of FORBIDDEN) {
+      if (pattern.test(text)) {
+        hits++;
+        fail(`${rel}: fabricated figure ${pattern} found - this value was purged in the integrity pass and must not return`);
+      }
+    }
+  }
+  return hits;
+}
+
 function main() {
   const tap = checkTap();
   const fileCount = checkTestFiles();
   checkAssets();
+  const forbiddenHits = checkForbidden();
 
   for (const rel of EXPECT.testCountDocs) {
     const text = readDoc(rel);
@@ -231,6 +283,7 @@ function main() {
     `latency: ${EXPECT.latency.fixture}s fixture / ${EXPECT.latency.liveLow}-${EXPECT.latency.liveHigh}s live ` +
       `pinned across ${EXPECT.latencyDocs.length} docs`
   );
+  console.log(`banned:   ${forbiddenHits} fabricated-figure hits across tracked docs`);
 
   if (failures.length > 0) {
     console.error(`\n${failures.length} doc-drift failure(s):`);
