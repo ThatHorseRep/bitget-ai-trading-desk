@@ -134,6 +134,15 @@ export function DecisionArtifactView({
 
   const decision = displayDecision;
 
+  // Persona-lever feedback. Tolerance moves only gated/uncertainty bands;
+  // weekend gates (OFF_HOURS_WAIT) and hard blockers are immune by policy.
+  // When the lever is non-default it must always say what it did on THIS
+  // artifact — a silently unchanged verdict reads as a broken lever (mobile
+  // bug report: "the low med high stuff is bugging").
+  const toleranceLabel =
+    riskTolerance === "CONSERVATIVE" ? "LOW" : riskTolerance === "AGGRESSIVE" ? "HIGH" : "MED";
+  const toleranceMoved = decision.verdict !== storedDecision.verdict;
+
   // Section 7 header. The from-X-to-Y transition is rendered only when the
   // change conditions actually name a different verdict, so a PROCEED
   // artifact no longer reads "from PROCEED to PROCEED".
@@ -191,6 +200,26 @@ export function DecisionArtifactView({
             </button>
           </div>
         </div>
+
+        {/* Persona-lever disclosure: always visible while non-default */}
+        {riskTolerance !== "MODERATE" && (
+          <div className="flex items-start gap-2 border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] px-3 py-2 text-[11px] font-mono leading-relaxed text-[var(--rtd-steel)]">
+            <span
+              className={`shrink-0 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                toleranceMoved
+                  ? "bg-[var(--rtd-ink)] text-[var(--rtd-paper)]"
+                  : "border border-[var(--rtd-steel)]/40"
+              }`}
+            >
+              {toleranceLabel}
+            </span>
+            <span>
+              {toleranceMoved
+                ? `Risk tolerance ${toleranceLabel} recomputed the verdict from ${storedDecision.verdict} to ${decision.verdict} via the same deterministic policy.`
+                : `Risk tolerance ${toleranceLabel} is active but the verdict is unchanged — the decisive rules on this artifact (weekend gate / hard blockers) are tolerance-immune by policy.`}
+            </span>
+          </div>
+        )}
 
         {/* Main Verdict Row */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
