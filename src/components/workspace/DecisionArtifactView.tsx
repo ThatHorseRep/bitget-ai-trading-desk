@@ -812,6 +812,128 @@ export function DecisionArtifactView({
         })()}
       </section>
 
+      {/* 4C. Historical Precedent Scenarios (Track 3 Sub-Theme Alignment) */}
+      {thesisPosition?.historicalScenarios && (
+        <section className="border border-[var(--rtd-steel)]/25 bg-[var(--rtd-paper)] p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--rtd-steel)]/15 pb-3">
+            <div className="flex items-center gap-2">
+              <div className="flex h-5 w-5 items-center justify-center bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-xs font-mono font-bold">
+                4C
+              </div>
+              <div>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--rtd-steel)]">
+                  Track 3 Sub-Theme: Decision Stress Testing
+                </span>
+                <h3 className="text-base font-mono font-bold text-[var(--rtd-ink)]">
+                  Historical Precedent Retrieval Engine
+                </h3>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono text-[var(--rtd-steel)]">Match:</span>
+              <span className="inline-block px-2 py-0.5 text-[10.5px] font-mono font-bold border border-[var(--rtd-steel)]/25 bg-[var(--rtd-paper-subtle)] text-[var(--rtd-ink)]">
+                {thesisPosition.historicalScenarios.matchConfidence} ({thesisPosition.historicalScenarios.matchedAsset})
+              </span>
+            </div>
+          </div>
+
+          {/* Empirical Metrics Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5">
+              <div className="text-[10px] font-mono font-bold text-[var(--rtd-steel)] uppercase tracking-wider">
+                Avg Basis Shift
+              </div>
+              <div className="text-sm sm:text-base font-bold font-mono text-[var(--rtd-ink)] rtd-figure">
+                {thesisPosition.historicalScenarios.empiricalMetrics.averageBasisShiftBps >= 0 ? "+" : ""}
+                {thesisPosition.historicalScenarios.empiricalMetrics.averageBasisShiftBps} bps
+              </div>
+              <div className="text-[9.5px] font-mono text-[var(--rtd-steel)]">Historical mean</div>
+            </div>
+
+            <div className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5">
+              <div className="text-[10px] font-mono font-bold text-[var(--rtd-steel)] uppercase tracking-wider">
+                Max Gap Drawdown
+              </div>
+              <div className="text-sm sm:text-base font-bold font-mono text-[var(--rtd-reject)] rtd-figure">
+                -{Math.abs(thesisPosition.historicalScenarios.empiricalMetrics.maxHistoricalDrawdownPct).toFixed(2)}%
+              </div>
+              <div className="text-[9.5px] font-mono text-[var(--rtd-steel)]">Worst observed</div>
+            </div>
+
+            <div className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5">
+              <div className="text-[10px] font-mono font-bold text-[var(--rtd-steel)] uppercase tracking-wider">
+                Empirical P&amp;L Impact
+              </div>
+              <div className={`text-sm sm:text-base font-bold font-mono rtd-figure ${
+                thesisPosition.historicalScenarios.empiricalMetrics.projectedPnlUsd < 0
+                  ? "text-[var(--rtd-reject)]"
+                  : "text-[var(--rtd-proceed)]"
+              }`}>
+                {formatUsd(thesisPosition.historicalScenarios.empiricalMetrics.projectedPnlUsd, true)}
+              </div>
+              <div className="text-[9.5px] font-mono text-[var(--rtd-steel)]">
+                {thesisPosition.historicalScenarios.empiricalMetrics.projectedPnlPct >= 0 ? "+" : ""}
+                {thesisPosition.historicalScenarios.empiricalMetrics.projectedPnlPct.toFixed(2)}%
+              </div>
+            </div>
+
+            <div className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-0.5">
+              <div className="text-[10px] font-mono font-bold text-[var(--rtd-steel)] uppercase tracking-wider">
+                Est. Re-Anchor Time
+              </div>
+              <div className="text-sm sm:text-base font-bold font-mono text-[var(--rtd-ink)] rtd-figure">
+                {thesisPosition.historicalScenarios.empiricalMetrics.estimatedReAnchorHours.toFixed(1)} hrs
+              </div>
+              <div className="text-[9.5px] font-mono text-[var(--rtd-steel)]">Post-market open</div>
+            </div>
+          </div>
+
+          {/* Matched Precedents Cards */}
+          <div className="space-y-2">
+            <div className="text-xs font-mono font-bold text-[var(--rtd-ink)] uppercase">
+              Retrieved Historically Similar Sessions ({thesisPosition.historicalScenarios.precedents.length} matched)
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {thesisPosition.historicalScenarios.precedents.map((prec) => (
+                <div
+                  key={prec.id}
+                  className="border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper-subtle)] p-3 space-y-2 flex flex-col justify-between"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[10px] font-mono">
+                      <span className="font-bold text-[var(--rtd-ink)]">{prec.date}</span>
+                      <span className="px-1.5 py-0.5 border border-[var(--rtd-steel)]/20 bg-[var(--rtd-paper)] text-[var(--rtd-steel)] font-semibold">
+                        {prec.sessionType ?? "WEEKEND"}
+                      </span>
+                    </div>
+                    <div className="text-xs font-bold font-mono text-[var(--rtd-ink)]">
+                      {prec.eventName}
+                    </div>
+                    <p className="text-[11px] font-sans text-[var(--rtd-steel)] leading-relaxed">
+                      {prec.description}
+                    </p>
+                  </div>
+                  <div className="border-t border-[var(--rtd-steel)]/15 pt-2 text-[10.5px] font-mono space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-[var(--rtd-steel)]">Basis Shift:</span>
+                      <span className="font-bold text-[var(--rtd-ink)]">{prec.basisShiftBps >= 0 ? "+" : ""}{prec.basisShiftBps} bps</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[var(--rtd-steel)]">Peak Drawdown:</span>
+                      <span className="font-bold text-[var(--rtd-reject)]">-{Math.abs(prec.peakDrawdownPct).toFixed(1)}%</span>
+                    </div>
+                    <div className="flex justify-between text-[10px] text-[var(--rtd-steel)] border-t border-[var(--rtd-steel)]/10 pt-1">
+                      <span>Re-anchor:</span>
+                      <span className="font-mono">{prec.reAnchorHours} hrs</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* 5. Thesis Quality vs Position Quality Deconstruction */}
       {thesisPosition && (
         <section className="border border-[var(--rtd-steel)]/25 bg-[var(--rtd-paper)] p-5 sm:p-6 md:p-8 shadow-xs space-y-4">
