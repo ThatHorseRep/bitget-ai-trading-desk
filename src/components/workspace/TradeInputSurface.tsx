@@ -5,6 +5,7 @@ import type { Verdict } from "@/config/branding";
 import { VerdictGlyph } from "@/components/brand/VerdictGlyph";
 import { parseNaturalLanguageTrade } from "@/core/trade/parser";
 import { PRESET_SCENARIOS } from "@/lib/presetScenarios";
+import { MultiAssetRadar } from "./MultiAssetRadar";
 
 interface TradeInputSurfaceProps {
   initialPrompt?: string;
@@ -377,6 +378,9 @@ export function TradeInputSurface({
               Recorded demo-fixture results; live runs depend on live market state.
             </p>
           </div>
+
+          {/* Multi-Asset Pre-Trade Scanner */}
+          <MultiAssetRadar onSelectAssetThesis={(text) => setPrompt(text)} />
 
           {/* Natural Language Input Form */}
           <form

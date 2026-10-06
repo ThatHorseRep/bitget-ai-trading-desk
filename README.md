@@ -133,7 +133,7 @@ npm run verify-clean
 - **Mobile Demo Video:** Brand-cut portrait walkthrough with live audio (`public/demo/brand-mobile-demo.mp4`, 14.3 MB) — Act 6 re-rendered 2026-10-01 to the engine-true tolerance verdicts; ships at the full 136.5s capture length
 - **Zero TypeScript Errors:** Passing `npm run typecheck`
 - **Zero Lint Errors:** Passing `npm run lint`
-- **Deterministic Unit Tests:** 100% passing `npm test` (388/388 tests across 39 files)
+- **Deterministic Unit Tests:** 100% passing `npm test` (397/397 tests across 41 files)
 - **GitHub Repo Cleanliness:** All temporary scratch files purged, large binaries ignored
 
 ---

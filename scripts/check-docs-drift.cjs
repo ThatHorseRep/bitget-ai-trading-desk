@@ -29,8 +29,8 @@ const TAP_FILE = path.join(ROOT, 'test-output.txt');
 // docs together, never separately.
 // ---------------------------------------------------------------------------
 const EXPECT = {
-  tests: { ok: 388, notOk: 0 },
-  testFiles: 39,
+  tests: { ok: 397, notOk: 0 },
+  testFiles: 41,
   // Docs that state the headline test numbers ("366/366" and "38 (test) files").
   testCountDocs: [
     'PRODUCT_DESCRIPTION.md',
@@ -246,9 +246,9 @@ function main() {
 
   for (const rel of EXPECT.testCountDocs) {
     const text = readDoc(rel);
-    docContains(rel, text, '388/388', 'test count');
-    if (text !== null && !/39 (test )?files/.test(text)) {
-      fail(`${rel}: pinned test-file count "39 files" not found`);
+    docContains(rel, text, '397/397', 'test count');
+    if (text !== null && !/41 (test )?files/.test(text)) {
+      fail(`${rel}: pinned test-file count "41 files" not found`);
     }
   }
 

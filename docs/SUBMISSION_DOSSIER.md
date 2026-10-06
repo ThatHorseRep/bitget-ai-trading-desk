@@ -119,7 +119,7 @@ Target Segment: Crypto-native retail traders on Bitget trading tokenized U.S. eq
 
 Part 3 · Validation data and key metrics
 Validation so far [OBSERVED]:
-- Full Test Suite Determinism: 388/388 automated tests passing across 41 test files with 0 failures, covering 5-tier competitor sabotage matrices, 10-case adversarial LLM injections, and a 15-test risk-tolerance contract.
+- Full Test Suite Determinism: 397/397 automated tests passing across 41 test files with 0 failures, covering 5-tier competitor sabotage matrices, 10-case adversarial LLM injections, and a 15-test risk-tolerance contract.
 - Historical Precedent Retrieval Engine: Catalog of 9 verified off-hours weekend/holiday gap precedents (e.g. August 2024 Yen-Carry unwind, DeepSeek AI weekend shock) providing empirical basis shifts (median +280 bps), peak drawdowns, and post-open re-anchor durations.
 - Latency & Reliability: Measured end-to-end evaluation at 11.75s–50.62s across live production runs via failover cascades, and 0.51s in deterministic fixture mode. 100% task completion rate across simulated user sessions with zero unhandled runtime crashes.
 - Empirical Walkthroughs: Three reproducible case studies (weekend basis premium, pre-earnings expansion, crypto contagion) executed through the production engine (docs/RETROSPECTIVE_CASE_STUDIES.md).

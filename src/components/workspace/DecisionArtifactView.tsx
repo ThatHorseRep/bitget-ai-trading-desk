@@ -8,7 +8,14 @@ import { sectionSevenHeading } from "../../lib/verdict/changeConditionHeading";
 import { provenanceIdFor } from "../../lib/stressTestFailure";
 import { Reveal } from "../motion/Reveal";
 import { VerdictGlyph, VerdictBadge } from "../brand/VerdictGlyph";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Download, Copy, FileText, Check } from "lucide-react";
+import { ConversationalDeskAssistant } from "./ConversationalDeskAssistant";
+import {
+  exportDecisionArtifactAsMarkdown,
+  exportDecisionArtifactAsJson,
+  downloadFile,
+  copyToClipboard
+} from "../../lib/exportDossier";
 
 interface DecisionArtifactViewProps {
   artifact: DecisionArtifact;
@@ -78,6 +85,7 @@ export function DecisionArtifactView({
   riskTolerance = "MODERATE"
 }: DecisionArtifactViewProps) {
   const [copied, setCopied] = useState(false);
+  const [copiedMd, setCopiedMd] = useState(false);
   const [sizeMultiplier, setSizeMultiplier] = useState<number>(1.0);
   const [timingMode, setTimingMode] = useState<"OFF_HOURS" | "MONDAY_OPEN">("OFF_HOURS");
   const [activeDrilldown, setActiveDrilldown] = useState<number | null>(null);
@@ -172,6 +180,17 @@ export function DecisionArtifactView({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleExportMarkdown = async () => {
+    const md = exportDecisionArtifactAsMarkdown(artifact);
+    const success = await copyToClipboard(md);
+    if (success) {
+      setCopiedMd(true);
+      setTimeout(() => setCopiedMd(false), 2000);
+    } else {
+      downloadFile(`dossier-${artifact.artifactId}.md`, md, "text/markdown");
+    }
+  };
+
   return (
     <div className="w-full max-w-5xl mx-auto space-y-4 sm:space-y-6 pb-20 md:pb-16 min-w-0">
       {/* 1. Verdict Band Card (Clean Editorial Style) */}
@@ -193,10 +212,18 @@ export function DecisionArtifactView({
           <div className="flex items-center gap-2 flex-wrap">
             <button
               type="button"
+              onClick={handleExportMarkdown}
+              className="inline-flex min-h-[38px] items-center gap-1.5 bg-[var(--rtd-paper-subtle)] px-3.5 py-1.5 text-xs font-mono font-bold text-[var(--rtd-ink)] hover:bg-[var(--rtd-steel)]/15 border border-[var(--rtd-steel)]/25 shadow-2xs active:scale-[0.98] transition-colors cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5 text-[var(--rtd-ink)]" />
+              <span>{copiedMd ? "Copied Dossier!" : "Export Dossier (.md)"}</span>
+            </button>
+            <button
+              type="button"
               onClick={handleCopyJson}
               className="inline-flex min-h-[38px] items-center gap-1.5 bg-[var(--rtd-paper-subtle)] px-3.5 py-1.5 text-xs font-mono font-bold text-[var(--rtd-ink)] hover:bg-[var(--rtd-steel)]/15 border border-[var(--rtd-steel)]/25 shadow-2xs active:scale-[0.98] transition-colors cursor-pointer"
             >
-              {copied ? "Copied JSON!" : "Export artifact JSON"}
+              {copied ? "Copied JSON!" : "Export JSON"}
             </button>
             <button
               type="button"
@@ -1142,6 +1169,13 @@ export function DecisionArtifactView({
           ))}
         </div>
       </section>
+
+      {/* 7B. Conversational Follow-up Desk Assistant (LUI Fluency) */}
+      <ConversationalDeskAssistant
+        artifact={artifact}
+        onSelectProvenance={onSelectProvenance}
+        onOpenProvenance={onOpenProvenance}
+      />
 
       {/* 8. Footer Navigation CTA */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-[var(--rtd-steel)]/20">

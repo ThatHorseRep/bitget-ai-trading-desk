@@ -36,4 +36,15 @@ declare module "lucide-react" {
   export const FileArchive: LucideIcon;
   export const Download: LucideIcon;
   export const ArrowUp: LucideIcon;
+  export const MessageSquare: LucideIcon;
+  export const Send: LucideIcon;
+  export const Sparkles: LucideIcon;
+  export const ShieldCheck: LucideIcon;
+  export const HelpCircle: LucideIcon;
+  export const Copy: LucideIcon;
+  export const FileText: LucideIcon;
+  export const ChevronDown: LucideIcon;
+  export const ChevronUp: LucideIcon;
+  export const ArrowUpRight: LucideIcon;
+  export const Cpu: LucideIcon;
 }
