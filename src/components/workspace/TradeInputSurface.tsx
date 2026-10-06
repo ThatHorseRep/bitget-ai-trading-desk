@@ -344,8 +344,8 @@ export function TradeInputSurface({
                     }}
                     className={`p-2.5 sm:p-3 text-left border transition-all flex flex-col justify-between space-y-1.5 group cursor-pointer ${
                       isSelected
-                        ? "bg-[var(--rtd-paper-subtle)] border-[var(--rtd-ink)] ring-1 ring-[var(--rtd-ink)] shadow-2xs"
-                        : "bg-[var(--rtd-paper)] border-[var(--rtd-steel)]/25 hover:border-[var(--rtd-steel)]"
+                        ? "bg-[var(--rtd-preset-surface)] border-[var(--rtd-ink)] ring-1 ring-[var(--rtd-ink)] shadow-2xs"
+                        : "bg-[var(--rtd-paper)] border-[var(--rtd-steel)]/25 hover:bg-[var(--rtd-preset-surface-hover)] hover:border-[var(--rtd-steel)]"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -361,7 +361,7 @@ export function TradeInputSurface({
                     </div>
 
                     <div>
-                      <div className="text-[11.5px] sm:text-xs font-mono font-bold text-[var(--rtd-ink)] group-hover:text-[var(--rtd-void)] leading-snug line-clamp-2 min-h-[2rem] flex items-center">
+                      <div className="text-[11.5px] sm:text-xs font-mono font-bold text-[var(--rtd-ink)] group-hover:text-[var(--rtd-steel)] leading-snug line-clamp-2 min-h-[2rem] flex items-center">
                         {preset.label}
                       </div>
                       <div className="text-[10px] font-mono text-[var(--rtd-steel)] rtd-figure mt-0.5">

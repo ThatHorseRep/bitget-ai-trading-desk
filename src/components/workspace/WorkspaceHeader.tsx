@@ -3,6 +3,7 @@
 import React from "react";
 import { Lockup } from "@/components/brand/Logo";
 import { ThemeToggle } from "../theme/ThemeToggle";
+import { ClipboardList } from "lucide-react";
 
 interface WorkspaceHeaderProps {
   useFixture: boolean;
@@ -117,8 +118,11 @@ export function WorkspaceHeader({
             </div>
           </div>
 
-          {/* Desktop Controls (>= md) */}
-          <div className="hidden md:flex items-center gap-2.5">
+          {/* Desktop Controls (>= lg). Below lg the compact mobile controls
+              take over: the full desktop cluster needs ~950px and at md–lg it
+              overflowed the h-16 header, wrapping the risk pills into a
+              clipped vertical stack. */}
+          <div className="hidden lg:flex items-center gap-2.5">
             {/* Back to System Overview */}
             {onViewOverview && (
               <button
@@ -139,7 +143,7 @@ export function WorkspaceHeader({
                 className="h-[36px] px-3 border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] text-[var(--rtd-ink)] hover:bg-[var(--rtd-paper-subtle)] hover:border-[var(--rtd-steel)] active:scale-[0.98] transition-all text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 title="View persisted audit decisions log"
               >
-                <span className="text-[11px]">📋</span>
+                <ClipboardList className="w-[11px] h-[11px]" />
                 <span>History</span>
                 {historyCount > 0 && (
                   <span className="px-1.5 py-0.2 bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-[10px] font-bold">
@@ -191,7 +195,7 @@ export function WorkspaceHeader({
               <div
                 role="group"
                 aria-label="Risk Tolerance Selector"
-                className="inline-flex flex-wrap items-center border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] p-0.5 shadow-2xs"
+                className="inline-flex flex-nowrap items-center shrink-0 border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] p-0.5 shadow-2xs"
               >
                 {(["CONSERVATIVE", "MODERATE", "AGGRESSIVE"] as const).map((level) => (
                   <button
@@ -238,8 +242,8 @@ export function WorkspaceHeader({
             )}
           </div>
 
-          {/* Mobile Controls (< md) */}
-          <div className="flex md:hidden items-center gap-1 shrink-0">
+          {/* Mobile Controls (< lg) */}
+          <div className="flex lg:hidden items-center gap-1 shrink-0">
             {/* Compact Mode Toggle */}
             <button
               type="button"
@@ -340,7 +344,7 @@ export function WorkspaceHeader({
                 title="View persisted audit decisions log"
                 aria-label={`Open audit history (${historyCount} saved)`}
               >
-                <span className="text-[11px]">📋</span>
+                <ClipboardList className="w-[11px] h-[11px]" />
                 {historyCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 flex items-center justify-center bg-[var(--rtd-ink)] text-[var(--rtd-paper)] text-[9px] font-bold rounded-full">
                     {historyCount > 9 ? "9+" : historyCount}
