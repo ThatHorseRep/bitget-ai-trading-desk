@@ -1,5 +1,17 @@
 import { httpGetJson } from "../network/http";
-import type { BitgetResponse, BitgetRealityCalendar, NormalizedBitgetTicker, RawBitgetTickerItem, RawBitgetInstrumentItem, NormalizedBitgetInstrument } from "./types";
+import type {
+  BitgetResponse,
+  BitgetRealityCalendar,
+  NormalizedBitgetTicker,
+  RawBitgetTickerItem,
+  RawBitgetInstrumentItem,
+  NormalizedBitgetInstrument,
+  RawBitgetOrderbookData,
+  NormalizedBitgetOrderbook,
+  OrderbookLevel,
+  RawBitgetCandleTuple,
+  NormalizedBitgetCandle
+} from "./types";
 
 const TRUSTED_BITGET_ORIGINS = new Set([
   "https://api.bitget.com",
@@ -61,6 +73,87 @@ export function parseBitgetInstrument(item: RawBitgetInstrumentItem): Normalized
   };
 }
 
+export function parseBitgetOrderbook(
+  symbol: string,
+  raw: RawBitgetOrderbookData,
+  requestTime?: number
+): NormalizedBitgetOrderbook {
+  const parseLevels = (levels: Array<[string, string] | string[]> | undefined): OrderbookLevel[] => {
+    if (!Array.isArray(levels)) return [];
+    const result: OrderbookLevel[] = [];
+    for (const lvl of levels) {
+      if (!lvl || lvl.length < 2) continue;
+      const price = parseFloat(lvl[0]);
+      const size = parseFloat(lvl[1]);
+      if (Number.isFinite(price) && Number.isFinite(size) && price >= 0 && size >= 0) {
+        result.push({ price, size });
+      }
+    }
+    return result;
+  };
+
+  const bids = parseLevels(raw.bids);
+  const asks = parseLevels(raw.asks);
+
+  let timestamp = 0;
+  if (raw.ts !== undefined && raw.ts !== null && raw.ts !== "") {
+    const parsedTs = typeof raw.ts === "number" ? raw.ts : parseInt(String(raw.ts), 10);
+    if (Number.isFinite(parsedTs) && parsedTs > 0) {
+      timestamp = parsedTs;
+    }
+  }
+  if (!timestamp && requestTime && Number.isFinite(requestTime) && requestTime > 0) {
+    timestamp = requestTime;
+  }
+  if (!timestamp) {
+    timestamp = Date.now();
+  }
+
+  return {
+    symbol,
+    bids,
+    asks,
+    timestamp
+  };
+}
+
+export function parseBitgetCandles(rawList: RawBitgetCandleTuple[]): NormalizedBitgetCandle[] {
+  if (!Array.isArray(rawList)) {
+    return [];
+  }
+  const result: NormalizedBitgetCandle[] = [];
+  for (const item of rawList) {
+    if (!item || item.length < 6) continue;
+    const timestamp = parseInt(item[0], 10);
+    const open = parseFloat(item[1]);
+    const high = parseFloat(item[2]);
+    const low = parseFloat(item[3]);
+    const close = parseFloat(item[4]);
+    const volume = parseFloat(item[5]);
+    const quoteVolume = item.length >= 7 && item[6] !== undefined && item[6] !== "" ? parseFloat(item[6]) : 0;
+
+    if (
+      Number.isFinite(timestamp) &&
+      Number.isFinite(open) &&
+      Number.isFinite(high) &&
+      Number.isFinite(low) &&
+      Number.isFinite(close) &&
+      Number.isFinite(volume)
+    ) {
+      result.push({
+        timestamp,
+        open,
+        high,
+        low,
+        close,
+        volume,
+        quoteVolume: Number.isFinite(quoteVolume) ? quoteVolume : 0
+      });
+    }
+  }
+  return result;
+}
+
 export class BitgetClient {
   private baseUrl: string;
 
@@ -110,5 +203,36 @@ export class BitgetClient {
     } catch {
       return null;
     }
+  }
+
+  async getSpotOrderbook(symbol: string, limit?: number): Promise<NormalizedBitgetOrderbook> {
+    const params = new URLSearchParams({ symbol });
+    if (limit !== undefined) {
+      params.set("limit", String(limit));
+    }
+    const url = `${this.baseUrl}/api/v2/spot/market/orderbook?${params.toString()}`;
+    const res = await httpGetJson<BitgetResponse<RawBitgetOrderbookData>>(url);
+
+    if (res.code !== "00000" || !res.data) {
+      throw new Error(`Bitget orderbook request for ${symbol} failed: [${res.code}] ${res.msg}`);
+    }
+
+    return parseBitgetOrderbook(symbol, res.data, res.requestTime);
+  }
+
+  async getSpotCandles(symbol: string, granularity?: string, limit?: number): Promise<NormalizedBitgetCandle[]> {
+    const gran = granularity && granularity.trim() !== "" ? granularity : "1day";
+    const params = new URLSearchParams({ symbol, granularity: gran });
+    if (limit !== undefined) {
+      params.set("limit", String(limit));
+    }
+    const url = `${this.baseUrl}/api/v2/spot/market/candles?${params.toString()}`;
+    const res = await httpGetJson<BitgetResponse<RawBitgetCandleTuple[]>>(url);
+
+    if (res.code !== "00000" || !Array.isArray(res.data)) {
+      throw new Error(`Bitget candles request for ${symbol} failed: [${res.code}] ${res.msg}`);
+    }
+
+    return parseBitgetCandles(res.data);
   }
 }

@@ -43,6 +43,15 @@ export type SeekAiResponse = {
   };
 };
 
+export const GEMINI_MODELS = [
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-flash-latest",
+  "gemini-flash-lite-latest"
+] as const;
+
 export function extractCleanJson(raw: string): string {
   let content = raw.trim();
   const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -128,25 +137,21 @@ class LLMProvider {
       payload.systemInstruction = { parts: [{ text: systemMessage }] };
     }
 
-    const models = [
-      "gemini-2.5-flash",
-      "gemini-2.0-flash",
-      "gemini-1.5-flash",
-      "gemini-flash-lite-latest",
-      "gemini-flash-latest",
-      "gemini-3.5-flash"
-    ];
+    const models = GEMINI_MODELS;
     let lastErr: unknown = null;
 
     for (const model of models) {
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
 
         const res = await fetch(url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey
+          },
           body: JSON.stringify(payload),
           signal: controller.signal
         });
