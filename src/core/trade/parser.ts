@@ -67,15 +67,14 @@ export function parseNaturalLanguageTrade(
   let assetClarificationRequired = false;
   let unsupportedAssetQuestion: string | null = null;
 
-  // Case matters: real r-tokens are camelCase (rNVDA, rAAPL) — a case-
-  // insensitive r[A-Za-z]+ rule would swallow ordinary words like "risk"
-  // or "return" as fake tickers. Match the rNVDA literal permissively and
-  // require an UPPERCASE ticker for the generic r-token rule.
-  const rnvdaLiteralMatch = text.match(/\brNVDA(?:USDT)?\b/i);
+  // 1. Check known r-tokens case-insensitively (e.g. rnvda, rtsla, rmstr, rcoin, raapl, ramzn)
+  const knownRTokenRegex = new RegExp(`\\b(${KNOWN_R_TOKENS.join("|")})(?:USDT)?\\b`, "i");
+  const knownRTokenMatch = text.match(knownRTokenRegex);
   const genericRTokenMatch = text.match(/\br([A-Z]{2,10})(?:USDT)?\b/);
 
-  if (rnvdaLiteralMatch) {
-    asset = "rNVDA";
+  if (knownRTokenMatch) {
+    const matchedTokenStr = knownRTokenMatch[1].toLowerCase();
+    asset = KNOWN_R_TOKENS.find((t) => t.toLowerCase() === matchedTokenStr) || knownRTokenMatch[1];
     userProvided.push("asset");
   } else if (genericRTokenMatch) {
     // e.g. rAAPL, rTSLA
@@ -102,8 +101,21 @@ export function parseNaturalLanguageTrade(
         break;
       }
     }
-    if (!asset && /\b(nvda|tsla|aapl|coin|mstr|amzn)\b/i.test(text)) {
+    const bareTickerMatch = text.match(/\b(nvda|tsla|aapl|coin|mstr|amzn)\b/i);
+    if (!asset && bareTickerMatch) {
       assetClarificationRequired = true;
+      const matchedTicker = bareTickerMatch[1].toLowerCase();
+      const targetRToken = KNOWN_R_TOKENS.find((t) => t.toLowerCase() === `r${matchedTicker}`) || `r${matchedTicker.toUpperCase()}`;
+      const companyNames: Record<string, string> = {
+        nvda: "NVIDIA",
+        tsla: "Tesla",
+        aapl: "Apple",
+        coin: "Coinbase",
+        mstr: "MicroStrategy",
+        amzn: "Amazon"
+      };
+      const cName = companyNames[matchedTicker] || matchedTicker.toUpperCase();
+      unsupportedAssetQuestion = `Did you mean ${targetRToken} (the tokenized ${cName} asset available on Bitget)?`;
     }
   }
 
@@ -191,7 +203,8 @@ export function parseNaturalLanguageTrade(
   const sharesMatch = text.match(/([\d,]+(?:\.\d+)?)\s*(?:shares|tokens|units|contracts)\b/i);
 
   const sizeMatch = text.match(/(-?)\s*\$\s*([\d,]+(?:\.\d+)?)\s*(k|m)?/i) ||
-    text.match(/(-?)\s*([\d,]+(?:\.\d+)?)\s*(?:usd|dollars|usdt)\b/i);
+    text.match(/(-?)\s*([\d,]+(?:\.\d+)?)\s*(k|m)?\s*(?:usd|dollars|usdt)\b/i) ||
+    text.match(/(-?)\s*\b([\d,]+(?:\.\d+)?)\s*(k|m)\s+(?:of\s+)?r?[A-Za-z]/i);
 
   if (sharesMatch) {
     const shareCount = parseFloat(sharesMatch[1].replace(/,/g, ""));
@@ -232,7 +245,7 @@ export function parseNaturalLanguageTrade(
   // the thesis truncates to the intent fragment and loses the reasoning.
   const terminator = "(?:\\.|$|\\b(?:stress-test|stress test|before Monday|already have|my exposure)\\b)";
   let thesis = "";
-  const causalMatch = text.match(new RegExp("\\b(?:because|since|thesis is|my thesis is)\\s+(.+?)" + terminator, "i"));
+  const causalMatch = text.match(new RegExp("\\b(?:because|since|thesis is|my thesis is|due to)\\s+(.+?)" + terminator, "i"));
   const softMatch = text.match(new RegExp("\\b(?:expecting|thinking|believing)\\s+(.+?)" + terminator, "i"));
   const thesisMatch = causalMatch ?? softMatch;
   if (thesisMatch) {

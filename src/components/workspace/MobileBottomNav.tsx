@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePwa } from "../pwa/PwaManager";
-import { LayoutDashboard, Database, CirclePlus, FileArchive, Download, ArrowUp } from "lucide-react";
+import { LayoutDashboard, Activity, Database, CirclePlus, FileArchive, Download, ArrowUp } from "lucide-react";
 
 interface MobileBottomNavProps {
   useFixture: boolean;
@@ -61,7 +61,7 @@ export function MobileBottomNav({
           className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 text-[var(--rtd-steel)] font-mono hover:bg-[var(--rtd-paper-subtle)] hover:text-[var(--rtd-ink)] active:scale-[0.98] transition-colors focus-visible:outline-hidden cursor-pointer"
           aria-label="System Overview"
         >
-          <LayoutDashboard className="w-5 h-5" />
+          <Activity className="w-5 h-5" />
           <span className="text-[10px] font-medium tracking-tight">Overview</span>
         </button>
 

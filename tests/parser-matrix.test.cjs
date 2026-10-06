@@ -8,6 +8,23 @@ test("matrix 1: buy $2,000 of rNVDA because...", () => {
   assert.equal(result.tradeIdea.direction, "LONG");
   assert.equal(result.tradeIdea.positionSizeUsd, 2000);
   assert.equal(result.tradeIdea.asset, "rNVDA");
+
+  // Lowercase rToken recognition (rtsla -> rTSLA, rmstr -> rMSTR)
+  const tslaResult = parseNaturalLanguageTrade("buy $2,000 of rtsla because Robotaxi rollout.");
+  assert.equal(tslaResult.requiresClarification, false);
+  assert.equal(tslaResult.tradeIdea.asset, "rTSLA");
+
+  // 'due to' causal clause and k/usdt notional parsing
+  const mstrResult = parseNaturalLanguageTrade("buy 2.5k usdt of rmstr due to bitcoin balance sheet growth.");
+  assert.equal(mstrResult.requiresClarification, false);
+  assert.equal(mstrResult.tradeIdea.asset, "rMSTR");
+  assert.equal(mstrResult.tradeIdea.positionSizeUsd, 2500);
+  assert.equal(mstrResult.tradeIdea.thesis, "bitcoin balance sheet growth");
+
+  // Bare ticker tailored clarification
+  const bareTsla = parseNaturalLanguageTrade("buy $1000 of TSLA because deliveries beat estimates");
+  assert.equal(bareTsla.requiresClarification, true);
+  assert.ok(bareTsla.clarificationQuestion.includes("Did you mean rTSLA"));
 });
 
 test("matrix 2: I'm long rNVDA for about two grand because...", () => {

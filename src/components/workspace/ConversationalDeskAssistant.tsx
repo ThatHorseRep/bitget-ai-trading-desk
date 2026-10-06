@@ -16,6 +16,18 @@ interface ConversationalDeskAssistantProps {
   onOpenProvenance?: () => void;
 }
 
+function createFallbackReply(queryText: string): ConversationalReply {
+  const now = Date.now();
+  return {
+    id: `err-${now}`,
+    timestamp: now,
+    query: queryText,
+    replyType: "grounded_synthesis",
+    content: "Desk was unable to process query against current artifact. Please verify trade inputs or select a suggested prompt.",
+    referencedProvenanceIds: []
+  };
+}
+
 export function ConversationalDeskAssistant({
   artifact,
   onSelectProvenance,
@@ -36,15 +48,7 @@ export function ConversationalDeskAssistant({
       const reply = await processConversationalQuery(artifact, queryText);
       setMessages((prev) => [...prev, reply]);
     } catch {
-      const fallbackReply: ConversationalReply = {
-        id: `err-${Date.now()}`,
-        timestamp: Date.now(),
-        query: queryText,
-        replyType: "grounded_synthesis",
-        content: "Desk was unable to process query against current artifact. Please verify trade inputs or select a suggested prompt.",
-        referencedProvenanceIds: []
-      };
-      setMessages((prev) => [...prev, fallbackReply]);
+      setMessages((prev) => [...prev, createFallbackReply(queryText)]);
     } finally {
       setIsLoading(false);
     }
