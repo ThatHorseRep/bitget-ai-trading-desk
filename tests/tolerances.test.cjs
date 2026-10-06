@@ -5,7 +5,7 @@ const { rnvdaDemoMarketState } = require("../dist-core/src/fixtures/rnvda-demo.j
 
 // Regression lock for the risk-tolerance lever (policy.ts).
 //
-// Contract being pinned (matches PRE_SUBMISSION_REPORT's documented matrix):
+// Contract being pinned (matches documented tolerance policy matrix):
 //  - The trader's tolerance shifts the gated risk band one step
 //    (CONSERVATIVE stricter / AGGRESSIVE looser) wherever the gated band
 //    governs — including under material uncertainty.

@@ -2,7 +2,7 @@
  * Single source of truth for the responsive brand-cut demo videos embedded on
  * the landing page (#demo-walkthrough). Both cuts are 100% live-data brand
  * recordings — provenance chain in demo-out/brand-live-timeline.json and
- * docs/SUBMISSION_SIGNOFF.md.
+ * docs/PROBLEMS_AND_SOLUTIONS.md.
  *
  * Consumed by src/components/landing/BrandedDemoPlayer.tsx; pinned by
  * tests/brand-cuts.test.cjs.

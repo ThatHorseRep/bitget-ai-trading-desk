@@ -20,7 +20,6 @@ Built for the **Bitget AI Base Camp Hackathon S2 — Track 3: Decision Stress Te
 - 📄 **Official Product Specification:** [PRODUCT_DESCRIPTION.md](./PRODUCT_DESCRIPTION.md)
 - 🧾 **Problems Faced & Solved (Engineering Log):** [docs/PROBLEMS_AND_SOLUTIONS.md](./docs/PROBLEMS_AND_SOLUTIONS.md) — every problem → root cause → fix → verification, with commits and test proof
 - 📚 **Full Documentation Index:** [docs/README.md](./docs/README.md) — every doc in the repo, organized by audience
-- ✅ **Submission Sign-Off (2026-09-30):** [docs/SUBMISSION_SIGNOFF.md](./docs/SUBMISSION_SIGNOFF.md) — audit scorecard, proof table (every claim → observable), remaining human items
 - 📊 **Shock Calibration Methodology:** [docs/SHOCK_CALIBRATION_METHODOLOGY.md](./docs/SHOCK_CALIBRATION_METHODOLOGY.md)
 - 📜 **Illustrative Scenario Walkthroughs (engine-executed):** [docs/RETROSPECTIVE_CASE_STUDIES.md](./docs/RETROSPECTIVE_CASE_STUDIES.md)
 - 🏛️ **Engineering Docs:** [docs/README.md](./docs/README.md)

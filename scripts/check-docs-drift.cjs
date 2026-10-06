@@ -35,8 +35,6 @@ const EXPECT = {
   testCountDocs: [
     'PRODUCT_DESCRIPTION.md',
     'docs/README.md',
-    'docs/SUBMISSION_SIGNOFF.md',
-    'docs/PRE_SUBMISSION_REPORT.md',
     'docs/PROBLEMS_AND_SOLUTIONS.md',
   ],
   latency: { fixture: '0.51', liveLow: '11.75', liveHigh: '50.62' },
@@ -44,9 +42,7 @@ const EXPECT = {
   latencyDocs: [
     'PRODUCT_DESCRIPTION.md',
     'docs/GOLDEN_PATH.md',
-    'docs/PRE_SUBMISSION_REPORT.md',
     'docs/CONNECTIVITY_REPORT.md',
-    'docs/SUBMISSION_SIGNOFF.md',
     'docs/PROBLEMS_AND_SOLUTIONS.md',
   ],
   assets: [
@@ -62,7 +58,7 @@ const EXPECT = {
 // ---------------------------------------------------------------------------
 // Fabricated-figure ban. These dollar values were once invented by hand and
 // presented as historical outcomes (purged in the integrity pass, see
-// docs/PRE_SUBMISSION_REPORT.md Part 1). They must never reappear in any
+// docs/PROBLEMS_AND_SOLUTIONS.md). They must never reappear in any
 // tracked doc. Scanned set = every tracked *.md via `git ls-files`, so
 // gitignored scratch/ and the local-only docs/archive/ are excluded by design.
 // ---------------------------------------------------------------------------
@@ -71,9 +67,8 @@ const FORBIDDEN = [
   /\$862\.45/, /\$1,112\.75/, /\$2,500\+/, /\$2,689\.50/, /\$2,703\.94/,
 ];
 // Judge-facing substance docs that must never carry the fabricated figures.
-// The two integrity ledgers (docs/PRE_SUBMISSION_REPORT.md,
-// docs/PROBLEMS_AND_SOLUTIONS.md) deliberately quote these values as the
-// "Before" column of the purge record, so they are excluded by design.
+// The integrity ledger (docs/PROBLEMS_AND_SOLUTIONS.md) deliberately quotes
+// these values as the "Before" column of the purge record, so it is excluded by design.
 const FORBIDDEN_DOCS = [
   'ARCHITECTURE_AND_LIMITATIONS.md',
   'PRODUCT_DESCRIPTION.md',
@@ -84,7 +79,6 @@ const FORBIDDEN_DOCS = [
   'docs/README.md',
   'docs/RETROSPECTIVE_CASE_STUDIES.md',
   'docs/SHOCK_CALIBRATION_METHODOLOGY.md',
-  'docs/SUBMISSION_SIGNOFF.md',
   'docs/VERDICT_GATING.md',
 ];
 const failures = [];
