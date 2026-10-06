@@ -102,6 +102,49 @@ export function ClarificationModal({
               autoFocus
               className="w-full border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper-subtle)] px-3 py-2 text-sm font-mono text-[var(--rtd-ink)] focus:bg-[var(--rtd-paper)] focus:border-[var(--rtd-ink)] focus:outline-hidden"
             />
+            {/* Quick-choice options based on missing field */}
+            {fieldName === "direction" && (
+              <div className="flex gap-2 pt-2">
+                {["LONG", "SHORT"].map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setAnswer(d)}
+                    className="px-2.5 py-1 text-xs font-mono font-bold border border-[var(--rtd-steel)]/30 hover:border-[var(--rtd-ink)] hover:bg-[var(--rtd-paper)] transition-all cursor-pointer"
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
+            )}
+            {fieldName === "asset" && (
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {["rNVDA", "rTSLA", "rAAPL", "rCOIN", "rMSTR", "rAMZN"].map((a) => (
+                  <button
+                    key={a}
+                    type="button"
+                    onClick={() => setAnswer(a)}
+                    className="px-2 py-1 text-xs font-mono font-bold border border-[var(--rtd-steel)]/30 hover:border-[var(--rtd-ink)] hover:bg-[var(--rtd-paper)] transition-all cursor-pointer"
+                  >
+                    {a}
+                  </button>
+                ))}
+              </div>
+            )}
+            {fieldName === "positionSizeUsd" && (
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {["$1,000", "$2,000", "$5,000", "$10,000"].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setAnswer(s)}
+                    className="px-2 py-1 text-xs font-mono font-bold border border-[var(--rtd-steel)]/30 hover:border-[var(--rtd-ink)] hover:bg-[var(--rtd-paper)] transition-all cursor-pointer"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between gap-3 pt-2">

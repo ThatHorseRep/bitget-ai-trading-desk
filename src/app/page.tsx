@@ -439,6 +439,18 @@ export default function WorkspacePage() {
                   >
                     Restart workspace
                   </button>
+                  {!useFixture && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUseFixture(true);
+                        setStep("REVIEW");
+                      }}
+                      className="border border-[var(--rtd-proceed)] bg-[var(--rtd-paper)] px-4 py-2 text-xs font-mono font-semibold text-[var(--rtd-proceed)] hover:bg-[var(--rtd-proceed)]/10 active:scale-[0.98] transition-colors cursor-pointer"
+                    >
+                      Retry in Fixture mode →
+                    </button>
+                  )}
                 </div>
               </div>
             )}

@@ -58,7 +58,7 @@ export function ProvenanceDrawer({
   // Scroll to selected record when opened with one
   useEffect(() => {
     if (selectedRecord && isOpen) {
-      const el = document.getElementById(`prov-${selectedRecord.id}`);
+      const el = document.getElementById(`prov-${selectedRecord.id}`) || document.getElementById(selectedRecord.id);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
@@ -145,7 +145,7 @@ export function ProvenanceDrawer({
           <div className="flex-1 overflow-y-auto overflow-x-hidden p-3.5 sm:p-6 space-y-3 min-w-0 max-w-full">
             {records.map((rec) => {
               const conf = CATEGORY_CONFIG[rec.type];
-              const isHighlighted = selectedRecord?.id === rec.id;
+              const isHighlighted = selectedRecord?.id === rec.id || (Boolean(selectedRecord?.id) && rec.id.includes(selectedRecord!.id));
               const timestamp = rec.observedAt || rec.retrievedAt || rec.publishedAt;
               return (
                 <div
