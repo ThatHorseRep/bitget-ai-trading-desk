@@ -119,9 +119,9 @@ export function TradeInputSurface({
   const isReject = positionInfo.verdict === "REJECT";
 
   return (
-    <div className="w-full max-w-6xl mx-auto flex flex-col justify-between min-h-full h-auto lg:h-full space-y-3 lg:space-y-4 overflow-hidden">
-      {/* Sleek, Compact Workbench Header Strip (Zero scroll overflow) */}
-      <div className="bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 px-3 py-2 sm:px-5 sm:py-3 shadow-2xs flex items-center justify-between gap-2 sm:gap-4 shrink-0 overflow-hidden w-full">
+    <div className="w-full max-w-6xl mx-auto flex flex-col min-h-full h-auto space-y-3 lg:space-y-4">
+      {/* Sleek, Compact Workbench Header Strip */}
+      <div className="bg-[var(--rtd-paper)] border border-[var(--rtd-steel)]/25 px-3 py-2 sm:px-5 sm:py-3 shadow-2xs flex items-center justify-between gap-2 sm:gap-4 shrink-0 w-full">
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
           <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-[0.16em] text-[var(--rtd-ink)] shrink-0">
             01 / RISK WORKBENCH
@@ -179,11 +179,11 @@ export function TradeInputSurface({
             Nocturnal high-contrast console matching 06-mobile-app.png
            ================================================================== */}
         <div
-          className={`lg:col-span-5 flex flex-col h-full ${
+          className={`lg:col-span-5 flex flex-col ${
             activeTab === "results" ? "block" : "hidden md:flex"
           }`}
         >
-          <div className="w-full h-full bg-[var(--rtd-void)] text-white border border-white/20 shadow-xl rounded-xl p-4 sm:p-5 flex flex-col justify-between space-y-4 relative overflow-hidden">
+          <div className="w-full min-h-[460px] bg-[var(--rtd-void)] text-white border border-white/20 shadow-xl rounded-xl p-4 sm:p-5 flex flex-col justify-between space-y-4 relative overflow-hidden">
             {/* Dynamic Verdict Indicator Bar */}
             <div
               className="absolute top-0 left-0 right-0 h-1 transition-colors duration-300"
@@ -312,7 +312,7 @@ export function TradeInputSurface({
             RIGHT COLUMN: THESIS CONTROLS & PRESET SCENARIOS (60% width)
            ================================================================== */}
         <div
-          className={`lg:col-span-7 flex flex-col justify-between gap-3 sm:gap-4 h-full ${
+          className={`lg:col-span-7 flex flex-col gap-3 sm:gap-4 ${
             activeTab === "input" ? "block" : "hidden md:flex"
           }`}
         >

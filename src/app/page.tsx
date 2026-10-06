@@ -358,7 +358,7 @@ export default function WorkspacePage() {
           <main
             className={`w-full max-w-full px-2.5 sm:px-6 lg:px-8 ${
               step === "ENTRY"
-                ? "py-3 sm:py-4 pb-28 sm:pb-24 lg:pb-4 lg:h-[calc(100dvh-4.25rem)] lg:overflow-hidden flex flex-col justify-center"
+                ? "py-3 sm:py-5 pb-28 sm:pb-24 lg:pb-12 min-h-[calc(100dvh-4.25rem)] flex flex-col"
                 : "py-5 sm:py-8 pb-28 sm:pb-24 md:pb-12"
             }`}
           >
