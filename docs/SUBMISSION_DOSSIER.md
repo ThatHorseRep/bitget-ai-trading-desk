@@ -24,9 +24,9 @@ ThatHorseRep
 
 ### 2. Team Lead Bitget UID (numbers only) *
 ```text
-[INSERT_YOUR_NUMERIC_BITGET_UID_HERE]
+6098344457
 ```
-*(Must contain numbers only, e.g. `1234567890`. Found in your Bitget app / web profile header).*
+*(Verified numeric Bitget UID).*
 
 ---
 
