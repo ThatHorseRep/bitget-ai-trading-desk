@@ -187,26 +187,51 @@ Models Used: Primary model is Qwen 2.5 (qwen3.8-max) via the official hackathon 
 ---
 
 ### 16. X Project Post URL *
-> **Action Required:** Publish the post below on X, quote-tweeting the official hackathon tweet, then paste the resulting tweet URL here.
+> **Action Required:** Publish the humanized mini-thread below on X (quote-tweeting the official hackathon tweet or posting as a thread tagging `@Bitget_AI`), then paste the URL of **Tweet 1 (the thread starter)** here.
+> 
+> *Optimized for standard X accounts (zero X Premium needed). Every tweet is strictly $\le 280$ characters.*
 
 **Target Tweet to Quote-Tweet:**  
 `https://x.com/Bitget_AI/status/2100519318824055159?s=20`
 
-**Post Copy:**
+---
+
+#### 🧵 Tweet 1 (Thread Starter / Quote-Tweet) — 269 / 280 chars:
 ```text
-Most traders evaluate a tokenized stock solely by its price chart. Almost no one stress-tests the market structure underneath it.
+Nothing hurts like buying a tokenized stock on Saturday, feeling smart, only to watch your capital get wrecked by a 300 bps basis crush before NYSE even opens on Monday.
 
-When NYSE and NASDAQ close for 65.5 hours every weekend, 24/7 tokenized stocks like $rTSLA and $rNVDA face structural basis decoupling, crypto contagion shocks, and thin orderbook liquidity.
+Most off-hours losses aren't bad thesis calls. The market structure broke underneath you. 🧵 (1/4)
+```
 
-We built @Bitget_AI RedTeam Desk: an adversarial pre-trade firewall for tokenized equities. State your trade in plain English—the desk reconstructs live off-hours market state, retrieves historical gap precedents, and runs 100% deterministic stress math.
+#### 🧵 Tweet 2 (The Structural Trap) — 267 / 280 chars:
+```text
+U.S. markets close for 65.5 hours every weekend.
 
-Verdict: PROCEED / WAIT / REDUCE / REJECT with auditable data provenance.
+During that void, 24/7 tokens like $rTSLA & $rNVDA trade blind:
+• Zero cash price discovery
+• Paper-thin orderbooks
+• BTC dumps bleed into equities
 
-🌐 Live App: https://redteamdesk.name.ng
-📦 GitHub: https://github.com/ThatHorseRep/bitget-ai-trading-desk
+Traders don't need bots guessing prices. They need a firewall. (2/4)
+```
+
+#### 🧵 Tweet 3 (The RedTeam Desk Solution) — 270 / 280 chars:
+```text
+That's why I built @Bitget_AI RedTeam Desk for the Hackathon S2 (Track 3).
+
+State your trade in plain English. The desk red-teams your thesis, pulls 9 historical gap precedents, and runs 100% deterministic math to issue a verdict: PROCEED, WAIT, REDUCE, or REJECT. (3/4)
+```
+
+#### 🧵 Tweet 4 (Proof & Live Links) — 262 / 280 chars:
+```text
+Zero LLM math hallucinations. 397/397 tests passing. Auditable provenance on every single metric.
+
+Try it before risking capital:
+🌐 App: https://redteamdesk.name.ng
+📦 Repo: https://github.com/ThatHorseRep/bitget-ai-trading-desk
 🎥 Demo: https://redteamdesk.name.ng/demo/brand-desktop-demo.mp4
 
-Built for the Bitget AI Base Camp Hackathon S2 (Track 3: Decision Stress Testing). #BitgetHackathon @Bitget_AI
+#BitgetHackathon @Bitget_AI (4/4)
 ```
 
 ---
