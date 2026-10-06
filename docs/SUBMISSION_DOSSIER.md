@@ -138,6 +138,9 @@ What is built and working:
 - Bitget Market Client with live spot ticker, L2 orderbook depth (/api/v3/market/orderbook), historical OHLCV candles (/api/v3/market/candles), and Reality market holiday calendar.
 - Interactive What-If Counterfactual Sandbox with real-time position sizing toggles (100%/50%/25%), execution session timing switch, and simulated saved capital metrics.
 - Triple-redundant LLM Failover Pipeline: Hackathon Qwen gateway -> Google Gemini Flash with header-based x-goog-api-key transport -> Deterministic heuristic rules.
+- Conversational LUI Follow-up Assistant executing deterministic what-if modeling, contagion explanations, and session timing guidance (src/core/assistant/conversationalFollowup.ts).
+- Multi-Asset Cross-Asset Pre-Trade Scanner across all 6 supported tokenized equities (src/components/workspace/MultiAssetRadar.tsx).
+- 1-Click Compliance Audit Dossier Export generating Markdown memos and structured JSON decision artifacts (src/lib/exportDossier.ts).
 - Auditable Provenance Drawer linking every metric to source timestamps and calculation inputs.
 - Risk-tolerance persona lever (CONSERVATIVE / MODERATE / AGGRESSIVE) dynamically shifting risk bands while strictly preserving hard safety gates.
 

@@ -38,6 +38,10 @@
 - Thesis vs. Position synthesis (deterministic position quality in src/core/decision/classifyPosition.ts; LLM thesis-quality synthesis in src/core/thesis/assessment.ts)
 - **Risk-tolerance persona lever tying Part 2's target user to the decision logic:** the desk's default persona (crypto-native retail, $1,000–$50,000, moderate risk) is now structural, not decorative — a CONSERVATIVE / MODERATE / AGGRESSIVE control (workspace header) shifts the computed risk band one step, which moves WAIT/REDUCE/PROCEED verdict thresholds deterministically. Hard blockers (invalid trade, insufficient thesis, critical data) are never relaxed by tolerance. The applied shift is surfaced on the artifact for audit (`riskToleranceApplied`).
 - Decision Artifact generation & Policy (src/core/decision/policy.ts)
+- Empirical Historical Precedent Retrieval Engine (src/core/scenarios/retrieval.ts & historicalDatabase.ts) matching asset and off-hours market states against 9 verified gap events with empirical basis shifts and peak drawdowns
+- Conversational LUI Follow-up Assistant (src/core/assistant/conversationalFollowup.ts & src/components/workspace/ConversationalDeskAssistant.tsx) executing deterministic what-if modeling, contagion explanations, and session timing guidance
+- Multi-Asset Cross-Asset Pre-Trade Scanner (src/components/workspace/MultiAssetRadar.tsx) profiling risk factors across rNVDA, rTSLA, rAAPL, rMSFT, rAMZN, and rCOIN
+- 1-Click Compliance Audit Dossier Export (src/lib/exportDossier.ts) generating downloadable Markdown memos and structured JSON decision artifacts
 - Transparent "Demo Mode" for off-hours trading simulation (fixture in src/fixtures/rnvda-demo.ts; UI toggle in src/components/workspace/WorkspaceHeader.tsx; API in src/app/api/stress-test/route.ts)
 - Optional ecosystem integrations as pure enrichment: Bitget US Equity MCP, Bitget Signal, Chainbase AgentKey (external partner), Agent Hub read-only handoff, and Agentic Account handoff — the core decision is fully defensible with all of them disabled
 
