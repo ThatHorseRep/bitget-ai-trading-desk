@@ -453,6 +453,7 @@ export class DecisionDeskService {
       challenge,
       scenarios,
       thesisPosition,
+      historicalScenarios: thesisPosition?.historicalScenarios,
       changeConditions: decision.changeConditions,
       evidence,
       provenance,

@@ -70,4 +70,43 @@ export interface BitgetRealityCalendar {
   specificConfig: BitgetRealityCalendarConfig[];
 }
 
+export interface OrderbookLevel {
+  price: number;
+  size: number;
+}
+
+export interface RawBitgetOrderbookData {
+  asks: Array<[string, string] | string[]>;
+  bids: Array<[string, string] | string[]>;
+  ts?: string | number;
+}
+
+export interface NormalizedBitgetOrderbook {
+  symbol: string;
+  bids: OrderbookLevel[];
+  asks: OrderbookLevel[];
+  timestamp: number;
+}
+
+export type RawBitgetCandleTuple = [
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string
+] | string[];
+
+export interface NormalizedBitgetCandle {
+  timestamp: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  quoteVolume: number;
+}
+
+
 

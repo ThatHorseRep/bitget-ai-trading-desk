@@ -15,6 +15,7 @@ import {
   type ScoringResult,
   type VerdictGateResult
 } from "../../lib/verdict/scoring";
+import { retrieveHistoricalScenarios } from "../scenarios/retrieval";
 
 // LLM provides qualitative narrative only; scores and verdict bands are 100% deterministic
 const AssessmentSchema = z.object({
@@ -185,6 +186,15 @@ ${evidenceText}
     }
   }
 
+  const historicalScenarios = retrieveHistoricalScenarios({
+    asset: trade.asset,
+    entryPrice: trade.entryPrice,
+    size: trade.positionSizeUsd,
+    isOffHours: marketState.sessionStatus === "OFF_HOURS",
+    isWeekend: marketState.sessionStatus === "WEEKEND",
+    direction: trade.direction
+  });
+
   return {
     thesisQuality: mappedThesisQuality,
     positionQuality,
@@ -193,6 +203,7 @@ ${evidenceText}
     modelInfo: respProvenance,
     thesisScoreResult: thesisScoring,
     positionScoreResult: positionScoring,
-    gatedVerdictResult
+    gatedVerdictResult,
+    historicalScenarios
   };
 }

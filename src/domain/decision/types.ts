@@ -102,6 +102,7 @@ export interface DecisionArtifact {
    * The core Decision Artifact remains fully functional without this field.
    */
   paperTradingStatus?: PaperTradingStatus;
+  historicalScenarios?: import("../../core/scenarios/retrieval").HistoricalRetrievalResult;
 }
 
 export type ProvenanceType = "OBSERVED_FACT" | "CALCULATED_METRIC" | "SCENARIO_ASSUMPTION" | "AI_INTERPRETATION";
