@@ -55,4 +55,5 @@ export interface ThesisPositionAssessment {
   thesisScoreResult?: ScoringResult;
   positionScoreResult?: ScoringResult;
   gatedVerdictResult?: VerdictGateResult;
+  historicalScenarios?: import("../../core/scenarios/retrieval").HistoricalRetrievalResult;
 }
