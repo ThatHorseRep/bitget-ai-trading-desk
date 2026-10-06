@@ -118,8 +118,11 @@ export function WorkspaceHeader({
             </div>
           </div>
 
-          {/* Desktop Controls (>= md) */}
-          <div className="hidden md:flex items-center gap-2.5">
+          {/* Desktop Controls (>= lg). Below lg the compact mobile controls
+              take over: the full desktop cluster needs ~950px and at md–lg it
+              overflowed the h-16 header, wrapping the risk pills into a
+              clipped vertical stack. */}
+          <div className="hidden lg:flex items-center gap-2.5">
             {/* Back to System Overview */}
             {onViewOverview && (
               <button
@@ -192,7 +195,7 @@ export function WorkspaceHeader({
               <div
                 role="group"
                 aria-label="Risk Tolerance Selector"
-                className="inline-flex flex-wrap items-center border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] p-0.5 shadow-2xs"
+                className="inline-flex flex-nowrap items-center shrink-0 border border-[var(--rtd-steel)]/30 bg-[var(--rtd-paper)] p-0.5 shadow-2xs"
               >
                 {(["CONSERVATIVE", "MODERATE", "AGGRESSIVE"] as const).map((level) => (
                   <button
@@ -239,8 +242,8 @@ export function WorkspaceHeader({
             )}
           </div>
 
-          {/* Mobile Controls (< md) */}
-          <div className="flex md:hidden items-center gap-1 shrink-0">
+          {/* Mobile Controls (< lg) */}
+          <div className="flex lg:hidden items-center gap-1 shrink-0">
             {/* Compact Mode Toggle */}
             <button
               type="button"

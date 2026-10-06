@@ -1,9 +1,15 @@
 // Bitget AI RedTeam Desk Service Worker
-// Version: redteam-desk-v1
+// Version: redteam-desk-v2
+//
+// v2 fix: hashed production chunks under /_next/static/ used to be served
+// cache-first forever, so any deploy left returning users on stale JS/CSS
+// until they manually purged (seen live on 2026-10-06). Static assets are
+// now stale-while-revalidate: the cached copy answers instantly, the
+// network copy refreshes the cache in the background, so staleness can
+// never outlive a single reload.
 
-const CACHE_NAME = 'redteam-desk-v1';
+const CACHE_NAME = 'redteam-desk-v2';
 const PRECACHE_ASSETS = [
-  '/',
   '/manifest.webmanifest',
   '/favicon.svg',
   '/favicon.ico',
@@ -101,6 +107,14 @@ const OFFLINE_PAGE_HTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
+// Put a successful response into the runtime cache (best-effort).
+const refreshCache = (request, response) => {
+  if (response && response.status === 200 && response.type !== 'opaque') {
+    const clone = response.clone();
+    caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+  }
+};
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -134,7 +148,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. NETWORK FIRST FOR NAVIGATION: Try network, fall back to offline shell
+  // 2. NETWORK FIRST FOR NAVIGATION: always fresh HTML when online; the SW
+  //    never serves a stale document (a stale document hydrating against
+  //    fresh chunks causes React #418 hydration mismatches).
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => {
@@ -146,7 +162,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. CACHE FIRST FOR STATIC ASSETS (scripts, styles, images, fonts)
+  // 3. STALE-WHILE-REVALIDATE for static assets (scripts, styles, images,
+  //    fonts). Cached copy answers immediately; network copy refreshes the
+  //    cache so the next load is always current. Offline falls back to the
+  //    last-good copy, preserving PWA behaviour.
   if (
     url.pathname.startsWith('/_next/static/') ||
     url.pathname.endsWith('.woff2') ||
@@ -157,18 +176,13 @@ self.addEventListener('fetch', (event) => {
   ) {
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        return fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const clone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, clone);
-            });
-          }
-          return networkResponse;
-        });
+        const networkFetch = fetch(event.request)
+          .then((networkResponse) => {
+            refreshCache(event.request, networkResponse);
+            return networkResponse;
+          })
+          .catch(() => cachedResponse);
+        return cachedResponse || networkFetch;
       })
     );
     return;

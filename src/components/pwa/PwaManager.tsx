@@ -37,17 +37,40 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // 1. Register Service Worker after load — production only.
-    // The SW caches /_next/static/* cache-first, which is safe for hashed
-    // production chunks but poisons dev, where Turbopack reuses unhashed
-    // chunk URLs across rebuilds (browser then replays stale modules —
-    // see docs/PROBLEMS_AND_SOLUTIONS.md §2.4).
+    //    v2 of the SW is stale-while-revalidate for static assets and
+    //    network-first for navigation, so it can no longer serve stale
+    //    HTML or chunks (see public/sw.js header + PROBLEMS_AND_SOLUTIONS).
     if (process.env.NODE_ENV === "production" && typeof window !== "undefined" && "serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker
           .register("/sw.js")
+          .then((registration) => {
+            // If a new SW is waiting, activate it right away; combined with
+            // the SW's skipWaiting() this guarantees the next reload runs
+            // the freshly deployed asset set.
+            registration.addEventListener("updatefound", () => {
+              const installing = registration.installing;
+              if (!installing) return;
+              installing.addEventListener("statechange", () => {
+                if (installing.state === "installed" && navigator.serviceWorker.controller) {
+                  installing.postMessage({ type: "SKIP_WAITING" });
+                }
+              });
+            });
+          })
           .catch((error) => {
             console.warn("[PWA] Service Worker registration failed:", error);
           });
+
+        // When a new SW takes control after an update, reload once so the
+        // document hydrates against the fresh chunk set (only reload on
+        // the first takeover to avoid loops).
+        let refreshedByTakeover = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (refreshedByTakeover) return;
+          refreshedByTakeover = true;
+          window.location.reload();
+        });
       });
     }
 

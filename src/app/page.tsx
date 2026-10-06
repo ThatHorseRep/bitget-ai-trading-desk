@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useSyncExternalStore } from "react";
 import { WorkspaceHeader } from "../components/workspace/WorkspaceHeader";
 import { MobileBottomNav } from "../components/workspace/MobileBottomNav";
 import { TradeInputSurface } from "../components/workspace/TradeInputSurface";
@@ -28,38 +28,72 @@ import {
 import { parseStressTestFailure } from "../lib/stressTestFailure";
 
 export default function WorkspacePage() {
-  const [persistedInitial] = useState(() => loadPersistedWorkspaceState());
+  // Hydration-safe persistence: the server render has no localStorage, so
+  // reading it inside useState initializers made the first client render
+  // diverge from the server HTML (React error #418 — server rendered the
+  // landing surface while the client rendered the desk).
+  //
+  // Pattern: state initializes to the same defaults on server and client;
+  // `hydrated` flips via useSyncExternalStore immediately after hydration;
+  // persisted values are then seeded during the first hydrated render using
+  // the guarded "adjust state during render" pattern (setState inside an
+  // effect is disallowed by react-hooks/set-state-in-effect).
+  const emptySubscribe = () => () => {};
+  const hydrated = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
-  const [viewMode, setViewMode] = useState<"landing" | "desk">(() => persistedInitial?.viewMode ?? "landing");
-  const [step, setStep] = useState<WorkspaceStep>(() => {
-    if (persistedInitial?.step === "ANALYZING") {
-      return persistedInitial.artifact ? "DECISION_READY" : "REVIEW";
-    }
-    return persistedInitial?.step ?? "ENTRY";
-  });
-  const [prompt, setPrompt] = useState(() => persistedInitial?.prompt ?? "");
-  const [useFixture, setUseFixture] = useState(() => Boolean(persistedInitial?.useFixture));
+  const [viewMode, setViewMode] = useState<"landing" | "desk">("landing");
+  const [step, setStep] = useState<WorkspaceStep>("ENTRY");
+  const [prompt, setPrompt] = useState("");
+  const [useFixture, setUseFixture] = useState(false);
   // Persona lever: ties the target-user persona (crypto-native retail,
   // $1,000–$50,000, moderate risk) to the decision logic. MODERATE preserves
   // the historical thresholds exactly.
-  const [riskTolerance, setRiskTolerance] = useState<"CONSERVATIVE" | "MODERATE" | "AGGRESSIVE">(() => {
-    const persisted = persistedInitial?.riskTolerance;
-    return persisted === "CONSERVATIVE" || persisted === "AGGRESSIVE" ? persisted : "MODERATE";
-  });
-  const [parsedResult, setParsedResult] = useState<ParsedTradeResult | null>(() => persistedInitial?.parsedResult ?? null);
-  const [artifact, setArtifact] = useState<DecisionArtifact | null>(() => persistedInitial?.artifact ?? null);
+  const [riskTolerance, setRiskTolerance] = useState<"CONSERVATIVE" | "MODERATE" | "AGGRESSIVE">("MODERATE");
+  const [parsedResult, setParsedResult] = useState<ParsedTradeResult | null>(null);
+  const [artifact, setArtifact] = useState<DecisionArtifact | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [auditHistory, setAuditHistory] = useState<AuditHistoryEntry[]>(() => loadAuditHistory());
+  const [auditHistory, setAuditHistory] = useState<AuditHistoryEntry[]>([]);
   const [selectedProvenance, setSelectedProvenance] = useState<{ id: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Auto-persist active state changes so page refresh never loses context
+  // null = seeding not yet run; 0 = seeded (marker for the auto-save guard).
+  const [seededAt, setSeededAt] = useState<number | null>(null);
+  if (hydrated && seededAt === null) {
+    const persistedInitial = loadPersistedWorkspaceState();
+    if (persistedInitial) {
+      setViewMode(persistedInitial.viewMode);
+      if (persistedInitial.step === "ANALYZING") {
+        setStep(persistedInitial.artifact ? "DECISION_READY" : "REVIEW");
+      } else {
+        setStep(persistedInitial.step);
+      }
+      setPrompt(persistedInitial.prompt ?? "");
+      setUseFixture(Boolean(persistedInitial.useFixture));
+      const persistedTolerance = persistedInitial.riskTolerance;
+      if (persistedTolerance === "CONSERVATIVE" || persistedTolerance === "AGGRESSIVE") {
+        setRiskTolerance(persistedTolerance);
+      }
+      setParsedResult(persistedInitial.parsedResult ?? null);
+      setArtifact(persistedInitial.artifact ?? null);
+    }
+    setAuditHistory(loadAuditHistory());
+    setSeededAt(0);
+  }
+
+  // Auto-persist active state changes so page refresh never loses context.
+  // Guarded so it only runs once hydrated AND after the restore pass, so the
+  // defaults-swap can never overwrite storage with pre-restore defaults.
   useEffect(() => {
+    if (!hydrated || seededAt === null) return;
     savePersistedWorkspaceState({
       viewMode,
       step,
@@ -70,7 +104,7 @@ export default function WorkspacePage() {
       artifact,
       timestamp: Date.now()
     });
-  }, [viewMode, step, prompt, useFixture, riskTolerance, parsedResult, artifact]);
+  }, [hydrated, seededAt, viewMode, step, prompt, useFixture, riskTolerance, parsedResult, artifact]);
 
   const handleLaunchFromLanding = (initialPrompt?: string) => {
     setViewMode("desk");
