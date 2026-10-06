@@ -2,7 +2,7 @@
 
 > Every tracked document in this repository, organized by what it's for. Judges: start with the
 > top row — the rest is engineering depth. If any document disagrees with the shipped behavior,
-> **the code and the test suite are authoritative** (`npm test`, 366/366).
+> **the code and the test suite are authoritative** (`npm test`, 388/388).
 
 ## Start here (judge-facing)
 
@@ -29,7 +29,7 @@
 ## Where the raw evidence lives
 
 The **tracked** proof is the signoff proof table plus the test suite itself (`npm test` →
-366/366 across 38 files; `tests/tolerances.test.cjs` pins the tolerance contract). The **raw
+388/388 across 39 files; `tests/tolerances.test.cjs` pins the tolerance contract). The **raw
 verification ledger** (unedited TAP captures, parser outputs, tolerance matrix, live-data path —
 built by `scripts/build-evidence-dump.cjs`) and the entire historical archive
 (`docs/archive/`: engineering specs, market-research dossier, brand-identity manifest, session-era

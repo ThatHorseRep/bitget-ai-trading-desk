@@ -51,7 +51,7 @@
 ### Bonus — Windows build repaired (commit `5b57b63`)
 `npm run build` was broken on Windows (missing win32-msvc native binaries for `lightningcss` + `@tailwindcss/oxide`; Turbopack cannot resolve the loaders' fallback chains). Fixed via `optionalDependencies` entries + postinstall binary staging + `serverExternalPackages`. Build now compiles successfully (`✓ Compiled successfully`, 12 routes).
 
-**Verification state:** typecheck ✓ · lint ✓ · 298/298 tests ✓ (re-baselined again: **366/366** across 38 files as of 2026-10-04, incl. the parser matrix cases 19–23, the preset-card fixture drift pin, and the error contract) · production build ✓.
+**Verification state:** typecheck ✓ · lint ✓ · 298/298 tests ✓ (re-baselined again: **388/388** across 39 files as of 2026-10-06, incl. the historical scenario retrieval engine & LLM security tests) · production build ✓.
 
 ---
 

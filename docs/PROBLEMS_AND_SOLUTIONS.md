@@ -42,7 +42,7 @@
 - **Problem.** After a rebuild, a dev session kept executing pre-rebuild modules; the code on screen lagged the code on disk and errors pointed at lines that no longer existed.
 - **Root cause.** `PwaProvider` registered the service worker in every environment. The SW caches `/_next/static/*` cache-first — correct for hashed production chunks, wrong for dev, where Turbopack reuses unhashed chunk URLs across rebuilds.
 - **Fix.** Registration is now production-only (`process.env.NODE_ENV === "production"` guard in `src/components/pwa/PwaManager.tsx`).
-- **Verification.** The guard is structural (dev installs no SW; production registration unchanged); suite 331/331 at the time and `npx tsc --noEmit` 0 after the change (the count has since re-baselined to **366/366 across 38 files** — see §4A.7).
+- **Verification.** The guard is structural (dev installs no SW; production registration unchanged); suite 331/331 at the time and `npx tsc --noEmit` 0 after the change (the count has since re-baselined to **388/388 across 39 files** — see §4A.7).
 
 ## 3. Session of 2026-09-27 — evidence dump → parser hardening → latency honesty
 
@@ -164,7 +164,7 @@ The session ran in two passes, per the methodology in the raw evidence ledger (l
 
 ### 4A.7 Test-count re-baseline, preset drift pin, and case-study re-verification
 
-- **Test count.** Suite re-baselined **331/331 across 35 files -> 366/366 across 38 files** (2026-10-04) after parser matrix cases 19-23, the error contract, and the preset drift pin. Judge-facing docs state the current number; earlier ledger entries keep their dated values with a pointer here.
+- **Test count.** Suite re-baselined **366/366 across 38 files -> 388/388 across 39 files** (2026-10-06) after the historical scenario retrieval engine and LLM security suites. Judge-facing docs state the current number; earlier ledger entries keep their dated values with a pointer here.
 - **Preset drift pin.** `tests/preset-cards.test.cjs` replays all four launcher prompts through the deterministic fixture workflow and asserts the card labels equal engine output (WAIT x3 with worst `COMBINED_SHOCK -9.25%`; the unhedged card stops at `CLARIFICATION`). A policy change that moves a verdict now fails the suite instead of shipping a card that lies.
 - **Case studies.** All three `RETROSPECTIVE_CASE_STUDIES.md` walkthroughs re-executed against the current engine (states reconstructed from their documented assumptions): **every displayed shocked price and percentage reproduces exactly**; dollar P&Ls reproduce to within **$0.05** (the engine rounds internally at 8 decimals while the docs display 2-decimal assumptions). Case 3's `"at 04:00 AM ET"` input no longer parses a clock time as a price.
 

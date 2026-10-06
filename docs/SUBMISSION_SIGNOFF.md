@@ -8,13 +8,13 @@
 
 ## 1. Verdict
 
-**The repository is submission-ready from the repo side.** All machine-verifiable gates pass: **366/366 tests** (re-baselined 2026-10-04), typecheck clean, eslint clean, every demo asset HTTP 200, every spoken number in the mobile brand cut traceable to the recorded live artifact (14/14). The human items in §7 remain the owner's.
+**The repository is submission-ready from the repo side.** All machine-verifiable gates pass: **388/388 tests** (re-baselined 2026-10-06), typecheck clean, eslint clean, every demo asset HTTP 200, every spoken number in the mobile brand cut traceable to the recorded live artifact (14/14). The human items in §7 remain the owner's.
 
 ## 2. Audit scorecard (four dimensions)
 
 | Dimension | Score | Evidence |
 |---|---|---|
-| **Code quality** | Strong | Deterministic core (`src/core`) pure, config-driven, tested from compiled output (now **366/366 across 38 test files**, `npm test`); hot spots mapped, not hidden — architecture map (local-only, not tracked): `DecisionArtifactView.tsx` 1007 L, two research providers ~900 L each, scripts/ now 18 files (2026-10-03 prune) |
+| **Code quality** | Strong | Deterministic core (`src/core`) pure, config-driven, tested from compiled output (now **388/388 across 39 test files**, `npm test`); hot spots mapped, not hidden — architecture map (local-only, not tracked): `DecisionArtifactView.tsx` 1007 L, two research providers ~900 L each, scripts/ now 18 files (2026-10-03 prune) |
 | **Spec compliance** | Strong | Every repo-side claim in README / SUBMISSION / PRODUCT_DESCRIPTION / PRE_SUBMISSION_REPORT maps to an artifact (§4 proof table); deliverables line in PRODUCT_DESCRIPTION updated to the brand cuts (was still promising retired 6.35 MB videos) |
 | **Integrity & honesty** | Strong | Zero invented prices in any live path — an uncommitted fake-price fallback in `src/adapters/reference/yahoo.ts` was identified and reverted before it could ship; verdict has a **single source of truth** (policy engine) after a UI paint-override was reverted; every Video 4 number traces to `demo-out/brand-live-recorded-artifact.json` (14/14, §4). **Update 2026-09-30: Video 3 rebuilt on the same zero-mock pipeline** — desktop numbers of record in `demo-out/brand-desktop-live-recorded-artifact.json` (trace 17/17); the mocked-pipeline gap is closed on both brand cuts |
 | **Resilience & ops** | Strong | Failover circuit covered by suite; rate-limited API; honest per-provider degradation; graceful-degradation limitations visible in every artifact; sitemap/robots/manifest now served (§5) |
@@ -35,7 +35,7 @@
 | 4 | Responsive player, mobile | `#demo-walkthrough` @390px | same probe | exactly 1 `<video>`, `brand-mobile-demo.mp4` + matching poster, 0 console errors | PASS |
 | 5 | Assets served | `public/demo/*` | curl ×11 | all brand-cut files (mp4/poster/srt/ass/voice/mix ×2) HTTP 200 | PASS |
 | 6 | Numbers of record | recorded artifact + timeline | trace-artifact.cjs (local) | **14/14**: WAIT · qty 70.07904917 · entry 356.74 · ref 357.45 (prevClose 372.11) · combined −2701.07267207 · protected = \|pnl\|/2 = 1350.536336035 (exact derivation; not artifact-verbatim by design) · `dataSource: live` | PASS |
-| 7 | Verdict math invariance | TAP suite | `npm test` | tolerance behavior pinned by the 15-test contract in `tests/tolerances.test.cjs` (LOW→REJECT / HIGH→PROCEED on gated uncertainty, MODERATE preserves history, hard blockers never relaxed, liquidity floor); **366/366** (re-baselined 2026-10-04: 331 + parser matrix cases 19–23 + preset-card fixture drift pin + error contract) | PASS |
+| 7 | Verdict math invariance | TAP suite | `npm test` | tolerance behavior pinned by the 15-test contract in `tests/tolerances.test.cjs` (LOW→REJECT / HIGH→PROCEED on gated uncertainty, MODERATE preserves history, hard blockers never relaxed, liquidity floor); **388/388** (re-baselined 2026-10-06: 366 + historical scenario retrieval engine & LLM security tests) | PASS |
 | 8 | Responsive switch pinned forever | new unit seam | [tests/brand-cuts.test.cjs](../tests/brand-cuts.test.cjs) (written red-first) | 6/6 — breakpoint 768 exact, file-pairing convention, no legacy cuts reachable | PASS |
 
 **Provenance note (kept honest):** `$1,350.54` (protected size) is spoken audio derived from the artifact-verbatim `−$2,701.07267207` by exact halving; it does not appear verbatim in the artifact JSON. The trace standard therefore distinguishes artifact-verbatim numbers (7/7) from exact-arithmetic derivations (1/1). Nothing else in the narration needed derivation.
@@ -84,9 +84,9 @@ Phase 1 trust-gate tasks 3–4 found two issues in the shipped mobile brand cut;
 |---|---|
 | typecheck (`tsc --noEmit`) | ✅ clean (after `next typegen` regenerated a corrupt dev-generated `routes.d.ts` — same class as the known `next-env.d.ts` churn; added to [PROBLEMS_AND_SOLUTIONS §3](./PROBLEMS_AND_SOLUTIONS.md)) |
 | lint (eslint, touched files) | ✅ clean |
-| tests (`npm test`) | ✅ **366/366** (2026-10-04) |
+| tests (`npm test`) | ✅ **388/388** (2026-10-06) |
 | `npm run verify-clean` (npm ci + build) | ⏸ deferred to the pre-commit gate: `npm ci` re-installs node_modules and `next build` contends with the running dev server's `.next`; run when the dev server can be stopped |
-| commit ladder | ✅ two commits landed 2026-10-04 (parser+tests; UI/provenance/docs) — no push |
+| commit ladder | ✅ commits landed 2026-10-06 (M1 endpoint security/depth, M2 historical scenario retrieval) — on branch `fix/judge-enhancements` |
 | deploy → cold incognito | ⏸ awaiting owner push + cold run |
 
 ---
@@ -101,8 +101,8 @@ Finalization pass before submission. The wrap-up handoff document is removed fro
 | Preset cards | Relabelled to recorded fixture results (WAIT ×3, CLARIFICATION) with a fixture disclaimer; `tests/preset-cards.test.cjs` replays every prompt through the engine so labels cannot drift. |
 | Mobile header | Fixed slots compacted (mode 70×44, risk 64×44, theme/audit 44×44) so the 94px lockup is never crushed at 360px; risk lever gained a visible `RISK` label and a real 1px state border; amber fills use dark void ink for light-mode contrast. |
 | Case studies | All three walkthroughs re-executed against the current engine: every displayed price and percentage reproduces exactly; dollar P&Ls within $0.05 (8-decimal internal rounding vs 2-decimal displayed assumptions). |
-| Docs | Test count re-baselined to **366/366 across 38 files**; GOLDEN_PATH latency replaced with the measured 0.51s fixture / 11.75–50.62s live range; references to gitignored local evidence are no longer clickable links. |
-| Gates | `test:core` 366/366 · `tsc --noEmit` 0 · `eslint .` 0 · `npm run build` 0 (2026-10-04). |
+| Docs | Test count re-baselined to **388/388 across 39 files**; GOLDEN_PATH latency replaced with the measured 0.51s fixture / 11.75–50.62s live range; references to gitignored local evidence are no longer clickable links. |
+| Gates | `test:core` 388/388 · `tsc --noEmit` 0 · `eslint .` 0 · `npm run build` 0 (2026-10-06). |
 | Commits | Two commits on `main`, not pushed. Push + redeploy remains the owner's step. |
 
 ---

@@ -47,9 +47,10 @@ During this 65.5-hour void:
 | Hackathon Requirement | How We Deliver |
 | :--- | :--- |
 | **Track Fit: Decision Stress Testing** | We do **NOT** build an unconstrained trading bot or speculative price predictor. We provide defensible pre-trade decision stress testing with explicit stop/proceed gates. |
+| **Historical Precedent Retrieval** | Directly fulfills the Track 3 sub-theme (*"retrieving historically similar scenarios for trade ideas"*): empirical database of 9 verified weekend/holiday gap events (`src/core/scenarios/historicalDatabase.ts`) matching assets and projecting empirical basis shifts, drawdowns, and recovery hours (`src/core/scenarios/retrieval.ts`). |
 | **Zero-Hallucination Math** | All P&L shocks, basis calculations, slippage estimates, and spreads are computed via **100% deterministic TypeScript arithmetic** (`src/core/scenarios/engine.ts`). The LLM is strictly used for qualitative thesis deconstruction and adversarial counter-arguments. |
 | **Full Audit Provenance** | Every single output number links directly back to an **auditable data lineage record** (`OBSERVED_FACT`, `CALCULATED_METRIC`, `SCENARIO_ASSUMPTION`, or `AI_INTERPRETATION`) visible in the interactive Provenance Drawer. |
-| **Resilience & Fallback Engineering** | Triple-redundant evaluation pipeline: **Local Qwen-2.5** (primary) $\rightarrow$ **Google Gemini Flash Lite** (auto-failover circuit breaker) $\rightarrow$ **Deterministic Offline Fixtures** (100% offline availability). |
+| **Resilience & Fallback Engineering** | Triple-redundant evaluation pipeline: **Local Qwen-2.5** (primary) $\rightarrow$ **Google Gemini Flash Lite** (auto-failover circuit breaker with header-based auth) $\rightarrow$ **Deterministic Offline Fixtures** (100% offline availability). |
 
 ---
 
@@ -108,7 +109,10 @@ npm run verify-clean
 - **Natural Language Parsing & Grammar:** [`src/core/trade/parser.ts`](./src/core/trade/parser.ts) and [`src/core/thesis/extractor.ts`](./src/core/thesis/extractor.ts)
 - **Adversarial Red Team Engine:** [`src/core/thesis/challenger.ts`](./src/core/thesis/challenger.ts)
 - **Deterministic Scenario Stress Engine:** [`src/core/scenarios/engine.ts`](./src/core/scenarios/engine.ts)
+- **Historical Precedent Retrieval Engine:** [`src/core/scenarios/retrieval.ts`](./src/core/scenarios/retrieval.ts) and [`src/core/scenarios/historicalDatabase.ts`](./src/core/scenarios/historicalDatabase.ts)
+- **Bitget Public Market & Orderbook Client:** [`src/adapters/bitget/client.ts`](./src/adapters/bitget/client.ts) (L1 ticker, L2 orderbook `/api/v3/market/orderbook`, OHLCV candles `/api/v3/market/candles`)
 - **Empirical Shock Calibration:** [`docs/SHOCK_CALIBRATION_METHODOLOGY.md`](./docs/SHOCK_CALIBRATION_METHODOLOGY.md)
+- **Official Submission Form Answers Dossier:** [`docs/SUBMISSION_DOSSIER.md`](./docs/SUBMISSION_DOSSIER.md)
 - **Problems Faced & Solved (Engineering Log):** [`docs/PROBLEMS_AND_SOLUTIONS.md`](./docs/PROBLEMS_AND_SOLUTIONS.md)
 - **Documentation Index:** [`docs/README.md`](./docs/README.md)
 - **Decision Policy & Gate Rules:** [`src/core/decision/policy.ts`](./src/core/decision/policy.ts)
@@ -123,12 +127,13 @@ npm run verify-clean
 ## Submission Status
 
 - **Track Selected:** Track 3: Decision Stress Testing
+- **Official Form Dossier:** [docs/SUBMISSION_DOSSIER.md](./docs/SUBMISSION_DOSSIER.md) (ready for Google Form submission)
 - **Functional Web Application:** Deployed at [redteamdesk.name.ng](https://redteamdesk.name.ng) (Mirror: [bitget-ai-redteam-desk.vercel.app](https://bitget-ai-redteam-desk.vercel.app))
 - **Desktop Demo Video:** Brand-cut 1280×720 walkthrough, 100% live data (`public/demo/brand-desktop-demo.mp4`, 6.8 MB)
 - **Mobile Demo Video:** Brand-cut portrait walkthrough with live audio (`public/demo/brand-mobile-demo.mp4`, 14.3 MB) — Act 6 re-rendered 2026-10-01 to the engine-true tolerance verdicts; ships at the full 136.5s capture length
 - **Zero TypeScript Errors:** Passing `npm run typecheck`
 - **Zero Lint Errors:** Passing `npm run lint`
-- **Deterministic Unit Tests:** 100% passing `npm test`
+- **Deterministic Unit Tests:** 100% passing `npm test` (388/388 tests across 39 files)
 - **GitHub Repo Cleanliness:** All temporary scratch files purged, large binaries ignored
 
 ---
