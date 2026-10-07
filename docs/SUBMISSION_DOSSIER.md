@@ -42,7 +42,7 @@ nelson.m2200397@st.futminna.edu.ng
 ```text
 @ThatHorseRep
 ```
-*(Telegram handle preferred. If unavailable, provide your X handle).*
+*(Telegram Handle: `@ThatHorseRep` | X Handle: `@ThatHorseRep1`)*
 
 ---
 
@@ -107,13 +107,13 @@ A pre-trade firewall for Bitget tokenized equities: deterministic stress tests a
 Part 1 · Thesis (highest weight)
 When retail traders buy tokenized stocks like rTSLA or rNVDA on Bitget on a Saturday, they think they're making a normal stock trade. But the cash markets in New York closed on Friday at 4 PM and won't reopen for 65.5 hours. During that entire weekend void, traders are flying blind: the token un-anchors from the underlying equity, orderbooks thin out, and unexpected Bitcoin drops spill straight into the token price.
 
-Most traders who lose money over the weekend don't have bad directional ideas—they walk straight into structural market traps they never saw coming.
+Most traders who lose money over the weekend don't have bad directional ideas, they are just victims who walk straight into structural market traps they never saw coming.
 
-We built the RedTeam Desk to act like an institutional pre-trade risk officer before you hit buy. You explain your trade in plain English, and the desk does two things:
+We built the RedTeam Desk to act like an institutional pre-trade risk officer to assess your risk before you hit buy. You explain your trade in plain English, and the desk does two things:
 1. It uses an adversarial AI to stress-test your thinking, pointing out what could go wrong and what hidden assumptions you're making.
 2. It runs 100% deterministic math on live Bitget orderbook data and 9 historical market shock precedents (like the August 2024 Yen-carry unwind) to show you your exact downside in dollars and cents.
 
-Crucially, the AI never touches the math. Generative models hallucinate numbers and invent probabilities—which is dangerous when real capital is on the line. Instead, deterministic code computes every shock loss, basis spread, and policy verdict (PROCEED / WAIT / REDUCE / REJECT), with full audit lineage back to real orderbook quotes.
+Crucially, the AI never touches the math. Generative models hallucinate numbers and invent probabilities, which is dangerous when real capital is on the line. Instead, deterministic code computes every shock loss, basis spread, and policy verdict (PROCEED / WAIT / REDUCE / REJECT), with full audit lineage back to real orderbook quotes.
 
 Part 2 · Target user and product value
 Our users are active retail traders on Bitget who trade tokenized U.S. equities (rNVDA, rTSLA, rMSTR, rCOIN, rAAPL) alongside their crypto holdings, typically putting $1,000 to $50,000 to work on multi-day swings.
@@ -139,22 +139,21 @@ What is live and working today:
 - Conversational trade parser: Type any natural English trade idea, and the desk extracts size, ticker, and entry assumptions automatically.
 - Adversarial thesis challenger: Generates aggressive, contextual counter-theses targeting the weakest link in your argument.
 - Deterministic shock engine: Computes 4 exact scenarios (Market Risk, Crypto Contagion, Token Microstructure, Combined Shock) with carry borrow fees.
-- Real-time Bitget integration: Connects to live Bitget Open API feeds—spot tickers, L2 orderbooks (/api/v3/market/orderbook), and recent candles.
+- Real-time Bitget integration: Connects to live Bitget spot tickers, L2 orderbooks (/api/v3/market/orderbook), and recent candles.
 - Interactive What-If Sandbox: Instant zero-latency toggles to test cutting position size (100% / 50% / 25%) or waiting for the Monday cash open, showing exact dollars saved.
-- Triple-redundant AI failover: Hackathon qwen3.8-max gateway -> Google Gemini 2.5 Flash -> Deterministic heuristics, ensuring the desk never hangs if an LLM provider drops.
+- Triple-redundant AI failover: Hackathon Qwen gateway -> Google Gemini 2.5 Flash -> Deterministic heuristics, ensuring the desk never hangs if an LLM provider drops.
 - Full provenance drawer: One click reveals the exact source, timestamp, and mathematical formula behind every single number.
 - Risk tolerance slider: Toggles between Conservative, Moderate, and Aggressive profiles while preserving hard safety limits.
-- Tech Stack & APIs: Built with Next.js 16 (React 19), TypeScript (Strict Mode), Tailwind CSS, Bitget Spot Market APIs, and the Bitget Hackathon Qwen gateway.
 
 What's on the immediate roadmap:
 - Direct portfolio balance sync via Bitget API keys.
 - Automated weekend webhook notifications when basis spreads cross dangerous thresholds.
 - Rolling dynamic covariance tracking for real-time beta calculations against Bitcoin.
 
-Part 5 · Your take on AI Trading
-Most people in crypto are using AI backwards—they build autonomous bots that try to predict where prices will go next week and execute trades automatically. That almost always blows up because language models are fundamentally incapable of reliable arithmetic and probability estimation; they hallucinate decimals and panic during outlier volatility.
+Part 5 · My take on AI Trading
+I strongly believe most people in crypto are using AI backwards, because they only build autonomous bots that try to predict where prices will go next week and execute trades automatically. That almost always blows up in their faces because language models are fundamentally incapable of reliable arithmetic and probability estimation; they hallucinate decimals and panic during outlier volatility.
 
-The real breakthrough for AI in trading isn't letting bots pull the trigger. It's using AI as an adversarial sparring partner. Humans are prone to confirmation bias and FOMO, especially during off-hours when rumors spread on social media. AI is brilliant at asking uncomfortable questions, poking holes in lazy theses, and pointing out hidden dependencies.
+The real breakthrough for AI in trading isn't letting bots pull the trigger for you. I believe the way to go is using AI as an adversarial sparring partner. While it's true that humans are prone to confirmation bias and FOMO, especially during off-hours when rumors spread on social media, AI is brilliant at asking uncomfortable questions, poking holes in lazy theses, and pointing out hidden dependencies.
 
 By pairing an adversarial AI that challenges your ideas with deterministic code that computes the math without hallucinations, you get the best of both worlds: human intuition, AI critical thinking, and unbreakable arithmetic.
 ```
@@ -179,14 +178,14 @@ Historical Scenario Engine & Methodology: https://github.com/ThatHorseRep/bitget
 ### 15. Role of the LLM / AI in Your Project *
 
 ```text
-We deliberately separated the AI from the math. The LLM never calculates a price, never computes a P&L shock, and never decides the final mathematical verdict on its own.
+We deliberately separated the AI from the math ran in the desk. The LLM never calculates a price, never computes a P&L shock, and never decides the final mathematical verdict on its own.
 
-Instead, it does what humans usually need an experienced risk officer for:
+What it does instead, is what humans usually need an experienced risk officer for:
 1. Spotting hidden assumptions: It parses the trader's plain-English thesis and separates hard verifiable facts from hopeful speculation (like assuming an unconfirmed weekend rumor will hold until Monday).
 2. Playing the cynical counter-party: It examines observed off-hours market conditions—such as basis spread widening or thin orderbook depth—and builds a targeted counter-argument directly challenging the trade.
 3. Evaluating thesis durability: It assesses the logical consistency and resilience of the trader's reasoning against historical market realities.
 
-Everything numerical—position sizing, scenario losses, slippage estimates, carry costs, and gating thresholds—is computed by verified deterministic algorithms with full audit provenance.
+Everything numerical, the position sizing, scenario losses, slippage estimates, carry costs, and gating thresholds, all are computed by verified deterministic algorithms with full audit provenance.
 
 Models Used: Primary model is qwen3.8-max via the official hackathon gateway, backed by an automated Circuit Breaker failover to Google Gemini 2.5 Flash / Flash Lite (with header-based x-goog-api-key authentication), and a final safety fallback to deterministic heuristic rules.
 ```
