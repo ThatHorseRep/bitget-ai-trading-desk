@@ -16,7 +16,7 @@ Built for the **Bitget AI Base Camp Hackathon S2 — Track 3: Decision Stress Te
 ## Quick Links
 
 - 🌐 **Live Web Application:** [redteamdesk.name.ng](https://redteamdesk.name.ng) *(Mirror: [bitget-ai-redteam-desk.vercel.app](https://bitget-ai-redteam-desk.vercel.app))*
-- 🖥️ **Embedded Walkthrough & Video Demos:** Interactive terminal player with chapter cues on the landing page ([#demo-walkthrough](https://redteamdesk.name.ng/#demo-walkthrough)), plus standalone downloads in [`public/demo/brand-desktop-demo.mp4`](./public/demo/brand-desktop-demo.mp4) (Desktop brand cut, 1280×720, 11.0 MB) and [`public/demo/brand-mobile-demo.mp4`](./public/demo/brand-mobile-demo.mp4) (Portrait brand cut, 1080×1920, 22.4 MB)
+- 🖥️ **Embedded Walkthrough & Video Demos:** Interactive terminal player with chapter cues on the landing page ([#demo-walkthrough](https://redteamdesk.name.ng/#demo-walkthrough)), plus standalone downloads in [`public/demo/brand-desktop-demo.mp4`](./public/demo/brand-desktop-demo.mp4) (Desktop brand cut, 1280×720, 10.1 MB) and [`public/demo/brand-mobile-demo.mp4`](./public/demo/brand-mobile-demo.mp4) (Portrait brand cut, 1080×1920, 15.0 MB)
 - 📄 **Official Product Specification:** [PRODUCT_DESCRIPTION.md](./PRODUCT_DESCRIPTION.md)
 - 🧾 **Problems Faced & Solved (Engineering Log):** [docs/PROBLEMS_AND_SOLUTIONS.md](./docs/PROBLEMS_AND_SOLUTIONS.md) — every problem → root cause → fix → verification, with commits and test proof
 - 📚 **Full Documentation Index:** [docs/README.md](./docs/README.md) — every doc in the repo, organized by audience
@@ -131,8 +131,8 @@ npm run verify-clean
 - **Track Selected:** Track 3: Decision Stress Testing
 - **Official Form Dossier:** [docs/SUBMISSION_DOSSIER.md](./docs/SUBMISSION_DOSSIER.md) (ready for Google Form submission)
 - **Functional Web Application:** Deployed at [redteamdesk.name.ng](https://redteamdesk.name.ng) (Mirror: [bitget-ai-redteam-desk.vercel.app](https://bitget-ai-redteam-desk.vercel.app))
-- **Desktop Demo Video:** Brand-cut 1280×720 walkthrough, 100% live data (`public/demo/brand-desktop-demo.mp4`, 11.0 MB)
-- **Mobile Demo Video:** Brand-cut portrait walkthrough with live audio (`public/demo/brand-mobile-demo.mp4`, 22.4 MB) — ships at the full 187.7s capture length
+- **Desktop Demo Video:** Brand-cut 1280×720 walkthrough, 100% live data (`public/demo/brand-desktop-demo.mp4`, 10.1 MB)
+- **Mobile Demo Video:** Brand-cut portrait walkthrough with live audio (`public/demo/brand-mobile-demo.mp4`, 15.0 MB) — ships at the full 187.7s capture length
 - **Zero TypeScript Errors:** Passing `npm run typecheck`
 - **Zero Lint Errors:** Passing `npm run lint`
 - **Deterministic Unit Tests:** 100% passing `npm test` (397/397 tests across 41 files)

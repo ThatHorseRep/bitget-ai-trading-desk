@@ -46,8 +46,8 @@ const EXPECT = {
     'docs/PROBLEMS_AND_SOLUTIONS.md',
   ],
   assets: [
-    { file: 'public/demo/brand-desktop-demo.mp4', docMB: 11.0, bytes: 10971941 },
-    { file: 'public/demo/brand-mobile-demo.mp4', docMB: 22.4, bytes: 22440320 },
+    { file: 'public/demo/brand-desktop-demo.mp4', docMB: 10.1, bytes: 10060082 },
+    { file: 'public/demo/brand-mobile-demo.mp4', docMB: 15.0, bytes: 15009313 },
   ],
   // Docs that state the asset sizes ("11.0 MB" / "22.4 MB").
   assetDocs: ['README.md', 'PRODUCT_DESCRIPTION.md', 'SUBMISSION.md'],
