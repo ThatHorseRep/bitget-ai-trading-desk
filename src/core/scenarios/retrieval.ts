@@ -166,14 +166,9 @@ export function retrieveHistoricalScenarios(input: HistoricalRetrievalInput): Hi
     }
 
     // Directional P&L calculation for this precedent
-    // LONG: suffers from adverse reference gap drop and adverse basis widening
-    // SHORT: gains from underlying drop, but loses from basis widening
-    let tokenPriceDeltaPct: number;
-    if (direction === "LONG") {
-      tokenPriceDeltaPct = (precedent.referenceGapPct * sessionMultiplier) - ((precedent.basisShiftBps * sessionMultiplier) / 100);
-    } else {
-      tokenPriceDeltaPct = (-precedent.referenceGapPct * sessionMultiplier) - ((precedent.basisShiftBps * sessionMultiplier) / 100);
-    }
+    // Stressed token price reflects underlying reference drop and basis dislocation widening
+    // calculateScenarioPnl handles direction: LONG loses, SHORT gains from price drop
+    const tokenPriceDeltaPct = (precedent.referenceGapPct * sessionMultiplier) - ((precedent.basisShiftBps * sessionMultiplier) / 100);
 
     const stressedPrice = Math.max(0.00000001, entryPrice * (1 + (tokenPriceDeltaPct / 100)));
     const pnlUsd = calculateScenarioPnl(direction, quantity, entryPrice, stressedPrice);

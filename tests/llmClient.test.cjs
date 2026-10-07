@@ -1,6 +1,6 @@
 const assert = require("node:assert/strict");
 const { test, beforeEach, afterEach } = require("node:test");
-const { sharedLlmClient, GEMINI_MODELS } = require("../dist-core/src/core/thesis/llmClient.js");
+const { sharedLlmClient, GEMINI_MODELS, calculateGeminiModelTimeout } = require("../dist-core/src/core/thesis/llmClient.js");
 
 // Regression tests for the Qwen3 "thinking" latency fix (2026-09-21):
 // the hackathon gateway's qwen3.8-max burned 30-90s+ in reasoning_content
@@ -88,6 +88,11 @@ test("GEMINI_MODELS cascade excludes deprecated models and prioritizes resilient
     "gemini-flash-latest",
     "gemini-flash-lite-latest"
   ]);
+  // Dynamic per-model timeout calculation and latency clamping
+  assert.equal(calculateGeminiModelTimeout(undefined, 6), 5000);
+  assert.equal(calculateGeminiModelTimeout(60000, 6), 8000);
+  assert.equal(calculateGeminiModelTimeout(12000, 6), 2500);
+  assert.equal(calculateGeminiModelTimeout(30000, 6), 5000);
 });
 
 test("Gemini API call transmits x-goog-api-key in request headers and removes ?key= from URL", async () => {

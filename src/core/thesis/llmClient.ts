@@ -52,6 +52,10 @@ export const GEMINI_MODELS = [
   "gemini-flash-lite-latest"
 ] as const;
 
+export function calculateGeminiModelTimeout(budgetMs?: number, modelCount: number = GEMINI_MODELS.length): number {
+  return Math.min(8000, Math.max(2500, Math.floor((budgetMs ?? 30000) / modelCount)));
+}
+
 export function extractCleanJson(raw: string): string {
   let content = raw.trim();
   const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -140,13 +144,15 @@ class LLMProvider {
     }
 
     const models = GEMINI_MODELS;
+    const perModelTimeoutMs = calculateGeminiModelTimeout(request.budgetMs, models.length);
     let lastErr: unknown = null;
 
     for (const model of models) {
+      let timeout: NodeJS.Timeout | undefined;
       try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
+        const timeout = setTimeout(() => controller.abort(), perModelTimeoutMs);
 
         const res = await fetch(url, {
           method: 'POST',
@@ -157,8 +163,6 @@ class LLMProvider {
           body: JSON.stringify(payload),
           signal: controller.signal
         });
-        clearTimeout(timeout);
-
         if (!res.ok) {
           const errText = await res.text();
           throw new Error(`Gemini ${model} returned ${res.status}: ${errText}`);
@@ -178,6 +182,8 @@ class LLMProvider {
         };
       } catch (err) {
         lastErr = err;
+      } finally {
+        if (timeout) clearTimeout(timeout);
       }
     }
 

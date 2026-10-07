@@ -721,7 +721,7 @@ export function DecisionArtifactView({
           const marketPct = marketScenario?.estimatedPnlPct != null ? `${marketScenario.estimatedPnlPct.toFixed(2)}%` : "-5.00%";
 
           const simulatedPnl = timingMode === "MONDAY_OPEN" ? rawMarket * sizeMultiplier : rawCombined * sizeMultiplier;
-          const deltaSavings = rawCombined - simulatedPnl;
+          const deltaSavings = simulatedPnl - rawCombined;
           const isReduced = sizeMultiplier < 1.0 || timingMode === "MONDAY_OPEN";
           const symbol = trade.canonicalSymbol || trade.asset || "token";
           const refSymbol = trade.referenceAsset || "underlying equity";

@@ -70,7 +70,10 @@ test("tolerance under material uncertainty: AGGRESSIVE shifts elevated→moderat
 });
 
 test("gated path without uncertainty: the three tolerances give REJECT / WAIT / PROCEED off-hours", () => {
-  const base = { materialUncertainty: false };
+  const base = {
+    materialUncertainty: false,
+    positionQuality: { quality: "STRONGER", reasons: [], executionRisk: { ratio: 0.1, explanation: "" } }
+  };
   assert.equal(evaluateDecision(makeInputs({ ...base, riskTolerance: "CONSERVATIVE" })).verdict, "REJECT");
   assert.equal(evaluateDecision(makeInputs({ ...base, riskTolerance: "MODERATE" })).verdict, "WAIT");
   assert.equal(evaluateDecision(makeInputs({ ...base, riskTolerance: "AGGRESSIVE" })).verdict, "PROCEED");
@@ -95,6 +98,26 @@ test("liquidity floor: WEAKER position + clear gated band + AGGRESSIVE is capped
   }));
   assert.equal(r.verdict, "REDUCE");
   assert.ok(r.reasons.some(x => x.message.includes("Liquidity floor")));
+
+  // Defect 3: WEAKER position with moderate gated band must also be capped at REDUCE (not PROCEED)
+  const rModerate = evaluateDecision(makeInputs({
+    materialUncertainty: false,
+    marketState: regular,
+    positionAssessment: makeAssessment("moderate"),
+    riskTolerance: "AGGRESSIVE"
+  }));
+  assert.equal(rModerate.verdict, "REDUCE");
+  assert.ok(rModerate.reasons.some(x => x.message.includes("Liquidity floor")));
+
+  // Off-hours variant: capped at WAIT, not PROCEED
+  const rModerateOffHours = evaluateDecision(makeInputs({
+    materialUncertainty: false,
+    marketState: offHours,
+    positionAssessment: makeAssessment("moderate"),
+    riskTolerance: "AGGRESSIVE"
+  }));
+  assert.equal(rModerateOffHours.verdict, "WAIT");
+  assert.ok(rModerateOffHours.reasons.some(x => x.message.includes("Liquidity floor")));
 });
 
 test("liquidity floor holds at MODERATE too: clear band + WEAKER position → REDUCE, not PROCEED", () => {
@@ -104,6 +127,15 @@ test("liquidity floor holds at MODERATE too: clear band + WEAKER position → RE
     positionAssessment: makeAssessment("clear")
   }));
   assert.equal(r.verdict, "REDUCE");
+
+  // Defect 3: moderate band + WEAKER position at MODERATE tolerance also caps at REDUCE
+  const rModerate = evaluateDecision(makeInputs({
+    materialUncertainty: false,
+    marketState: regular,
+    positionAssessment: makeAssessment("moderate")
+  }));
+  assert.equal(rModerate.verdict, "REDUCE");
+  assert.ok(rModerate.reasons.some(x => x.message.includes("Liquidity floor")));
 });
 
 test("hard blockers are never relaxed by any tolerance", () => {

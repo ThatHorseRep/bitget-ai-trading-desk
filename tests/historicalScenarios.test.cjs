@@ -182,6 +182,19 @@ test("Empirical Metrics - Directional short trade gains from underlying drop, of
     shortResult.empiricalMetrics.projectedPnlPct > longResult.empiricalMetrics.projectedPnlPct,
     "Short position should perform better than long position under a gap-down dislocation"
   );
+  assert.ok(
+    shortResult.empiricalMetrics.projectedPnlPct > 0,
+    "Short position should have positive projected PnL % when underlying price drops"
+  );
+  assert.ok(
+    shortResult.empiricalMetrics.projectedPnlUsd > 0,
+    "Short position should have positive projected PnL USD when underlying price drops"
+  );
+  assert.equal(
+    shortResult.empiricalMetrics.projectedPnlUsd,
+    -longResult.empiricalMetrics.projectedPnlUsd,
+    "Short and long projected PnL must be symmetrical for same asset dislocation"
+  );
 });
 
 test("Session Risk Weighting - Weekend and off-hours risk exceeds regular hours", () => {

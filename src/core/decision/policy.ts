@@ -206,7 +206,7 @@ export function evaluateDecision(inputs: DecisionInputs, config: DecisionPolicyC
     // (loosened) past REDUCE/WAIT — scenario grading stays authoritative on
     // the downside.
     const effectiveBand: RiskAdjustedBand =
-      inputs.positionQuality.quality === "WEAKER" && adjusted.band === "clear"
+      inputs.positionQuality.quality === "WEAKER" && (adjusted.band === "clear" || adjusted.band === "moderate")
         ? {
             ...adjusted,
             band: "elevated",
