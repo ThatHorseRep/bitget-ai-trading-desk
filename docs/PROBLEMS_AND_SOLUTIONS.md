@@ -168,6 +168,13 @@ The session ran in two passes, per the methodology in the raw evidence ledger (l
 - **Preset drift pin.** `tests/preset-cards.test.cjs` replays all four launcher prompts through the deterministic fixture workflow and asserts the card labels equal engine output (WAIT x3 with worst `COMBINED_SHOCK -9.25%`; the unhedged card stops at `CLARIFICATION`). A policy change that moves a verdict now fails the suite instead of shipping a card that lies.
 - **Case studies.** All three `RETROSPECTIVE_CASE_STUDIES.md` walkthroughs re-executed against the current engine (states reconstructed from their documented assumptions): **every displayed shocked price and percentage reproduces exactly**; dollar P&Ls reproduce to within **$0.05** (the engine rounds internally at 8 decimals while the docs display 2-decimal assumptions). Case 3's `"at 04:00 AM ET"` input no longer parses a clock time as a price.
 
+### 4A.8 Final audit pass: Adaptive stage budgeting, 2-strike breaker, and edge-case fixes
+
+- **Qwen Starvation vs. Fast-Fail.** Probing the hackathon gateway (`qwen3.8-max`) revealed simple prompts return in 2.8s, but complex multi-field JSON schema extractions require ~15–25s. The hardcoded 5,000ms timeout aborted healthy in-flight generation, tripping the single-strike circuit breaker for 45s and starving subsequent stages.
+- **Adaptive Budgeting & 2-Strike Breaker.** Default Qwen baseline window raised to 18,000ms (`QWEN_TIMEOUT_MS`), dynamically clamped to 45% of caller remaining headroom (`request.budgetMs`). Breaker now requires 2 consecutive hard failures before opening for 30s.
+- **Edge-Case Fixes.** (1) Precedent retrieval for SHORT positions now preserves directional gain symmetry when the underlying drops; (2) What-If Sandbox "Capital Protected" UI badge sign formula fixed (`simulatedPnl - rawCombined`); (3) Liquidity floor in policy gating extended to cover `moderate` band alongside `clear`; (4) Gemini 6-model fallback cascade now clamps per-model timeout to remaining budget (`calculateGeminiModelTimeout`), preventing serverless ceiling breaches.
+- **Verification.** Full suite passes clean (397/397 across 41 files), `tsc --noEmit` 0 errors, `eslint .` 0 warnings, and `check:docs` in sync with 0 drift.
+
 ## 5. Open items (tracked, not solved)
 
 1. **Qwen primary-path recovery.** All 6 latency measurements ran on the Gemini failover path. When the shared gateway recovers, re-measure and update the latency range in PRODUCT_DESCRIPTION Part 3 / CONNECTIVITY_REPORT (expected to tighten).
