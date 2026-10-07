@@ -80,8 +80,8 @@ class CircuitBreaker {
   private state: CircuitState = "CLOSED";
   private failureCount = 0;
   private lastFailureTime = 0;
-  private readonly failureThreshold = 1; // Trip on first hard timeout/failure to keep desk fast
-  private readonly cooldownMs = 45000; // 45s cooldown before probing Qwen again
+  private readonly failureThreshold = 2; // Trip on 2 consecutive hard failures
+  private readonly cooldownMs = 30000; // 30s cooldown before probing Qwen again
 
   getState(): CircuitState {
     if (this.state === "OPEN") {
@@ -102,7 +102,9 @@ class CircuitBreaker {
   recordFailure() {
     this.failureCount++;
     this.lastFailureTime = Date.now();
-    this.state = "OPEN";
+    if (this.failureCount >= this.failureThreshold) {
+      this.state = "OPEN";
+    }
   }
 
   getCooldownRemainingSeconds(): number {
@@ -253,8 +255,11 @@ class LLMProvider {
       resolvedEndpoint = resolvedEndpoint.replace(/\/$/, '') + '/chat/completions';
     }
 
-    // FAST-FAIL TIMEOUT: 5000ms max for Qwen so the desk never hangs in live mode
-    const QWEN_MAX_TIMEOUT_MS = isMockOrTestEndpoint ? 30000 : 5000;
+    // ADAPTIVE QWEN TIMEOUT: Give Qwen realistic generation budget (18s default) or caller stage headroom
+    const envTimeout = process.env.QWEN_TIMEOUT_MS ? parseInt(process.env.QWEN_TIMEOUT_MS, 10) : undefined;
+    const defaultLiveTimeout = envTimeout ?? 18000;
+    const stageAllocatedTimeout = request.budgetMs ? Math.min(defaultLiveTimeout, Math.max(5000, Math.floor(request.budgetMs * 0.45))) : defaultLiveTimeout;
+    const QWEN_MAX_TIMEOUT_MS = isMockOrTestEndpoint ? 30000 : stageAllocatedTimeout;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), QWEN_MAX_TIMEOUT_MS);
 
@@ -337,7 +342,7 @@ class LLMProvider {
       }
 
       if (hasGemini) {
-        const reason = err.name === 'AbortError' ? 'Qwen Timeout (5s)' : 'Qwen Connection Error';
+        const reason = err.name === 'AbortError' ? `Qwen Timeout (${Math.round(QWEN_MAX_TIMEOUT_MS / 1000)}s)` : 'Qwen Connection Error';
         console.warn(`[CIRCUIT-BREAKER] ${reason}. Tripping breaker, routing instantly to Gemini...`);
         try {
           return await this.callGemini(request, `Auto-Failover: ${reason}`);
