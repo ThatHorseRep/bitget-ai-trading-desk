@@ -32,9 +32,9 @@ ThatHorseRep
 
 ### 3. Team Lead Email *
 ```text
-thathorserep@gmail.com
+nelson.m2200397@st.futminna.edu.ng
 ```
-*(Or your active primary email address).*
+*(Or your secondary email: `thathorserep@gmail.com`).*
 
 ---
 
@@ -47,8 +47,9 @@ thathorserep@gmail.com
 ---
 
 ### 5. Member Background *
+- [x] **Student**
 - [x] **Developer**
-*(Select Developer, Trader, or Student as applicable).*
+*(Check Student and Developer).*
 
 ---
 
@@ -138,11 +139,12 @@ What is live and working today:
 - Conversational trade parser: Type any natural English trade idea, and the desk extracts size, ticker, and entry assumptions automatically.
 - Adversarial thesis challenger: Generates aggressive, contextual counter-theses targeting the weakest link in your argument.
 - Deterministic shock engine: Computes 4 exact scenarios (Market Risk, Crypto Contagion, Token Microstructure, Combined Shock) with carry borrow fees.
-- Real-time Bitget integration: Connects to live Bitget spot tickers, L2 orderbooks (/api/v3/market/orderbook), and recent candles.
+- Real-time Bitget integration: Connects to live Bitget Open API feeds—spot tickers, L2 orderbooks (/api/v3/market/orderbook), and recent candles.
 - Interactive What-If Sandbox: Instant zero-latency toggles to test cutting position size (100% / 50% / 25%) or waiting for the Monday cash open, showing exact dollars saved.
-- Triple-redundant AI failover: Hackathon Qwen gateway -> Google Gemini 2.5 Flash -> Deterministic heuristics, ensuring the desk never hangs if an LLM provider drops.
+- Triple-redundant AI failover: Hackathon qwen3.8-max gateway -> Google Gemini 2.5 Flash -> Deterministic heuristics, ensuring the desk never hangs if an LLM provider drops.
 - Full provenance drawer: One click reveals the exact source, timestamp, and mathematical formula behind every single number.
 - Risk tolerance slider: Toggles between Conservative, Moderate, and Aggressive profiles while preserving hard safety limits.
+- Tech Stack & APIs: Built with Next.js 16 (React 19), TypeScript (Strict Mode), Tailwind CSS, Bitget Spot Market APIs, and the Bitget Hackathon Qwen gateway.
 
 What's on the immediate roadmap:
 - Direct portfolio balance sync via Bitget API keys.
@@ -165,6 +167,7 @@ By pairing an adversarial AI that challenges your ideas with deterministic code 
 Project Link (Live App): https://www.redteamdesk.name.ng
 Project Mirror (Vercel): https://bitget-ai-redteam-desk.vercel.app
 Source Code (GitHub): https://github.com/ThatHorseRep/bitget-ai-trading-desk
+Demo Video (Public X Post): https://x.com/ThatHorseRep1/status/2107786783325134865
 Run Records (Walkthrough Video - Desktop Brand Cut): https://redteamdesk.name.ng/demo/brand-desktop-demo.mp4
 Run Records (Walkthrough Video - Mobile Brand Cut): https://redteamdesk.name.ng/demo/brand-mobile-demo.mp4
 Product Specification: https://github.com/ThatHorseRep/bitget-ai-trading-desk/blob/main/PRODUCT_DESCRIPTION.md
