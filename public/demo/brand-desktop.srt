@@ -3,30 +3,30 @@
 Crypto never sleeps, but the stock market does. On weekends, traders jump into tokenized equities off rumors and wake up wrecked by Monday morning. Let's stress-test one right now.
 
 2
-00:00:18,928 --> 00:00:30,664
-Say I'm looking at Tesla on a Saturday — rumors of an autonomous driving breakthrough. Instead of blindly FOMOing twenty-five grand in, I'll type it into the desk and let it argue with me a little.
+00:00:21,924 --> 00:00:33,780
+Say I'm looking at Tesla on a Saturday — rumors of an autonomous driving breakthrough. Instead of blindly FOMOing $25,000 in, I'll type it into the desk and let it argue with me a little.
 
 3
-00:00:40,520 --> 00:00:50,984
-It parses the trade: twenty-five thousand long, sixty six tokens, working entry around three-seventy nine sixty. That looks right. Let's hit execute.
+00:00:45,486 --> 00:00:55,902
+It parses the trade: $25,000 long, 66 tokens, working entry around $378.40. That looks right. Let's hit execute.
 
 4
-00:00:57,486 --> 00:01:14,382
+00:01:04,325 --> 00:01:21,221
 Here's the engine running live — six adversarial checks running in parallel. If the primary model gateway hiccups, it fails over automatically without breaking the arithmetic. It models off-hours orderbook depth and unanchored weekend basis drag.
 
 5
-00:01:32,630 --> 00:01:50,030
-The engine has returned its decision: it's advising a WAIT. Here's why the desk flagged it — Tesla equity closed at three-eighty sixty eight, but the token is at three-seventy nine fifty five. And under the full weekend shock, that's a negative twenty seven hundred dollars hit before Monday's open.
+00:02:18,831 --> 00:02:35,247
+The engine has returned its decision: it's advising a WAIT. Here's why the desk flagged it — Tesla equity closed at $380.68, but the token is at $378.42. And under the full weekend shock, that's a -$2,704 hit before Monday's open.
 
 6
-00:01:52,160 --> 00:02:10,400
+00:02:38,373 --> 00:02:56,613
 Watch what happens when I toggle the risk tolerance lever. Dialing it down to Conservative immediately hardens the threshold to a REJECT. Pushing it up to Aggressive recalculates the runway to a PROCEED. That's real-time dynamic calibration tailored to the trader's risk profile.
 
 7
-00:02:11,780 --> 00:02:30,356
-Cutting the size in half preserves about one thousand three hundred and fifty dollars. And opening the audit provenance drawer exposes the entire deterministic lineage — every quote links to a verified orderbook tick, live spread depth, and macro source, so there's zero black-box hallucination.
+00:03:01,051 --> 00:03:19,795
+Cutting the size in half preserves +$1,352. And opening the audit provenance drawer exposes the entire deterministic lineage — every quote links to a verified orderbook tick, live spread depth, and macro source, so there's zero black-box hallucination.
 
 8
-00:02:33,209 --> 00:02:45,473
-That right there is a structural trap I would've walked straight into. Bitget A.I. Red Team Desk. Stress-test before the market does. Available now at redteamdesk.name.ng.
+00:03:29,820 --> 00:03:42,084
+That right there is a structural trap I would've walked straight into. Bitget AI Red Team Desk. Stress-test before the market does. Available now at redteamdesk.name.ng.
 

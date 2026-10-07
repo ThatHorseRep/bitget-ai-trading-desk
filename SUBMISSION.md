@@ -7,8 +7,8 @@
 
 **Video Walkthroughs:**
 - Embedded directly on the Landing Page (`#demo-walkthrough`) with automated in-view playback/pause, chapter seeking, speed toggles, and responsive Desktop/Mobile framing.
-- Desktop 1280×720 (`public/demo/brand-desktop-demo.mp4`, 9.1 MB) — 100% live-data brand cut
-- Mobile Portrait (`public/demo/brand-mobile-demo.mp4`, 12.3 MB) — 100% live-data brand cut
+- Desktop 1280×720 (`public/demo/brand-desktop-demo.mp4`, 11.0 MB) — 100% live-data brand cut
+- Mobile Portrait (`public/demo/brand-mobile-demo.mp4`, 22.4 MB) — 100% live-data brand cut
 
 ## Project Description
 

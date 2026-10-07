@@ -46,10 +46,10 @@ const EXPECT = {
     'docs/PROBLEMS_AND_SOLUTIONS.md',
   ],
   assets: [
-    { file: 'public/demo/brand-desktop-demo.mp4', docMB: 9.1, bytes: 9071537 },
-    { file: 'public/demo/brand-mobile-demo.mp4', docMB: 12.3, bytes: 12275219 },
+    { file: 'public/demo/brand-desktop-demo.mp4', docMB: 11.0, bytes: 10971941 },
+    { file: 'public/demo/brand-mobile-demo.mp4', docMB: 22.4, bytes: 22440320 },
   ],
-  // Docs that state the asset sizes ("9.1 MB" / "12.3 MB").
+  // Docs that state the asset sizes ("11.0 MB" / "22.4 MB").
   assetDocs: ['README.md', 'PRODUCT_DESCRIPTION.md', 'SUBMISSION.md'],
   // Rounding headroom: docs round to one decimal (10.06 MB is written "10.1 MB").
   assetToleranceMB: 0.1,
@@ -258,8 +258,8 @@ function main() {
 
   for (const rel of EXPECT.assetDocs) {
     const text = readDoc(rel);
-    docContains(rel, text, `${EXPECT.assets[0].docMB} MB`, 'desktop asset size');
-    docContains(rel, text, `${EXPECT.assets[1].docMB} MB`, 'mobile asset size');
+    docContains(rel, text, `${EXPECT.assets[0].docMB.toFixed(1)} MB`, 'desktop asset size');
+    docContains(rel, text, `${EXPECT.assets[1].docMB.toFixed(1)} MB`, 'mobile asset size');
   }
 
   console.log('== docs drift check ==');
