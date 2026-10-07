@@ -50,10 +50,12 @@ The LLM is **never** used for market parsing, price selection, scenario math, P&
 
 ## Mandatory X (Twitter) Promotional Post (Rule Requirement)
 
+- **Published Live Post URL:** [`https://x.com/ThatHorseRep1/status/2107786783325134865`](https://x.com/ThatHorseRep1/status/2107786783325134865)
+
 > [!IMPORTANT]
 > **Hackathon Rule Requirement:** Submission **must** include at least 1 X post link that **Quote-Tweets (retweets with comment)** the official announcement:
-> **Target Tweet to Quote:** [`https://x.com/Bitget_AI/status/2100519318824055159?s=20`](https://x.com/Bitget_AI/status/2100519318824055159?s=20)
-> Must include: `#BitgetHackathon` and `@Bitget_AI`. Without this compliant quote-tweet, the Google Form submission is marked incomplete!
+> **Target Tweet Quoted:** [`https://x.com/Bitget_AI/status/2100519318824055159?s=20`](https://x.com/Bitget_AI/status/2100519318824055159?s=20)
+> Included: `#BitgetHackathon` and `@Bitget_AI`.
 
 ### Ready-to-Publish Post Copy:
 

@@ -187,12 +187,12 @@ Models Used: Primary model is Qwen 2.5 (qwen3.8-max) via the official hackathon 
 ---
 
 ### 16. X Project Post URL *
-> **Action Required:** Publish the humanized mini-thread below on X (quote-tweeting the official hackathon tweet or posting as a thread tagging `@Bitget_AI`), then paste the URL of **Tweet 1 (the thread starter)** here.
-> 
-> *Optimized for standard X accounts (zero X Premium needed). Every tweet is strictly $\le 280$ characters.*
+```text
+https://x.com/ThatHorseRep1/status/2107786783325134865
+```
 
-**Target Tweet to Quote-Tweet:**  
-`https://x.com/Bitget_AI/status/2100519318824055159?s=20`
+> **Live Post Published:** [`https://x.com/ThatHorseRep1/status/2107786783325134865`](https://x.com/ThatHorseRep1/status/2107786783325134865)  
+> Quote-tweets the official hackathon tweet with tags `@Bitget_AI` and `#BitgetHackathon`.
 
 ---
 
