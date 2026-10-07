@@ -185,7 +185,7 @@ Instead, it does what humans usually need an experienced risk officer for:
 
 Everything numerical—position sizing, scenario losses, slippage estimates, carry costs, and gating thresholds—is computed by verified deterministic algorithms with full audit provenance.
 
-Models Used: Primary model is Qwen 2.5 (qwen3.8-max) via the official hackathon gateway, backed by an automated Circuit Breaker failover to Google Gemini 2.5 Flash / Flash Lite (with header-based x-goog-api-key authentication), and a final safety fallback to deterministic heuristic rules.
+Models Used: Primary model is qwen3.8-max via the official hackathon gateway, backed by an automated Circuit Breaker failover to Google Gemini 2.5 Flash / Flash Lite (with header-based x-goog-api-key authentication), and a final safety fallback to deterministic heuristic rules.
 ```
 
 ---

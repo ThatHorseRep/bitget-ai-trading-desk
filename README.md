@@ -49,7 +49,7 @@ During this 65.5-hour void:
 | **Historical Precedent Retrieval** | Directly fulfills the Track 3 sub-theme (*"retrieving historically similar scenarios for trade ideas"*): empirical database of 9 verified weekend/holiday gap events (`src/core/scenarios/historicalDatabase.ts`) matching assets and projecting empirical basis shifts, drawdowns, and recovery hours (`src/core/scenarios/retrieval.ts`). |
 | **Zero-Hallucination Math** | All P&L shocks, basis calculations, slippage estimates, and spreads are computed via **100% deterministic TypeScript arithmetic** (`src/core/scenarios/engine.ts`). The LLM is strictly used for qualitative thesis deconstruction and adversarial counter-arguments. |
 | **Full Audit Provenance** | Every single output number links directly back to an **auditable data lineage record** (`OBSERVED_FACT`, `CALCULATED_METRIC`, `SCENARIO_ASSUMPTION`, or `AI_INTERPRETATION`) visible in the interactive Provenance Drawer. |
-| **Resilience & Fallback Engineering** | Triple-redundant evaluation pipeline: **Local Qwen-2.5** (primary) $\rightarrow$ **Google Gemini Flash Lite** (auto-failover circuit breaker with header-based auth) $\rightarrow$ **Deterministic Offline Fixtures** (100% offline availability). |
+| **Resilience & Fallback Engineering** | Triple-redundant evaluation pipeline: **qwen3.8-max** (official hackathon gateway) $\rightarrow$ **Google Gemini Flash Lite** (auto-failover circuit breaker with header-based auth) $\rightarrow$ **Deterministic Offline Fixtures** (100% offline availability). |
 
 ---
 
