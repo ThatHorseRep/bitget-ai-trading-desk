@@ -1,32 +1,32 @@
 1
-00:00:00,800 --> 00:00:12,416
+00:00:00,800 --> 00:00:12,680
 Crypto never sleeps, but the stock market does. On weekends, traders jump into tokenized equities off rumors and wake up wrecked by Monday morning. Let's stress-test one right now.
 
 2
-00:00:14,080 --> 00:00:25,864
+00:00:32,293 --> 00:00:44,149
 Say I'm looking at Tesla on a Saturday — rumors of an autonomous driving breakthrough. Instead of blindly FOMOing twenty-five grand in, I'll type it into the desk and let it argue with me a little.
 
 3
-00:00:44,130 --> 00:00:54,282
+00:00:45,086 --> 00:00:55,214
 It parses the trade: twenty-five thousand long, sixty six tokens, working entry around three-seventy nine eighty eight. That looks right. Let's hit execute.
 
 4
-00:00:56,710 --> 00:01:13,462
+00:01:03,489 --> 00:01:20,385
 Here's the engine running live — six adversarial checks running in parallel. If the primary model gateway hiccups, it fails over automatically without breaking the arithmetic. It models off-hours orderbook depth and unanchored weekend basis drag.
 
 5
-00:01:35,000 --> 00:01:51,776
-The engine has returned its decision: it's advising a WAIT. Here's why the desk flagged it — Tesla equity closed at three-eighty sixty eight, but the token is at three-seventy nine eighty eight. And under the full weekend shock, that's a negative twenty seven hundred dollars hit before Monday's open.
+00:01:39,835 --> 00:01:58,531
+The red team analysis has completed, and the desk issues a cautious WAIT. Here's why the desk flagged it — Tesla equity closed at three-eighty sixty eight, but the token is at three-seventy nine eighty eight. And under the full weekend shock, that's a negative twenty seven hundred dollars hit before Monday's open.
 
 6
-00:01:52,576 --> 00:02:08,584
-Watch what happens when I toggle the risk tolerance lever. Dialing it to Conservative shifts the verdict to REJECT. Switching to Aggressive opens the runway to PROCEED. That's dynamic threshold calibration responding to the trader's profile in real time.
+00:01:59,562 --> 00:02:17,538
+Watch what happens when I toggle the risk tolerance lever. Dialing it down to Conservative immediately hardens the threshold to a REJECT. Pushing it up to Aggressive recalculates the runway to a PROCEED. That's real-time dynamic calibration tailored to the trader's risk profile.
 
 7
-00:02:09,384 --> 00:02:25,656
-Cutting the size in half preserves about one thousand three hundred and fifty one dollars. And down here in the audit trail, you get full cryptographic provenance — every quote links to a verified orderbook tick, SEC filing, and institutional macro source.
+00:02:18,587 --> 00:02:36,899
+Cutting the size in half preserves over thirteen hundred dollars immediately. And opening the audit provenance drawer exposes the entire deterministic lineage — every quote links to a verified orderbook tick, live spread depth, and macro source, so there's zero black-box hallucination.
 
 8
-00:02:26,456 --> 00:02:38,984
-That right there is a structural trap I would've walked straight into. Bit-get A.I. Red Team Desk. Stress-test before the market does. Available now at redteamdesk.name.ng.
+00:02:45,677 --> 00:02:58,301
+That right there is a structural trap I would've walked straight into. Bitget A.I. Red Team Desk. Stress-test before the market does. Available now at redteamdesk.name.ng.
 
