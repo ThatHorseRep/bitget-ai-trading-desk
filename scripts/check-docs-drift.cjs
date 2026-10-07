@@ -46,10 +46,10 @@ const EXPECT = {
     'docs/PROBLEMS_AND_SOLUTIONS.md',
   ],
   assets: [
-    { file: 'public/demo/brand-desktop-demo.mp4', docMB: 9.7, bytes: 9715891 },
-    { file: 'public/demo/brand-mobile-demo.mp4', docMB: 7.2, bytes: 7161890 },
+    { file: 'public/demo/brand-desktop-demo.mp4', docMB: 9.1, bytes: 9071537 },
+    { file: 'public/demo/brand-mobile-demo.mp4', docMB: 12.3, bytes: 12275219 },
   ],
-  // Docs that state the asset sizes ("10.1 MB" / "7.2 MB").
+  // Docs that state the asset sizes ("9.1 MB" / "12.3 MB").
   assetDocs: ['README.md', 'PRODUCT_DESCRIPTION.md', 'SUBMISSION.md'],
   // Rounding headroom: docs round to one decimal (10.06 MB is written "10.1 MB").
   assetToleranceMB: 0.1,

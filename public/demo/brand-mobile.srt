@@ -1,32 +1,32 @@
 1
-00:00:00,800 --> 00:00:15,128
-I'm looking at taking a long position on tokenized Tesla over the weekend, fifteen thousand dollar size. Most traders just check the chart and hit buy. On the Red Team Desk, we stress-test the structural mechanics before risking capital.
+00:00:00,800 --> 00:00:12,440
+Crypto never sleeps, but the stock market does. On weekends, traders jump into tokenized equities off rumors and wake up wrecked by Monday morning. Let's stress-test one right now.
 
 2
-00:00:15,728 --> 00:00:26,720
-The desk parses the thesis into five core parameters: the underlying equity reference, weekend crypto exposure, basis spread, market depth, and our holding horizon.
+00:00:13,824 --> 00:00:25,680
+Say I'm looking at Tesla on a Saturday — rumors of an autonomous driving breakthrough. Instead of blindly FOMOing twenty-five grand in, I'll type it into the desk and let it argue with me a little.
 
 3
-00:00:27,320 --> 00:00:38,696
-Reviewing the checkpoint: fifteen thousand dollar notional, long r-TSLA. Now let's execute the adversarial stress test against live market conditions.
+00:00:33,771 --> 00:00:44,115
+It parses the trade: twenty-five thousand long, sixty six tokens, working entry around three-seventy nine forty seven. That looks right. Let's hit execute.
 
 4
-00:00:39,296 --> 00:00:49,352
-The engine is now streaming five concurrent attack vectors: equity gap down, crypto correlation, structural basis widening, and orderbook liquidity drain.
+00:00:44,915 --> 00:01:01,595
+Here's the engine running live — six adversarial checks running in parallel. If the primary model gateway hiccups, it fails over automatically without breaking the arithmetic. It models off-hours orderbook depth and unanchored weekend basis drag.
 
 5
-00:01:12,870 --> 00:01:35,286
-The engine has returned its decision: it's advising a WAIT. Here's why the desk flagged it — Tesla equity closed at 379 dollars and 87 cents, but the token is at 379 dollars and 88 cents. And under the full weekend shock, that's a negative 1 thousand 388 dollars hit before Monday's open.
+00:01:16,393 --> 00:01:33,961
+The engine has returned its decision: it's advising a WAIT. Here's why the desk flagged it — Tesla equity closed at three-eighty sixty eight, but the token is at three-seventy nine forty seven. And under the full weekend shock, that's a negative twenty seven hundred dollars hit before Monday's open.
 
 6
-00:01:35,886 --> 00:01:51,966
-Watch what happens when I toggle the risk tolerance lever. Dialing it to Conservative shifts the verdict to Reject. Switching to Aggressive opens the runway to Proceed. That's dynamic threshold calibration responding to the trader's profile in real time.
+00:01:35,923 --> 00:01:54,163
+Watch what happens when I toggle the risk tolerance lever. Dialing it down to Conservative immediately hardens the threshold to a REJECT. Pushing it up to Aggressive recalculates the runway to a PROCEED. That's real-time dynamic calibration tailored to the trader's risk profile.
 
 7
-00:01:52,566 --> 00:02:04,974
-Cutting the size in half preserves about 694 dollars. And down here in the evidence drawer, every quote traces to a live orderbook tick with verified SEC and news provenance.
+00:01:55,491 --> 00:02:14,067
+Cutting the size in half preserves about one thousand three hundred and fifty dollars. And opening the audit provenance drawer exposes the entire deterministic lineage — every quote links to a verified orderbook tick, live spread depth, and macro source, so there's zero black-box hallucination.
 
 8
-00:02:05,574 --> 00:02:18,102
+00:02:15,001 --> 00:02:27,913
 That right there is a structural trap I would've walked straight into. Bit-get A.I. Red Team Desk. Stress-test before the market does. Available now at redteamdesk.name.ng.
 
