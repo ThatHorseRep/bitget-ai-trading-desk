@@ -43,9 +43,12 @@ export type SeekAiResponse = {
   };
 };
 
+// Cascade of Gemini fallback models, order = priority. Verified against
+// https://ai.google.dev/gemini-api/docs/deprecations on 2026-10-11: none of
+// these have a shutdown date announced; the deprecated 2.0/2.5 flash series
+// has been purged. Do NOT add models absent from that page.
 export const GEMINI_MODELS = [
-  "gemini-2.5-flash",
-  "gemini-2.5-flash-lite",
+  "gemini-3.8-flash",
   "gemini-3.5-flash",
   "gemini-3.5-flash-lite",
   "gemini-flash-latest",
@@ -152,7 +155,7 @@ class LLMProvider {
       try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), perModelTimeoutMs);
+        timeout = setTimeout(() => controller.abort(), perModelTimeoutMs);
 
         const res = await fetch(url, {
           method: 'POST',

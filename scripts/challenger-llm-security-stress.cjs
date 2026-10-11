@@ -123,8 +123,8 @@ async function withCustomEnv(overrides, fn) {
     );
   });
 
-  runTest("S1.3: No other deprecated 1.x or 2.0 models present", () => {
-    const forbiddenPatterns = [/^gemini-1\./, /^gemini-2\.0/];
+  runTest("S1.3: No other deprecated 1.x, 2.0, or 2.5 models present", () => {
+    const forbiddenPatterns = [/^gemini-1\./, /^gemini-2\.0/, /^gemini-2\.5/];
     for (const model of GEMINI_MODELS) {
       for (const pattern of forbiddenPatterns) {
         assert.equal(
@@ -138,15 +138,14 @@ async function withCustomEnv(overrides, fn) {
 
   runTest("S1.4: GEMINI_MODELS matches exact canonical resilient cascade", () => {
     const expected = [
-      "gemini-2.5-flash",
-      "gemini-2.5-flash-lite",
+      "gemini-3.8-flash",
       "gemini-3.5-flash",
       "gemini-3.5-flash-lite",
       "gemini-flash-latest",
       "gemini-flash-lite-latest"
     ];
     assert.deepEqual(Array.from(GEMINI_MODELS), expected);
-    assert.equal(GEMINI_MODELS.length, 6);
+    assert.equal(GEMINI_MODELS.length, 5);
   });
 
   // =========================================================================
@@ -195,7 +194,7 @@ async function withCustomEnv(overrides, fn) {
         assert.equal(req.url.includes(testSecret), false, "API key secret string must NEVER be present in URL");
 
         // Positive check
-        assert.equal(req.url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent");
+        assert.equal(req.url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent");
       });
     } finally {
       global.fetch = realFetch;
@@ -408,7 +407,7 @@ async function withCustomEnv(overrides, fn) {
         assert.equal(qwenReq.headers["Authorization"], `Bearer ${qwenKey}`);
 
         // Verify Gemini Failover call
-        assert.equal(geminiReq.url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent");
+        assert.equal(geminiReq.url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent");
         assert.equal(new URL(geminiReq.url).search, "");
         assert.equal(geminiReq.headers["x-goog-api-key"], geminiKey);
         assert.equal(geminiReq.headers["Content-Type"], "application/json");
@@ -470,7 +469,7 @@ async function withCustomEnv(overrides, fn) {
 
         const [qwenReq, geminiReq] = captured;
         assert.match(qwenReq.url, /chat\/completions/);
-        assert.equal(geminiReq.url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent");
+        assert.equal(geminiReq.url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent");
         assert.equal(new URL(geminiReq.url).search, "");
         assert.equal(geminiReq.headers["x-goog-api-key"], geminiKey);
 
@@ -490,7 +489,7 @@ async function withCustomEnv(overrides, fn) {
 
   await resetCircuitToClosed();
 
-  await runAsyncTest("S5.1: Primary Gemini model (gemini-2.5-flash) returns HTTP 500 -> Cascade advances to model 2", async () => {
+  await runAsyncTest("S5.1: Primary Gemini model (gemini-3.8-flash) returns HTTP 500 -> Cascade advances to model 2", async () => {
     const attemptedModels = [];
     const capturedReqs = [];
     const realFetch = global.fetch;
@@ -506,7 +505,7 @@ async function withCustomEnv(overrides, fn) {
       }
 
       // First model fails with HTTP 500 Internal Server Error
-      if (match && match[1] === "gemini-2.5-flash") {
+      if (match && match[1] === "gemini-3.8-flash") {
         return {
           ok: false,
           status: 500,
@@ -515,7 +514,7 @@ async function withCustomEnv(overrides, fn) {
       }
 
       // Second model succeeds
-      if (match && match[1] === "gemini-2.5-flash-lite") {
+      if (match && match[1] === "gemini-3.5-flash") {
         return {
           ok: true,
           status: 200,
@@ -534,9 +533,9 @@ async function withCustomEnv(overrides, fn) {
     try {
       await withCustomEnv({ GEMINI_API_KEY: geminiKey }, async () => {
         const res = await sharedLlmClient.chat({ messages: [{ role: "user", content: "Test Gemini 500 Cascade" }] });
-        assert.deepEqual(attemptedModels, ["gemini-2.5-flash", "gemini-2.5-flash-lite"]);
+        assert.deepEqual(attemptedModels, ["gemini-3.8-flash", "gemini-3.5-flash"]);
         assert.equal(res.provenance.provider, "Google Gemini");
-        assert.match(res.provenance.model, /^gemini-2\.5-flash-lite/);
+        assert.match(res.provenance.model, /^gemini-3\.5-flash/);
 
         // Security check on all attempted requests
         for (const req of capturedReqs) {
@@ -550,7 +549,7 @@ async function withCustomEnv(overrides, fn) {
     }
   });
 
-  await runAsyncTest("S5.2: Primary Gemini model (gemini-2.5-flash) returns HTTP 404 -> Cascade advances to model 2", async () => {
+  await runAsyncTest("S5.2: Primary Gemini model (gemini-3.8-flash) returns HTTP 404 -> Cascade advances to model 2", async () => {
     const attemptedModels = [];
     const capturedReqs = [];
     const realFetch = global.fetch;
@@ -566,7 +565,7 @@ async function withCustomEnv(overrides, fn) {
       }
 
       // First model fails with HTTP 404 Not Found (e.g. decommissioned)
-      if (match && match[1] === "gemini-2.5-flash") {
+      if (match && match[1] === "gemini-3.8-flash") {
         return {
           ok: false,
           status: 404,
@@ -575,7 +574,7 @@ async function withCustomEnv(overrides, fn) {
       }
 
       // Second model succeeds
-      if (match && match[1] === "gemini-2.5-flash-lite") {
+      if (match && match[1] === "gemini-3.5-flash") {
         return {
           ok: true,
           status: 200,
@@ -594,8 +593,8 @@ async function withCustomEnv(overrides, fn) {
     try {
       await withCustomEnv({ GEMINI_API_KEY: geminiKey }, async () => {
         const res = await sharedLlmClient.chat({ messages: [{ role: "user", content: "Test Gemini 404 Cascade" }] });
-        assert.deepEqual(attemptedModels, ["gemini-2.5-flash", "gemini-2.5-flash-lite"]);
-        assert.match(res.provenance.model, /^gemini-2\.5-flash-lite/);
+        assert.deepEqual(attemptedModels, ["gemini-3.8-flash", "gemini-3.5-flash"]);
+        assert.match(res.provenance.model, /^gemini-3\.5-flash/);
 
         for (const req of capturedReqs) {
           assert.equal(new URL(req.url).search, "");
@@ -618,16 +617,16 @@ async function withCustomEnv(overrides, fn) {
       const model = match ? match[1] : "";
       attemptedModels.push(model);
 
-      if (model === "gemini-2.5-flash") {
+      if (model === "gemini-3.8-flash") {
         return { ok: false, status: 500, text: async () => "500 Server Error" };
       }
-      if (model === "gemini-2.5-flash-lite") {
+      if (model === "gemini-3.5-flash") {
         return { ok: false, status: 404, text: async () => "404 Not Found" };
       }
-      if (model === "gemini-3.5-flash") {
+      if (model === "gemini-3.5-flash-lite") {
         return { ok: false, status: 503, text: async () => "503 Service Unavailable" };
       }
-      if (model === "gemini-3.5-flash-lite") {
+      if (model === "gemini-flash-latest") {
         return {
           ok: true,
           status: 200,
@@ -647,12 +646,12 @@ async function withCustomEnv(overrides, fn) {
       await withCustomEnv({ GEMINI_API_KEY: geminiKey }, async () => {
         const res = await sharedLlmClient.chat({ messages: [{ role: "user", content: "Test Multi Failover" }] });
         assert.deepEqual(attemptedModels, [
-          "gemini-2.5-flash",
-          "gemini-2.5-flash-lite",
+          "gemini-3.8-flash",
           "gemini-3.5-flash",
-          "gemini-3.5-flash-lite"
+          "gemini-3.5-flash-lite",
+          "gemini-flash-latest"
         ]);
-        assert.match(res.provenance.model, /^gemini-3\.5-flash-lite/);
+        assert.match(res.provenance.model, /^gemini-flash-latest/);
       });
     } finally {
       global.fetch = realFetch;
@@ -661,7 +660,7 @@ async function withCustomEnv(overrides, fn) {
 
   await resetCircuitToClosed();
 
-  await runAsyncTest("S5.4: Exhaustion of all 6 Gemini models throws error without leaking API key in error message", async () => {
+  await runAsyncTest("S5.4: Exhaustion of all 5 Gemini models throws error without leaking API key in error message", async () => {
     const attemptedModels = [];
     const realFetch = global.fetch;
     const superSecretKey = "SUPER_SECRET_GEMINI_KEY_EXHAUSTION_123456";
@@ -688,7 +687,7 @@ async function withCustomEnv(overrides, fn) {
         }
 
         assert.ok(thrownError, "Should throw when all models fail");
-        assert.equal(attemptedModels.length, 6, "Must attempt all 6 models before giving up");
+        assert.equal(attemptedModels.length, 5, "Must attempt all 5 models before giving up");
         assert.deepEqual(attemptedModels, Array.from(GEMINI_MODELS));
 
         // Verify the error message does NOT echo the secret key
@@ -743,17 +742,22 @@ async function withCustomEnv(overrides, fn) {
         LLM_API_KEY: "dummy-key",
         GEMINI_API_KEY: geminiKey
       }, async () => {
-        // Call 1: Trips breaker from CLOSED to OPEN
+        // Strike 1
         capturedReqs.length = 0;
-        const res1 = await sharedLlmClient.chat({ messages: [{ role: "user", content: "Call 1" }] });
-        assert.equal(capturedReqs.length, 2, "Call 1 attempts Qwen then Gemini");
+        await sharedLlmClient.chat({ messages: [{ role: "user", content: "Strike 1" }] });
+        assert.equal(capturedReqs.length, 2, "Strike 1 attempts Qwen then Gemini");
 
-        // Call 2: Breaker is OPEN -> should bypass Qwen immediately
+        // Strike 2: Trips 2-strike breaker to OPEN
         capturedReqs.length = 0;
-        const res2 = await sharedLlmClient.chat({ messages: [{ role: "user", content: "Call 2" }] });
-        assert.equal(capturedReqs.length, 1, "Call 2 should go directly to Gemini without attempting Qwen");
-        assert.equal(capturedReqs[0], "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent");
-        assert.match(res2.provenance.model, /Qwen Breaker Open/);
+        await sharedLlmClient.chat({ messages: [{ role: "user", content: "Strike 2" }] });
+        assert.equal(capturedReqs.length, 2, "Strike 2 attempts Qwen then Gemini and opens circuit");
+
+        // Call 3: Breaker is OPEN -> should bypass Qwen immediately
+        capturedReqs.length = 0;
+        const res3 = await sharedLlmClient.chat({ messages: [{ role: "user", content: "Call 3" }] });
+        assert.equal(capturedReqs.length, 1, "Call 3 should go directly to Gemini without attempting Qwen");
+        assert.equal(capturedReqs[0], "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent");
+        assert.match(res3.provenance.model, /Qwen Breaker Open/);
       });
     } finally {
       global.fetch = realFetch;

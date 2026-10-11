@@ -141,7 +141,7 @@ What is live and working today:
 - Deterministic shock engine: Computes 4 exact scenarios (Market Risk, Crypto Contagion, Token Microstructure, Combined Shock) with carry borrow fees.
 - Real-time Bitget integration: Connects to live Bitget spot tickers, L2 orderbooks (/api/v3/market/orderbook), and recent candles.
 - Interactive What-If Sandbox: Instant zero-latency toggles to test cutting position size (100% / 50% / 25%) or waiting for the Monday cash open, showing exact dollars saved.
-- Triple-redundant AI failover: Hackathon Qwen gateway -> Google Gemini 2.5 Flash -> Deterministic heuristics, ensuring the desk never hangs if an LLM provider drops.
+- Triple-redundant AI failover: Hackathon Qwen gateway -> Google Gemini 3.8 / 3.5 Flash -> Deterministic heuristics, ensuring the desk never hangs if an LLM provider drops.
 - Full provenance drawer: One click reveals the exact source, timestamp, and mathematical formula behind every single number.
 - Risk tolerance slider: Toggles between Conservative, Moderate, and Aggressive profiles while preserving hard safety limits.
 
@@ -187,7 +187,7 @@ What it does instead, is what humans usually need an experienced risk officer fo
 
 Everything numerical, the position sizing, scenario losses, slippage estimates, carry costs, and gating thresholds, all are computed by verified deterministic algorithms with full audit provenance.
 
-Models Used: Primary model is qwen3.8-max via the official hackathon gateway, backed by an automated Circuit Breaker failover to Google Gemini 2.5 Flash / Flash Lite (with header-based x-goog-api-key authentication), and a final safety fallback to deterministic heuristic rules.
+Models Used: Primary model is qwen3.8-max via the official hackathon gateway, backed by an automated Circuit Breaker failover to Google Gemini 3.8 / 3.5 Flash (with header-based x-goog-api-key authentication), and a final safety fallback to deterministic heuristic rules.
 ```
 
 ---

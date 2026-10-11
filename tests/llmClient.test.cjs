@@ -80,19 +80,20 @@ test("llmClient omits enable_thinking when LLM_ENABLE_THINKING=1 (opt-in)", asyn
 test("GEMINI_MODELS cascade excludes deprecated models and prioritizes resilient list", () => {
   assert.equal(GEMINI_MODELS.includes("gemini-2.0-flash"), false, "gemini-2.0-flash is shut down and must be excluded");
   assert.equal(GEMINI_MODELS.includes("gemini-1.5-flash"), false, "gemini-1.5-flash is deprecated and must be excluded");
+  assert.equal(GEMINI_MODELS.includes("gemini-2.5-flash"), false, "gemini-2.5-flash is deprecated and must be excluded");
+  assert.equal(GEMINI_MODELS.includes("gemini-2.5-flash-lite"), false, "gemini-2.5-flash-lite is deprecated and must be excluded");
   assert.deepEqual(GEMINI_MODELS, [
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
+    "gemini-3.8-flash",
     "gemini-3.5-flash",
     "gemini-3.5-flash-lite",
     "gemini-flash-latest",
     "gemini-flash-lite-latest"
   ]);
   // Dynamic per-model timeout calculation and latency clamping
-  assert.equal(calculateGeminiModelTimeout(undefined, 6), 5000);
-  assert.equal(calculateGeminiModelTimeout(60000, 6), 8000);
-  assert.equal(calculateGeminiModelTimeout(12000, 6), 2500);
-  assert.equal(calculateGeminiModelTimeout(30000, 6), 5000);
+  assert.equal(calculateGeminiModelTimeout(undefined, 5), 6000);
+  assert.equal(calculateGeminiModelTimeout(60000, 5), 8000);
+  assert.equal(calculateGeminiModelTimeout(12000, 5), 2500);
+  assert.equal(calculateGeminiModelTimeout(30000, 5), 6000);
 });
 
 test("Gemini API call transmits x-goog-api-key in request headers and removes ?key= from URL", async () => {
@@ -136,7 +137,7 @@ test("Gemini API call transmits x-goog-api-key in request headers and removes ?k
     // Verify Clean URL without ?key= parameter
     assert.equal(geminiCall.url.includes("?key="), false, "Gemini URL must not expose ?key= query string");
     assert.equal(geminiCall.url.includes("test-gemini-secret-key-xyz123"), false, "API key must never appear in URL");
-    assert.equal(geminiCall.url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent");
+    assert.equal(geminiCall.url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent");
 
     // Verify Header Authentication
     assert.equal(geminiCall.headers["x-goog-api-key"], "test-gemini-secret-key-xyz123", "API key must be sent via x-goog-api-key header");
@@ -222,8 +223,8 @@ test("Gemini model cascade cascades to next model when first model fails", async
       assert.equal(urlStr.includes("?key="), false);
       assert.equal(init?.headers?.["x-goog-api-key"], "test-cascade-secret");
 
-      // First model (gemini-2.5-flash) returns 404
-      if (match && match[1] === "gemini-2.5-flash") {
+      // First model (gemini-3.8-flash) returns 404
+      if (match && match[1] === "gemini-3.8-flash") {
         return {
           ok: false,
           status: 404,
@@ -231,7 +232,7 @@ test("Gemini model cascade cascades to next model when first model fails", async
         };
       }
 
-      // Second model (gemini-2.5-flash-lite) succeeds
+      // Second model (gemini-3.5-flash) succeeds
       return {
         ok: true,
         status: 200,
@@ -257,8 +258,8 @@ test("Gemini model cascade cascades to next model when first model fails", async
 
   try {
     const res = await sharedLlmClient.chat({ messages: [{ role: "user", content: "Evaluate" }] });
-    assert.deepEqual(attemptedModels, ["gemini-2.5-flash", "gemini-2.5-flash-lite"]);
-    assert.match(res.provenance.model, /^gemini-2\.5-flash-lite/);
+    assert.deepEqual(attemptedModels, ["gemini-3.8-flash", "gemini-3.5-flash"]);
+    assert.match(res.provenance.model, /^gemini-3\.5-flash/);
   } finally {
     global.fetch = real;
     for (const k of keys) {
